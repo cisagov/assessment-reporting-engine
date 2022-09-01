@@ -1,0 +1,4 @@
+@import "../node_modules/@sds/tailwindcss-3/open-sans/index.css";
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";

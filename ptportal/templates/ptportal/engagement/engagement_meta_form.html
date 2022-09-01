@@ -1,0 +1,467 @@
+{% extends 'ptportal/base.html' %}
+{% load humanize %}
+{% load widget_tweaks %}
+{% block active %}#engagement{% endblock %}
+
+{% block style %}
+<style>
+    .header{
+        padding: 10px;
+        background: white;
+        color: black;
+        font-size: 20px;
+        position: relative;
+        top: -15px;
+        margin-left: -18px;
+        margin-right: -20px;
+    }
+    .btn-primary{
+		margin-left: 45%;
+		margin-top: 50px;
+    }
+    .col-span-5{
+        border-top:1px solid black!important;
+        border-color:#1b1c1d!important;
+    }
+	.w-full{
+		width: 85% !important;
+	}
+	.gap-2{
+		gap: 1.5rem !important;
+	}
+	/* .form-control{
+	 width: 45% !important;
+	} */
+	.fields{
+		margin-top: -190px !important;
+		margin-left: 560px !important;
+		width: 30% !important;
+	}
+	.fieldlabel{
+		margin-left: 260px !important;
+
+	}
+	.label-sm
+	{
+		width: 35% !important;
+	}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="header">
+   <h2> Assessment Details</h2>
+</div>
+<br>
+
+<div class="col-span-5">
+    <sds-section class="col-span-5" type="accented">
+        <span class="border-top border-dark"></span>
+            <template #title><b>ASSESSMENT DETAILS</b></template>
+		{% if object %}
+		<div class="mt-2 grid grid-cols-2">
+			<div class="">
+				<h2>{{report.report_type}} ID: {{object.asmt_id}}</h2>
+				<p>Last modified on {{object.updated_at | naturaltime}}</p>
+			</div>
+			<div class="justify-self-end">
+				<sds-button variant="danger" @click="redirectLink('{% url "engagement_delete" %}')"><i class="fa fa-trash"></i> Delete</sds-button>
+			</div>
+		</div>
+		{% endif %}
+
+		<form @submit="submitEngagement" class="block">
+			{% csrf_token %}
+
+			<div class="mt-2 mb-4 block">
+				<h1 class="text-xl">Stakeholder Information</h1>
+			</div>
+
+			<div class="grid grid-cols-6 gap-2 mb-8">
+				<div class="col-span-3">
+					<h4><b>{{ form.customer_long_name.label_tag }}</b></h4>
+					<sds-input v-model="formData.customer_long_name" placeholder="Oz corp"></sds-input>
+				</div>
+				<div class="col-span-3">
+					<h4><b>{{ form.customer_initials.label_tag }}</b></h4>
+					<sds-input v-model="formData.customer_initials" placeholder="OZC"></sds-input>
+				</div>
+				<div class="col-span-3">
+					<h4><b>{{ form.customer_POC_name.label_tag }}</b></h4>
+					<sds-input v-model="formData.customer_POC_name" placeholder="John Doe POC"></sds-input>
+				</div>
+				<div class="col-span-3">
+					<h4><b>{{ form.customer_POC_email.label_tag }}</b></h4>
+					<sds-input v-model="formData.customer_POC_email" placeholder="johndoe@company.com" type="email"></sds-input>
+				</div>
+			</div>
+
+			<div class="mt-2 mb-4 block">
+				<h1 class="text-xl">Testing Details</h1>
+			</div>
+			<div class="grid grid-cols-6 gap-2 mb-8">
+				<div class="col-span-3">
+					<h4><b>{{ form.team_lead_name.label_tag }}</b></h4>
+					<sds-input v-model="formData.team_lead_name" placeholder="Team Lead"></sds-input>
+				</div>
+				<div class="col-span-3">
+					<h4><b>{{ form.team_lead_email.label_tag }}</b></h4>
+					<sds-input v-model="formData.team_lead_email" placeholder="johndoe@comapny.com" type="email"></sds-input>
+				</div>
+				<div class="col-span-full">
+					<h4><b>{{ form.business_goal.label_tag }}</b></h4>
+					<sds-textarea v-model="formData.business_goal" placeholder="Enter a brief description of the goal of the test.." v-bind:rows="3"></sds-textarea>
+				</div>
+			</div>
+
+			{% if report.report_type == 'HVA' %}
+				<div class="mb-2">
+					<h2>High Valued Asset(s)</h2>
+				</div>
+				<div class="mb-2">
+					<h4>HVA Targets</h4>
+				</div>
+				<div class="mb-8">
+					<sds-table class="table-prose mb-2" v-bind="HVATableArgs">
+						<template #cell(name)="{item}">
+							<sds-input v-model="item.name" placeholder="CDN Server"></sds-input>
+						</template>
+						<template #cell(address)="{item}">
+							<sds-input v-model="item.address" placeholder="127.0.0.1"></sds-input>
+						</template>
+						<template #cell(status)="{item}">
+							<sds-select v-bind="HVASelectionArgs" v-model="item.status"></sds-select>
+						</template>
+						<template #cell(delete)="{item}">
+							<sds-button variant="danger" type="button" @click="deleteHVASystem(item)"><i class="fas fa-trash-alt"></i></sds-button>
+						</template>
+					</sds-table>
+					<sds-button variant="primary" type="button" size="sm" @click="addHVASystem">Add System</sds-button>
+				</div>
+			{% endif %}
+
+			<!--Need to add some validation in here or some way to respond when the backend rejects bad IP formats.-->
+			<div class="mt-2 mb-4 block">
+				<h1 class="text-xl">External Testing</h1>
+			</div>
+			<div class="grid grid-cols-6 gap-2 mb-8">
+				<div class="col-span-4">
+					<h4 class="mb-2"><b>External Start and End Date</b></h4>
+					<sds-datepicker v-model="formData.ext_date"></sds-datepicker>
+				</div>
+				<div class="col-span-3">
+					<h4><b>
+						{{form.ext_scope.label_tag}}
+					</b></h4>
+					<span class="text-sm text-gray-600">
+						{{form.ext_scope.help_text}}
+					</span>
+					<sds-textarea v-model="formData.ext_scope" placeholder="192.168.0.0, 192.168.0.1-4, 192.168.0.5-192.168.1.7, 192.168.0.0/25, subdomain.domain.com"></sds-textarea>
+				</div>
+				<div class="col-span-3">
+					<h4><b>
+						{{form.ext_excluded_scope.label_tag}}
+					</b></h4>
+					<span class="text-sm text-gray-600">
+						{{form.ext_excluded_scope.help_text}}
+					</span>
+					<sds-textarea v-model="formData.ext_excluded_scope" placeholder="192.168.0.0, 192.168.0.1-4, 192.168.0.5-192.168.1.7, 192.168.0.0/25, subdomain.domain.com"></sds-textarea>
+				</div>
+			</div>
+
+			{% if report.report_type != 'RPT' %}
+			<div class="mt-2 mb-4 block">
+				<h1 class="text-xl">Internal Testing</h1>
+			</div>
+			<div class="grid grid-cols-6 gap-2 mb-8">
+				<div class="col-span-4">
+					<h4 class="mb-2"><b>Internal Start and End Date</b></h4>
+					<sds-datepicker v-model="formData.int_date"></sds-datepicker>
+				</div>
+				<div class="col-span-3">
+					<h4><b>
+						{{form.int_scope.label_tag}}
+					</b></h4>
+					<span class="text-sm text-gray-600">
+						{{form.int_scope.help_text}}
+					</span>
+					<sds-textarea v-model="formData.int_scope" placeholder="192.168.0.0, 192.168.0.1-4, 192.168.0.5-192.168.1.7, 192.168.0.0/25, subdomain.domain.com"></sds-textarea>
+				</div>
+				<div class="col-span-3">
+					<h4><b>
+						{{form.int_excluded_scope.label_tag}}
+					</b></h4>
+					<span class="text-sm text-gray-600">
+						{{form.int_excluded_scope.help_text}}
+					</span>
+					<sds-textarea v-model="formData.int_excluded_scope" placeholder="192.168.0.0, 192.168.0.1-4, 192.168.0.5-192.168.1.7, 192.168.0.0/25, subdomain.domain.com"></sds-textarea>
+				</div>
+			</div>
+			{% endif %}
+
+			<div class="mt-2 mb-4 block">
+				<h1 class="text-xl">Additional Information</h1>
+			</div>
+			<h4 class=""><b>{{form.traffic_light_protocol.label_tag}}</b></h4>
+			<span class="text-sm text-gray-600">
+				{{form.traffic_light_protocol.help_text}}
+			</span>
+			<sds-radio-group v-bind="TLP_Button_Options" v-model="formData.traffic_light_protocol" class="mb-4"></sds-radio-group>
+
+			<div class="grid gap-2 mb-2 fieldlabel">
+				<div>
+					<h4 class="mb-2"><b>Create Assessment ID</b><span class="text-red-500 text-sm"> * required</span></h4>
+					<span class="text-sm text-gray-600">
+						Assessment ID Max Length = 8 characters
+					</span>
+					<!-- <sds-input v-model="formData.asmt_id" v-bind="asmt_idArgs" @update:model-value="validateAsmtID"></sds-input> -->
+				</div>
+				<div>
+					<h4><b>{{form.report_password.label_tag}}</b><span class="text-red-500 text-sm"> * required</span></h4>
+					<span class="text-sm text-gray-600">
+						{{form.report_password.help_text}}
+						<i v-if="passwordArgs.invalid" class="fas fa-times-circle"></i>
+						<i v-if="passwordArgs.valid" class="fas fa-check-circle"></i>
+					</span>
+					<!-- <sds-input required v-model="formData.report_password" v-bind="passwordArgs" @update:model-value="validatePassword"></sds-input> -->
+				</div>
+				<div >
+					<h4><b>{{form.confirm_report_password.label_tag}}</b><span class="text-red-500 text-sm"> * required</span></h4>
+					<span class="text-sm text-gray-600">
+						{{form.confirm_report_password.help_text}}
+						<i v-if="confirmPasswordArgs.invalid" class="fas fa-times-circle"></i>
+						<i v-if="confirmPasswordArgs.valid" class="fas fa-check-circle"></i>
+					</span>
+					<!-- <sds-input required v-model="formData.confirm_report_password" v-bind="confirmPasswordArgs" @update:model-value="confirmPassword"></sds-input> -->
+				</div>
+			</div>
+			<div class="grid gap-2 fields">
+					<div class ="label-sm">
+						<sds-input v-model="formData.asmt_id" v-bind="asmt_idArgs" @update:model-value="validateAsmtID"></sds-input>
+					</div>
+					<sds-input required v-model="formData.report_password" v-bind="passwordArgs" @update:model-value="validatePassword"></sds-input>
+					<sds-input required v-model="formData.confirm_report_password" v-bind="confirmPasswordArgs" @update:model-value="confirmPassword"></sds-input>
+			</div>
+			<sds-button type="submit" variant="primary">Submit</sds-button>
+		</form>
+	</sds-section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type='text/javascript'>
+	document.addEventListener("DOMContentLoaded", function () {
+
+	})
+
+	function pageData() {
+		console.log("{{object.traffic_light_protocol}}")
+		data = {
+			//Form data
+			formData: {
+				customer_long_name: "{{ object.customer_long_name }}",
+				customer_initials: "{{ object.customer_initials }}",
+				customer_POC_name: "{{ object.customer_POC_name }}",
+				customer_POC_email: "{{ object.customer_POC_email }}",
+				team_lead_name: "{{ object.team_lead_name }}",
+				team_lead_email: "{{ object.team_lead_email }}",
+				technical_lead_name: "{{ object.technical_lead_name }}",
+				technical_lead_email: "{{ object.technical_lead_email }}",
+				business_goal: "{{ object.business_goal }}",
+				ext_date: {start: "{{object.ext_start_date}}" ? new Date("{{object.ext_start_date}}") : "", end: "{{object.ext_end_date}}" ? new Date("{{object.ext_end_date}}") : ""},
+				int_date: {start: "{{object.int_start_date}}" ? new Date("{{object.int_start_date}}") : "", end: "{{object.int_end_date}}" ? new Date("{{object.int_end_date}}") : ""},
+				ext_scope: "{{ object.ext_scope }}",
+				ext_excluded_scope: "{{ object.ext_excluded_scope }}",
+				int_scope: "{{ object.int_scope }}",
+				int_excluded_scope: "{{ object.int_excluded_scope }}",
+				asmt_id: "{{ object.asmt_id }}",
+				report_password: "{{ object.report_password }}",
+				confirm_report_password: "{{ object.confirm_report_password }}",
+				traffic_light_protocol: "{{ object.traffic_light_protocol }}",
+			},
+			//Extra data
+			showPassword: false,
+
+			//Argument data for components
+			asmt_idArgs: {
+				asmt_regexp: new RegExp("^(?:[a-zA-Z0-9]+)(?:$|\.[a-zA-Z0-9]+$)"),
+				required: true,
+				valid: false,
+				invalid: false,
+				maxlength: 8,
+				placeholder: "{{report.report_type}}" == "RPT" ? "####.##" : "1234"
+			},
+			passwordArgs: {
+				type: "password",
+				required: true,
+				valid: false,
+				invalid: false,
+				maxlength: 50
+			},
+			confirmPasswordArgs: {
+				type: "password",
+				required: true,
+				valid: false,
+				invalid: false,
+				maxlength: 50
+			},
+			TLP_Button_Options: {
+				stacked: true,
+				options: [
+					{
+						id: 1,
+						value: "Amber",
+						text: "Amber"
+					},
+					{
+						id: 2,
+						value: "Red",
+						text: "Red"
+					}
+				]
+			},
+			HVATableArgs: {
+				fields: [
+					{
+						key: "name",
+						label: "HVA Name"
+					},
+					{
+						key: "address",
+						label: "Address"
+					},
+					{
+						key: "status",
+						label: "Status"
+					},
+					{
+						key: "delete",
+						label: "Delete"
+					}
+				],
+				items: [],
+				sortBy: "num"
+			},
+			HVASelectionArgs: {
+				options: [
+					{
+						id: 1,
+						value: "Canceled",
+						text: "Canceled"
+					},
+					{
+						id: 2,
+						value: "Completed",
+						text: "Completed"
+					},
+					{
+						id: 3,
+						value: "In Progress",
+						text: "In Progress"
+					},
+					{
+						id: 4,
+						value: "Not Started",
+						text: "Not Started"
+					},
+					{
+						id: 5,
+						value: "On Hold",
+						text: "On Hold"
+					}
+				]
+			}
+
+		}
+
+		{% if report.report_type == 'HVA' %}
+			{% for hva in hvas %}
+				data["HVATableArgs"]["items"].push({name: "{{hva.name}}", address: "{{hva.address}}", status: "{{hva.status}}"})
+			{% endfor %}
+		{% endif %}
+
+		return data
+	}
+
+	function pageMethods() {
+		pageFunctions = {
+			validateForm: function () {
+				invalidFields = document.getElementsByClassName("form-control invalid")
+				if(invalidFields.length > 0) {
+					invalidFields[0].focus()
+					return false
+				}
+				return true
+			},
+			submitEngagement: function (event) {
+				event.preventDefault()
+				if (!this.validateForm()) {return}
+				formattedData = JSON.parse(JSON.stringify(this.formData))
+				formattedData['hvas'] = this.HVATableArgs.items
+				fetch(window.location.href, {
+					method: "POST",
+					//The body should contain the data you wanna post.
+					body: JSON.stringify(formattedData),
+					credentials: "same-origin",
+					headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
+				}).then(response => {
+					if (response.ok) {
+						this.displayNotification({title: "Engagement Saved", variant:"success", text: "Engagement data saved! Redirecting to detail page."})
+						this.redirectLink("{% url 'engagement_detail'%}")
+					}
+				}).catch(error => {
+					this.displayNotification({text: error, title: "Error saving engagement", variant:"danger"})
+				})
+			},
+			showPasswordToggle: function () {
+				if (this.showPassword) {
+					this.passwordArgs.type = this.confirmPasswordArgs.type = "text"
+				}
+				else {
+					this.passwordArgs.type = this.confirmPasswordArgs.type = "password"
+				}
+			},
+			validateAsmtID: function() {
+				if (this.asmt_idArgs.asmt_regexp.test(this.formData.asmt_id)) {
+					this.asmt_idArgs.valid = true
+					this.asmt_idArgs.invalid = false
+				}
+				else {
+					this.asmt_idArgs.valid = false
+					this.asmt_idArgs.invalid = true
+				}
+			},
+			validatePassword: function () {
+				if (this.formData.report_password.length > 12) {
+					this.passwordArgs.valid = true
+					this.passwordArgs.invalid = false
+				}
+				else {
+					this.passwordArgs.valid = false
+					this.passwordArgs.invalid = true
+				}
+				this.confirmPassword()
+			},
+			confirmPassword: function () {
+				if (this.formData.report_password == this.formData.confirm_report_password) {
+					this.confirmPasswordArgs.valid = true
+					this.confirmPasswordArgs.invalid = false
+				}
+				else {
+					this.confirmPasswordArgs.valid = false
+					this.confirmPasswordArgs.invalid = true
+				}
+			},
+			addHVASystem: function() {
+				this.HVATableArgs.items.push({name: "", address: "", status: "Not Started"})
+			},
+			deleteHVASystem: function(system) {
+				this.HVATableArgs.items.splice(this.HVATableArgs.items.indexOf(system), 1)
+			}
+		}
+
+		return pageFunctions
+	}
+
+</script>
+{% endblock %}

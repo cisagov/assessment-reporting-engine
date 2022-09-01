@@ -1,0 +1,482 @@
+{% extends 'ptportal/base.html' %}
+{% load humanize %}
+{% load widget_tweaks %}
+{% block active %}#exfil-data{% endblock %}
+{% block content %}
+
+<h1><i class="fas fa-edit"></i> Exfiltrated Data</h1>
+<hr />
+
+{% for message in messages %}
+    <div class="row">
+        <div class="col-sm-8">
+        <div class="alert alert-success alert-dismissable">
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            <strong>Success!</strong> &#8216;{{ finding.finding }}&#8217; {{ message }}
+        </div>
+        </div>
+    </div>
+{% endfor %}
+
+<nav aria-label="breadcrumb">
+	<ol class="breadcrumb">
+	 <li class="breadcrumb-item"><a href="{% url 'index' %}">Dashboard</a></li>
+	 <li class="breadcrumb-item"><a href="{% url 'finding_severity' finding.severity %}">{{ finding.severity }}</a></li>
+	 <li class="breadcrumb-item active"><a href="{% url 'finding_detail' finding.slug %}"> {{ finding }} Details</a></li>
+	 <li class="breadcrumb-item active">Exfiltrated Data</li>
+	</ol>
+</nav>
+
+<form action="" method="POST" novalidate>
+  {% csrf_token %}
+	{{ formset.management_form }}
+
+<div class="table-responsive">
+<table id='myTable' class="table">
+ <thead>
+   <tr>
+     <th scope="col">#</th>
+     <th scope="col">Protocol</th>
+     <th scope="col">Datatype</th>
+     <th scope="col">Date/Time Started</th>
+     <th scope="col">Result</th>
+     <th scope="col"></th>
+   </tr>
+ </thead>
+ <tbody>
+   {% for form in formset %}
+   <tr class='clone-selector'>
+     <td id='hiddenInputRow' class='text-center align-middle'><strong id="id_form-0-row" class='rowId' name="form-0-row">1</strong>
+     {% if form.id %}
+     {% with WIDGET_ERROR_CLASS='is-invalid' %}
+        {% render_field form.id|add_class:'id' %}
+         {% if form.id.errors %}
+           {% for error in form.id.errors %}
+               <div class="invalid-feedback mb-1">
+                   {{error}}
+               </div>
+           {% endfor %}
+         {% endif %}
+       {% endwith %}
+     {% endif %}
+     </td>
+     <td class='align-middle'>
+       {% with WIDGET_ERROR_CLASS='is-invalid' %}
+       <div role='radiogroup' id='borderRadioGroup' aria-labelledby="borderRadioGroup">
+         {% for radio in form.protocol %}
+         <div class="form-check" style="margin: 0px 0px -0.5em 0px">
+             {{ radio }}
+         </div>
+         {% endfor %}
+        </div>
+         {% if form.protocol.errors %}
+           {% for error in form.protocol.errors %}
+             <div class="invalid-feedback">
+                 {{error}}
+             </div>
+           {% endfor %}
+       {% endif %}
+       {% endwith %}
+    </td>
+     <td class='align-middle'>
+     {% with WIDGET_ERROR_CLASS='is-invalid' %}
+       {% render_field form.datatype %}
+       {% if form.datatype.errors %}
+         {% for error in form.datatype.errors %}
+             <div class="invalid-feedback mb-1">
+                 {{error}}
+             </div>
+         {% endfor %}
+     {% endif %}
+     {% endwith %}
+   </td>
+   <td class='align-middle'>
+     {% with WIDGET_ERROR_CLASS='is-invalid' %}
+        {% render_field form.date_time %}
+        {% if form.date_time.errors %}
+           {% for error in form.date_time.errors %}
+               <div class="invalid-feedback mb-1">
+                   {{error}}
+               </div>
+           {% endfor %}
+         {% endif %}
+       {% endwith %}
+   </td>
+  <td class='align-middle'>
+    {% with WIDGET_ERROR_CLASS='is-invalid' %}
+    <div role='radiogroup' id='resultRadioGroup' aria-labelledby="resultRadioGroup">
+      {% for radio in form.result %}
+      <div class="form-check" style="margin: 0px 0px -0.5em 0px">
+          {{ radio }}
+      </div>
+      {% endfor %}
+    </div>
+      {% if form.result.errors %}
+        {% for error in form.result.errors %}
+          <div class="invalid-feedback">
+              {{error}}
+          </div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+   </td>
+   <td class='text-center align-middle'>
+     <div class="btn-group" role="group" aria-label="Basic example">
+     <button tabindex='-1' id="id_form-0-delete" name="form-0-delete" class="btn btn-outline-danger remove-form-row"><i class="fas fa-trash-alt" aria-hidden="true"></i></button>
+     <!-- <button tabindex='-1' id="id_form-0-add" name="form-0-add" class="btn btn-outline-info add-arbitrary-form-row"><i class="fa fa-plus"></i></button> -->
+    </div>
+  </td>
+   </tr>
+  {% endfor %}
+ </tbody>
+</table>
+</div>
+<div class='form-row'>
+    <div class='col-md'>
+      <input type='button' id='addRowButton' class="btn btn-outline-primary mb-3 add-form-row" value='Add Row'></input>
+    </div>
+  </div>
+
+<div class="form-row">
+  <div class="col-md-9 mb-3 finding-type">
+    <h4>Sensitive Data Exfil Description</h4>
+    <h4><small class="text-muted control-label required">Add short description of the data exfil</small></h4>
+      <textarea class="form-control"  name="data_exfil_description" id="data_exfil_description" rows="2" required>{{finding.data_exfil_description}}</textarea>
+  </div>
+</div>
+
+<div class="form-row">
+  <div class='col-md-12 text-right'>
+      <input id='toDelete' class='d-none' name='delete'></input>
+      <a class="btn btn-outline-secondary" href="{% url 'finding_edit' finding.slug %}" role="button">Back</a>
+      <input name="Submit" type="submit" class="btn btn-primary" id="submit" value="Save" />
+  </div>
+</div>
+
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script type='text/javascript'>
+
+function stopRKey(event) {
+  var evt = (evt) ? evt : ((event) ? event : null);
+  var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null);
+  console.log('evt: ', evt);
+  console.log('node: ', node);
+  if ((evt.keyCode == 13) && (node.type=="radio")) {
+    node.checked = true;
+    return false;
+  }
+}
+
+var templateRow,
+    totalFormsEl,
+    totalFormsVal,
+    initialFormsEl,
+    initialFormsVal,
+    toDelete = '';
+
+var isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification)),
+    isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime),
+    isMozilla =  typeof InstallTrigger !== 'undefined';
+
+// order fields by column sort
+$.fn.dataTable.ext.order['dom-textarea'] = function ( settings, col ) {
+    return this.api().column( col, {order:'index'} ).nodes().map( function ( td, i ) {
+        return $('textarea', td).val();
+    } );
+}
+
+function updateRowOrder() {
+  var forms = $('tr.clone-selector');
+  for (var i=0, formCount=forms.length; i<formCount; i++) {
+      $(forms.get(i)).find('label, input, textarea, button, strong').each(function() {
+          updateID( $(this), i);
+      });
+  }
+  // set the ID of each new form to ''
+  $('tr.newData').find('input[type=hidden]').attr('value', '');
+
+  $('.rowId').each(function(index) {
+    $(this).text( parseInt(index) + 1);
+  });
+}
+
+function timeValidation(input) {
+  // check if input is a time
+  var isValid = /^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$/.test( input.val() );
+
+  if (isValid) {
+    $(input).removeClass('is-invalid');
+    $(input).get(0).setCustomValidity('');
+  }
+  else {
+    $(input).addClass('is-invalid');
+    $(input).get(0).setCustomValidity('is-invalid');
+  }
+  return isValid;
+}
+
+function clearTable() {
+  var templateRow = getCleanRow().clone();
+  templateRow.attr('id', 'invisibleRow');
+  templateRow.addClass('d-none');
+  $('form').append(templateRow);
+  $('tr.clone-selector').each(function (i) {
+    row = $(this).find('td input.id');
+    id = parseInt(row.attr('value'));
+    if (id) {
+      input = $('input[id=toDelete]');
+      if (input.val() == '') {
+        input.val(id)
+      }
+      else {
+        input.val( input.val() + ',' + id);
+      }
+      initialFormsVal--;
+      $(initialFormsEl).val(initialFormsVal);
+    }
+
+  });
+  // remove every row in the table
+  $('tr.clone-selector').remove();
+  $('#id_form-INITIAL_FORMS').val(0);
+
+  initialFormsVal = 0;
+  $(initialFormsEl).val(initialFormsVal);
+
+  totalFormsVal = 0;
+  $(totalFormsEl).val(totalFormsVal);
+}
+
+function getCleanRow() {
+  templateRow = $('tr.clone-selector:first').clone(true);
+  if (templateRow.length === 0) {
+    templateRow = $('#invisibleRow').clone();
+    $(templateRow).removeClass('d-none');
+    $('#invisibleRow').remove();
+  }
+  templateRow.find('input.text-field').val('');
+  templateRow.find('input').prop('checked', false);
+  templateRow.find('input').removeClass('is-invalid');
+  templateRow.find('input').prop('checked', false);
+  templateRow.find('input[type=date]').val('');
+  templateRow.find('input[type=time]').val('');
+  templateRow.addClass('newData');
+  return templateRow
+}
+
+function pasteSpreadsheetDataSafari(cell, event) {
+  console.log('pasteSpreadsheetDataSafari');
+  $.each(event.originalEvent.clipboardData.items, function(i, v){
+      if (v.type === 'text/plain'){
+          v.getAsString(function(text){
+              var x = cell.closest('td').index(),
+                  y = cell.closest('tr').index() +1 ,
+                  obj = {};
+              text = text.trim('\r\n');
+              $.each(text.split('\r\n'), function(i2, v2){
+                  $.each(v2.split('\t'), function(i3, v3){
+                      var row = y+i2, col = x+i3;
+                      obj['cell-'+row+'-'+col] = v3;
+                      cell.closest('table').find('tr:eq('+row+') td:eq('+col+') textarea').attr('value', v3);
+                  });
+              });
+              // $('div').text(JSON.stringify(obj));
+          });
+      }
+  });
+  return false;
+}
+
+function pasteSpreadsheetDataChrome(cell, event) {
+  console.log('pasting spreadsheet in mozilla');
+  $.each(event.originalEvent.clipboardData.items, function(i, v){
+    if (v.type === 'text/plain'){
+      v.getAsString(function(text) {
+        var x = cell.closest('td').index(),
+            y = cell.closest('tr').index() +1 ,
+            obj = {};
+        text = text.trim('\r\n');
+        $.each( text.split('/\s+/'), function(i2, v2){
+          $.each( v2.split('\r\n'), function(i3, v3) {
+            console.log('each v3 split: ', v3);
+            $.each( v3.split('\t'), function(i4, v4) {
+              console.log('each v4 split: ', v4 );
+              var row = y+i3, col = x+i4;
+              obj['cell-'+row+'-'+col] = v4;
+              cell.closest('table').find('tr:eq('+row+') td:eq('+col+') textarea').attr('value', v4);
+            })
+          })
+
+        });
+
+      });
+    }
+  });
+}
+
+function pasteSpreadsheetDataMozilla(cell, event) {
+  console.log('pasting spreadsheet in mozilla');
+  $.each(event.originalEvent.clipboardData.items, function(i, v){
+    if (v.type === 'text/plain'){
+      v.getAsString(function(text) {
+        var x = cell.closest('td').index(),
+            y = cell.closest('tr').index() +1 ,
+            obj = {};
+        text = text.trim('\r\n');
+        $.each( text.split('/\s+/'), function(i2, v2){
+          $.each( v2.split('\n'), function(i3, v3) {
+            console.log('each v3 split: ', v3);
+            $.each( v3.split('\t'), function(i4, v4) {
+              console.log('each v4 split: ', v4 );
+              var row = y+i3, col = x+i4;
+              obj['cell-'+row+'-'+col] = v4;
+              cell.closest('table').find('tr:eq('+row+') td:eq('+col+') textarea').attr('value', v4);
+            })
+          })
+
+        });
+
+      });
+    }
+  });
+}
+
+function updateID(el, newID) {
+    // el: an element to be updated
+    // newID: the new id for the element
+    let idRegex = new RegExp('(form-\\d+)');
+    let replacement = 'form-' + newID;
+
+    if ($(el).attr("for")) $(el).attr("for", $(el).attr("for").replace(idRegex, replacement));
+    if ($(el).attr('name')) $(el).attr("name", $(el).attr("name").replace(idRegex, replacement));
+    if ($(el).attr('id')) $(el).attr("id", $(el).attr("id").replace(idRegex, replacement));
+}
+
+
+function getRowDataID(row) {
+    return $(row).find('td#hiddenInputRow input[type=hidden]').val();
+}
+
+function addRow(row=0) {
+  // row: row element to add row after
+  if (totalFormsVal === 0) {
+    newRow = templateRow.clone();
+    newRow.removeClass('d-none');
+    newRow.attr('id', '');
+  }
+  else {
+    newRow = getCleanRow();
+  }
+  if (row) {
+    $(row).after(newRow);
+  }
+  // add row to the end of the table
+   else {
+      $('tr:last').after(newRow);
+   }
+   totalFormsVal++;
+   $(totalFormsEl).val(totalFormsVal);
+   updateRowOrder();
+}
+
+function deleteRow(row) {
+  dataID = getRowDataID(row);
+  if (dataID) {
+    input = $('input[id=toDelete]');
+    if (input.val() == '') {
+      input.val(dataID)
+    }
+    else {
+      input.val( input.val() + ',' + dataID);
+    }
+    initialFormsVal--;
+    $(initialFormsEl).val(initialFormsVal);
+  }
+
+  $(row).remove();
+
+  totalFormsVal--;
+  $(totalFormsEl).val(totalFormsVal);
+  updateRowOrder();
+}
+
+$(document).ready(function() {
+
+  $('#submit').on('click', function(event) {
+    form = document.getElementsByTagName('form')[0];
+    // lastRow = $('tr.clone-selector').last();
+    // if (!lastRow.find('input.time').filter('[required]:visible').val()) {
+    //   console.log('deleting last row');
+    //   deleteRow(lastRow);
+    // }
+    if (form.checkValidity() === false ) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    form.classList.add('was-validated');
+    warnMessage = null;
+  });
+
+  $('table').on('change', '.time', function(e) {
+    console.log('validate time entered');
+    timeValidation( $(this) );
+  });
+
+  updateRowOrder();
+  $('#myTable_paginate').addClass('pagination justify-content-end pagination-sm');
+	$("label").addClass('control-label');
+
+  totalFormsEl = $('#id_form-TOTAL_FORMS');
+  totalFormsVal = $(totalFormsEl).val();
+
+  initialFormsEl = $('#id_form-INITIAL_FORMS');
+  initialFormsVal = $(initialFormsEl).val();
+
+  // Allow users to paste from spreadsheets
+  // inspired by: https://jsfiddle.net/mowglisanu/zmhg5rwo/
+  $('table').on('paste', 'textarea', function(e){
+    cell = $(this);
+
+    if (isSafari) {
+      pasteSpreadsheetDataSafari(cell, e);
+    }
+    // todo
+    else if (isChrome) {
+      pasteSpreadsheetDataChrome(cell, e);
+    }
+    // is mozilla
+    else  {
+      pasteSpreadsheetDataMozilla(cell, e);
+    }
+  });
+
+
+
+$(document).on('click', '.add-form-row', function(event){
+  event.preventDefault();
+  addRow();
+});
+
+// Add arbitrary form row after click row
+$(document).on('click', '.add-arbitrary-form-row', function(event) {
+  event.preventDefault();
+  row = $(this).parent().parent().parent();
+  addRow( $(row) );
+});
+
+$(document).on('click', '.remove-form-row', function(event){
+  event.preventDefault();
+  row = $(this).parent().parent().parent();
+  deleteRow( $(row) );
+});
+
+}); // document ready
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'ptportal/base.html' %}
+{% load humanize %}
+
+{% block active %}#ei{% endblock %}
+{% block content %}
+
+
+<h1>Delete Election Infrastructure Questionnaire</h1>
+<hr />
+
+<div class="row mb-3">
+	<div class="col-md-6">
+		<h3>{{ object }}</h3>
+		<p>Last modified on {{object.updated_at | naturaltime}}</p>
+	</div>
+	<div class="col-md-6 text-right">
+    <a class="btn btn-primary" href ="{% url 'ei_update' %}"><i class="fa fa-edit"></i> Edit</a>
+	</div>
+</div>
+
+
+<p>Are you sure you want to delete the election infrastructure form?: <strong>{{ object.pk }}</strong>?</p>
+
+<form action="" method="POST">
+  {% csrf_token %}
+  <button type="submit" action="" class="btn btn-primary">Yes, delete</button>
+</form>
+
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends 'ptportal/base.html' %}
+{% load humanize %}
+{% load widget_tweaks %}
+{% block active %}#ransomware{% endblock %}
+{% block content %}
+
+<h1><i class="fas fa-edit"></i> Ransomware Data</h1>
+<hr />
+
+
+{% for message in messages %}
+    <div class="row">
+        <div class="col-sm-8">
+        <div class="alert alert-success alert-dismissable">
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            <strong>Success!</strong> &#8216;{{ finding.finding }}&#8217; {{ message }}
+        </div>
+        </div>
+    </div>
+{% endfor %}
+<nav aria-label="breadcrumb">
+	<ol class="breadcrumb">
+	 <li class="breadcrumb-item"><a href="{% url 'index' %}">Dashboard</a></li>
+	 <li class="breadcrumb-item"><a href="{% url 'finding_severity' finding.severity %}">{{ finding.severity }}</a></li>
+	 <li class="breadcrumb-item active"><a href="{% url 'finding_detail' finding.slug %}"> {{ finding }} Details</a></li>
+	 <li class="breadcrumb-item active">Ransomware Data</li>
+	</ol>
+</nav>
+
+<form action="" method="POST" novalidate>
+  {% csrf_token %}
+
+  <div class="form-row mb-3">
+    <div class="col-md-5">
+    <h4><small class="control-label">{{ form.wormable_machines.label_tag }}</small></h4>
+    {% if form.is_bound and form.wormable_machines.errors %}
+      {% render_field form.wormable_machines class="form-control is-invalid" %}
+      <div class="invalid-feedback">
+        Please provide a valid number
+        {{form.wormable_machines.errors}}
+      </div>
+    {% elif form.is_bound %}
+      {% render_field form.wormable_machines class="form-control is-valid" %}
+    {% else %}
+      {% render_field form.wormable_machines class="form-control" %}
+    {% endif %}
+    {% if form.wormable_machines.help_text %}
+      <small class="form-text text-muted">{{ form.wormable_machines.help_text }}</small>
+    {% endif %}
+    <br>
+    <h4><small class="control-label">{{ form.wormable_HVAs.label_tag }}</small></h4>
+    {% if form.is_bound and form.wormable_HVAs.errors %}
+      {% render_field form.wormable_HVAs class="form-control is-invalid" %}
+      <div class="invalid-feedback">
+        Please provide a valid number
+        {{form.wormable_HVAs.errors}}
+      </div>
+    {% elif form.is_bound %}
+      {% render_field form.wormable_HVAs class="form-control is-valid" %}
+    {% else %}
+      {% render_field form.wormable_HVAs class="form-control" %}
+    {% endif %}
+    {% if form.wormable_machines.help_text %}
+      <small class="form-text text-muted">{{ form.wormable_HVAs.help_text }}</small>
+    {% endif %}
+<br>
+    <h4><small class="control-label">{{ form.network_susc.label_tag }}</small></h4>
+    {% if form.is_bound and form.network_susc.errors %}
+      {% render_field form.network_susc class="form-control is-invalid" %}
+      <div class="invalid-feedback">
+        Please provide a valid percentage
+        {{form.network_susc.errors}}
+      </div>
+    {% elif form.is_bound %}
+      {% render_field form.network_susc class="form-control is-valid" %}
+    {% else %}
+      {% render_field form.network_susc class="form-control" %}
+    {% endif %}
+    {% if form.network_susc.help_text %}
+      <small class="form-text text-muted">{{ form.network_susc.help_text }}</small>
+    {% endif %}
+
+
+  </div>
+  </div>
+
+
+
+
+
+<div class="form-row">
+  <div class='col-md-12 text-right'>
+      <input id='toDelete' class='d-none' name='delete'></input>
+      <a class="btn btn-outline-secondary" href="{% url 'finding_edit' finding.slug %}" role="button">Back</a>
+      <input name="Submit" type="submit" class="btn btn-primary" id="submit" value="Save" />
+  </div>
+</div>
+
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script type='text/javascript'>
+
+
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,376 @@
+<html>
+
+  <head>
+    <!-- Bootstrap CSS -->
+    {% load static %}
+
+    <link href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ STATIC_URL }}bootstrap/css/styles.css">
+
+    <!-- Bootstrap CSS Extensions -->
+    <!-- <link href="{{ STATIC_URL }}css/bootstrap-select.min.css" rel="stylesheet" /> -->
+    <link href="{{ STATIC_URL }}bootstrap/css/bootstrap-datepicker3.css" rel="stylesheet" />
+    <link href="{{ STATIC_URL }}css/dataTables.bootstrap4.min.css" rel="stylesheet" />
+
+    <!-- External CSS -->
+    <link href="{{ STATIC_URL }}css/all.css" rel="stylesheet" />
+    <link href="{{ STATIC_URL }}css/opensans.css" rel="stylesheet" />
+    <link href="{{ STATIC_URL }}css/datetimepicker.min.css" rel="stylesheet" />
+
+    <!-- SDS CSS -->
+    <link href="{% static 'css/sds.tailwind.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/sds.style.css' %}" rel="stylesheet" />
+
+    <!-- Apexcharts CSS-->
+    <link href="{% static 'css/apexcharts.css' %}" rel="stylesheet"/>
+
+    <!-- Page Specific CSS -->
+    {% block style %}
+    <!-- Load styles from content pages -->{% endblock %}
+
+    <!-- JQuery -->
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-3.3.1.min.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script type="text/javascript" src="{{ STATIC_URL }}js/popper.min.js"></script>
+
+    <script type="text/javascript" src="{{ STATIC_URL}}js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap.min.js"></script>
+
+    <!-- Javascript Libraries -->
+    <!-- Bootstrap Date-Picker Plugin https://github.com/eternicode/bootstrap-datepicker -->
+    <script src="{{ STATIC_URL }}bootstrap/js/bootstrap-datepicker.min.js"></script>
+
+    <!-- <script type="text/javascript" src="{{ STATIC_URL}}/js/bootstrap-select.min.js"></script> -->
+
+    <script type="text/javascript" src="{{ STATIC_URL}}/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL}}/js/dataTables.bootstrap4.min.js"></script>
+    <script src="{{ STATIC_URL }}js/dom-text.js"></script>
+    <link href="{{ STATIC_URL }}css/editor.dataTables.min.css" rel="stylesheet" />
+    <script src="{{ STATIC_URL}}/js/radioGroup.js"></script>
+    <script src="{{ STATIC_URL}}/js/radioButton.js"></script>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ STATIC_URL }}Favicon_Package/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ STATIC_URL }}Favicon_Package/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ STATIC_URL }}Favicon_Package/favicon-16x16.png">
+    <link rel="manifest" href="{{ STATIC_URL }}Favicon_Package//site.webmanifest">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+
+    <!-- Add-in External JS -->
+    <script src="{{ STATIC_URL }}js/datetimepicker.full.min.js"></script>
+    <script src="{{ STATIC_URL }}js/Chart.bundle.min.js"></script>
+    <script src="{{ STATIC_URL }}js/chartjs-plugin-datalabels.js"></script>
+    <script src="{{ STATIC_URL }}js/chartjs-plugin-piechart-outlabels.js"></script>
+
+    <!-- select2 -->
+    <link href="{{ STATIC_URL }}css/select2.min.css" rel="stylesheet" />
+    <script src="{{ STATIC_URL }}js/select2.min.js"></script>
+    <link href="{{ STATIC_URL }}css/select2-bootstrap4.css" rel="stylesheet" />
+
+
+    <!-- selectize... the better select2...  -->
+    <link href="{{ STATIC_URL }}css/selectize.css" rel="stylesheet" />
+    <!-- <link href="{{ STATIC_URL }}css/selectize.default.css" rel="stylesheet" /> -->
+    <link href="{{ STATIC_URL }}css/selectize.bootstrap3.css" rel="stylesheet" />
+    <script src="{{ STATIC_URL }}js/selectize.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/preserve_on_blur.js"></script>
+
+    <!-- Vue Compiler/Runtime-->
+    <!-- Vue development version. Uncomment if you need prod.
+      <script src="{{ STATIC_URL }}js/vue.global.prod.js"></script>
+    -->
+    <script src="https://unpkg.com/vue@3"></script>
+    <script src="{{ STATIC_URL }}js/sds.umd.js"></script>
+
+    <!-- ApexCharts -->
+    <script src="{% static 'js/apexcharts.amd.js' %}"></script>
+    <script src="{% static 'js/vue3-apexcharts.umd.min.js' %}"></script>
+
+    <!-- Custom CSS -->
+    <link href="{{ STATIC_URL }}css/custom/sidebar-nav.css" rel="stylesheet" />
+    <link href="{{ STATIC_URL }}css/custom/dropzone-style.css" rel="stylesheet" />
+    <link href="{{ STATIC_URL }}css/custom/sei-brand.css" rel="stylesheet" />
+    <link href="{{ STATIC_URL }}css/custom/forms.css" rel="stylesheet" />
+    <link href="{{ STATIC_URL }}css/custom/main.css" rel="stylesheet" />
+
+    <!--  Custom JS -->
+    <script src="{{ STATIC_URL }}js/custom/main.js"></script>
+
+    <script>
+      //Only runs the code once the DOM has been loaded.
+      document.addEventListener("DOMContentLoaded", function()
+      {
+        // Update the active block based on the page selected
+        $("{% block active %}{% endblock %}").addClass('bg-primary').removeClass('bg-transparent bg-dark');
+
+        //Configuration of the main Vue App. Allows for page specific configuration as well.
+        appConfiguration =
+        {
+          compilerOptions: {
+            delimiters: ["[[", "]]"]
+          },
+          //Function that returns the data used by the Vue App.
+
+          data()
+          {
+            baseData =
+            {
+              toasts: [],
+              sidebarCollapsed: false,
+              dropdownArgs:
+              {
+                placement: "right",
+                menuClass: "py-2 border shadow-lg my-1 w-32 rounded-md bg-white dark:border-gray-500 dark:bg-gray-700",
+                animated: true,
+              },
+              layoutArgs:
+              {
+                appSuite: "Engine",
+                appName: "{{ report_type }}-{{ asmt_id }}",
+                enableCollapsibleSidebar: true,
+                appSuitePrefix: "Reporting",
+                hideAppIcon: false,
+                hidePageHeader: false,
+                appUrl: "{% url 'index' %}",
+                appIconUrl: "{% static 'icons/shield-halved.svg' %}",
+                sidebarNavigationItems: [
+                  {
+                    id: 2,
+                    title: "Dashboard",
+                    href: "{% url 'index' %}",
+                    iconUrl: "{% static 'icons/tachometer-alt-solid.svg' %}",
+                  },
+                  {
+                    id: 3,
+                    title: "Assessment Details",
+                    href: "{% url 'engagement' %}",
+                    iconUrl: "{% static 'icons/address-card-regular.svg' %}"
+                  },
+                  {
+                    id: 4,
+                    title: "Payloads",
+                    href: "{% url 'payloads' %}",
+                    iconUrl: "{% static 'icons/file-code.svg' %}"
+
+                  },
+                  {
+                    id: 5,
+                    title: "Campaigns",
+                    href: "{% url 'campaigns' %}",
+                    iconUrl: "{% static 'icons/envelope.svg' %}"
+
+                  },
+                  {
+                    id: 6,
+                    title: "Add Finding",
+                    href: "{% url 'finding_create' %}",
+                    iconUrl: "{% static 'icons/upload-solid.svg' %}"
+                  },
+                  {
+                    id: 7,
+                    title: "Risk Scoring",
+                    // href: "{% url 'index' %}",
+                    iconUrl: "{% static 'icons/calculator-solid.svg' %}"
+                  },
+                  {
+                    id: 8,
+                    title: "Report",
+                    href: "{% url 'report' %}",
+                    iconUrl: "{% static 'icons/file-alt-solid.svg' %}",
+                  },
+                  {
+                    id: 9,
+                    title: "Activity Tracker",
+                    href: "{% url 'activity_tracker' %}",
+                    iconUrl: "{% static 'icons/table-solid.svg' %}"
+                  },
+                  {
+                    id: 10,
+                    title: "Attack Paths",
+                    href: "{% url 'attack-paths' %}",
+                    iconUrl: "{% static 'icons/project-diagram-solid.svg' %}"
+                  },
+                  {
+                    id: 11,
+                    title: "ATT&CK",
+                    href: "{% url 'attack-matrix' %}",
+                    iconUrl: "{% static 'icons/a.svg' %}"
+                  },
+                  {
+                    id: 12,
+                    title: "Tools",
+                    href: "{% url 'tools' %}",
+                    iconUrl: "{% static 'icons/wrench-solid.svg' %}"
+                  },
+                  {
+                    id: 13,
+                    title: "Election Infrastructure",
+                    href: "{% url 'ei' %}",
+                    iconUrl: "{% static 'icons/poll-h-solid.svg' %}"
+                  },
+                ]
+              },
+              //Side bar links for if the phishing findings are added to the engagement.
+              phishingLinks: {
+                port: {
+                  id: 14,
+                  title: "Port Mapping",
+                  href: "{% url 'port_mapping' %}",
+                  iconUrl: "{% static 'icons/network-wired-solid.svg' %}"
+                }
+              },
+              //The links for the side bar for the narrative section. Have to check the assessment before these are inserted.
+              narrativeLinks:
+              {
+                phishing: {
+                  id: 15,
+                  title: "Phishing",
+                  href: "{% url 'narratives' 'phishing' %}",
+                },
+                external: {
+                  id: 16,
+                  title: "External",
+                  href: "{% url 'narratives' 'external' %}",
+                },
+                internal: {
+                  id: 24,
+                  title: "Internal",
+                  href: "{% url 'narratives' 'internal' %}",
+                }
+              },
+
+            }
+            //If the current page content contains a function called pageData, it will merge the dictionary returned
+            //from that function and merge it with the base template datalabels.
+            //NOTE: The pageData function must return a dictionary.
+            if (typeof pageData === 'function')
+            {
+              baseData = Object.assign({}, baseData, pageData())
+            }
+
+            return baseData
+          },
+          //Methods for the base vue app object. If a function called pageMethods exists in the page then
+          //the functions from there will be merged into the methods of the Vue App.
+          //NOTE: The function should return a dictionary of functions.
+          methods: Object.assign
+          ({
+            redirectLink: function(link)
+            {
+              window.location.href = link
+            },
+            displayNotification: function(options) {
+              this.toasts.push(Object.assign({}, options, {id: this.toasts.length}))
+            },
+
+          }, (typeof pageMethods === 'function' ? pageMethods() : {}), {
+
+          }),
+
+          //Runs during the created portion of the Vue lifecycle.
+          //If a function called pageCreated exists on the page that will be ran at the end of the lifecycle.
+          created()
+          {
+            //Logic to add extra side bar tabs based on conditions.
+            //Report type Specific
+            if ("{{report_type}}" != "HVA") {
+              narrativeTabs = {
+                id: 66,
+                title: "Narrative",
+                items: [this.narrativeLinks['phishing'], this.narrativeLinks['external']],
+                iconUrl: "{% static 'icons/list-solid.svg' %}"
+              }
+              if ("{{report_type}}" != "RPT") {
+                narrativeTabs['items'].push(this.narrativeLinks['internal'])
+              }
+
+              this.layoutArgs.sidebarNavigationItems.splice(6, 0, narrativeTabs)
+              this.layoutArgs.sidebarNavigationItems.splice(6, 0, this.phishingLinks['port'])
+            }
+
+            for(let tab in this.layoutArgs.sidebarNavigationItems){
+              if(this.layoutArgs.sidebarNavigationItems[tab]['href'] === window.location.pathname){
+                this.layoutArgs.sidebarNavigationItems[tab]['active'] = true
+                break
+              }
+            }
+
+            if(typeof pageCreated === "function"){
+              pageCreated()
+            }
+          },
+          beforeMount()
+          {
+            if(typeof pageBeforeMounted === 'function') {
+              pageBeforeMounted()
+            }
+          },
+        }
+
+        const vueApp = Vue.createApp(appConfiguration)
+        vueApp.use(SeiDesignSystem.default)
+        vueApp.use(window['vue3-apexcharts'].default)
+        vueApp.mount("#vue-container")
+      });
+    </script>
+
+    <!-- Page Specific JavaScript-->
+    {% block scripts %}
+    <!-- Load scripts from content pages -->{% endblock %}
+
+    {% load notifications_tags %}
+    {% register_notify_callbacks callbacks='fill_notification_list, fill_notification_badge, alert_admin_users' %}
+
+    {% if asmt_id %}
+    <title>PT Portal {{report_type}}-{{asmt_id}}</title>
+    {% else %}
+    <title>PT Portal {{report_type}}</title>
+    {% endif %}
+
+  </head>
+
+  <body>
+    <div id="vue-container">
+      <sds-layout-app v-bind="layoutArgs" v-model="sidebarCollapsed">
+        <template #suite-header>
+          <sds-dropdown v-bind="dropdownArgs">
+            <template #title>{{ user }}</template>
+            <sds-dropdown-item v-if="{{ user.is_admin }} = true" tag="a" href="/admin">Admin</sds-dropdown-item>
+            <sds-dropdown-item v-else tag="a" href="{% url 'password_change' %}">Change Password</sds-dropdown-item>
+            <sds-dropdown-item tag="a" href="{% url 'logout_view' %}">Logout</sds-dropdown-item>
+          </sds-dropdown>
+        </template>
+        <template #default>
+          <sds-toaster v-model="toasts"></sds-toaster>
+          {% block content %}
+          {% endblock %}
+        </template>
+        <template #footer-right>
+          <div style="float: right;">version {{version_number}}</div>
+        </template>
+      </sds-layout-app>
+    </div>
+  </body>
+<style>
+  .text-red-400{
+    color: rgb(187 0 0) !important;
+  }
+  .hover\:underline:hover{
+    color: white !important;
+  }
+  .w-8.h-8{
+    width: 1.333rem !important;
+    height: 1.333rem !important;
+  }
+  .text-xl.flex{
+    font-size: 1.75rem !important;
+  }
+  .text-lg.font-bold.my-auto{
+    font-size: 1.25rem !important;
+  }
+  .tab{
+    background-color: transparent !important;
+  }
+</style>
+</html>

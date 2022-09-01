@@ -1,0 +1,444 @@
+{% extends 'ptportal/base.html' %}
+{% load humanize %}
+{% block content %}
+<!-- TODO fix carousel height normalization  -->
+
+
+<div id="page-content-wrapper">
+	<div class="container-fluid">
+
+<div class="row">
+	<div class="col-md-12">
+    {% if object_list %}
+		  <h1>Edit Images for {{ finding.uploaded_finding_name }}</h1>
+    {% else %}
+      <h1>Add Images to {{ finding.uploaded_finding_name }}</h1>
+    {% endif %}
+
+<hr />
+
+{% for message in messages %}
+	<div class="row">
+	    <div class="col-sm-8">
+	    <div class="alert alert-success alert-dismissable">
+	        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+             <strong>Success!</strong> &#8216;{{ finding.uploaded_finding_name }}&#8217; {{ message }}
+	    </div>
+	    </div>
+	</div>
+{% endfor %}
+
+<nav aria-label="breadcrumb">
+	<ol class="breadcrumb">
+	 <li class="breadcrumb-item"><a href="{% url 'index' %}">Dashboard</a></li>
+	 <li class="breadcrumb-item"><a href="{% url 'finding_severity' finding.severity %}">{{finding.severity}}</a></li>
+	 <li class="breadcrumb-item"><a href="{% url 'finding_detail' finding.slug %}">{{finding.uploaded_finding_name}} Details</a></li>
+   <li class="breadcrumb-item active">{{finding.uploaded_finding_name}} Edit</li>
+	</ol>
+</nav>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-6">
+    <p><small>Last modified on {{finding.updated_at | naturaltime}}</small></p>
+    <button type="button" class="btn btn-primary fileinput-button text-primary'"><i class="fas fa-images"></i> Add Screenshot(s)</button>
+  </div>
+</div>
+<br>
+
+<form id="form" class="needs-validation" enctype="multipart/form-data" method="POST" novalidate>
+	{% csrf_token %}
+
+<div id="myDropzone" class="mb-3 bg-light dropzoneContainer">
+  <!-- align-middle -->
+  <div class='row  my-auto mx-auto align-middle'>
+    <div class='col-sm-12'>
+      <div id='dropzonePreText' class="text-center">
+        <h3>Drag &amp; drop your files here or <span class='fileinput-button  text-primary' style='cursor:pointer'><u>Browse</u></span></h3>
+        <i class="fas fa-10x fa-cloud-upload-alt" style='opacity:.5;'></i>
+      </div>
+    </div>
+  </div>
+
+  <div id='sortable' class='previewContainer cards'> <!-- handler for list of images -->
+    <div class='template '>
+      <div class="card dz-preview preview" style='cursor:move;'>
+        <img type='file' data-dz-thumbnail class="card-img-top thumbnailSize" />
+        <div data-dz-card-body class="card-body">
+          <label for="file_name" class='control-label'>Title</label>
+          <div class="input-group input-group-sm mb-1 form-group">
+
+            <div class="input-group-prepend">
+              <button class="btn btn-outline-secondary editButton" type="button" id="button-addon1">Edit</button>
+            </div>
+            <input id="file_name" type="text" class="form-control required" name="file_name" placeholder="file-name" data-dz-name-field required disabled>
+            <input id="file_pk" type="text" class="form-control d-none" name="file_pk" value="" data-dz-pk>
+            <div class="input-group-append">
+              <span id='file_type' class="input-group-text">.png</span>
+            </div>
+
+          </div>
+          <small id="fileNameHelp" class="form-text text-muted mb-2">Renames file in PTPortal Server.</small>
+          <label for="file_captions control-label required">Caption</label>
+          <div class="input-group input-group-sm mb-2">
+            <textarea id="file_captions" class="form-control required" rows="1" name="file_captions" data-dz-caption-field required></textarea>
+          </div>
+            <!-- <p class='card-text'><span data-dz-remove id="delete" class="delete underline-on-hover" style='cursor:pointer'><small class='text-danger'>Delete Image</small></span></p> -->
+            <button data-dz-remove id='delete' type="button" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
+        </div>
+        <div class="card-footer text-muted">
+          <!-- <span id='orderNum'>1</span> -->
+          <small id="orderNum" class="form-text text-muted">1</small>
+          <p class="dz-error-message text-danger"><span data-dz-errormessage></span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+	</div>
+
+	<div class="form-row d-none" id="screenshot_description_hidden">
+		<div class="col-md-9 mb-3 finding-type">
+			<h4>Screenshot Description</h4>
+			<h4><small class="text-muted control-label required">Add short description of screenshots</small></h4>
+				<textarea class="form-control"  name="screenshot_description" id="screenshot_description" rows="2" placeholder="This/These screenshots show...">{{finding.screenshot_description}}</textarea>
+		</div>
+	</div>
+
+  <div class='form-row'>
+    <div class='col-md-12 text-right'>
+        <a class="btn btn-outline-secondary" href="{% url 'finding_edit' finding.slug %}" role="button">Back</a>
+        <input name="Submit" type="submit" class="btn btn-primary" id="imageSubmit" {% if object_list %}value='Save Changes' {% else %}value="Save" {% endif %} />
+    </div>
+  </div>
+
+</form>
+
+</div>
+</div><!-- end page content wrapper -->
+
+<style>
+#myDropzone {
+    border-radius: 20px;
+    padding: 20px;
+    min-height: 400px;
+    width: 100%;
+    position: relative;
+    border-style: dotted;
+    border-color: rgba(0, 0, 0, 0.3);
+}
+.underline-on-hover:hover {
+    text-decoration: underline;
+}
+.input-group .form-control {
+    margin: 0px !important;
+}
+#sortable div.card {
+  overflow: visible;
+}
+/* https://getflywheel.com/layout/flexbox-create-modern-card-design-layout/ */
+.cards {
+    display: flex;
+    flex-wrap: wrap;
+ }
+
+.card {
+    flex: 1 0 300px;
+    box-sizing: border-box;
+    margin: 1rem .25em;
+    width: 5rem;
+}
+
+@media screen and (min-width: 40em) {
+    .card {
+       max-width: calc(50% -  1em);
+    }
+}
+
+@media screen and (min-width: 60em) {
+    .card {
+        max-width: calc(25% - 1em);
+    }
+}
+.thumbnailSize{
+  /* width: 10em; */
+  position: relative;
+  float: left;
+  /* width:  300px; */
+  height: 300px;
+  background-position: 50% 50%;
+  background-repeat:   no-repeat;
+  background-size:     cover;
+}
+</style>
+
+<link href="{{ STATIC_URL }}/css/dropzone-basic.css" rel="stylesheet" />
+<link href="{{ STATIC_URL }}/css/dropzone.css" rel="stylesheet" />
+
+<script src="{{ STATIC_URL }}/js/dropzone.js"></script>
+
+
+<script>
+let delete_files = [];
+
+/* Sortable Feature for Dropzone */
+ $("#sortable").sortable({
+ 		helper: 'clone',
+    cursor: 'move',
+    opacity: .8,
+    forceHelperSize: true,
+    revert: 250,
+    scroll: false,
+    tolerance: 'pointer',
+
+    update: function(event, ui) {
+        let $lis = $(this).children('div');
+        $lis.each(function() {
+            newVal = $(this).index() + 1;
+            $(this).find('small#orderNum').html(newVal);
+        });
+    }
+
+});
+
+  $('#myDropzone').on('click', '.editButton', function() {
+    $(this).parent().next().prop('disabled', false);
+  });
+
+// the function for replacing the array
+// reference: https://stackoverflow.com/questions/40202086/dropzone-js-jquery-ui-sortable-queue
+function newDropzoneArray(oldArray){
+    // on the webpage search for all the images that have been uploaded
+    var imageTags = $('img.card-img-top');
+    // the new array where we will put in the new files
+    var current_queue = [];
+
+    // iterate through all the images that have been uploaded by the user
+    imageTags.each(function (index, imageTag) {
+        // get the image name from the images
+        imageName = imageTag.alt;
+
+        // now we will iterate through the old array
+        for (i = 0; i < oldArray.length; i++) {
+            /** if the name of the image on the website is the same as the image from the old array
+             * we will add it to the new array. You can see this as sorting the array.
+             */
+            if (imageName === oldArray[i].name) {
+                current_queue.push(oldArray[i]);
+            }
+        }
+    });
+    // now we return the new dropzone array so that we can replace it.
+    return current_queue;
+}
+
+
+/* Dropzone Configuration */
+
+var myDropzone = new Dropzone('form', {
+		url: "{% url 'finding_create_image_form' finding.slug %}",
+    acceptedFiles: 'image/*',
+    autoDiscover: false,
+    autoProcessQueue: false,
+    autoQueue: true,
+		addRemoveLinks: false,
+    clickable: ".fileinput-button",
+		headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() } ,
+    hiddenInputContainer: '#myDropzone',
+    maxFiles: 20,
+		maxFilesize: 5,
+		parallelUploads: 20,
+    previewsContainer: '.previewContainer',
+    previewTemplate: $('.template').html(),
+		uploadMultiple: true,
+    thumbnailWidth: 300,
+		thumbnailHeight: 300,
+
+		init: function() {
+
+				var myDropzone = this,
+				    form = $("#form"),
+				    submitButton = $("#imageSubmit"),
+            filesCount = 1;
+
+        $('.template').remove();
+
+				// Handle Images for Finding Update
+        $.ajax({
+          url: "{% url 'ajax_get_uploaded_finding_images' %}",
+          data: {
+            'finding': "{{ finding.slug }}",
+          },
+
+          success: function (data) {
+            $.each(data['images'], function(key, value) {
+              var mockFile = { name: value.file, size: value.size, caption: value.caption, pk: value.id, extension: value.ext };
+              console.log('value.caption: ', value.caption );
+               myDropzone.emit("addedfile", mockFile);
+               myDropzone.options.thumbnail.call(myDropzone, mockFile, '/media/' + value.file);
+            });
+          }// success
+        }); //ajax
+
+        /* Form Submission Logic */
+				submitButton.click(function(event){
+					form.addClass("was-validated");
+          numImageErrors = $('.dz-error').length;
+          console.log('numImageErrors: ', numImageErrors);
+
+					// if form is not valid
+					if ( (form.get(0).checkValidity() === false) || (numImageErrors > 0)) {
+            event.preventDefault();
+						event.stopPropagation();
+					}
+          else {
+            warnMessage = null;
+
+            if (delete_files.length > 0) {
+                $.ajax({
+                  type: "POST",
+                  url: "{% url 'ajax_image_delete' %}",
+                  data: {
+                    'images': delete_files,
+                    'csrfmiddlewaretoken': '{{csrf_token}}'
+                  },
+                });
+              }
+
+            // no new files, just updates to captions and or description
+            if (myDropzone.files.length == 0) {
+              form.submit();
+            }
+            else {
+              // actual form isn't being sent
+              event.preventDefault();
+              // // reorder image queue
+              myDropzone.files = newDropzoneArray(myDropzone.files);
+              // dropzone will not sow submit the request
+              event.stopPropagation();
+              myDropzone.enqueueFiles(myDropzone.getFilesWithStatus(Dropzone.ADDED));
+              myDropzone.processQueue();
+            }
+          }
+				});
+        myDropzone.on("successmultiple", function(files, response) {
+            // redirecting user on success. No message atm.
+            warnMessage = null;
+            var url = document.location.origin;
+            // Send the index page the finding information
+            document.cookie = "new_finding={{ finding.finding }}; path=/";
+            document.cookie = "new_finding_slug={{ finding.slug }}; path=/";
+            window.location.replace(url);
+        });
+
+				myDropzone.on("addedfile", function(file) {
+          // Remove hidden screenshot description field
+          $("#screenshot_description_hidden").removeClass('d-none');
+          // Make screenshot description field required
+          $("#screenshot_description").prop('required', true);
+          // Remove myDropzone before class
+          // $('#dropzonePreText').remove();
+          $('#dropzonePreText').addClass('d-none');
+
+          /* Set default input fields */
+          // image pk if it's already on the server
+          inputPk = $(file.previewElement).find('input#file_pk');
+          inputPk.val(file.pk);
+
+          inputFileName = $(file.previewElement).find('input#file_name');
+          inputExt = $(file.previewElement).find("span#file_type");
+          inputCaption = $(file.previewElement).find("textarea#file_captions");
+
+          // On Finding Update
+          let temp = file.name.split('.'),
+              extension = temp[temp.length-1],
+              name = file.name;
+
+          // Edit Images on Server
+          if ( name.includes('/') ) {
+            temp = name.split('/');
+            temp = temp[temp.length-1];
+            temp = temp.split('.');
+            name = temp[0];
+            extension = file.extension;
+          }
+          else {
+            name = name.substr(0, name.indexOf('.'));
+          }
+
+          inputFileName.val(name);
+          inputExt.text('.'+extension);
+          if (file.caption ) {
+            inputCaption.val(file.caption);
+          }
+          else {
+            inputCaption.val(name);
+          }
+
+          $(file.previewElement).find('small#orderNum').html(filesCount);
+          filesCount++;
+
+				}); // addedFile
+
+
+				myDropzone.on("removedfile", function(file) {
+          delete_files.push(file.name);
+          filesCount--;
+
+          // run through cards and renumber them
+          divs = $('.card small#orderNum');
+          $.each(divs, function( index, value ) {
+            $(value).html((index+1));
+          });
+
+          let cardCount = $('.card').length;
+					if (cardCount < 1) {
+						// Hide screenshot description field
+						$("#screenshot_description_hidden").addClass('d-none');
+						// Remove required field from screenshot description
+						$("#screenshot_description").prop('required', false);
+            $('#dropzonePreText').removeClass('d-none');
+					}
+				});
+
+        myDropzone.on('error', function(file, message) {
+          console.log('this, message: ', file, message);
+          // add error message to this file template
+          console.log('this.previewElement: ', file.previewElement);
+          console.log($(file.previewElement));
+          $(file.previewElement).addClass('border-danger');
+        });
+
+		} // end of init function ()
+
+}); // end of myDropzone configuration
+
+  var unsaved = false;
+  var WARN_MESSAGE = "You have unsaved changes on this page.";
+
+  $('#myDropzone').on('change', function() {
+    unsaved = true;
+  });
+
+  myDropzone.on('addedfile', function() {
+    unsaved = true;
+  });
+
+  myDropzone.on('removedfile', function() {
+    unsaved = true;
+  });
+
+  $('#imageSubmit').on('click', function() {
+    unsaved = false;
+  });
+
+  $(window).on('beforeunload', function(e){
+    if (unsaved) {
+      return WARN_MESSAGE;
+    } else {
+   	  e=null;
+   	}
+  });
+
+</script>
+
+{% endblock %}

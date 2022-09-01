@@ -1,0 +1,7 @@
+FROM nginx:1.21.6-alpine
+
+ADD conf/nginx.conf /etc/nginx/conf.d/
+RUN mkdir -p /etc/nginx/ssl
+RUN chown -R root:root /etc/nginx/ssl
+RUN chmod -R 600 /etc/nginx/ssl
+ADD ssl /etc/nginx/ssl

@@ -1,0 +1,15 @@
+.git/
+.cache
+
+
+*.egg-info
+*.egg/
+*.pyc
+
+.coverage
+
+help_templates/
+__pycache__
+
+docker/containers/
+docker/images/

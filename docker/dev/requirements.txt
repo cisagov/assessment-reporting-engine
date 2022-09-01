@@ -1,0 +1,16 @@
+attackcti
+beautifulsoup4==4.10.0
+django==3.1
+django-axes==5.4.3
+django-extra-views
+django-widget-tweaks==1.4.3
+djangorestframework==3.11.1
+gunicorn==19.9.0
+iptools==0.7.0
+netaddr==0.7.19
+openpyxl==2.6.2
+pandas==1.0.0
+Pillow==6.0.0
+python-docx==0.8.10
+python-pptx==0.6.18
+pyzipper

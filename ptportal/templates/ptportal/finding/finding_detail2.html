@@ -1,0 +1,385 @@
+{% extends 'ptportal/base.html' %}
+{% load humanize %}
+
+{% block style %}
+<style>
+  .thumbnailSize{
+    /* width: 10em; */
+    position: relative;
+    float: left;
+    width:  150px;
+    height: 150px;
+    background-position: 50% 50%;
+    background-repeat:   no-repeat;
+    background-size:     cover;
+  }
+  .card {
+    border: none;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- TODO fix carousel height normalization  -->
+
+<div id="page-content-wrapper">
+	<div class="container-fluid">
+
+
+<div class="row">
+	<div class="col-md-6">
+    {% if object.finding.cisa_id == 1 %} <!-- customer specific finding -->
+    <h3>Customer Specific Finding: {{object.uploaded_finding_name}} Details</h3>
+    {% else %}
+    <h3>{{object.uploaded_finding_name}} Details</h3>
+    {% endif %}
+  </div>
+</div>
+<hr />
+
+
+<nav aria-label="breadcrumb">
+	<ol class="breadcrumb">
+    {% if previous_url|stringformat:"s" == "report" %}
+      <li class="breadcrumb-item"><a href="{% url 'report' %}">Report</a></li>
+    {% else %}
+      <li class="breadcrumb-item"><a href="{% url 'index' %}">Dashboard</a></li>
+      {% if previous_url|stringformat:"s" == object.severity|stringformat:"s" %}
+        <li class="breadcrumb-item">	<a href="{% url 'finding_severity' object.severity %}">{{object.severity}}</a></li>
+      {% endif %}
+    {% endif %}
+	 <li class="breadcrumb-item active">{{object.uploaded_finding_name}} Details</li>
+
+	</ol>
+</nav>
+
+<div class="row">
+    <div class="col-md-6">
+    <p><small>Last modified {{object.updated_at | naturaltime}}</small></p>
+  </div>
+
+</div>
+<div class="row">
+    <div class="col-md-6">
+    <div class='row mb-3'>
+      <div class='col-md'>
+        <h4>Details</h4>
+      </div>
+      <div class='col-md text-right'>
+        <a class="btn btn-outline-primary" href ="{% url 'finding_edit' object.slug %}"><i class="fa fa-edit"></i> Edit Details</a>
+      </div>
+    </div>
+
+    <dl class="row">
+      <dt class="col-sm-3">Finding Description</dt>
+      <dd class="col-sm-9">{{object.description}}</dd>
+
+      <dt class="col-sm-3">Remediation</dt>
+      <dd class="col-sm-9">
+        <p>{{object.remediation}}</p>
+      </dd>
+
+      <dt class="col-sm-3">Severity</dt>
+      <dd class="col-sm-9">{{object.severity}}</dd>
+
+      <dt class="col-sm-3 text-truncate">Assessment Type</dt>
+      <dd class="col-sm-9">{{object.assessment_type}}</dd>
+
+      <dt class="col-sm-3 text-truncate">Discovery</dt>
+      <dd class="col-sm-9">{{object.discovery}}</dd>
+
+      <dt class="col-sm-3 text-truncate">Mitigated</dt>
+      {% if object.mitigation == True %}
+        <dd class="col-sm-9">Yes</dd>
+      {% elif object.mitigation == False %}
+        <dd class="col-sm-9">No</dd>
+      {% endif %}
+
+      <dt class="col-sm-3 text-truncate">Affected Systems</dt>
+      <dd class="col-sm-9">{% for system in object.affected_systems.all %}
+        {% if forloop.last %}
+          {{system}}
+        {% else %}
+          {{system}},
+        {% endif %}
+      {% endfor %}</dd>
+
+    </dl>
+	</div> <!-- col-md-6 -->
+
+	<div class="col-md-6">
+    {% if object.finding.name == "Ransomware" %}
+    <div class='row mb-3'>
+        <div class='col-md'>
+          <h4>Ransomware</h4>
+        </div>
+         <div class='col-md text-right'>
+          {% if ransomware %}
+          {% for r in ransomware %}<a class="btn btn-outline-primary" href ="{% url 'ransomware_update' r.id %}"><i class="fa fa-edit"></i> Edit Ransomware stats{% endfor %}
+          {% else %}
+          <a class="btn btn-outline-primary" href ="{% url 'ransomware' %}"><i class="fa fa-edit"></i> Add Ransomware stats
+          {% endif %}
+          </a>
+        </div>
+      </div>
+      <dl class="row">
+        {% for r in ransomware %}
+
+
+        <dt class="col-sm-4"># of Wormable Machines</dt>
+        <dd class="col-sm-8">{{r.wormable_machines}}</dd>
+
+        <dt class="col-sm-4"># of Wormable High Value Assets</dt>
+        <dd class="col-sm-8">{{r.wormable_HVAs}}</dd>
+
+        <dt class="col-sm-4">% of Network Susceptibility</dt>
+        <dd class="col-sm-8">{{r.network_susc}}</dd>
+  </dl>
+  {% endfor %}
+    {% endif %}
+    {% if object.finding.name == "Spear Phishing Susceptibility" %}
+      <div class='row mb-3'>
+        <div class='col-md'>
+          <h4>Campaigns</h4>
+        </div>
+        <div class='col-md text-right'>
+          <a class="btn btn-outline-primary" href ="{% url 'campaigns' %}"><i class="fa fa-edit"></i>
+          {% if spear_susceptibility %}
+           Edit Campaigns
+          {% else %}
+          Add Campaigns
+          {% endif %}
+          </a>
+        </div>
+      </div>
+      {% if object.campaign_description %}
+      <div class='row mb-3'>
+        <div class='col-md'>
+          <p>{{object.campaign_description}}</p>
+        </div>
+      </div>
+    {% endif %}
+    {% for sus in spear_susceptibility %}
+    <h5>Campaign: {{forloop.counter}}</h5>
+    <dl class="row">
+
+    <dt class="col-sm-4"># of Emails Sent</dt>
+    <dd class="col-sm-8">{{sus.emails_sent}}</dd>
+
+    <dt class="col-sm-4"># of Emails Delivered</dt>
+    <dd class="col-sm-8">{{sus.emails_delivered}}</dd>
+
+    <dt class="col-sm-4"># Unique Clicks</dt>
+    <dd class="col-sm-8">{{sus.unique_clicks}}</dd>
+
+    <dt class="col-sm-4 tool" data-placement='bottom' title="Click Rate = unique clicks / emails delivered" data-toggle="tooltip">Click Rate</dt>
+    <dd class="col-sm-8 tool" data-placement='bottom' title="Click Rate = unique clicks / emails delivered" data-toggle="tooltip">{{sus.click_rate}}</dd>
+
+    <dt class="col-sm-4"># Total Clicks</dt>
+    <dd class="col-sm-8">{{sus.total_clicks}}</dd>
+
+    <dt class="col-sm-4">Time to First Click</dt>
+    <dd class="col-sm-8">{{sus.time_to_first_click}}</dd>
+
+    <dt class="col-sm-4">Number Exploited</dt>
+    <dd class="col-sm-8">{{sus.number_exploited}}</dd>
+
+    <dt class="col-sm-4">Length of Campaign</dt>
+    <dd class="col-sm-8">{{sus.length_of_campaign}}</dd>
+
+    </dl>
+
+    {% endfor %}
+
+    {% endif %}
+    {% if object.finding.name == "Spear Phishing Weaknesses" %}
+    <div class='row mb-3'>
+      <div class='col-md'>
+        <h4>Payloads</h4>
+      </div>
+      <div class='col-md text-right'>
+        <a class="btn btn-outline-primary" href ="{% url 'payloads' %}"><i class="fa fa-edit"></i>
+        {% if spear_weaknesses %}
+         Edit Payloads
+        {% else %}
+        Add Payloads
+        {% endif %}
+        </a>
+      </div>
+    </div>
+    {% if object.payload_description %}
+    <div class='row mb-3'>
+      <div class='col-md'>
+  	    <p>{{object.payload_description}}</p>
+      </div>
+  	</div>
+    {% endif %}
+    {% for weak in spear_weaknesses %}
+      <h5>Payload: {{forloop.counter}}</h5>
+      <dl class="row">
+
+      <dt class="col-sm-4">Payload Description</dt>
+      <dd class="col-sm-8">{{weak.payload_description}}</dd>
+
+      <dt class="col-sm-4">C2 Protocol</dt>
+      <dd class="col-sm-8">{{weak.c2_protocol}}</dd>
+
+      <dt class="col-sm-4">Border Protection</dt>
+      <dd class="col-sm-8">{{weak.get_border_protection_display}}</dd>
+
+      <dt class="col-sm-4">Host Protection</dt>
+      <dd class="col-sm-8">{{weak.get_host_protection_display}}</dd>
+      </dl>
+    {% endfor %}
+    {% elif object.finding.name == "Sensitive Data Exfiltration" %}
+    <div class='row mb-3'>
+      <div class='col-md'>
+        <h4>Exfiltrated Data</h4>
+      </div>
+      <div class='col-md text-right'>
+        <a class="btn btn-outline-primary" href ="{% url 'sensitive_data_exfil' %}"><i class="fa fa-edit"></i>
+        {% if sensitive_data_exfil %}
+         Edit Data Exfils
+        {% else %}
+        Add Data Exfils
+        {% endif %}
+        </a>
+      </div>
+    </div>
+    {% if object.data_exfil_description %}
+    <div class='row mb-3'>
+      <div class='col-md'>
+  	    <p>{{object.data_exfil_description}}</p>
+      </div>
+  	</div>
+    {% endif %}
+    {% for exfil in sensitive_data_exfil %}
+      <h5>Data Exfil: {{forloop.counter}}</h5>
+      <dl class="row">
+
+      <dt class="col-sm-4">Protocol</dt>
+      <dd class="col-sm-8">{{exfil.get_protocol_display}}</dd>
+
+      <dt class="col-sm-4">Datatype</dt>
+      <dd class="col-sm-8">{{exfil.datatype}}</dd>
+
+      <dt class="col-sm-4">Date/Time Started</dt>
+      <dd class="col-sm-8">{{exfil.date_time}}</dd>
+
+      <dt class="col-sm-4">Result</dt>
+      <dd class="col-sm-8">{{exfil.get_result_display}}</dd>
+      </dl>
+    {% endfor %}
+    {% endif %}
+    {% if object.finding.name != 'Spear Phishing Susceptibility' and object.finding.name != 'Spear Phishing Weaknesses' and object.finding.name != 'Sensitive Data Exfiltration'  and object.finding.name != 'Ransomware' %}
+      <div class='row mb-3'>
+        <div class='col-md'>
+          <h4>Screenshots</h4>
+        </div>
+        <div class='col-md text-right'>
+          <a class="btn btn-outline-primary" href ="{% url 'finding_create_image_form' object.slug %}"><i class="fa fa-edit"></i> {% if uploaded_files.count == 0 %} Add Screenshots {% else %} Edit Screenshots {% endif %}</a>
+        </div>
+      </div>
+
+  	{% if uploaded_files.count < 1 %}
+  		<div class="row mb-3">
+  			<div class="col-md text-center">
+            None uploaded
+  			</div>
+  		</div>
+  	{% else %}
+    <div class='row'>
+      <div class='col-md'>
+      <h5>Description of Images</h5>
+      </div>
+    </div>
+    <div class='row mb-3'>
+      <div class='col-md'>
+  	    <p>{{object.screenshot_description}}</p>
+      </div>
+  	</div>
+
+    <h5>Screenshots</h5>
+    <ul class="list-unstyled">
+      {% for i in uploaded_files %}
+      <li class="media mb-2">
+        <a href="#" class='imagePop'>
+          <img src={{i.file.url}} class="mr-3 thumbnailSize" alt={{i.file.name}}>
+        </a>
+        <div class="media-body">
+          <h5 class="mt-0 mb-1">{{i.slug}}</h5>
+          <dl class="row">
+            <dt class="col-sm-2">Caption:</dt>
+            <dd class="col-sm-9 caption">{{i.caption}}</dd>
+
+            <dt class="col-sm-2">Order:</dt>
+            <dd class="col-sm-9">
+              <p>{{i.order|add:1}}</p>
+            </dd>
+          </dl>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+
+  {% endif %}
+  {% endif %}
+
+</div> <!-- col-md-6 right -->
+</div>
+
+</div>
+</div> <!-- row -->
+<div class="row">
+<div class="col-md-6 offset-md-6">
+<div class="col-md"></div>
+<div class="col-md text-right">
+    <a class="btn btn-danger" href ="{% url 'finding_delete' object.slug %}"><i class="fas fa-trash-alt"></i> Delete Finding</a>
+  </div>
+</div>
+</div>
+
+
+</div> <!-- container -->
+
+<!-- Modal -->
+<div class="modal fade" id="screenshotModal" tabindex="-1" role="dialog" aria-labelledby="screenshotModal" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 id='modalImageTitle' class="modal-title">Screenshot Title</h5>
+      </div>
+      <div class="modal-body">
+        <img id='modalImage' src='' alt='' class='img-responsive'>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<!-- Custom JS for findingsDetails.html -->
+<script>
+$(document).ready(function(){
+		 $(".nav-item").removeClass("active");
+		 $("#findings_upload_page").addClass("active");
+     $("[data-toggle=\"tooltip\"]").tooltip({container:'#pageContentWrapper'});
+
+     $(".imagePop").on("click", function() {
+       $('#modalImage').attr('src', $(this).find('img').attr('src')); // here asign the image to the modal when the user click the enlarge link
+       $('#modalImageTitle').text( $(this).parent().find('.caption').text() );
+       $('#screenshotModal').appendTo("body").modal('show'); // imagemodal is the id attribute assigned to the bootstrap modal, then i use the show function
+    });
+
+     // $('.tool').tooltip({'container': '#content'});
+});
+
+</script>
+
+{% endblock %}

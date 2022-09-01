@@ -1,0 +1,40 @@
+{% extends 'ptportal/base.html' %}
+{% block content %}
+
+<h1><i class="fas fa-edit"></i>Narrative Types</h1>
+<!-- add breadcrumbs -->
+<hr />
+
+<nav aria-label="breadcrumb">
+	<ol class="breadcrumb">
+	    <li class="breadcrumb-item"><a href="{% url 'index' %}">Dashboard</a></li>
+	    <li class="breadcrumb-item active">Narratives</li>
+	</ol>
+</nav>
+
+<div class="row">
+    <div class="col-md-8">
+        <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">Narrative Type</th>
+                <th scope="col">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for narrative_type in object_list %}
+                {% if report_type == 'RPT' and narrative_type.name == 'Internal' %}
+                  <!-- print nothing -->
+                {% else %}
+                  <tr>
+                    <td><a href="{% url 'narratives' narrative_type.slug %}">{{ narrative_type.name }}</a></td>
+                    <td>{{ narrative_type.description }}</td>
+                  </tr>
+                {% endif %
+              {% endfor %}
+            </tbody>
+          </table>
+    </div>
+</div>
+
+{% endblock %}

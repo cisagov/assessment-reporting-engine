@@ -1,0 +1,41 @@
+{% extends 'ptportal/base.html' %}
+{% load humanize %}
+{% block active %}#narrative{% endblock %}
+{% block content %}
+<h1><i class="fas fa-edit"></i> {{ narrative_type }}</h1>
+<!-- add breadcrumbs -->
+<hr />
+<nav aria-label="breadcrumb">
+	<ol class="breadcrumb">
+	    <li class="breadcrumb-item"><a href="{% url 'index' %}">Dashboard</a></li>
+	    <li class="breadcrumb-item"><a href="{% url 'narrative-types' %}">Narratives</a></li>
+        <li class="breadcrumb-item active">{{ narrative_type.name}}</li>
+	</ol>
+</nav>
+
+<div class="row">
+    <div class="col-md-8">
+        <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">Narrative</th>
+                <th scope="col">Tools</th>
+                <th scope="col">Description</th>
+                <!-- <th scope="col">Last Modified</th> -->
+              </tr>
+            </thead>
+            <tbody>
+                {% for narrative in object_list %}
+              <tr>
+                <td><a href="{% url 'narrative_edit' narrative.type.slug narrative.slug %}">{{ narrative.name }}</a></td>
+                <td>{{ narrative.tools }}</td>
+                <td>{{ narrative.tool_output_description }}</td>
+                <!-- <td>{{ narrative.updated_at | naturaltime }}</td> -->
+              </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+    </div>
+</div>
+
+{% endblock %}

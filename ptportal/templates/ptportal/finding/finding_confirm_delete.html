@@ -1,0 +1,26 @@
+{% extends 'ptportal/base.html' %}
+{% load humanize %}
+{% load widget_tweaks %}
+{% load bootstrap4 %}
+
+{% block content %}
+
+<div id="page-content-wrapper">
+	<div class="container-fluid">
+		<h1>Delete Finding</h1>
+		<hr />
+
+
+		<p>Are you sure you want to delete the finding: <strong>{{ object.finding.finding_ID }}: {{ object }}</strong>?</p>
+
+		<form action="" method="POST">
+		  {% csrf_token %}
+
+		  <button type="submit" action="" class="btn btn-primary">Yes, delete</button>
+
+		</form>
+
+	</div>
+</div>
+
+{% endblock %}

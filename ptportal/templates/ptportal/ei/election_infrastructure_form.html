@@ -1,0 +1,194 @@
+{% extends 'ptportal/base.html' %}
+{% load humanize %}
+{% load widget_tweaks %}
+{% block active %}#ei{% endblock %}
+
+{% block style %}
+<style>
+    .header{
+        padding: 10px;
+        background: white;
+        color: black;
+        font-size: 20px;
+        position: relative;
+        top: -15px;
+        margin-left: -18px;
+        margin-right: -20px;
+    }
+    .btn-primary{
+        float: right;
+        margin-top: -30px;
+    }
+    .col-span-5{
+        border-top:1px solid black!important;
+        border-color:#1b1c1d!important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="header">
+   <h2> Election Infrastructure</h2>
+
+</div>
+<br>
+<form action="" method="POST" novalidate>
+
+{% csrf_token %}
+
+<div class="col-span-5 mb-5 ">
+    <sds-section class="col-span-5" type="accented">
+        <span class="border-top border-dark"></span>
+        <template #title><b>ELECTION SYSTEMS</b></template>
+
+            <div class="d-flex gap-x-6 items-end mb-8">
+                <div class="p-2 flex-fill">
+                    Make
+                    <textarea class="form-control" rows="1" id="{{ form.ei_make.id }}" name="{{ form.ei_make.name }}" placeholder="Enter election system Make information">{{form.ei_make.value}}</textarea>
+                </div>
+                <div class="p-2 flex-fill">
+                    Model
+                    <textarea class="form-control" rows="1" id="{{ form.ei_model.id }}" name="{{ form.ei_model.name }}" placeholder="Enter election system Model information">{{form.ei_model.value}}</textarea>
+                </div>
+                <div class="p-2 flex-fill">
+                    Model Number
+                    <textarea class="form-control" rows="1" id="{{ form.ei_model_num.id }}" name="{{ form.ei_model_num.name }}" placeholder="Enter election system Model Number">{{form.ei_model_num.value}}</textarea>
+                </div>
+
+        </div>
+    </sds-section>
+</div>
+
+<div class="col-span-5">
+    <sds-section class="col-span-5" type="accented">
+        <span class="border-top border-dark"></span>
+            <template #title><b>ELECTION INFRASTRUCTURE QUESTIONNAIRE</b></template>
+            <!-- Toast message for Questionnaire saved -->
+            {% for message in messages %}
+            <div aria-live="assertive" class="grid grid-cols-7" style="position:relative;z-index: 999999; min-width: 200px;">
+            <div id="questionnaire_alert" class="toast" role="alert" data-delay="2000" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <strong class="mr-auto">Questionnaire Saved</strong>
+                    <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="toast-body">
+                {{ message }}
+                </div>
+            </div>
+
+            </div>
+            {% endfor %}
+
+            <!-- This is for the json button and last modified time -->
+            {% if object %}
+            <div class="row mb-3">
+            <div class="col-md-6">
+                <p>Last modified on {{object.updated_at | naturaltime}}</p>
+            </div>
+            <div class="col-md-6 text-right">
+                {% if asmt_id != '' %}
+                    <a class="btn btn-success" href ="{% url 'generateEIJSON' %}"><i class="fa fa-download"></i> Download JSON</a>
+                {% else %}
+                    <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="bottom" title="Engagement data must be entered before downloading JSON">
+                    <a class="btn btn-success disabled" href ="{% url 'generateEIJSON' %}"><i class="fa fa-download"></i> Download JSON</a></span>
+                {% endif %}
+            </div>
+            </div>
+
+            <!-- Modal -->
+            <div class="modal fade" id="deleteEIModal" tabindex="-1" role="dialog" aria-labelledby="deleteEIModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Delete Saved Election Infrastructure Questionnaire?</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the Election Infrastructure Questionnaire?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <a class="btn btn-danger" href ="{% url 'ei_modal_delete' %}"><i class="fa fa-trash"></i> Yes, Delete</a>
+                </div>
+                </div>
+            </div>
+            </div>
+
+            {% endif %}
+
+            {% for q in form %}
+                {% if q.name == 'q4A' or q.name == 'q9A' %}
+                <div class='form-row mb-3 d-none' {% if q.name == 'q4A' %}id='q4AField'{% elif q.name == 'q9A' %}id='q9AField'{% endif %}>
+                    <div class="col-md-7">
+                        <h6 class="control-label">{{ q.label_tag }} {{ q.help_text }}</h6>
+                        <textarea class="form-control" id="{{ q.id }}" name="{{ q.name }}">{{q.value}}</textarea>
+                    </div>
+                </div>
+                {% elif q.name == 'ei_make' or q.name == 'ei_model' or q.name == 'ei_model_num' %}
+                {% else %}
+                <div class="form-row mb-3">
+                    <div class="col-md-7">
+                    {% with WIDGET_ERROR_CLASS='is-invalid' %}
+                    <h6 class="control-label">{{ q.label_tag }} {{ q.help_text }}</h6>
+                    <!-- <h4><small class="text-muted control-label ">{{ q.help_text }}</small></h4> -->
+                    {% for radio in q %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="{{ radio.id_for_label }}" name="{{ radio.data.name }}" value="{{ radio.data.value }}" {% if radio.data.selected %}checked{% endif %}>
+                        <label class="form-check-label" for="{{ radio.id_for_label }}">{{radio.choice_label}}</label>
+                    </div>
+                    {% endfor %}
+                    {% endwith %}
+                    </div>
+                </div>
+                {% endif %}
+                <br>
+            {% endfor %}
+
+            <button type="submit" id="submit" class="btn btn-primary">{% if object %}Save{% else %}Submit{% endif %}</button>
+            </form>
+    </sds-section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function(){
+        $('#questionnaire_alert').toast('show');
+
+        if (document.querySelector("input[name='q4']").value === 'Yes') {
+        document.getElementById('q4AField').classList.remove('d-none');
+        }
+
+        if (document.querySelector("input[name='q9']").value === 'Yes') {
+            document.getElementById('q9AField').classList.remove('d-none');
+        }
+
+
+        $("input[name='q4']").change(function (event) {
+            console.log('this.value: ', this.value)
+            if (this.value === 'Yes') {
+                document.getElementById('q4AField').classList.remove('d-none');
+            }
+            if (this.value != 'Yes') {
+                document.getElementById('q4AField').classList.add('d-none');
+        }
+        });
+        $("input[name='q9']").change(function (event) {
+            console.log('this.value: ', this.value)
+            if (this.value === 'Yes') {
+                document.getElementById('q9AField').classList.remove('d-none');
+            }
+            if (this.value != 'Yes') {
+                document.getElementById('q9AField').classList.add('d-none');
+            }
+        });
+
+    });
+
+</script>
+
+{% endblock %}

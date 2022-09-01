@@ -1,0 +1,24 @@
+FROM python:3.8 as ptportalWebBase
+
+RUN apt-get update && apt-get install -y \
+  p7zip-full \
+  nano \
+  zip
+
+ADD docker/dev/requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
+
+
+FROM python:3.8
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+COPY --from=ptportalWebBase /usr/local/lib/python3.8/site-packages/ /usr/local/lib/python3.8/site-packages/
+COPY --from=ptportalWebBase /usr/local/bin/ /usr/local/bin/
+COPY --from=ptportalWebBase /usr/bin/ /usr/bin/
+COPY --from=ptportalWebBase /bin/ /bin/
+
+RUN mkdir -p /code/pentestportal/media
+WORKDIR /code

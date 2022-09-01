@@ -1,0 +1,448 @@
+{% extends 'ptportal/base.html' %}
+{% load humanize %}
+{% block active %}#addFinding{% endblock %}
+{% load widget_tweaks %}
+{% load utils %}
+
+{% block content %}
+{% csrf_token %}
+<div class="mt-2 px-2">
+  <sds-section v-bind="findingSectionArgs" class="mb-4">
+    <template #title>
+      <span class="font-bold">SELECT FINDING</span>
+      <span v-if="formData.selectedFinding != null" class="font-bold">: [[formData.selectedFinding.findingName]]</span>
+    </template>
+    <template #nav>
+      <sds-button @click="findingSectionArgs.hideContent = !findingSectionArgs.hideContent; filterFindings(''); findingSectionArgs.searchTerm = ''">
+        <i class="fas fa-pencil-alt pr-2"></i>
+        <i v-if="findingSectionArgs.hideContent" class="fas fa-angle-down"></i>
+        <i v-else class="fas fa-angle-up"></i>
+      </sds-button>
+    </template>
+    <div class="grid place-items-center">
+      <sds-search-box class="w-1/2 place-self-center" :disableSearch="true" variant="primary" placeholder="Search Term" v-model="findingSectionArgs.searchTerm" @update:model-value="filterFindings(findingSectionArgs.searchTerm)"></sds-search-box>
+      <sds-scroll-area class="px-4 pt-4 place-self-center h-80 w-11/12">
+        <div v-for="finding in findingSectionArgs.findingsSearchList" :key="finding.fields.name" :id="finding.fields.name" class="grid grid-cols-2 border-b border-slate-700 hover:bg-gray-700/[.1]"  @click="selectFinding(finding)" >
+          <div class="py-2 px-4">
+            <div v-if="finding.fields.finding_type == 'specific'">
+              <div class="font-bold">[[finding.fields.name]]</div>
+                <div>[[finding.fields.category]] > [[finding.fields.gen_finding]]</div>
+            </div>
+            <div v-else>
+              <div class="font-bold">[[finding.fields.name]]</div>
+                <div>[[finding.fields.category]]</div>
+            </div>
+          </div>
+          <div class="py-2">
+            [[finding.fields.description]]
+          </div>
+        </div>
+      </sds-scroll-area>
+    </div>
+    <div class="flex flex-row-reverse">
+    
+    </div>
+  </sds-section>
+  <sds-section v-bind="findingDetailSectionArgs" class="mb-4">
+    <template #title>
+      <span class="font-bold">ADD DETAIL</span>
+    </template>
+    <template #nav>
+
+    </template>
+    <form id="detailForm">
+      <div class="grid grid-cols-6">
+        <div class="col-span-5 mb-12">
+          <div class="mb-4">
+            <h2 class="after:content-['*required'] after:ml-0.5 after:text-red-500 after:font-normal font-bold">Finding Description</h2>
+            <span class="font-light text-gray-700">Contains the description of this finding from the database. Edit the text below to clarify the description for this specific case.</span>
+            <sds-textarea v-model="formData.findingDescription" :required="true"></sds-textarea>
+          </div>
+          <div class="mb-4">
+            <h2 class="after:content-['*required'] after:ml-0.5 after:text-red-500 after:font-normal font-bold">Finding Remediation</h2>
+            <span class="font-light text-gray-700">Contains the standard remediation of this finding from the database. Edit the text below to clarify the remediation for this specific case.</span>
+            <sds-textarea v-model="formData.findingRemediation" :required="true"></sds-textarea>
+          </div>
+          <div class="grid grid-cols-4 mb-4">
+            <div>
+              <h2 class="after:content-['*required'] after:ml-0.5 after:text-red-500 after:font-normal font-bold">Severity</h2>
+              <span class="font-light text-gray-700">How severe is this finding?</span>
+              <sds-radio-group :required="true" :options="findingDetailSectionArgs.severityOptions" :stacked="true" v-model="formData.findingSeverity"></sds-radio-group>
+            </div>
+            <div>
+              <h2 class="after:content-['*required'] after:ml-0.5 after:text-red-500 after:font-normal font-bold">Assessment Type</h2>
+              <span class="font-light text-gray-700">What kind of assessment is this?</span>
+              <sds-radio-group :required="true" :options="findingDetailSectionArgs.assessmentTypeOptions" :stacked="true" v-model="formData.assessmentType"></sds-radio-group>
+            </div>
+            <div>
+              <h2 class="after:content-['*required'] after:ml-0.5 after:text-red-500 after:font-normal font-bold">Discovery</h2>
+              <span class="font-light text-gray-700">How was this finding discovered?</span>
+              <sds-radio-group :required="true" :options="findingDetailSectionArgs.discoveryOptions" :stacked="true" v-model="formData.discoveryType"></sds-radio-group>
+            </div>
+            <div>
+              <h2 class="after:content-['*required'] after:ml-0.5 after:text-red-500 after:font-normal font-bold">Mitigation</h2>
+              <span class="font-light text-gray-700">Was this finding mitigated within the assessment timeframe?</span>
+              <sds-radio-group :required="true" :options="findingDetailSectionArgs.mitigationOptions" :stacked="true" v-model="formData.findingMitigation"></sds-radio-group>
+            </div>
+          </div>
+          <div>
+            <h2 class="after:content-['*required'] after:ml-0.5 after:text-red-500 after:font-normal font-bold">Affected Systems</h2>
+            <span class="font-light text-gray-700">What affected system(s) does this finding relate to?</span>
+            <sds-multiselect class="w-3/5" :required="true" v-bind="findingDetailSectionArgs.affectedSystemArgs" v-model="findingDetailSectionArgs.affectedSystemArgs.affectedSystem" @update-selected="updateAffectedSystems" @update:model-value="performSearch"></sds-multiselect>
+          </div>
+        </div>
+        
+      </div>
+    </form>
+  </sds-section>
+  <sds-section v-bind="findingImageSectionArgs" class="mb-4">
+    <template #title>
+      <span class="font-bold">ADD SCREENSHOT</span>
+    </template>
+    <template #nav>
+      
+    </template>
+    <div class="grid place-items-center gap-2">
+      <sds-file-uploader class="place-self-center w-full" v-bind="findingImageSectionArgs.fileUploaderArgs" @add=addFile></sds-file-uploader>
+      <div class="flex flex-row-reverse gap-2 place-self-end">
+
+       
+      </div>
+    </div>
+  </sds-section>
+  <sds-section v-bind="kevSectionArgs" class="mb-16">
+    <template #title>
+      <span class="font-bold">SELECT KNOWN EXPLOITED VULNERABILITIES (KEV)</span>
+    </template>
+    <template #nav>
+      
+    </template>
+    <div class="grid place-items-center">
+      <sds-search-box class="w-1/2 place-self-center" :disableSearch="true" variant="primary" placeholder="Search Term" v-model="kevSectionArgs.searchTerm" @update:model-value="filterKevs(kevSectionArgs.searchTerm)"></sds-search-box>
+      <sds-scroll-area class="px-4 pt-4 place-self-center h-80 w-11/12">
+        <div v-for="kev in kevSectionArgs.kevSearchList" :key="kev.vulnerability" :id="kev.vulnerability" class="grid grid-cols-7 border-b border-slate-700">
+          <div class="py-2 px-4 place-self-center">
+            <sds-toggle-switch v-model="kev.include" @update:model-value="updateKevs"></sds-toggle-switch>
+          </div>
+          <div class="py-2 px-4 col-span-3">
+            <div class="font-bold">[[kev.vulnerability]]</div>
+            <div>[[kev.cve]]</div>
+          </div>
+          <div class="py-2 col-span-3">
+            [[kev.description]]
+          </div>
+        </div>
+      </sds-scroll-area>
+    </div>
+  </sds-section>
+
+  <div class="flex flex-row-reverse">
+    <sds-button variant="primary" @click="submitFinding">Save Finding</sds-button>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function pageData() {
+  let pageData = {
+    formData: {
+      selectedFinding: null,
+      findingDescription: "",
+      findingRemediation: "",
+      findingSeverity: "",
+      assessmentType: "",
+      discoveryType: "",
+      findingMitigation: "",
+      affectedSystemList: "",
+      imageUploads: [],
+    },
+    kevSectionArgs: {
+      type: "accented",
+      hideContent: false,
+      kevSearchList: [],
+      searchTerm: "",
+    },
+    findingImageSectionArgs: {
+      type: "accented",
+      hideContent: false,
+      fileUploaderArgs: {
+        accept: ".jpg, .jpeg, .png",
+        allowedFiletypes: ["image/jpeg", "image/png", "image/jpg"],
+        helperText: "Use a JPG, JPEG, or PNG under 10MB.",
+        multiple: true
+      }
+    },
+    findingSectionArgs: {
+      type: "accented",
+      hideContent: false,
+      findingsSearchList: [],
+      searchTerm: "",
+    },
+    findingDetailSectionArgs: {
+      type: "accented",
+      hideContent: false,
+      affectedSystemArgs: {
+        canLoopOptions: true,
+        taggable: true,
+        multiple: true,
+        defaultMsg: "Select one or multiple affected systems",
+        maxItems: 1000,
+        maxlength: 255,
+        showClear: true,
+        selected: [],
+        options: [],
+        tempOptions: [],
+        affectedSystem: "",
+        hideSelectedOptions: true,
+        openDirection: "bottom"
+      },
+      severityOptions: [
+        {
+          id: 1,
+          value: "Critical",
+          text: "Critical"
+        },
+        {
+          id: 2,
+          value: "High",
+          text: "High"
+        },
+        {
+          id: 3,
+          value: "Medium",
+          text: "Medium"
+        },
+        {
+          id: 4,
+          value: "Low",
+          text: "Low"
+        },
+        {
+          id: 5,
+          value: "Informational",
+          text: "Informational"
+        }
+      ],
+      assessmentTypeOptions: [
+        {
+          id: 1,
+          value: "External/Internal",
+          text: "External/Internal"
+        },
+        {
+          id: 2,
+          value: "External",
+          text: "External"
+        },
+        {
+          id: 3,
+          value: "Internal",
+          text: "Internal"
+        },
+        {
+          id: 4,
+          value: "Phishing",
+          text: "Phishing"
+        }
+      ],
+      discoveryOptions: [
+        {
+          id: 1,
+          value: "Manual",
+          text: "Manual"
+        },
+        {
+          id: 2,
+          value: "Tool",
+          text: "Tool"
+        }
+      ],
+      mitigationOptions: [
+        {
+          id: 1,
+          value: "Yes",
+          text: "Yes"
+        },
+        {
+          id: 2,
+          value: "No",
+          text: "No"
+        }
+      ]
+    },
+
+    findingData: function() {
+        var finding_list =[];
+        var findings = {{findings | safe}};
+        for (i = 0; i< findings.length; i++){
+          const proxy = new Proxy(findings[i], {});
+          finding_list.push(proxy);
+        }
+      
+        return finding_list;
+    },
+    kevData: function() {
+      //   var kev_list =[];
+      //   var kevList = {{kevs | safe}};
+      //   for (i = 0; i< kevList.length; i++){
+      //     const proxy = new Proxy(kevList[i], {});
+      //     kevList.push(proxy);
+      //   }
+      // console.log(kev_list);
+      //   return kev_list;
+    },
+  }
+  pageData.findingSectionArgs.findingsSearchList = pageData.findingData().filter(finding => finding)
+  // pageData.kevSectionArgs.kevSearchList = pageData.kevData().filter(kev => kev)
+  return pageData
+}
+
+
+function pageCreated() {
+  this.baseData.layoutArgs.pageTitle = "Add Findings"
+}
+
+function pageMethods() {
+  pageFunctions = {
+    selectFinding: function(finding){
+      //Three scenarios.
+      //1. Nothing selected.
+      //2. Clicking finding that is already selected.
+      //3. Clicking a finding when another is selected.
+      if(this.formData.selectedFinding == null){
+        this.formData.selectedFinding = finding
+        element = document.getElementById(finding.fields.name)
+
+        element.classList.remove("hover:bg-gray-700/[.1]")
+        element.classList.add("bg-blue-300")
+        element.classList.add("hover:bg-blue-200")
+
+        this.formData.findingDescription = this.formData.selectedFinding.fields.description
+        this.formData.findingRemediation = this.formData.selectedFinding.fields.remediation
+        this.formData.findingSeverity = this.formData.selectedFinding.fields.severity
+      }
+      else if(this.formData.selectedFinding == finding){
+        this.formData.selectedFinding = null
+        element = document.getElementById(finding.fields.name)
+        element.classList.remove("bg-blue-300")
+        element.classList.remove("hover:bg-blue-200")
+        element.classList.add("hover:bg-gray-700/[.1]")
+
+        this.formData.findingDescription = null
+        this.formData.findingRemediation = null
+        this.formData.findingSeverity = null
+      }
+      else{
+        oldElement = document.getElementById(this.formData.selectedFinding.fields.name)
+        newElement = document.getElementById(finding.fields.name)
+        this.formData.selectedFinding = finding
+        oldElement.classList.remove("bg-blue-300")
+        oldElement.classList.remove("hover:bg-blue-200")
+        oldElement.classList.add("hover:bg-gray-700/[.1]")
+        newElement.classList.remove("hover:bg-gray-700/[.1]")
+        newElement.classList.add("bg-blue-300")
+        newElement.classList.add("hover:bg-blue-200")
+
+        this.formData.findingDescription = this.formData.selectedFinding.fields.description
+        this.formData.findingRemediation = this.formData.selectedFinding.fields.remediation
+        this.formData.findingSeverity = this.formData.selectedFinding.fields.severity
+      }
+    },
+        //Validation function for the finding details section.
+    validateDetails: function(){
+      const detailForm = document.getElementById("detailForm")
+      if(!detailForm.checkValidity()){
+        detailForm.reportValidity()
+      }
+    },
+    addFile: function (event) {
+      const files = Array.from(event.files)
+      newFiles = files.filter(file => !this.formData.imageUploads.includes(file))
+      Array.prototype.push.apply(this.formData.imageUploads, newFiles)
+      // for(let file in newFiles) {
+      //   //Make uuid null.
+      //   console.log(this.formData);
+      //   // this.formData.push({file: newFiles[file], imgURL: URL.createObjectURL(newFiles[file]), description: "", uuid: null})
+      // }
+      this.displayNotification({'title': 'Images added', text: 'File added to list! Make sure to save the new images.', variant:"info"})
+    },
+    deleteFile: function (file) {
+      //Skip if negative one in certain cases. Avoid deleting end one.
+      index = this.imageUploads.indexOf(file.file)
+      if(index != -1){
+        this.imageUploads.splice(index,1)
+        URL.revokeObjectURL(this.formData.imgURL)
+      }
+      //Have to get index in other array. Can ignore previous entries inside of imageUploads then.
+      index = this.formData.indexOf(file)
+      this.formData.splice(index, 1)
+    },
+    submitFinding: function () {
+      this.validateDetails();
+      const formData = new FormData()
+      formData.append('data', JSON.stringify(this.formData))
+      let num = 0
+      for(const file in this.imageUploads) {
+        formData.append('file' + num.toString(), this.imageUploads[file])
+        num += 1
+      }
+      fetch(window.location.href, {
+        method: "POST",
+        body: formData,
+        credentials: "same-origin",
+        headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
+      }).then(response => {
+        if (response.ok) {
+          this.displayNotification({'title': 'Finding Saved', text: 'Finding saved successfully.', variant:'success'})
+        }
+      }).catch(error => {
+        this.displayNotification({'title': 'Save Error', text: 'There was an error saving the finding. Please wait and try again.', variant:'danger'})
+      })
+    },
+    //Seach box function for the findings list.
+    filterFindings: function(searchTerm){ 
+      this.findingSectionArgs.findingsSearchList = this.findingData().filter(finding => finding.fields.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                                                    finding.fields.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                                                    // finding.fields.gen_finding.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                                                    finding.fields.description.toLowerCase().includes(searchTerm.toLowerCase()))
+      
+
+      //Set a small timeout to prevent the function for search for the DOM before it renders.
+      //May have to test times to see if this is too short for a slow computer.
+      setTimeout(() => {
+        if(this.formData.selectedFinding != null){
+          element = document.getElementById(this.formData.selectedFinding.fields.name)
+          if(element != null){
+            element.classList.remove("hover:bg-gray-700/[.1]")
+            element.classList.add("bg-blue-300")
+            element.classList.add("hover:bg-blue-200")
+          }
+        }
+      }, "50")
+
+    },
+    //Search box function for the kev list.
+    filterKevs: function(searchTerm){
+      this.kevSectionArgs.kevSearchList = this.kevData().filter(kev => kev.vulnerability.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                                                      kev.cve.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                                                      kev.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    },
+    //Updates the formData kev list for later submission.
+    updateKevs: function(){
+      this.baseData.kevList = this.kevData().filter(kev => kev.include)
+    },
+    //Allows updating and deleting the mutli select.
+    updateAffectedSystems: function(selections) {
+      this.findingDetailSectionArgs.affectedSystemArgs.selected = selections
+      this.formData.affectedSystemList = selections
+    },
+    //For the new tag creation for the multiselect in the details section.
+    performSearch: function(value){
+      this.findingDetailSectionArgs.affectedSystemArgs.options = this.findingDetailSectionArgs.affectedSystemArgs.tempOptions.filter((i) => i.value.toLowerCase().includes(i.value.toLowerCase()))
+    }
+  }
+  return pageFunctions
+}
+</script>
+{% endblock %}

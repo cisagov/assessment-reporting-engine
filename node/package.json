@@ -1,0 +1,34 @@
+{
+  "name": "node",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "processcss": "npx postcss tailwind/tailwind.css -o ../ptportal/static/css/sds.tailwind.css",
+    "copySDSjs": "cp ./node_modules/@sds/components-vue3/dist/index.umd.js ../ptportal/static/js/sds.umd.js",
+    "copySDScss": "cp ./node_modules/@sds/components-vue3/dist/style.css ../ptportal/static/css/sds.style.css",
+    "copyApex": "cp ./node_modules/apexcharts/dist/apexcharts.amd.js ../ptportal/static/js/apexcharts.amd.js; cp ./node_modules/apexcharts/dist/apexcharts.css ../ptportal/static/css/apexcharts.css",
+    "collect": "npm run processcss;npm run copySDSjs; npm run copySDScss; npm run copyApex;"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@sds/components-vue3": "^2.3.0",
+    "@sds/tailwindcss-3": "^1.0.6",
+    "@tailwindcss/aspect-ratio": "^0.4.0",
+    "@tailwindcss/forms": "^0.5.1",
+    "@tailwindcss/line-clamp": "^0.4.0",
+    "@tailwindcss/typography": "^0.5.2",
+    "autoprefixer": "^10.4.7",
+    "postcss": "^8.4.13",
+    "postcss-cli": "^9.1.0",
+    "postcss-import": "^14.1.0",
+    "tailwindcss": "^3.1.7"
+  },
+  "dependencies": {
+    "apexcharts": "^3.35.4",
+    "vue3-apexcharts": "^1.4.1"
+  }
+}

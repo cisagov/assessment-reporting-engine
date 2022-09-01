@@ -1,0 +1,107 @@
+{% extends 'ptportal/base.html' %}
+{% block active %}#attackpaths{% endblock %}
+{% load humanize %}
+{% block content %}
+
+<div>
+  <h1 class="text-xl">Attack Paths</h1>
+{% csrf_token %}
+<sds-section class="mb-4">
+  <template #title>
+    <p>Download the Attack Path template here and follow the instructions in the document to construct/save your attack path diagram(s). Upload the attack path image file(s) below.
+      In penetration testing, security engineers test the security of an environment by simulating scenarios an advanced attacker may attempt.
+      Because different components have different vulnerabilities, this type of testing is highly customized. Penetration testing is valuable because it often exploits a chain or path of security vulnerabilities, revealing risks that other activities like security scans and reviews do not detect.</p>
+      <sds-link href="{{ MEDIA_URL }}attackpath.pptx" variant="primary">Attack Path Template</sds-link>
+  </template>
+  <sds-file-uploader v-bind="fileUploadArgs" @add="addFile">
+
+  </sds-file-uploader>
+</sds-section>
+<sds-section v-for="file in formData" :key="file" type="simple" class="mb-4">
+  <template #title class="">
+    <img :src="[[file.imgURL]]"></img>
+  </template>
+  <div class="grid grid-cols-2 mb-2">
+    <h4>Description:</h4>
+    <sds-button type="button" variant="danger" class="justify-self-end" size="sm" @click="deleteFile(file)"><i class="fas fa-trash-alt"></i></sds-button>
+  </div>
+  <sds-textarea v-model="file.description" :rows="2"></sds-textarea>
+</sds-section>
+<sds-button variant="primary" class="float-right" @click="submitPaths"><i class="fas fa-save"></i> Save</sds-button>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function pageData() {
+  data = {
+    fileList: [],
+    formData: [],
+    fileUploadArgs: {
+      helperText: "Use the Attack Path template above to develop a diagram for each attack path that was executed during the engagement. Attack paths can be added, removed, edited, and reordered below. Use the browse button or drag and drop your attack path image(s) below. NOTE: Clear the list of files below before uploading new ones",
+      accept: ".jpg, .jpeg, .png",
+      allowedFiletypes: ["image/jpeg","image/jpg","image/png"],
+      name: "attackPathUpload",
+      multiple: true
+    }
+  }
+  {% for path in paths %}
+      //Add uuid to existing ones. New ones will be empty.
+      data['formData'].push({uuid: "{{path.figure_uuid}}", imgURL: window.location.origin + '/media/' + "{{path.image_upload}}", description: "{{path.figure_description}}"})
+  {% endfor %}
+
+  return data
+}
+
+function pageMethods() {
+  methods = {
+    addFile: function (event) {
+      const files = Array.from(event.files)
+      newFiles = files.filter(file => !this.fileList.includes(file))
+      Array.prototype.push.apply(this.fileList, newFiles)
+      for(let file in newFiles) {
+        //Make uuid null.
+        this.formData.push({file: newFiles[file], imgURL: URL.createObjectURL(newFiles[file]), description: "", uuid: null})
+      }
+      this.displayNotification({'title': 'Images added', text: 'File added to list! Make sure to save the new images.', variant:"info"})
+    },
+    deleteFile: function (file) {
+      //Skip if negative one in certain cases. Avoid deleting end one.
+      index = this.fileList.indexOf(file.file)
+      if(index != -1){
+        this.fileList.splice(index,1)
+        URL.revokeObjectURL(this.formData.imgURL)
+      }
+      //Have to get index in other array. Can ignore previous entries inside of fileList then.
+      index = this.formData.indexOf(file)
+      this.formData.splice(index, 1)
+    },
+    submitPaths: function () {
+      const formData = new FormData()
+      formData.append('data', JSON.stringify(this.formData))
+      let num = 0
+      console.log("Form data: "+JSON.stringify(this.formData))
+
+      for(const file in this.fileList) {
+        formData.append('file' + num.toString(), this.fileList[file])
+        num += 1
+      }
+      fetch(window.location.href, {
+        method: "POST",
+        body: formData,
+        credentials: "same-origin",
+        headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
+      }).then(response => {
+        if (response.ok) {
+          this.displayNotification({'title': 'Attack Paths Saved', text: 'Attack paths and images have been saved successfully.', variant:'success'})
+        }
+      }).catch(error => {
+        this.displayNotification({'title': 'Save Error', text: 'There was an error saving the attack paths. Please wait and try again.', variant:'danger'})
+      })
+    }
+  }
+  return methods
+}
+</script>
+{% endblock %}

@@ -1,0 +1,915 @@
+{% extends 'ptportal/base.html' %}
+{% block active %}#report{% endblock %}
+
+{% block style %}
+<style>
+    .header{
+        padding: 10px;  
+        background: white;
+        color: black;
+        font-size: 20px;
+        position: relative; 
+        top: -15px;
+        margin-left: -18px;
+        margin-right: -20px;
+    }
+    .float-right{
+		right: 50px !important;
+		position: relative !important;
+		
+	}
+    .col-span-5{
+        border-top:1px solid black!important;
+        border-color:#1b1c1d!important;
+    }
+	.table-prose.acro{
+  		overflow-y:scroll;
+  		height:500px;
+  		display:block;
+	}
+	mark{
+		background-color: #B2E2F7 ;
+	}
+</style>
+{% endblock %}
+
+{% block content %}
+{% load report_extras %}
+{% load humanize %}
+{% load widget_tweaks %}
+
+
+{%csrf_token%}
+
+<div class="header">
+	<h2> RVA Report</h2>
+  </div>
+<br>
+<div class="col-span-5">
+    <sds-section class="col-span-5" type="accented">
+        <span class="border-top border-dark"></span>
+            <template #title><b>{{ report_type }} REPORT</b></template>
+		<div class="grid grid-cols-5">
+			<sds-scroll-area id="scrollspy-page" class="col-span-4 h-screen">
+				<div>
+					<!-- <h1 class="text-xl inline font-bold">{{ report_type }} Report</h1> -->
+					{% if eng_meta.traffic_light_protocol == 'Amber' %}
+					<sds-badge variant="orange" class="float-right">TLP: {{ eng_meta.traffic_light_protocol }}</sds-badge>
+					{% elif eng_meta.traffic_light_protocol == 'Red'%}
+					<sds-badge variant="red" class="float-right">TLP: {{ eng_meta.traffic_light_protocol }}</sds-badge>
+					{% else %}
+					<sds-badge class="float-right">TLP: {{ eng_meta.traffic_light_protocol }}</sds-badge>
+					{% endif %}
+				</div>
+				
+				<h2 id="resultSummary"><b>Summary of Results</b></h2>
+				<la>
+					<br>
+				<span class="text-sm text-gray-600">
+					<p>The Department of Homeland Security (DHS) Cybersecurity and Infrastructure Security Agency (CISA) Assessments team conducted a {% if report_type == 'RPT' %}Remote Penetration Test (RPT){% elif report_type == 'HVA' %}High Value Asset (HVA){% else %}Risk and Vulnerability Assessment (RVA){% endif %} at the request of the <mark>{% if eng_meta %} {{eng_meta.customer_long_name}} ({{eng_meta.customer_initials}}){% else %}CUSTOMER NAME (ACRONYM){% endif %}</mark>. <mark>{% if eng_meta %}{{eng_meta.team_lead_name}} ({{eng_meta.team_lead_email}}){% else %}CISA TEAM LEADER (EMAIL){% endif %}</mark> led a CISA Assessment Team remotely{% if report_type != 'RPT' %} and on site at &lsaquo;address&rsaquo; {% endif %}from {% if eng_meta %}{{eng_dates}}{% endif %}.</p>
+				</span>
+				
+				<br><p class="text-sm">During testing CISA successfully compromised the following:</p>
+				<sds-textarea placeholder="Type a description of the results in this field" v-model="formData.cisa_results" rows="3"></sds-textarea>
+				<br>
+
+				<p class="text-sm">Considering this test, CISA recommends the following high-level actions:</p>
+				<sds-textarea placeholder="Type the recommended remediations from this test in this field" v-model="formData.cisa_recommendations" rows="3"></sds-textarea>
+				<br>
+
+				<p class="text-sm">The following strengths were observed during testing:</p>
+				<sds-textarea placeholder="Type the strengths that were observed during the test in this field" v-model="formData.noted_system_strengths" rows="3"></sds-textarea>
+				<br>
+				<span class="text-sm text-gray-600">
+					<p>This report only covers the targets described within and makes no claims about the security of any system that was deemed out of scope or was not tested during this engagement.</p>
+				</span>
+				<br>
+				<hr><br>
+				<h4 id="findingSummary"><b>Findings Summary</b></h4>
+				<div class="mb-4">
+					<span class="text-sm text-gray-600">
+						<p class="mb-2">Below is a summary table of the results from the {{report_type}}. Detailed results can be found in subsequent sections of this report.</p>
+					</span>
+					<br>
+					<apexchart height="500" width="100%" :options="findingTableArgs.options" :series="findingTableArgs.data"></apexchart>
+					<span class="text-sm text-gray-600">
+						<p>CISA identified {{findings_breakdown.Critical.count|num_to_word}} ({{findings_breakdown.Critical.count}}) critical-severity {% if findings_breakdown.Critical.count == 1 %}finding{% else %}findings{% endif %}, 
+							{{findings_breakdown.High.count|num_to_word}} ({{findings_breakdown.High.count}}) high-severity  {% if findings_breakdown.High.count == 1 %}finding{% else %}findings{% endif %}, 
+							{{findings_breakdown.Medium.count|num_to_word}} ({{findings_breakdown.Medium.count}}) medium-severity {% if findings_breakdown.Medium.count == 1 %}finding{% else %}findings{% endif %}, 
+							{{findings_breakdown.Low.count|num_to_word}} ({{findings_breakdown.Low.count}}) low-severity {% if findings_breakdown.Low.count == 1 %}finding{% else %}findings{% endif %}, and 
+							{{findings_breakdown.Info.count|num_to_word}} ({{findings_breakdown.Info.count}}) informational-severity {% if findings_breakdown.Info.count == 1 %}finding{% else %}findings{% endif %}.
+						</p>
+					</span>
+				</div>
+				<hr><br>
+				<h4 id="nistSummary"><b>NIST-Based Summary</b></h4>
+				<span class="text-sm text-gray-600">
+					<!-- <div class="mb-4"> -->
+						<p>The CISA Assessments team mapped all the findings (see <a href="#findings">Findings</a>) to applicable National Institute of Standards and Technology (NIST) controls as described in NIST Special Publication (SP) 800-53. Figure {{ figure_count.increment }} illustrates the most common control families cited based on the number of findings. <a href="#findings">Findings</a> provides the complete mapping and the detailed technical description for each finding. Note that some findings may be mapped to multiple applicable NIST controls.</p>
+						<br>
+						<apexchart height="500" width="100%" :options="nistSummaryArgs.options" :series="nistSummaryArgs.data"></apexchart>
+					<!-- </div>				 -->
+				</span>
+				<hr><br>
+				<h4 id="nistFramework"><b>NIST Cybersecurity Framework</b></h4>
+				<span class="text-sm text-gray-600">
+					<!-- <div class="mb-4"> -->
+						<p>{{ report_type }} findings are mapped to the NIST Framework for Improving Critical Infrastructure Cybersecurity, Version 1.0, February 12, 2014, called the Cybersecurity Framework.</p>
+						<p>Figure {{ figure_count.increment }} illustrates the most common controls cited based on the number of findings. <a href="#findings">Findings</a> provides the complete mapping and the detailed technical description for each finding. Note that some findings may be mapped to multiple applicable NIST controls.</p>
+						<br>
+						<apexchart height="400" width="100%" :options="nistFrameworkArgs.options" :series="nistFrameworkArgs.data"></apexchart>
+					<!-- </div> -->
+				</span>
+				<hr><br>
+				<h4 id="riskscore"><b>Risk Scoring</b></h4>
+				<div class="mb-4">
+					<p class="text-sm">Place holder for now. Chart to come.</p>
+				</div>
+				<hr><br>
+				<div>
+					<h4 id="scope"><b>Scope</b></h4>
+					<sds-table v-bind="scopeTableArgs" class="table-prose mb-8">
+						<template #cell(external)="{item}">
+							<sds-textarea v-if="item.row === 'Scope'" :rows="3" v-model="item.external" :placeholder="item.placeholder"></sds-textarea>
+							<sds-input v-else v-model="item.external" :placeholder="item.placeholder"></sds-input>
+						</template>
+						<template #cell(internal)="{item}">
+							<sds-textarea v-if="item.row === 'Scope'" :rows="3" v-model="item.internal" :placeholder="item.placeholder"></sds-textarea>
+							<sds-input v-else v-model="item.internal" :placeholder="item.placeholder"></sds-input>
+						</template>
+						<template #cell(phishing)="{item}">
+							<sds-textarea v-if="item.row === 'Scope'" :rows="3" v-model="item.phishing" :placeholder="item.placeholder"></sds-textarea>
+							<sds-input v-else v-model="item.phishing" :placeholder="item.phishingPlaceholder"></sds-input>
+						</template>
+						<template #caption>
+							<p class="text-center align-bottom">Figure {{ figure_count.increment }}: Scan Results</p>
+						</template>
+					</sds-table>
+				</div>
+				<hr><br>
+				<div>
+					<h4 id="methodology"><b>Methodology</b></h4>
+					<span class="text-sm text-gray-600">
+						<p class="mb-4">CISA assessments consist of several phases, which are detailed in the subsequent sections. CISA follows the Penetration Testing Execution Standard (PTES) as the model for penetration testing activities. The standard can be found at: <a href="http://www.pentest-standard.org">http://www.pentest-standard.org</a>.</p>
+					</span>
+				</div>
+				<hr><br>
+				<div>
+					<h4 id="attackpath"><b>Attack Paths</b></h4>
+					<span class="text-sm text-gray-600">
+						<p class="mb-4">Instructions for how to develop and upload attack paths can be found on the <a href="{% url 'attack-paths' %}">Attack Paths</a> screen. The attack paths you upload will appear in the generated report.</p>
+					</span>
+				</div>
+				<hr><br>
+				<div>
+					<h2 id="recommendations"><b>General Recommendations</b></h2>
+					<span class="text-sm text-gray-600">
+						<p>To support the CISA Assessments team’s goal of helping stakeholders improve their security posture, the assessment team identified general recommendations based on the Center for Internet Security’s Critical Infrastructure Security (CIS) controls for mitigating the risks discovered. Figure {{ figure_count.increment }} represents a high-level summary of prioritized recommended remediations and the associated findings. As always, <mark>{{eng_meta.customer_initials}}</mark> has a much deeper understanding of its business and technical environment standards that should determine the balance of implementation.</p>
+					</span>
+					<br>
+					<table class="table-prose" id="cis-csc-table">
+						<thead class="text-center">
+							<tr><th width="20%">ID</th>
+								<th width="60%">Controls</th>
+								<th width="20%">Finding ID</th>
+							</tr>
+						</thead>
+						{% for c in cis_csc %}
+						<tr class="text-center">
+							<td>{{c.CIS_ID}}</td>
+							<td class ="text-left">{{c.name}}</td>	
+							<td class ="text-left">{{c.finding_ids}}</td>
+						</tr>
+						{% endfor %}
+						<caption class="text-center" align="bottom">Figure {{ figure_count.count }}: CIS Controls Based Recommendations</caption>
+					</table>
+				</div>
+				<hr><br>
+				<div class="mb-4">
+					<h4 id="findings"><b>Findings</b></h4>
+					<span class="text-sm text-gray-600">
+						<p>The CISA Assessments team identified the following findings as potentially exploitable vulnerabilities that could compromise the confidentiality, integrity, and availability of the tested environment. Each finding includes a description, supporting details, and recommended steps for mitigation. The <mark>{% if eng_meta %} {{eng_meta.customer_initials}} {% else %}ACRONYM POC {%endif%}</mark> team should review the findings and recommendations for technical weaknesses, shortcomings in processes and procedures, and systemic weaknesses in overall security posture.</p>
+						<br>
+						<p>See <a href="#appendix-a">Appendix A</a> for definitions of each level of severity (Critical/High/Medium/Low/Informational).</p>
+					</span>
+					
+					{% for item in uploaded_list %}
+						<div class="relative flex flex-col min-w-0 break-words bg-clip-border border rounded border-black/[.125]" style="background-color: rgb(239 239 239)">
+						<table style="font-family: Helvetica; color: #212529;" class="table w-full mb-1 indent-0 border-inherit border-collapse">
+							<thead class="thead-dark">
+								<tr>
+									<th>ID</th>
+									<th>Finding</th>
+									<th>Severity</th>
+									<th>Affected System</th>
+									<th>Location</th>
+									<th>Mitigated</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>{{forloop.counter}}</td>
+									<td><sds-link href="{% url 'finding_detail' item.slug %}">{{item.uploaded_finding_name}}</sds-link></td>
+									<td>{{item.severity}}</td>
+									<td>{{item.affected_systems.all|join:", "}}</td>
+									<td>{{item.assessment_type}}</td>
+									{% if item.mitigation == True %}
+									<td>Yes</td>
+									{% elif item.mitigation == False %}
+									<td>No</td>
+									{% endif %}
+									
+								</tr>
+							</tbody>
+						</table>
+						<table style="font-family: Helvetica; color: #212529;" class="table w-full mb-1 indent-0 border-inherit border-collapse">
+							<thead>
+								<tr><th>Description</th></tr>
+							</thead>
+							<tbody><tr><td>{{item.description}}</td></tr></tbody>
+							<thead>
+								<tr><th>Recommended Mitigation</th></tr>
+							</thead>
+							<tbody><tr><td>{{item.remediation}}</td></tr></tbody>
+							
+
+							</td></tr>
+						
+							<thead>
+								<tr><th>Relevant Screenshots</th></tr>
+							</thead>
+								<tbody>
+									{% if item.screenshot_description %}
+									<tr><td>{{item.screenshot_description}}</td></tr>
+									{% for screenshot in uploaded_screenshots %}
+									{% if screenshot.belongs_to_finding == item %}
+									<tr><td>
+										<figure class="inline-block m-0">
+											<img src="{{ MEDIA_URL }}{{screenshot.file}}" class="block w-full h-auto max-h-full max-w-full align-middle border-none">
+											<figcaption class="mt-1 text-center" style="color:#777; font-size:medium;">{{screenshot.caption}}</figcaption>
+											</figure></td></tr>
+									{% endif %}
+									{% endfor %}
+									</td></tr>
+									{% endif %}
+								</tbody>
+								{% endif %}
+						</table>
+						<table style="font-family: Helvetica; color: #212529;" class="table w-full mb-1 indent-0 border-inherit border-collapse">
+								<thead>
+									<tr><th>Security Reference (FCRM, NIST, etc.)</th></tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>NIST 800-53: {{item.NIST_800_53}};  NIST Cybersecurity Framework: {{item.NIST_CSF}}; CISA_ID: {{item.finding.cisa_id}}</td>
+									</tr>
+								</tbody>
+							</table>
+						<table style="font-family: Helvetica; color: #212529;" class="table w-full mb-1 indent-0 border-inherit border-collapse">
+							<thead></thead>
+							<tbody>
+								<tr>
+									<td><a class="btn btn-outline-dark" href ="{% url 'finding_edit' item.slug %}"><i class="fa fa-edit"></i> Edit Finding</a></td>
+								</tr>
+							</tbody>
+						</table>
+						</div>
+						<br>
+					{% endfor %}
+				</div>
+				<hr><br>
+				<div class="mb-4">
+					<h4 id="severity"><b>Appendix A: Severity Rating Criteria</b></h4><br>
+					<table class="table-prose">
+						<thead>
+							<tr><th>Severity</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for sev in severities %}
+							<tr><td>{{sev.severity_name}}</td>
+								<td>{{sev.severity_description|linebreaksbr}}</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+				<hr><br>
+				<div class="mb-4">
+					{% if report_type == 'RPT' %}
+						<div id="appendix-b">
+							<h2 id="opensource" class="underline">Appendix B: Open Source Information</h2></div>
+
+							<p>Prior to performing a targeted attack against an organization, attackers typically collect information about their intended target.  The collected information is freely available to anyone with access to the Internet and requires minimal knowledge or interaction with an organization’s network.</p>
+
+							<p>The information contained within this appendix was obtained using standard utilities and open source tools in less than an hour.</p>
+
+							<p>An attacker begins by first determining the domains associated with their target organization.</p>
+							<sds-file-uploader accept=".csv" allowedFiletypes=["text/csv"] name="networkUpload" helperText="The expected format is a CSV file. Example files are in the help templates folder."></sds-file-uploader>
+							<div class="flex gap-4 mb-4 mt-4">
+								<sds-button variant="primary" @click="uploadNetworkCSV">Upload CSV</sds-button>
+								<sds-button variant="danger" @click="this.networkTableArgs.items = []">Clear Network Data</sds-button>
+							</div>
+
+						<p>Once an organization’s domains have been identified, an attacker then attempts to identify specific networks and servers.</p>
+						<sds-table class="table-prose mb-4" v-bind="networkTableArgs"></sds-table>
+
+						<p>Publicly available resources, such as search engines and blogs, can be searched to identify email addresses associated with the target organization. 
+					
+						<div class="inline flex content-center items-center">
+							<sds-input class="w-32" v-model="formData.emails_identified" placeholder="# of identified emails" @update:model-value="updatePercentage"></sds-input>
+							<p class="ml-2"> email addresses were identified by the attacker.</p>
+						</div>
+
+						<p>This information can also be used to help identify additional information about specific employees (via social media) for use in targeted spear phishing attacks.</p>
+						<p>Once email addresses have been identified, they can be checked to see if the account has been exposed in any recent data breaches.  In addition to password information, data breaches can expose PII. If employees re-use passwords between the target organization and sites that have had their data exposed, an attacker may be able to leverage this information to gain access to the organization (via VPN, mail, or other accessible services).</p>
+
+						<div class="inline flex content-center items-center">
+							<sds-input class="w-32" v-model="formData.emails_breached" placeholder="# of emails in data breaches" @update:model-value="updatePercentage"></sds-input>
+							<p class="ml-2"> email addresses were involved in recent data breaches.</p>
+						</div>
+
+						<p class="mb-4">Through Open Source Intelligence gathering, a prospective attacker could readily determine that <b>[[formData.email_percentage]]</b> of email addresses associated with the <mark>{{eng_meta.customer_initials}}</mark> were involved in previous data breaches.</p>
+						
+						<sds-file-uploader accept=".csv" allowedFiletypes=["text/csv"] name="emailUpload"></sds-file-uploader>
+						<div class="flex gap-4 mb-4 mt-4">
+							<sds-button variant="primary" @click="uploadEmailCSV">Upload CSV</sds-button>
+							<sds-button variant="danger" @click="this.emailTableArgs.items = []">Clear Email Data</sds-button>
+						</div>
+
+						<sds-table v-bind="emailTableArgs" class="table-prose mb-4"></sds-table>
+						
+						<div class="inline flex content-center items-center">
+							<sds-input class="w-32" v-model="formData.credentials_identified" placeholder="# of identified creds"></sds-input>
+							<p class="ml-2">sets of credentials (emails and passwords) identified in the wild.</p>
+						</div>
+						<div class="inline flex content-center items-center">
+							<sds-input class="w-32" v-model="formData.credentials_validated" placeholder="# of validated creds"></sds-input>
+							<p class="ml-2">sets of credentials were validated.</p>
+						</div>
+					
+						<hr><br>
+
+						<div class="pad" id="appendix-b">
+							<h4 id="portmap"><b>Appendix C: External Port Mapping</b></h4>
+						</div>
+
+					{% else %}
+						<div class="pad" id="appendix-c">
+							<h4 id="portmap"><b>Appendix B: External Port Mapping</b></h4>
+						</div>
+					{% endif %}
+				</div>
+
+				<div class="mb-4">
+					<span class="text-sm text-gray-600">
+						<p class="text-sm">This data can be added/edited on the <a href="{% url 'port_mapping' %}">Port Mapping</a> screen.</p>
+					</span>
+					<br>
+					<table class="table">
+						<thead class="thead-dark">
+							<tr>
+								<th width="25%">IP</th>
+								<th width="25%">Hostname</th>
+								<th width="25%">Ports</th>
+								<th width="25%">Service</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for host in port_mapping %}
+								<tr>
+								<td>{{host.ip}}</td>
+								<td>{{host.hostname}}</td>
+								<td>{{host.ports}}</td>
+								<td>{{host.services}}</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+						<caption class="text-center" align="bottom">Figure {{ figure_count.increment }}: External Port Mapping</caption>
+					</table>
+				</div>
+				<hr><br>
+				{% if report_type == 'RVA' %}
+				<div class="mb-4">
+					<h4 id="password"><b>Appendix C: Password Analysis</b></h4>
+					<sds-textarea v-model="formData.password_analysis" placeholder="Enter results of password analysis tool here"></sds-textarea>
+				</div>
+				<hr><br>
+				<h4 id="acronym"><b>Appendix D: Acronyms</b></h4>
+				{% elif report_type == 'RPT' %}
+				<h4 id="acronym"><b>Appendix D: Acronyms</b></h4>
+				{% else %}
+				<h4 id="acronym"><b>Appendix C: Acronyms</b></h4>
+				{% endif %}
+
+				<div>
+					<sds-table v-bind="acronymTableArgs" class="table-prose mb-4 acro">
+						<template #cell(acronym)="{item}">
+							<sds-input placeholder="CDC" class="" v-model="item.acronym"></sds-input>
+						</template>
+						<template #cell(context)="{item}">
+							<sds-textarea placeholder="Added manually by user" :rows="3" v-model="item.context"></sds-textarea>
+						</template>
+						<template #cell(definition)="{item}">
+							<sds-textarea placeholder="Center of Disease Control" :rows="3" v-model="item.definition"></sds-textarea>
+						</template>
+						<template #cell(auto_found)="{item}">
+							<sds-select :options="acronymTableArgs.autoOptions" v-model="item.auto_found"></sds-select>
+						</template>
+						<template #cell(include)="{item}">
+							<sds-toggle-switch v-model=item.include class="text-center"></sds-toggle-switch>
+						</template>
+					</sds-table>
+					<sds-button class="float-right" variant="light" @click="addAcronym">Add Acronym</sds-button>
+					<!-- <sds-button @click="addAcronym" class="float-right">Add Acronym<img class="w-8 h-8" src="/static/icons/plus-circle-solid.svg"></sds-button> -->
+
+				</div>
+			</sds-scroll-area>
+			<div class="col-start-5">
+				<sds-scrollspy class="mb-8" v-bind="scrollspyArgs"></sds-scrollspy>
+				<sds-button variant="primary" class="ml-4" @click="saveReport">Save Report</sds-button>
+			</div>
+		</div>
+	</sds-section>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+	function pageData(){
+		pageData = {
+			formData: {
+				cisa_results: "{{report.cisa_results | escapejs}}",
+				cisa_recommendations: "{{report.cisa_recommendations | escapejs}}",
+				noted_system_strengths: "{{report.noted_system_strengths | escapejs}}",
+				password_analysis: "{{report.password_analysis | escapejs}}",
+				emails_identified: "{{report.emails_identified}}",
+				emails_breached: "{{report.emails_breached}}",
+				credentials_identified: "{{report.credentials_identified}}",
+				credentials_validated: "{{report.credentials_validated}}",
+				email_percentage: "{{report.email_percentage}}"
+			},
+			emailTableArgs: {
+				fields: [
+					{
+						key: "email",
+						label: "Email Address"
+					},
+					{
+						key: "breach",
+						label: "Breach Information"
+					}
+				],
+				items: []
+			},
+			networkTableArgs: {
+				fields: [
+					{
+						key: "network",
+						label: "Network or IP Address",
+					},
+					{
+						key: "domain",
+						label: "Domain"
+					},
+					{
+						key: "registrant",
+						label: "Registrant"
+					}
+				],
+				items: []
+			},
+			acronymTableArgs: {
+				fields: [
+					{
+						key: "acronym",
+						label: "Acronym"
+					},
+					{
+						key: "context",
+						label: "Context"
+					},
+					{
+						key: "definition",
+						label: "Definition"
+					},
+					{
+						key: "auto_found",
+						label: "Auto or Manual"
+					},
+					{
+						key: "include",
+						label: "Include in Report"
+					}
+				],
+				items: [],
+				autoOptions: [
+					{
+						id: 1,
+						value: "M",
+						text: "Manual"
+					},
+					{
+						id: 2,
+						value: "A",
+						text: "Auto"
+					}
+				]
+			},
+			scopeTableArgs: {
+				fields: [
+					{
+						key: "row",
+						label: ""
+					},
+					{
+						key: "external",
+						label: "EXTERNAL"
+					},
+					{
+						key: "internal",
+						label: "INTERNAL",
+						hidden: "{{report_type}}" == 'RPT'
+					},
+					{
+						key: "phishing",
+						label: "PHISHING"
+					}
+				],
+				items: [{row:"Scope", external:"{{report.scanned_scope_ext | escapejs}}", internal:"{{report.scanned_scope_int | escapejs}}", phishing:"{{report.scope_phishing | escapejs}}", placeholder:"Scope Scanned"},
+						{row:"Number Attempted", external:"{{report.IP_scanned_ext}}", internal:"{{report.IP_scanned_int}}", phishing:"{{report.users_attempted_phishing}}", placeholder:"# Scanned", phishingPlaceholder: "# Attempted Phishes"},
+						{row:"Number Successful", external:"{{report.hosts_IDd_ext}}", internal:"{{report.hosts_IDd_int}}", phishing:"{{report.users_phished}}", placeholder:"# Identified", phishingPlaceholder: "# Users Phished"},
+						]
+			},
+			nistFrameworkArgs: {
+				options: {
+					chart: {
+						type: 'pie',
+						width: 40,
+						animations: {
+							enabled:true
+						}
+					},
+					plotOptions: {
+						pie: {
+							size: "55%"
+						}
+					},
+					labels: ['Identify.Asset Management','Identify.Governance','Identify.Risk Assessment','Protect.Access Control','Protect.Awareness and Training','Protect.Data Security','Protect.Information Protection','Protect.Protective Technology'],
+					title: {
+						text: "Figure 3: NIST Cybersecurity Framework Controls"
+					},
+					colors: ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffd700", "#a65628", "#f781bf"]
+				},
+				data: [{{nist_iam}}, {{nist_ig}}, {{nist_ira}}, {{nist_pac}}, {{nist_pat}}, {{nist_pds}}, {{nist_pip}}, {{nist_ppt}}]
+			},
+			findingTableArgs: {
+				options: {
+					chart: {
+						type: 'bar',
+						height: 350,
+						animations: {
+							enabled: true
+						}
+					},
+					plotOptions: {
+						bar: {
+							horizontal: false,
+							columnWidth: '85%',
+							endingShape: 'rounded',
+							distributed: true
+						}
+					},
+					colors: ["#F87171", "#FB923C", "#FACC15", "#4ADE80", "#60A5DC"],
+					stroke: {
+						show: true,
+						width: 2,
+						colors: ['transparent']
+					},
+					xaxis: {
+						categories: ['Critical', 'High', 'Medium', 'Low', 'Informational']
+					},
+					yaxis: {
+						title: {
+							text: '# Findings'
+						}
+					},
+					legend: {
+						show:false
+					},
+					fill: {
+						opacity: 1
+					},
+					tooltip: {
+						enabled: false
+					},
+					title: {
+						text: "Figure 1: Findings Summary"
+					},
+				},
+				data: [
+					{
+						data: ["{{findings_breakdown.Critical.count}}", "{{findings_breakdown.High.count}}", "{{findings_breakdown.Medium.count}}", "{{findings_breakdown.Low.count}}", "{{findings_breakdown.Info.count}}"]
+					}
+				]
+			},
+			nistSummaryArgs: {
+				options: {
+					chart: {
+						type: 'bar',
+						height: 500,
+						animations: {
+							enabled: true
+						}
+					},
+					plotOptions: {
+						bar: {
+							horizontal: false,
+							columnWidth: "50%",
+							endingShape: 'rounded',
+						}
+					},
+					stroke: {
+						show: true,
+						width: 2,
+						colors: ['transparent']
+					},
+					fill: {
+						opacity: 1
+					},
+					tooltip: {
+						enabled: false
+					},
+					title: {
+						text: "Figure 2: Most Frequently Cited NIST Controls"
+					},
+					legend: {
+						show: false
+					},
+					yaxis: {
+						title: {
+							text: '# of findings of x control'
+						}
+					},
+					xaxis: {
+						categories: ['Access Control', 'Awareness and Training', 'Configuration Management', 'Identification and Authentication', 'Risk Assessment', 'System and Communication Protection', 'System and Information Integrity'],
+						labels: {
+							rotate:-20,
+							rotateAlways: false,
+							offsetX: 20
+						}
+					}
+				},
+				data: [
+					{
+						data: ["{{nist_ac}}", "{{nist_at}}", "{{nist_cm}}", "{{nist_ia}}", "{{nist_ra}}", "{{nist_sc}}", "{{nist_si}}"]
+					}
+				],
+			},
+			scrollspyArgs: {
+				parent: "#scrollspy-page",
+				activeClass: "underline",
+				itemClass: "flex w-full select-none items-center py-1 px-4 text-sm font-semibold nav-primary",
+				items: [
+					{
+						id: "resultSummary",
+						text: "1. Summary of Results"
+					},
+					{
+						id: "findingSummary",
+						text: "1.1 Findings Summary"
+					},
+					{
+						id: "nistSummary",
+						text: "1.2 NIST-Based Summary"
+					},
+					{
+						id: "nistFramework",
+						text: "1.3 NIST Cybersecurity Framework"
+					},
+					{
+						id: "riskscore",
+						text: "1.4 Risk Scores"
+					},
+					{
+						id: "scope",
+						text: "2. Scope"
+					},
+					{
+						id: "methodology",
+						text: "3. Methodology"
+					},
+					{
+						id: "attackpath",
+						text: "4. Attack Paths"
+					},
+					{
+						id: "recommendations",
+						text: "5. General Recommendations"
+					},
+					{
+						id: "findings",
+						text: "6. Findings"
+					},
+					{
+						id: "severity",
+						text: "Appendix A: Severity Rating Criteria"
+					},
+				]
+			}
+		}
+
+		{% if report_type == 'RPT' %}
+			pageData.scrollspyArgs.items.push({id:"opensource", text:"Appendix B: Open Source Information"})
+			pageData.scrollspyArgs.items.push({id:"portmap", text:"Appendix C: External Port Mapping"})
+			pageData.scrollspyArgs.items.push({id:"acronym", text:"Appendix D: Acronyms"})
+		{% elif report_type == 'RVA' %}
+			pageData.scrollspyArgs.items.push({id:"portmap", text:"Appendix B: External Port Mapping"})
+			pageData.scrollspyArgs.items.push({id:"password", text:"Appendix C: Password Analysis"})
+			pageData.scrollspyArgs.items.push({id:"acronym", text:"Appendix D: Acronyms"})
+		{% else %}
+			pageData.scrollspyArgs.items.push({id:"portmap", text:"Appendix B: External Port Mapping"})
+			pageData.scrollspyArgs.items.push({id:"acronym", text:"Appendix C: Acronyms"})
+		{% endif %}
+
+		{% for acronym in acronyms %}
+			pageData.acronymTableArgs.items.push({acronym: "{{acronym.acronym | escapejs}}", context: "{{acronym.context}}", definition: "{{acronym.definition}}", auto_found: "{{acronym.auto_found}}", include: "True" === "{{acronym.include}}", hash: "{{acronym.original_hash}}"})
+		{% endfor %}
+
+		{% for network in rpt_identified_networks %}
+			pageData.networkTableArgs.items.push({network: "{{network.ip_address}}", domain:"{{network.domain}}", registrant:"{{network.registrant}}"})
+		{% endfor %}
+
+		{% for email in rpt_email_breaches %}
+			pageData.emailTableArgs.items.push({email: "{{email.breached_email}}", breach:"{{email.breach_info}}"})
+		{% endfor %}
+
+		return pageData
+	}
+	function pageMethods() {
+		functions = {
+			addAcronym: function() {
+				this.acronymTableArgs.items.push({acronym: "", context:"", definition:"", auto:"M", include:false})
+			},
+			saveReport: function() {
+				var reportData = JSON.parse(JSON.stringify(this.formData))
+				reportData['scanned_scope_ext'] = this.scopeTableArgs.items[0].external
+				reportData['scanned_scope_int'] = this.scopeTableArgs.items[0].internal
+				reportData['scope_phishing'] = this.scopeTableArgs.items[0].phishing
+				reportData['IP_scanned_ext'] = this.scopeTableArgs.items[1].external
+				reportData['IP_scanned_int'] = this.scopeTableArgs.items[1].internal
+				reportData['users_attempted_phishing'] = this.scopeTableArgs.items[1].phishing
+				reportData['hosts_IDd_ext'] = this.scopeTableArgs.items[2].external
+				reportData['hosts_IDd_int'] = this.scopeTableArgs.items[2].internal
+				reportData['users_phished'] = this.scopeTableArgs.items[2].phishing
+				reportData['networks'] = this.networkTableArgs.items
+				reportData['emails'] = this.emailTableArgs.items
+				reportData['acronyms'] = this.acronymTableArgs.items
+				// console.log("DATTAAAAA!!!!! - "+ JSON.stringify(reportData))
+				fetch(window.location.href, {
+					method: "POST",
+					body: JSON.stringify(reportData),
+					credentials: "same-origin",
+					headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
+				}).then(response => {
+					if(response.ok) {
+						this.displayNotification({title: "Report Saved", variant:"success", text: "Report data saved! Page will reload in 2 seconds."})
+						setTimeout(() => {this.redirectLink("{% url 'report'%}")}, 2000)
+					}
+				}).catch(error => {
+					this.displayNotification({text: error, title: "Error saving report.", variant:"danger"})
+				})
+				console.log(reportData)
+			},
+			uploadNetworkCSV: async function() {
+				if(document.getElementsByName('networkUpload')[0].files.length == 0){
+					return
+				}
+
+				const file = document.getElementsByName('networkUpload')[0].files[0]
+				let csvText = null
+				await file.text().then(text => {csvText = text.replace("\r", "\n")})
+
+				csvText = csvText.replaceAll("\r", "\n")
+				const headers = csvText.slice(0, csvText.indexOf("\n")).split(",")
+				if(headers[0] != "Network" || headers[1] != "Domain" || headers[2] != "Registrant"){
+					this.displayNotification({text: "The CSV file has the incorrect headers. They should be Netowrk, Domain, and Registrant.", title: "Incorrect CSV headers", variant: "danger"})
+					return
+				}
+
+				const rows = csvText.slice(csvText.indexOf("\n") + 1).split("\n")
+				for(let row of rows){
+					const data = row.split(",")
+					this.networkTableArgs.items.push({network: data[0], domain: data[1], registrant: data[2]})
+				}
+
+			},
+			uploadEmailCSV: async function() {
+				if(document.getElementsByName('emailUpload')[0].files.length == 0){
+					return
+				}
+
+				const file = document.getElementsByName('emailUpload')[0].files[0]
+				let csvText = null
+				await file.text().then(text => {csvText = text.replace("\r", "\n")})
+
+				csvText = csvText.replaceAll("\r", "\n")
+				const headers = csvText.slice(0, csvText.indexOf("\n")).split(",")
+				if(headers[0] != "Email Address" || headers[1] != "Breach Information"){
+					this.displayNotification({text: "The CSV file has the incorrect headers. They should be Email Address and Breach Information.", title: "Incorrect CSV headers", variant: "danger"})
+					return
+				}
+
+				const rows = csvText.slice(csvText.indexOf("\n") + 1).split("\n")
+				for(let row of rows){
+					const data = row.split(",")
+					this.emailTableArgs.items.push({email: data[0], breach: data[1]})
+				}
+			},
+			updatePercentage: function() {
+				if(parseInt(this.formData.emails_identified) == 0 || parseInt(this.formData.emails_breached) == 0){
+					this.formData.email_percentage = "0%"
+				}
+				else {
+					this.formData.email_percentage = Math.round(parseFloat(this.formData.emails_breached)/parseFloat(this.formData.emails_identified) * 100).toString() + "%"
+				}
+				
+			}
+		}
+		return functions
+	}
+
+	$(":input").keydown(MarkAsChanged);
+	$("#domains-csv").change(MarkAsChanged);
+	$("#emails-csv").change(MarkAsChanged);
+	$("#password-analysis-txt").change(MarkAsChanged);
+	$("textarea").keydown(MarkAsChanged);
+	$(".form-check-input").change(MarkAsChanged);
+	$("select").change(MarkAsChanged);
+	$("select2:unselect").change(MarkAsChanged);
+
+
+	// Add row on add button click
+	$(document).on("click", ".add", function(){
+		var empty = false;
+		var input = $(this).parents("tr").find('input[type="text"]');
+        input.each(function(){
+			if(!$(this).val()){
+				$(this).addClass("error");
+				empty = true;
+			} else{
+                $(this).removeClass("error");
+            }
+		});
+		$(this).parents("tr").find(".error").first().focus();
+		if(!empty){
+			input.each(function(){
+				$(this).parent("td").html($(this).val());
+			});
+			$(this).parents("tr").find(".add, .edit").toggle();
+			$(".add-new").removeAttr("disabled");
+		}
+    });
+
+    $("#btn-pw-file-reset").on("click", function(e){
+    	$("#password-analysis-txt").val("");
+    	$("#pw-file-name").text("Choose file");
+    	$("#delete-pw-analysis").attr("disabled", false);
+	});
+
+	$("#password-analysis-txt").on("input", function(){
+		var pwName = $("#password-analysis-txt")[0].files[0].name;
+		$("#pw-file-name").text(pwName);
+		$("#delete-pw-analysis").attr("disabled", true);
+	});
+
+	//Copies the hidden acronym row from the table in to a visible one at the end of the table.
+	$('#add_acronym').click(function(){
+		var form_idx = $('#id_form-TOTAL_FORMS').val();
+		$('#acr_formset').append($('#empty_acr_row').html().replace(/__prefix__/g, form_idx));
+		$('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
+	})
+
+    // creates select2 risk assesment
+	// allows user to delete a selection by using a backspace
+	$.fn.select2.amd.require(['select2/selection/search'], function (Search) {
+	    var oldRemoveChoice = Search.prototype.searchRemoveChoice;
+
+	    Search.prototype.searchRemoveChoice = function () {
+	        oldRemoveChoice.apply(this, arguments);
+	        this.$search.val('');
+	    };
+	});
+
+
+    $("#report_saved_alert").toast("show");
+
+}); //end document ready
+
+
+
+
+</script>
+{% endblock %}

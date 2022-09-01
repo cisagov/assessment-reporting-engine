@@ -1,0 +1,114 @@
+{% extends 'ptportal/base.html' %}
+{% load humanize %}
+{% load widget_tweaks %}
+{% block active %}#engagement{% endblock %}
+{% block content %}
+
+<h1>Engagement Metadata</h1>
+<hr />
+
+<div class="mt-2 mb-4 grid grid-cols-2">
+	<div class="">
+		<h2>{{report.report_type}} ID: {{object.asmt_id}}</h2>
+		<p>Last modified on {{object.updated_at | naturaltime}}</p>
+	</div>
+	<div class="justify-self-end">
+    <sds-button class="mr-2" variant="primary" @click="redirectLink('{% url "engagement_update" %}')"><i class="fa fa-edit"></i> Edit</sds-button>
+		<sds-button variant="danger" @click="redirectLink('{% url "engagement_delete" %}')"><i class="fa fa-trash"></i> Delete</sds-button>
+	</div>
+</div>
+
+<sds-section type="simple" class="mb-4 w-1/2">
+  <template #title>
+    <h4>Stakeholder Information</h4>
+  </template>
+  <p>Customer Long Name: {{ object.customer_long_name }}</p>
+  <p>Customer Initials: {{ object.customer_initials }}</p>
+  <p>Point of Contact: {{ object.customer_POC_name }}</p>
+  <p>POC Email: {{ object.customer_POC_email }}</p>
+</sds-section>
+
+<sds-section type="simple" class="mb-4 w-1/2">
+  <template #title>
+    <h4>Testing Details</h4>
+  </template>
+  <p>Team Lead: {{ object.team_lead_name }}</p>
+  <p>Team Lead Email: {{ object.team_lead_email }}</p>
+  <p>Technical Lead: {{ object.technical_lead_name }}</p>
+  <p>Technical Lead Email: {{ object.technical_lead_email }}</p>
+  <p>Business Goal: {{ object.business_goal }}</p>
+</sds-section>
+
+{% if report_type == 'HVA' %}
+<sds-section type="simple" class="mb-4 w-1/2">
+  <template #title>
+    <h4>HVA Systems</h4>
+  </template>
+  <sds-table class='table-prose' v-bind="HVATableArgs"></sds-table>
+</sds-section>
+{% endif %}
+
+<sds-section type="simple" class="mb-4 w-1/2">
+  <template #title>
+    <h4>External Assessment</h4>
+  </template>
+  <p>External Start Date: {{ object.ext_start_date }}</p>
+  <p>External End Date: {{ object.ext_end_date }}</p>
+  <p>External Included Scope: {{ object.ext_scope }}</p>
+  <p>External Excluded Scope: {{ object.ext_excluded_scope }}</p>
+</sds-section>
+
+{% if report_type != 'RPT' %}
+  <sds-section type="simple" class="mb-4 w-1/2">
+    <template #title>
+      <h4>Internal Assessment</h4>
+    </template>
+    <p>Internal Start Date: {{ object.int_start_date }}</p>
+    <p>Internal End Date: {{ object.int_end_date }}</p>
+    <p>Internal Included Scope: {{ object.int_scope }}</p>
+    <p>Internal Excluded Scope: {{ object.int_excluded_scope }}</p>
+  </sds-section>
+{% endif %}
+
+<sds-section type="simple" class="mb-4 w-1/2">
+  <template #title>
+    <h4>Additional Information</h4>
+  </template>
+  <p>Traffic Light Protocol: {{ object.traffic_light_protocol }}{% if object.traffic_light_protocol == 'Amber' %} <i class="fa fa-circle" style="color:orange"></i>{% elif object.traffic_light_protocol == 'Red' %} <i class="fa fa-circle" style="color:red"></i>{% endif %}</p>
+  <p>Constraint: {{ object.assessment_constraint }}</p>
+</sds-section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function pageData() {
+    data = {
+      HVATableArgs: {
+				fields: [
+					{
+						key: "name",
+						label: "HVA Name"
+					},
+					{
+						key: "address",
+						label: "Address"
+					},
+					{
+						key: "status",
+						label: "Status"
+					},
+				],
+				items: [],
+				sortBy: "num"
+			}
+    }
+    {% if report.report_type == 'HVA' %}
+			{% for hva in hvas %}
+				data["HVATableArgs"]["items"].push({name: "{{hva.name}}", address: "{{hva.address}}", status: "{{hva.status}}"})
+			{% endfor %}
+		{% endif %}
+
+    return data
+  }
+</script>
+{% endblock %}
