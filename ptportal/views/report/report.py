@@ -104,7 +104,6 @@ def report_findings_counts():
     findings_breakdown['Phishing_Low'] = low.intersection(phishing)
     findings_breakdown['Phishing_Info'] = informational.intersection(phishing)
     return findings_breakdown
-<<<<<<< HEAD
 
 
 def ajax_pwa_delete(request):
@@ -118,9 +117,7 @@ def ajax_pwa_delete(request):
         return JsonResponse({})
 
 
-=======
     
->>>>>>> origin/PTP-1554
 def find_acronyms(text):
     """Finds acronyms in varoius models and attempts to identify definitions within the text the acronyms are located in.
 
@@ -365,56 +362,6 @@ class ReportUpdate(generic.edit.UpdateView):
             c.finding_ids = ', '.join(str(e) for e in finding_ids)
             c.save()
 
-<<<<<<< HEAD
-        # NIST_800_53
-        context['nist_ac'] = UploadedFinding.objects.filter(
-            NIST_800_53__icontains='AC'
-        ).count()
-        context['nist_at'] = UploadedFinding.objects.filter(
-            NIST_800_53__icontains='AT'
-        ).count()
-        context['nist_cm'] = UploadedFinding.objects.filter(
-            NIST_800_53__icontains='CM'
-        ).count()
-        context['nist_ia'] = UploadedFinding.objects.filter(
-            NIST_800_53__icontains='IA'
-        ).count()
-        context['nist_ra'] = UploadedFinding.objects.filter(
-            NIST_800_53__icontains='RA'
-        ).count()
-        context['nist_sc'] = UploadedFinding.objects.filter(
-            NIST_800_53__icontains='SC'
-        ).count()
-        context['nist_si'] = UploadedFinding.objects.filter(
-            NIST_800_53__icontains='SI'
-        ).count()
-
-        # NIST_CSF
-        context['nist_iam'] = UploadedFinding.objects.filter(
-            NIST_CSF__icontains='ID.AM'
-        ).count()
-        context['nist_ig'] = UploadedFinding.objects.filter(
-            NIST_CSF__icontains='ID.GV'
-        ).count()
-        context['nist_ira'] = UploadedFinding.objects.filter(
-            NIST_CSF__icontains='ID.RA'
-        ).count()
-        context['nist_pac'] = UploadedFinding.objects.filter(
-            NIST_CSF__icontains='PR.AC'
-        ).count()
-        context['nist_pat'] = UploadedFinding.objects.filter(
-            NIST_CSF__icontains='PR.AT'
-        ).count()
-        context['nist_pds'] = UploadedFinding.objects.filter(
-            NIST_CSF__icontains='PR.DS'
-        ).count()
-        context['nist_pip'] = UploadedFinding.objects.filter(
-            NIST_CSF__icontains='PR.IP'
-        ).count()
-        context['nist_ppt'] = UploadedFinding.objects.filter(
-            NIST_CSF__icontains='PR.PT'
-        ).count()
-=======
 
         # These have been moved from UploadedFindng to BaseFiding
         # NIST_800_53
@@ -435,7 +382,6 @@ class ReportUpdate(generic.edit.UpdateView):
         context['nist_pds']=BaseFinding.objects.filter(NIST_CSF__icontains='PR.DS').count()
         context['nist_pip']=BaseFinding.objects.filter(NIST_CSF__icontains='PR.IP').count()
         context['nist_ppt']=BaseFinding.objects.filter(NIST_CSF__icontains='PR.PT').count()
->>>>>>> origin/PTP-1554
 
         context['port_mapping'] = PortMappingHost.objects.all()
 
@@ -447,19 +393,13 @@ class ReportUpdate(generic.edit.UpdateView):
         # Findings: Exclude NIST_800_53, NIST_CSF CIS_CSC, CMMC
         # Report: All game
         # Narrative:
-        collect_acronyms()
-<<<<<<< HEAD
-        acronyms = Acronym.objects.filter(belongs_to_report=report_data).order_by(
-            'acronym'
-        )
-        formset = AcronymFormSet(queryset=acronyms)
-        context['acronym_formset'] = formset
-
-=======
+        collect_acronyms()        
         acronyms = Acronym.objects.filter(belongs_to_report=report_data).order_by('acronym')
         context['acronyms'] = acronyms
+        formset = AcronymFormSet(queryset=acronyms)
+        context['acronym_formset'] = formset        
+        
     
->>>>>>> origin/PTP-1554
         return context
 
     def post(
@@ -469,75 +409,76 @@ class ReportUpdate(generic.edit.UpdateView):
             request
         )  # Clears the messages to eliminate duplicates alerts in template
         report = Report.object()
-<<<<<<< HEAD
-        self.object = self.get_object()
-        context = super().get_context_data(**kwargs)
-        form = self.get_form()
-        if form.is_valid():
-            print("form is valid!")
-            form_instance = form.save()
-        else:
-            print('report form errors:')
-            print(form.errors)
-            return super().post(self, request, *args, **kwargs)
+#<<<<<<< HEAD
+#        self.object = self.get_object()
+#        context = super().get_context_data(**kwargs)
+#        form = self.get_form()
+#        if form.is_valid():
+#            print("form is valid!")
+#            form_instance = form.save()
+#        else:
+#            print('report form errors:')
+#            print(form.errors)
+#            return super().post(self, request, *args, **kwargs)
+#
+#        acr = AcronymFormSet(self.request.POST)
+#
+#        if acr.is_valid():
+#            for fs in acr:
+#                if fs.is_valid():
+#                    # The form won't detect the empty field at first for some reason. Here we just check to make sure they at least gave an acronym.
+#                    instance = fs.save(commit=False)
+#                    if instance.acronym == "":
+#                        continue
+#                    instance.belongs_to_report = report
+#                    instance.save()
+#                else:
+#                    print('acronym form errors:')
+#                    print(fs.errors)
+#        else:
+#            print('acronym formset errors:')
+#            print(acr.errors)
+#            return super().post(self, request, *args, **kwargs)
+#
+#        if 'domains-csv' in request.FILES:
+#            report_read_csv(request.FILES['domains-csv'], "domains")
+#
+#        if 'emails-csv' in request.FILES:
+#            row_count = report_read_csv(request.FILES['emails-csv'], "emails")
+#            # report.emails_breached = row_count
+#            if row_count:
+#                messages.success(
+#                    request,
+#                    " Uploaded Emails Breached From File ",
+#                    extra_tags="alert-success",
+#                )
+#            else:
+#                messages.warning(
+#                    request,
+#                    " Failed To Upload Emails Breached From File ",
+#                    extra_tags="alert-warning",
+#                )
+#        if 'emails_breached' in request.POST and 'emails_identified' in request.POST:
+#            emails_breached = int(request.POST['emails_breached'])
+#            emails_identified = int(request.POST['emails_identified'])
+#            if emails_breached > 0 and emails_identified > 0:
+#                report.email_percentage = (
+#                    str("{:.2f}".format((emails_breached / emails_identified) * 100))
+#                    + "%"
+#                )
+#
+#        if 'password-analysis-txt' in request.FILES:
+#            report.password_analysis = report_read_pwa(
+#                request.FILES['password-analysis-txt']
+#            )
+#
+#        report.save()
+#
+#        super().post(request, *args, **kwargs)
+#
+#        return redirect('report')
 
-        acr = AcronymFormSet(self.request.POST)
-
-        if acr.is_valid():
-            for fs in acr:
-                if fs.is_valid():
-                    # The form won't detect the empty field at first for some reason. Here we just check to make sure they at least gave an acronym.
-                    instance = fs.save(commit=False)
-                    if instance.acronym == "":
-                        continue
-                    instance.belongs_to_report = report
-                    instance.save()
-                else:
-                    print('acronym form errors:')
-                    print(fs.errors)
-        else:
-            print('acronym formset errors:')
-            print(acr.errors)
-            return super().post(self, request, *args, **kwargs)
-
-        if 'domains-csv' in request.FILES:
-            report_read_csv(request.FILES['domains-csv'], "domains")
-
-        if 'emails-csv' in request.FILES:
-            row_count = report_read_csv(request.FILES['emails-csv'], "emails")
-            # report.emails_breached = row_count
-            if row_count:
-                messages.success(
-                    request,
-                    " Uploaded Emails Breached From File ",
-                    extra_tags="alert-success",
-                )
-            else:
-                messages.warning(
-                    request,
-                    " Failed To Upload Emails Breached From File ",
-                    extra_tags="alert-warning",
-                )
-        if 'emails_breached' in request.POST and 'emails_identified' in request.POST:
-            emails_breached = int(request.POST['emails_breached'])
-            emails_identified = int(request.POST['emails_identified'])
-            if emails_breached > 0 and emails_identified > 0:
-                report.email_percentage = (
-                    str("{:.2f}".format((emails_breached / emails_identified) * 100))
-                    + "%"
-                )
-
-        if 'password-analysis-txt' in request.FILES:
-            report.password_analysis = report_read_pwa(
-                request.FILES['password-analysis-txt']
-            )
-
-        report.save()
-
-        super().post(request, *args, **kwargs)
-
-        return redirect('report')
-=======
+# MG: Choose one implementation for now get the container to even run, and run this down before the change is fully merged.
         postData = json.loads(request.body)
         
         reportForm = ReportForm(postData, instance=report)
@@ -576,4 +517,3 @@ class ReportUpdate(generic.edit.UpdateView):
                                        include=acronym['include'])
         
         return HttpResponse(status=200)
->>>>>>> origin/PTP-1554
