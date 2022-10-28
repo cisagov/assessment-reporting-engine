@@ -63,7 +63,7 @@ class AffectedSystems(models.Model):
         if self.ip:
             sets = [int(x) for x in self.ip.split('.')]
             self.ip_int = (
-                sets[0] * 256 ** 3 + sets[1] * 256 ** 2 + sets[2] * 256 + sets[3]
+                sets[0] * 256**3 + sets[1] * 256**2 + sets[2] * 256 + sets[3]
             )
             self.name = self.ip
         super().save()
@@ -165,14 +165,12 @@ class KEV(models.Model):
 class Category(abstract_models.TimeStampedModel):
 
     name = models.CharField(max_length=51, unique=True)
-    remediation = models.TextField(verbose_name="Remediation",
-                                   blank=True)
-    description = models.TextField(verbose_name="Description", 
-                                    blank=True)
-    resources = models.TextField(verbose_name="Resources",
-                                   blank=True)
-    cat_id = models.CharField(max_length=50, verbose_name='Category ID', unique=True, default=0)
-
+    remediation = models.TextField(verbose_name="Remediation", blank=True)
+    description = models.TextField(verbose_name="Description", blank=True)
+    resources = models.TextField(verbose_name="Resources", blank=True)
+    cat_id = models.CharField(
+        max_length=50, verbose_name='Category ID', unique=True, default=0
+    )
 
     def __str__(self):
         return self.name
@@ -184,17 +182,22 @@ class Category(abstract_models.TimeStampedModel):
 class BaseFinding(abstract_models.TimeStampedModel):
     name = models.CharField(max_length=100)
 
-    finding_id = models.CharField(max_length=50, verbose_name='Finding ID', unique=True, default=0)
+    finding_id = models.CharField(
+        max_length=50, verbose_name='Finding ID', unique=True, default=0
+    )
 
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Category", blank=True, null=True, to_field='name')
-    description = models.TextField(verbose_name="Description", 
-                                    blank=True)
-    remediation = models.TextField(verbose_name="Standard Remediation",
-                                   blank=True)
-    references = models.TextField(verbose_name="References",
-                                   blank=True)
-    resources = models.TextField(verbose_name="Resources",
-                                   blank=True)
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.CASCADE,
+        verbose_name="Category",
+        blank=True,
+        null=True,
+        to_field='name',
+    )
+    description = models.TextField(verbose_name="Description", blank=True)
+    remediation = models.TextField(verbose_name="Standard Remediation", blank=True)
+    references = models.TextField(verbose_name="References", blank=True)
+    resources = models.TextField(verbose_name="Resources", blank=True)
 
     severity = models.CharField(max_length=14, default='TBD')
     assessment_type = models.TextField(

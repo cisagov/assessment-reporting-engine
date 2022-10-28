@@ -87,8 +87,7 @@ tag_db_map = {
     "{Short business level internal scope – tech scope is in appendix.}": "report.fields.scanned_scope_int",
     "{Internal Test Location}": "report.fields.test_location_int",
     "{External Test Location}": "report.fields.test_location_ext",
-    "{Short business level internal scope – tech scope is in appendix.}":
-        "report.fields.scanned_scope_int",
+    "{Short business level internal scope – tech scope is in appendix.}": "report.fields.scanned_scope_int",
     "{Number of External Addresses Scanned}": "report.fields.IP_scanned_ext",
     "{Number of Internal Addresses Scanned}": "report.fields.IP_scanned_int",
     "{Number of External Hosts Identified}": "report.fields.hosts_IDd_ext",

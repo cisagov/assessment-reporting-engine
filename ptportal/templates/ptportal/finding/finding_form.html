@@ -40,7 +40,7 @@
       </sds-scroll-area>
     </div>
     <div class="flex flex-row-reverse">
-    
+
     </div>
   </sds-section>
   <sds-section v-bind="findingDetailSectionArgs" class="mb-4">
@@ -91,7 +91,7 @@
             <sds-multiselect class="w-3/5" :required="true" v-bind="findingDetailSectionArgs.affectedSystemArgs" v-model="findingDetailSectionArgs.affectedSystemArgs.affectedSystem" @update-selected="updateAffectedSystems" @update:model-value="performSearch"></sds-multiselect>
           </div>
         </div>
-        
+
       </div>
     </form>
   </sds-section>
@@ -100,13 +100,13 @@
       <span class="font-bold">ADD SCREENSHOT</span>
     </template>
     <template #nav>
-      
+
     </template>
     <div class="grid place-items-center gap-2">
       <sds-file-uploader class="place-self-center w-full" v-bind="findingImageSectionArgs.fileUploaderArgs" @add=addFile></sds-file-uploader>
       <div class="flex flex-row-reverse gap-2 place-self-end">
 
-       
+
       </div>
     </div>
   </sds-section>
@@ -115,7 +115,7 @@
       <span class="font-bold">SELECT KNOWN EXPLOITED VULNERABILITIES (KEV)</span>
     </template>
     <template #nav>
-      
+
     </template>
     <div class="grid place-items-center">
       <sds-search-box class="w-1/2 place-self-center" :disableSearch="true" variant="primary" placeholder="Search Term" v-model="kevSectionArgs.searchTerm" @update:model-value="filterKevs(kevSectionArgs.searchTerm)"></sds-search-box>
@@ -279,7 +279,7 @@ function pageData() {
           const proxy = new Proxy(findings[i], {});
           finding_list.push(proxy);
         }
-      
+
         return finding_list;
     },
     kevData: function() {
@@ -401,12 +401,12 @@ function pageMethods() {
       })
     },
     //Seach box function for the findings list.
-    filterFindings: function(searchTerm){ 
-      this.findingSectionArgs.findingsSearchList = this.findingData().filter(finding => finding.fields.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                                                                    finding.fields.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    filterFindings: function(searchTerm){
+      this.findingSectionArgs.findingsSearchList = this.findingData().filter(finding => finding.fields.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                                                    finding.fields.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                                                     // finding.fields.gen_finding.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                                                     finding.fields.description.toLowerCase().includes(searchTerm.toLowerCase()))
-      
+
 
       //Set a small timeout to prevent the function for search for the DOM before it renders.
       //May have to test times to see if this is too short for a slow computer.

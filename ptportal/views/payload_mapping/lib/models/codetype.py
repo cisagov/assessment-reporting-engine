@@ -2,7 +2,8 @@
 
 
 class CodeType(object):
-    """ Programming Languages used with Tool """
+    """Programming Languages used with Tool"""
+
     def __init__(self, name, attributes):
         self.name = name
 

@@ -32,7 +32,7 @@ from ...models import (
     Payload,
     Severities,
     CIS_CSC,
-    KEV
+    KEV,
 )
 from ..utils import (
     get_nist_csf,
@@ -224,10 +224,9 @@ class UploadedFindingCreateView(generic.edit.CreateView):
 
         context['findings'] = serializers.serialize("json", BaseFinding.objects.all())
 
-
         context["severity"] = Severities.objects.all()
         context['kevs'] = serializers.serialize("json", KEV.objects.all())
-        print ("in get_context_data")
+        print("in get_context_data")
 
         engagement = EngagementMeta.object()
         context["engagement"] = engagement
@@ -237,7 +236,7 @@ class UploadedFindingCreateView(generic.edit.CreateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        self.object = self.get_object() 
+        self.object = self.get_object()
         postData = json.loads(request.POST['data'])
 
         print(postData)
@@ -287,6 +286,7 @@ class UploadedFindingDetail(generic.DetailView):
             belongs_to_finding=self.object
         )
         return context
+
 
 class UploadedFindingDelete(generic.edit.DeleteView):
     model = UploadedFinding

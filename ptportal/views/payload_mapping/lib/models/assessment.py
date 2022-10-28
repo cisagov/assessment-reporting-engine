@@ -5,17 +5,21 @@ import datetime
 
 class Assessment(object):
     def __init__(self, id):
-        """ Model for Assessment Information """
+        """Model for Assessment Information"""
         self.asmt_id = id
         self.phishing_assessment_date = None
-        self.date_generated = str(datetime.datetime.today().month) + "/" + \
-                              str(datetime.datetime.today().day) + "/" + \
-                              str(datetime.datetime.today().year)
+        self.date_generated = (
+            str(datetime.datetime.today().month)
+            + "/"
+            + str(datetime.datetime.today().day)
+            + "/"
+            + str(datetime.datetime.today().year)
+        )
         self.security_solutions = {}
         self.fiscal_year = None
 
     def GatherSolutions(self):
-        """ Gathers the Solutions Name """
+        """Gathers the Solutions Name"""
         output = []
 
         for id, properties in self.security_solutions.items():
@@ -25,7 +29,7 @@ class Assessment(object):
         return output
 
     def set_phishing_assessment_date(self, date, mapped=False):
-        """ Configures the Phishing Assessment Date """
+        """Configures the Phishing Assessment Date"""
         if not mapped:
             today = datetime.datetime.today()
             full_date = date.split('/')
@@ -36,5 +40,9 @@ class Assessment(object):
         self.phishing_assessment_date = datetime.datetime.strptime(date, format).date()
 
     def output_phishing_date(self):
-        """ Configures Date for Reporting """
-        return "%s/%s/%s" % (str(self.phishing_assessment_date.month), str(self.phishing_assessment_date.day), str(self.phishing_assessment_date.year))
+        """Configures Date for Reporting"""
+        return "%s/%s/%s" % (
+            str(self.phishing_assessment_date.month),
+            str(self.phishing_assessment_date.day),
+            str(self.phishing_assessment_date.year),
+        )

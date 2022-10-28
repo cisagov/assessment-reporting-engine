@@ -16,9 +16,5 @@ clean:
 	find . -type f -name "*.pptx" -not -path  "*report_gen*" -delete
 	rm -r ptportal/migrations/*
 	touch ptportal/migrations/__init__.py
-<<<<<<< HEAD
 	rm mode.txt
-=======
-
 	rm ptportal.log
->>>>>>> development

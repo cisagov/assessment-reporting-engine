@@ -1,4 +1,3 @@
-
 # Risk & Vulnerability Reporting Engine
 
 # Copyright 2022 Carnegie Mellon University.

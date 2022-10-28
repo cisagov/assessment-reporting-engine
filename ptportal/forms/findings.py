@@ -51,12 +51,37 @@ class UploadedFindingForm(BaseModelForm):
 
     class Meta:
         model = UploadedFinding
-        exclude = ('uploaded_finding_name', 'uploaded_finding_id', 'business_description', 'NIST_800_53', 'NIST_CSF', 'slug', 'created_at', 'updated_at', 'screenshot_description', 'campaign_description', 'payload_description', 'data_exfil_description')
-        widgets = {'finding': forms.RadioSelect({'class':'form-check-input', 'required':True}),
-                   'severity': forms.RadioSelect({'class':'form-check-input', 'required':True}),
-                   'assessment_type': forms.RadioSelect({'class':'form-check-input', 'required':True}),
-                   'discovery': forms.RadioSelect({'class':'form-check-input', 'required':True}),
-                   'mitigation': forms.RadioSelect({'class':'form-check-input', 'required':True})}
+        exclude = (
+            'uploaded_finding_name',
+            'uploaded_finding_id',
+            'business_description',
+            'NIST_800_53',
+            'NIST_CSF',
+            'slug',
+            'created_at',
+            'updated_at',
+            'screenshot_description',
+            'campaign_description',
+            'payload_description',
+            'data_exfil_description',
+        )
+        widgets = {
+            'finding': forms.RadioSelect(
+                {'class': 'form-check-input', 'required': True}
+            ),
+            'severity': forms.RadioSelect(
+                {'class': 'form-check-input', 'required': True}
+            ),
+            'assessment_type': forms.RadioSelect(
+                {'class': 'form-check-input', 'required': True}
+            ),
+            'discovery': forms.RadioSelect(
+                {'class': 'form-check-input', 'required': True}
+            ),
+            'mitigation': forms.RadioSelect(
+                {'class': 'form-check-input', 'required': True}
+            ),
+        }
 
 
 class EditUploadedFindingForm(BaseModelForm):
@@ -116,6 +141,7 @@ class EditUploadedFindingForm(BaseModelForm):
                 {'class': 'form-check-input', 'required': True}
             ),
         }
+
 
 class FindingForm(BaseModelForm):
     def __init__(self, *args, **kwargs):

@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+
 class FileType(object):
-    """ Parses the Filetype and the Related Techniques """
+    """Parses the Filetype and the Related Techniques"""
+
     def __init__(self, name, attributes):
         self.name = name
 

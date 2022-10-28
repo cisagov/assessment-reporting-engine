@@ -16,11 +16,10 @@
 from django import forms
 from django.forms.models import modelformset_factory
 
-from ptportal.models import (
-    Report
-)
+from ptportal.models import Report
 
 from . import BaseModelForm
+
 
 class ReportForm(BaseModelForm):
     def __init__(self, *args, **kwargs):
@@ -36,9 +35,15 @@ class ReportForm(BaseModelForm):
         # for RPT app B:
         self.fields['emails_identified'].widget.attrs.update({'class': ' form-control'})
         self.fields['emails_breached'].widget.attrs.update({'class': ' form-control'})
-        self.fields['credentials_identified'].widget.attrs.update({'class': ' form-control'})
-        self.fields['credentials_validated'].widget.attrs.update({'class': ' form-control'})     
-        self.fields['email_percentage'].widget.attrs.update({'class': ' form-control', 'rows': '1'})
+        self.fields['credentials_identified'].widget.attrs.update(
+            {'class': ' form-control'}
+        )
+        self.fields['credentials_validated'].widget.attrs.update(
+            {'class': ' form-control'}
+        )
+        self.fields['email_percentage'].widget.attrs.update(
+            {'class': ' form-control', 'rows': '1'}
+        )
 
     class Meta:
         model = Report

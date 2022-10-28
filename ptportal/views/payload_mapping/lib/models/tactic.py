@@ -5,7 +5,7 @@ from .technique import Technique
 
 class Tactic(object):
     def __init__(self, tactic_name, data):
-        """ Holds Information Regarding Mitre Tactics """
+        """Holds Information Regarding Mitre Tactics"""
         self.name = tactic_name
         self.id = data["ID"]
         self.total = data["Total"]

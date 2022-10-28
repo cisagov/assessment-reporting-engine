@@ -4,7 +4,7 @@
 class Tool(object):
     def __init__(self, name, attributes):
         self.name = name
-        self.technique_mapping = {},
+        self.technique_mapping = ({},)
         self.kill = False
 
         if attributes["techniques"]:
@@ -16,5 +16,3 @@ class Tool(object):
             self.aliases = attributes["aliases"]
         else:
             self.aliases = []
-
-
