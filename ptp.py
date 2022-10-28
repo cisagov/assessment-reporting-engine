@@ -20,7 +20,7 @@ import argparse
 import datetime
 import glob
 import logging
-import os, getpass, zipfile
+import os, getpass, zipfile, errno
 import platform
 import subprocess
 import sys
@@ -314,10 +314,15 @@ def run(args):
 def install_node_packages():
     print("Installing SDS and running postcss for tailwind.")
     try:
-        subprocess.run(f"npm ci", cwd="./node", shell=True)
-        subprocess.run("npm run collect", cwd="./node", shell=True)
+        retval = subprocess.run(f"npm ci", cwd="./node", shell=True)
+        if retval.returncode != 0:
+            raise Exception("npm ci failed to execute correctly.")
+        retval = subprocess.run("npm run collect", cwd="./node", shell=True)
+        if retval.returncode != 0:
+            raise Exception("npm run collect failed to execute correctly.")
     except Exception as e:
-        print("Error installing SDS and tailwind: " + e)
+        print(f"Error installing SDS and tailwind: {e}, can't continue.")        
+        raise e
     print("Successfully installed SDS and tailwind.")
 
 
