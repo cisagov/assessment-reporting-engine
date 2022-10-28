@@ -104,7 +104,6 @@ def report_findings_counts():
     findings_breakdown['Phishing_Low'] = low.intersection(phishing)
     findings_breakdown['Phishing_Info'] = informational.intersection(phishing)
     return findings_breakdown
-<<<<<<< HEAD
 
 
 def ajax_pwa_delete(request):
@@ -118,9 +117,7 @@ def ajax_pwa_delete(request):
         return JsonResponse({})
 
 
-=======
     
->>>>>>> origin/PTP-1554
 def find_acronyms(text):
     """Finds acronyms in varoius models and attempts to identify definitions within the text the acronyms are located in.
 
@@ -365,56 +362,6 @@ class ReportUpdate(generic.edit.UpdateView):
             c.finding_ids = ', '.join(str(e) for e in finding_ids)
             c.save()
 
-<<<<<<< HEAD
-        # NIST_800_53
-        context['nist_ac'] = UploadedFinding.objects.filter(
-            NIST_800_53__icontains='AC'
-        ).count()
-        context['nist_at'] = UploadedFinding.objects.filter(
-            NIST_800_53__icontains='AT'
-        ).count()
-        context['nist_cm'] = UploadedFinding.objects.filter(
-            NIST_800_53__icontains='CM'
-        ).count()
-        context['nist_ia'] = UploadedFinding.objects.filter(
-            NIST_800_53__icontains='IA'
-        ).count()
-        context['nist_ra'] = UploadedFinding.objects.filter(
-            NIST_800_53__icontains='RA'
-        ).count()
-        context['nist_sc'] = UploadedFinding.objects.filter(
-            NIST_800_53__icontains='SC'
-        ).count()
-        context['nist_si'] = UploadedFinding.objects.filter(
-            NIST_800_53__icontains='SI'
-        ).count()
-
-        # NIST_CSF
-        context['nist_iam'] = UploadedFinding.objects.filter(
-            NIST_CSF__icontains='ID.AM'
-        ).count()
-        context['nist_ig'] = UploadedFinding.objects.filter(
-            NIST_CSF__icontains='ID.GV'
-        ).count()
-        context['nist_ira'] = UploadedFinding.objects.filter(
-            NIST_CSF__icontains='ID.RA'
-        ).count()
-        context['nist_pac'] = UploadedFinding.objects.filter(
-            NIST_CSF__icontains='PR.AC'
-        ).count()
-        context['nist_pat'] = UploadedFinding.objects.filter(
-            NIST_CSF__icontains='PR.AT'
-        ).count()
-        context['nist_pds'] = UploadedFinding.objects.filter(
-            NIST_CSF__icontains='PR.DS'
-        ).count()
-        context['nist_pip'] = UploadedFinding.objects.filter(
-            NIST_CSF__icontains='PR.IP'
-        ).count()
-        context['nist_ppt'] = UploadedFinding.objects.filter(
-            NIST_CSF__icontains='PR.PT'
-        ).count()
-=======
 
         # These have been moved from UploadedFindng to BaseFiding
         # NIST_800_53
@@ -435,7 +382,6 @@ class ReportUpdate(generic.edit.UpdateView):
         context['nist_pds']=BaseFinding.objects.filter(NIST_CSF__icontains='PR.DS').count()
         context['nist_pip']=BaseFinding.objects.filter(NIST_CSF__icontains='PR.IP').count()
         context['nist_ppt']=BaseFinding.objects.filter(NIST_CSF__icontains='PR.PT').count()
->>>>>>> origin/PTP-1554
 
         context['port_mapping'] = PortMappingHost.objects.all()
 
@@ -447,19 +393,13 @@ class ReportUpdate(generic.edit.UpdateView):
         # Findings: Exclude NIST_800_53, NIST_CSF CIS_CSC, CMMC
         # Report: All game
         # Narrative:
-        collect_acronyms()
-<<<<<<< HEAD
-        acronyms = Acronym.objects.filter(belongs_to_report=report_data).order_by(
-            'acronym'
-        )
-        formset = AcronymFormSet(queryset=acronyms)
-        context['acronym_formset'] = formset
-
-=======
+        collect_acronyms()        
         acronyms = Acronym.objects.filter(belongs_to_report=report_data).order_by('acronym')
         context['acronyms'] = acronyms
+        formset = AcronymFormSet(queryset=acronyms)
+        context['acronym_formset'] = formset        
+        
     
->>>>>>> origin/PTP-1554
         return context
 
     def post(
