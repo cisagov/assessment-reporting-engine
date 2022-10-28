@@ -409,75 +409,76 @@ class ReportUpdate(generic.edit.UpdateView):
             request
         )  # Clears the messages to eliminate duplicates alerts in template
         report = Report.object()
-<<<<<<< HEAD
-        self.object = self.get_object()
-        context = super().get_context_data(**kwargs)
-        form = self.get_form()
-        if form.is_valid():
-            print("form is valid!")
-            form_instance = form.save()
-        else:
-            print('report form errors:')
-            print(form.errors)
-            return super().post(self, request, *args, **kwargs)
+#<<<<<<< HEAD
+#        self.object = self.get_object()
+#        context = super().get_context_data(**kwargs)
+#        form = self.get_form()
+#        if form.is_valid():
+#            print("form is valid!")
+#            form_instance = form.save()
+#        else:
+#            print('report form errors:')
+#            print(form.errors)
+#            return super().post(self, request, *args, **kwargs)
+#
+#        acr = AcronymFormSet(self.request.POST)
+#
+#        if acr.is_valid():
+#            for fs in acr:
+#                if fs.is_valid():
+#                    # The form won't detect the empty field at first for some reason. Here we just check to make sure they at least gave an acronym.
+#                    instance = fs.save(commit=False)
+#                    if instance.acronym == "":
+#                        continue
+#                    instance.belongs_to_report = report
+#                    instance.save()
+#                else:
+#                    print('acronym form errors:')
+#                    print(fs.errors)
+#        else:
+#            print('acronym formset errors:')
+#            print(acr.errors)
+#            return super().post(self, request, *args, **kwargs)
+#
+#        if 'domains-csv' in request.FILES:
+#            report_read_csv(request.FILES['domains-csv'], "domains")
+#
+#        if 'emails-csv' in request.FILES:
+#            row_count = report_read_csv(request.FILES['emails-csv'], "emails")
+#            # report.emails_breached = row_count
+#            if row_count:
+#                messages.success(
+#                    request,
+#                    " Uploaded Emails Breached From File ",
+#                    extra_tags="alert-success",
+#                )
+#            else:
+#                messages.warning(
+#                    request,
+#                    " Failed To Upload Emails Breached From File ",
+#                    extra_tags="alert-warning",
+#                )
+#        if 'emails_breached' in request.POST and 'emails_identified' in request.POST:
+#            emails_breached = int(request.POST['emails_breached'])
+#            emails_identified = int(request.POST['emails_identified'])
+#            if emails_breached > 0 and emails_identified > 0:
+#                report.email_percentage = (
+#                    str("{:.2f}".format((emails_breached / emails_identified) * 100))
+#                    + "%"
+#                )
+#
+#        if 'password-analysis-txt' in request.FILES:
+#            report.password_analysis = report_read_pwa(
+#                request.FILES['password-analysis-txt']
+#            )
+#
+#        report.save()
+#
+#        super().post(request, *args, **kwargs)
+#
+#        return redirect('report')
 
-        acr = AcronymFormSet(self.request.POST)
-
-        if acr.is_valid():
-            for fs in acr:
-                if fs.is_valid():
-                    # The form won't detect the empty field at first for some reason. Here we just check to make sure they at least gave an acronym.
-                    instance = fs.save(commit=False)
-                    if instance.acronym == "":
-                        continue
-                    instance.belongs_to_report = report
-                    instance.save()
-                else:
-                    print('acronym form errors:')
-                    print(fs.errors)
-        else:
-            print('acronym formset errors:')
-            print(acr.errors)
-            return super().post(self, request, *args, **kwargs)
-
-        if 'domains-csv' in request.FILES:
-            report_read_csv(request.FILES['domains-csv'], "domains")
-
-        if 'emails-csv' in request.FILES:
-            row_count = report_read_csv(request.FILES['emails-csv'], "emails")
-            # report.emails_breached = row_count
-            if row_count:
-                messages.success(
-                    request,
-                    " Uploaded Emails Breached From File ",
-                    extra_tags="alert-success",
-                )
-            else:
-                messages.warning(
-                    request,
-                    " Failed To Upload Emails Breached From File ",
-                    extra_tags="alert-warning",
-                )
-        if 'emails_breached' in request.POST and 'emails_identified' in request.POST:
-            emails_breached = int(request.POST['emails_breached'])
-            emails_identified = int(request.POST['emails_identified'])
-            if emails_breached > 0 and emails_identified > 0:
-                report.email_percentage = (
-                    str("{:.2f}".format((emails_breached / emails_identified) * 100))
-                    + "%"
-                )
-
-        if 'password-analysis-txt' in request.FILES:
-            report.password_analysis = report_read_pwa(
-                request.FILES['password-analysis-txt']
-            )
-
-        report.save()
-
-        super().post(request, *args, **kwargs)
-
-        return redirect('report')
-=======
+# MG: Choose one implementation for now get the container to even run, and run this down before the change is fully merged.
         postData = json.loads(request.body)
         
         reportForm = ReportForm(postData, instance=report)
@@ -516,4 +517,3 @@ class ReportUpdate(generic.edit.UpdateView):
                                        include=acronym['include'])
         
         return HttpResponse(status=200)
->>>>>>> origin/PTP-1554
