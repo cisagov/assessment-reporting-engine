@@ -267,8 +267,3 @@ urlpatterns += [
     path('403/', views.custom_permission_denied, name='handler403'),
     path('400/', views.custom_bad_request, name='handler400'),
 ]
-
-# summernote
-urlpatterns += [
-    path('summernote/', include('django_summernote.urls')),
-]

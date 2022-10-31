@@ -15,7 +15,6 @@
 # DM22-0744
 from django import forms
 from django.contrib import admin
-from django_summernote.admin import SummernoteModelAdmin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import *
 
@@ -66,11 +65,11 @@ admin.site.register(allModels)
 
 
 @admin.register(Report)
-class ReportModelAdmin(SummernoteModelAdmin):  # instead of ModelAdmin
-    summernote_fields = 'password_analysis'
+# class ReportModelAdmin(SummernoteModelAdmin):  # instead of ModelAdmin
+#     summernote_fields = 'password_analysis'
 
 
-class UserCreationForm(forms.ModelForm):
+class UserCreationForm(admin.ModelAdmin, forms.ModelForm):
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(
         label='Password Confirmation', widget=forms.PasswordInput

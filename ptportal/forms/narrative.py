@@ -14,7 +14,6 @@
 
 # DM22-0744s
 from django import forms
-from django_summernote.widgets import SummernoteWidget
 from ptportal.models import Narrative
 
 from . import BaseModelForm
@@ -33,13 +32,3 @@ class NarrativeForm(BaseModelForm):
     class Meta:
         model = Narrative
         fields = ['tools', 'tool_output', 'tool_output_description']
-        widgets = {
-            'tool_output': SummernoteWidget(
-                attrs={
-                    'class': 'form-control',
-                    'summernote': {
-                        'toolbar': [['font', ['bold', 'underline', 'italic']]]
-                    },
-                }
-            )
-        }

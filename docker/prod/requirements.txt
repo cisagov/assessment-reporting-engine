@@ -10,9 +10,6 @@ django-docutils==0.4.0
 django-extensions==2.1.7
 django-extra-views
 django-ipware==3.0.1
-django-jquery==3.1.0
-django-notifications-hq==1.6.0
-django-summernote==0.8.11.6
 django-widget-tweaks==1.4.3
 djangorestframework==3.11.1
 git+https://github.com/mireq/django-autoslugfield.git
