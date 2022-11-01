@@ -10,7 +10,6 @@
 # Created, in part, with funding and support from the United States Government. (see Acknowledgments file).
 
 # DM22-1011
-s
 from django import forms
 from ptportal.models import Narrative
 

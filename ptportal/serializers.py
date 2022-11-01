@@ -10,7 +10,6 @@
 # Created, in part, with funding and support from the United States Government. (see Acknowledgments file).
 
 # DM22-1011
-s
 from rest_framework import serializers
 
 from ptportal.models import (

@@ -14,7 +14,6 @@ It takes json input and generates an excel worksheet
 # Created, in part, with funding and support from the United States Government. (see Acknowledgments file).
 
 # DM22-1011
-s
 import sys
 import os.path
 import argparse
