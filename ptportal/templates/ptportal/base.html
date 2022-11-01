@@ -1,21 +1,21 @@
+<!-- Risk & Vulnerability Assessment Reporting Engine
+
+Copyright 2022 The Risk & Vulnerability Reporting Engine Contributors, All Rights Reserved.
+(see Contributors.txt for a full list of Contributors)
+
+SPDX-License-Identifier: BSD-3-Clause
+
+Please see additional acknowledgments (including references to third party source code, object code, documentation and other files) in the license.txt file or contact permission@sei.cmu.edu for full terms.
+
+Created, in part, with funding and support from the United States Government. (see Acknowledgments file).
+
+DM22-1011
+ -->
 <html>
 
   <head>
     <!-- Bootstrap CSS -->
     {% load static %}
-
-    <link href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ STATIC_URL }}bootstrap/css/styles.css">
-
-    <!-- Bootstrap CSS Extensions -->
-    <!-- <link href="{{ STATIC_URL }}css/bootstrap-select.min.css" rel="stylesheet" /> -->
-    <link href="{{ STATIC_URL }}bootstrap/css/bootstrap-datepicker3.css" rel="stylesheet" />
-    <link href="{{ STATIC_URL }}css/dataTables.bootstrap4.min.css" rel="stylesheet" />
-
-    <!-- External CSS -->
-    <link href="{{ STATIC_URL }}css/all.css" rel="stylesheet" />
-    <link href="{{ STATIC_URL }}css/opensans.css" rel="stylesheet" />
-    <link href="{{ STATIC_URL }}css/datetimepicker.min.css" rel="stylesheet" />
 
     <!-- SDS CSS -->
     <link href="{% static 'css/sds.tailwind.css' %}" rel="stylesheet" />
@@ -27,54 +27,12 @@
     <!-- Page Specific CSS -->
     {% block style %}
     <!-- Load styles from content pages -->{% endblock %}
-
-    <!-- JQuery -->
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-3.3.1.min.js"></script>
-
-    <!-- Bootstrap JS -->
-    <script type="text/javascript" src="{{ STATIC_URL }}js/popper.min.js"></script>
-
-    <script type="text/javascript" src="{{ STATIC_URL}}js/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap.min.js"></script>
-
-    <!-- Javascript Libraries -->
-    <!-- Bootstrap Date-Picker Plugin https://github.com/eternicode/bootstrap-datepicker -->
-    <script src="{{ STATIC_URL }}bootstrap/js/bootstrap-datepicker.min.js"></script>
-
-    <!-- <script type="text/javascript" src="{{ STATIC_URL}}/js/bootstrap-select.min.js"></script> -->
-
-    <script type="text/javascript" src="{{ STATIC_URL}}/js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL}}/js/dataTables.bootstrap4.min.js"></script>
-    <script src="{{ STATIC_URL }}js/dom-text.js"></script>
-    <link href="{{ STATIC_URL }}css/editor.dataTables.min.css" rel="stylesheet" />
-    <script src="{{ STATIC_URL}}/js/radioGroup.js"></script>
-    <script src="{{ STATIC_URL}}/js/radioButton.js"></script>
-
     <link rel="apple-touch-icon" sizes="180x180" href="{{ STATIC_URL }}Favicon_Package/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ STATIC_URL }}Favicon_Package/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ STATIC_URL }}Favicon_Package/favicon-16x16.png">
     <link rel="manifest" href="{{ STATIC_URL }}Favicon_Package//site.webmanifest">
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="theme-color" content="#ffffff">
-
-    <!-- Add-in External JS -->
-    <script src="{{ STATIC_URL }}js/datetimepicker.full.min.js"></script>
-    <script src="{{ STATIC_URL }}js/Chart.bundle.min.js"></script>
-    <script src="{{ STATIC_URL }}js/chartjs-plugin-datalabels.js"></script>
-    <script src="{{ STATIC_URL }}js/chartjs-plugin-piechart-outlabels.js"></script>
-
-    <!-- select2 -->
-    <link href="{{ STATIC_URL }}css/select2.min.css" rel="stylesheet" />
-    <script src="{{ STATIC_URL }}js/select2.min.js"></script>
-    <link href="{{ STATIC_URL }}css/select2-bootstrap4.css" rel="stylesheet" />
-
-
-    <!-- selectize... the better select2...  -->
-    <link href="{{ STATIC_URL }}css/selectize.css" rel="stylesheet" />
-    <!-- <link href="{{ STATIC_URL }}css/selectize.default.css" rel="stylesheet" /> -->
-    <link href="{{ STATIC_URL }}css/selectize.bootstrap3.css" rel="stylesheet" />
-    <script src="{{ STATIC_URL }}js/selectize.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/preserve_on_blur.js"></script>
 
     <!-- Vue Compiler/Runtime-->
     <!-- Vue development version. Uncomment if you need prod.
@@ -89,20 +47,15 @@
 
     <!-- Custom CSS -->
     <link href="{{ STATIC_URL }}css/custom/sidebar-nav.css" rel="stylesheet" />
-    <link href="{{ STATIC_URL }}css/custom/dropzone-style.css" rel="stylesheet" />
     <link href="{{ STATIC_URL }}css/custom/sei-brand.css" rel="stylesheet" />
     <link href="{{ STATIC_URL }}css/custom/forms.css" rel="stylesheet" />
     <link href="{{ STATIC_URL }}css/custom/main.css" rel="stylesheet" />
 
-    <!--  Custom JS -->
-    <script src="{{ STATIC_URL }}js/custom/main.js"></script>
 
     <script>
       //Only runs the code once the DOM has been loaded.
       document.addEventListener("DOMContentLoaded", function()
       {
-        // Update the active block based on the page selected
-        $("{% block active %}{% endblock %}").addClass('bg-primary').removeClass('bg-transparent bg-dark');
 
         //Configuration of the main Vue App. Allows for page specific configuration as well.
         appConfiguration =
@@ -318,9 +271,6 @@
     <!-- Page Specific JavaScript-->
     {% block scripts %}
     <!-- Load scripts from content pages -->{% endblock %}
-
-    {% load notifications_tags %}
-    {% register_notify_callbacks callbacks='fill_notification_list, fill_notification_badge, alert_admin_users' %}
 
     {% if asmt_id %}
     <title>PT Portal {{report_type}}-{{asmt_id}}</title>

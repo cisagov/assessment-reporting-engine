@@ -1,18 +1,16 @@
-# Risk & Vulnerability Reporting Engine
+# Risk & Vulnerability Assessment Reporting Engine
 
-# Copyright 2022 Carnegie Mellon University.
+# Copyright 2022 The Risk & Vulnerability Reporting Engine Contributors, All Rights Reserved.
+# (see Contributors.txt for a full list of Contributors)
 
-# NO WARRANTY. THIS CARNEGIE MELLON UNIVERSITY AND SOFTWARE ENGINEERING INSTITUTE MATERIAL IS FURNISHED ON AN "AS-IS" BASIS. CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER EXPRESSED OR IMPLIED, AS TO ANY MATTER INCLUDING, BUT NOT LIMITED TO, WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY, OR RESULTS OBTAINED FROM USE OF THE MATERIAL. CARNEGIE MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
+# SPDX-License-Identifier: BSD-3-Clause
 
-# Released under a BSD (SEI)-style license, please see license.txt or contact permission@sei.cmu.edu for full terms.
+# Please see additional acknowledgments (including references to third party source code, object code, documentation and other files) in the license.txt file or contact permission@sei.cmu.edu for full terms.
 
-# [DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.  Please see Copyright notice for non-US Government use and distribution.
+# Created, in part, with funding and support from the United States Government. (see Acknowledgments file).
 
-# Carnegie Mellon® is registered in the U.S. Patent and Trademark Office by Carnegie Mellon University.
+# DM22-1011
 
-# This Software includes and/or makes use of Third-Party Software each subject to its own license.
-
-# DM22-0744
 from django.core.exceptions import ObjectDoesNotExist
 
 from django.shortcuts import redirect
@@ -33,8 +31,8 @@ from ...models import (
     Severities,
     PortMappingHost,
     Narrative,
-    Acronym, 
-    BaseFinding
+    Acronym,
+    BaseFinding,
 )
 
 from django.http import HttpResponse, JsonResponse
@@ -47,6 +45,7 @@ from django.contrib import messages
 
 import re
 import json
+
 
 def report_findings_counts():
     # Findings Breakdown counts
@@ -104,7 +103,6 @@ def report_findings_counts():
     findings_breakdown['Phishing_Low'] = low.intersection(phishing)
     findings_breakdown['Phishing_Info'] = informational.intersection(phishing)
     return findings_breakdown
-<<<<<<< HEAD
 
 
 def ajax_pwa_delete(request):
@@ -118,9 +116,6 @@ def ajax_pwa_delete(request):
         return JsonResponse({})
 
 
-=======
-    
->>>>>>> origin/PTP-1554
 def find_acronyms(text):
     """Finds acronyms in varoius models and attempts to identify definitions within the text the acronyms are located in.
 
@@ -365,77 +360,55 @@ class ReportUpdate(generic.edit.UpdateView):
             c.finding_ids = ', '.join(str(e) for e in finding_ids)
             c.save()
 
-<<<<<<< HEAD
+        # These have been moved from UploadedFindng to BaseFiding
         # NIST_800_53
-        context['nist_ac'] = UploadedFinding.objects.filter(
+        context['nist_ac'] = BaseFinding.objects.filter(
             NIST_800_53__icontains='AC'
         ).count()
-        context['nist_at'] = UploadedFinding.objects.filter(
+        context['nist_at'] = BaseFinding.objects.filter(
             NIST_800_53__icontains='AT'
         ).count()
-        context['nist_cm'] = UploadedFinding.objects.filter(
+        context['nist_cm'] = BaseFinding.objects.filter(
             NIST_800_53__icontains='CM'
         ).count()
-        context['nist_ia'] = UploadedFinding.objects.filter(
+        context['nist_ia'] = BaseFinding.objects.filter(
             NIST_800_53__icontains='IA'
         ).count()
-        context['nist_ra'] = UploadedFinding.objects.filter(
+        context['nist_ra'] = BaseFinding.objects.filter(
             NIST_800_53__icontains='RA'
         ).count()
-        context['nist_sc'] = UploadedFinding.objects.filter(
+        context['nist_sc'] = BaseFinding.objects.filter(
             NIST_800_53__icontains='SC'
         ).count()
-        context['nist_si'] = UploadedFinding.objects.filter(
+        context['nist_si'] = BaseFinding.objects.filter(
             NIST_800_53__icontains='SI'
         ).count()
 
         # NIST_CSF
-        context['nist_iam'] = UploadedFinding.objects.filter(
+        context['nist_iam'] = BaseFinding.objects.filter(
             NIST_CSF__icontains='ID.AM'
         ).count()
-        context['nist_ig'] = UploadedFinding.objects.filter(
+        context['nist_ig'] = BaseFinding.objects.filter(
             NIST_CSF__icontains='ID.GV'
         ).count()
-        context['nist_ira'] = UploadedFinding.objects.filter(
+        context['nist_ira'] = BaseFinding.objects.filter(
             NIST_CSF__icontains='ID.RA'
         ).count()
-        context['nist_pac'] = UploadedFinding.objects.filter(
+        context['nist_pac'] = BaseFinding.objects.filter(
             NIST_CSF__icontains='PR.AC'
         ).count()
-        context['nist_pat'] = UploadedFinding.objects.filter(
+        context['nist_pat'] = BaseFinding.objects.filter(
             NIST_CSF__icontains='PR.AT'
         ).count()
-        context['nist_pds'] = UploadedFinding.objects.filter(
+        context['nist_pds'] = BaseFinding.objects.filter(
             NIST_CSF__icontains='PR.DS'
         ).count()
-        context['nist_pip'] = UploadedFinding.objects.filter(
+        context['nist_pip'] = BaseFinding.objects.filter(
             NIST_CSF__icontains='PR.IP'
         ).count()
-        context['nist_ppt'] = UploadedFinding.objects.filter(
+        context['nist_ppt'] = BaseFinding.objects.filter(
             NIST_CSF__icontains='PR.PT'
         ).count()
-=======
-
-        # These have been moved from UploadedFindng to BaseFiding
-        # NIST_800_53
-        context['nist_ac']=BaseFinding.objects.filter(NIST_800_53__icontains='AC').count()
-        context['nist_at']=BaseFinding.objects.filter(NIST_800_53__icontains='AT').count()
-        context['nist_cm']=BaseFinding.objects.filter(NIST_800_53__icontains='CM').count()
-        context['nist_ia']=BaseFinding.objects.filter(NIST_800_53__icontains='IA').count()
-        context['nist_ra']=BaseFinding.objects.filter(NIST_800_53__icontains='RA').count()
-        context['nist_sc']=BaseFinding.objects.filter(NIST_800_53__icontains='SC').count()
-        context['nist_si']=BaseFinding.objects.filter(NIST_800_53__icontains='SI').count()
-
-        # NIST_CSF
-        context['nist_iam']=BaseFinding.objects.filter(NIST_CSF__icontains='ID.AM').count()
-        context['nist_ig']=BaseFinding.objects.filter(NIST_CSF__icontains='ID.GV').count()
-        context['nist_ira']=BaseFinding.objects.filter(NIST_CSF__icontains='ID.RA').count()
-        context['nist_pac']=BaseFinding.objects.filter(NIST_CSF__icontains='PR.AC').count()
-        context['nist_pat']=BaseFinding.objects.filter(NIST_CSF__icontains='PR.AT').count()
-        context['nist_pds']=BaseFinding.objects.filter(NIST_CSF__icontains='PR.DS').count()
-        context['nist_pip']=BaseFinding.objects.filter(NIST_CSF__icontains='PR.IP').count()
-        context['nist_ppt']=BaseFinding.objects.filter(NIST_CSF__icontains='PR.PT').count()
->>>>>>> origin/PTP-1554
 
         context['port_mapping'] = PortMappingHost.objects.all()
 
@@ -448,18 +421,12 @@ class ReportUpdate(generic.edit.UpdateView):
         # Report: All game
         # Narrative:
         collect_acronyms()
-<<<<<<< HEAD
+
         acronyms = Acronym.objects.filter(belongs_to_report=report_data).order_by(
             'acronym'
         )
-        formset = AcronymFormSet(queryset=acronyms)
-        context['acronym_formset'] = formset
-
-=======
-        acronyms = Acronym.objects.filter(belongs_to_report=report_data).order_by('acronym')
         context['acronyms'] = acronyms
-    
->>>>>>> origin/PTP-1554
+
         return context
 
     def post(
@@ -469,96 +436,32 @@ class ReportUpdate(generic.edit.UpdateView):
             request
         )  # Clears the messages to eliminate duplicates alerts in template
         report = Report.object()
-<<<<<<< HEAD
-        self.object = self.get_object()
-        context = super().get_context_data(**kwargs)
-        form = self.get_form()
-        if form.is_valid():
-            print("form is valid!")
-            form_instance = form.save()
-        else:
-            print('report form errors:')
-            print(form.errors)
-            return super().post(self, request, *args, **kwargs)
 
-        acr = AcronymFormSet(self.request.POST)
-
-        if acr.is_valid():
-            for fs in acr:
-                if fs.is_valid():
-                    # The form won't detect the empty field at first for some reason. Here we just check to make sure they at least gave an acronym.
-                    instance = fs.save(commit=False)
-                    if instance.acronym == "":
-                        continue
-                    instance.belongs_to_report = report
-                    instance.save()
-                else:
-                    print('acronym form errors:')
-                    print(fs.errors)
-        else:
-            print('acronym formset errors:')
-            print(acr.errors)
-            return super().post(self, request, *args, **kwargs)
-
-        if 'domains-csv' in request.FILES:
-            report_read_csv(request.FILES['domains-csv'], "domains")
-
-        if 'emails-csv' in request.FILES:
-            row_count = report_read_csv(request.FILES['emails-csv'], "emails")
-            # report.emails_breached = row_count
-            if row_count:
-                messages.success(
-                    request,
-                    " Uploaded Emails Breached From File ",
-                    extra_tags="alert-success",
-                )
-            else:
-                messages.warning(
-                    request,
-                    " Failed To Upload Emails Breached From File ",
-                    extra_tags="alert-warning",
-                )
-        if 'emails_breached' in request.POST and 'emails_identified' in request.POST:
-            emails_breached = int(request.POST['emails_breached'])
-            emails_identified = int(request.POST['emails_identified'])
-            if emails_breached > 0 and emails_identified > 0:
-                report.email_percentage = (
-                    str("{:.2f}".format((emails_breached / emails_identified) * 100))
-                    + "%"
-                )
-
-        if 'password-analysis-txt' in request.FILES:
-            report.password_analysis = report_read_pwa(
-                request.FILES['password-analysis-txt']
-            )
-
-        report.save()
-
-        super().post(request, *args, **kwargs)
-
-        return redirect('report')
-=======
         postData = json.loads(request.body)
-        
+
         reportForm = ReportForm(postData, instance=report)
         if reportForm.is_valid():
             reportForm.save()
         else:
             return HttpResponse(status=400, reason=reportForm.errors)
-        
+
         RPTIdentifiedNetworks.objects.all().delete()
         for network in postData['networks']:
-            RPTIdentifiedNetworks.objects.create(ip_address=network['network'],
-                                                domain=network['domain'],
-                                                registrant=network['registrant'],
-                                                belongs_to_report=report)
-                
+            RPTIdentifiedNetworks.objects.create(
+                ip_address=network['network'],
+                domain=network['domain'],
+                registrant=network['registrant'],
+                belongs_to_report=report,
+            )
+
         RPTBreachedEmails.objects.all().delete()
         for email in postData['emails']:
-            RPTBreachedEmails.objects.create(breached_email=email['email'],
-                                             breach_info=email['breach'],
-                                             belongs_to_report=report)
-        
+            RPTBreachedEmails.objects.create(
+                breached_email=email['email'],
+                breach_info=email['breach'],
+                belongs_to_report=report,
+            )
+
         for acronym in postData['acronyms']:
             if acronym['hash']:
                 acronymObject = Acronym.objects.get(original_hash=acronym['hash'])
@@ -569,11 +472,12 @@ class ReportUpdate(generic.edit.UpdateView):
                 acronymObject.include = acronym['include']
                 acronymObject.save()
             else:
-                Acronym.objects.create(acronym=acronym['acronym'], 
-                                       definition=acronym['definition'], 
-                                       context=acronym['context'], 
-                                       auto_found=acronym['auto'], 
-                                       include=acronym['include'])
-        
+                Acronym.objects.create(
+                    acronym=acronym['acronym'],
+                    definition=acronym['definition'],
+                    context=acronym['context'],
+                    auto_found=acronym['auto'],
+                    include=acronym['include'],
+                )
+
         return HttpResponse(status=200)
->>>>>>> origin/PTP-1554

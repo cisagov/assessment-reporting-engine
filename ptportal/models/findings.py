@@ -1,18 +1,16 @@
-# Risk & Vulnerability Reporting Engine
+# Risk & Vulnerability Assessment Reporting Engine
 
-# Copyright 2022 Carnegie Mellon University.
+# Copyright 2022 The Risk & Vulnerability Reporting Engine Contributors, All Rights Reserved.
+# (see Contributors.txt for a full list of Contributors)
 
-# NO WARRANTY. THIS CARNEGIE MELLON UNIVERSITY AND SOFTWARE ENGINEERING INSTITUTE MATERIAL IS FURNISHED ON AN "AS-IS" BASIS. CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER EXPRESSED OR IMPLIED, AS TO ANY MATTER INCLUDING, BUT NOT LIMITED TO, WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY, OR RESULTS OBTAINED FROM USE OF THE MATERIAL. CARNEGIE MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
+# SPDX-License-Identifier: BSD-3-Clause
 
-# Released under a BSD (SEI)-style license, please see license.txt or contact permission@sei.cmu.edu for full terms.
+# Please see additional acknowledgments (including references to third party source code, object code, documentation and other files) in the license.txt file or contact permission@sei.cmu.edu for full terms.
 
-# [DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.  Please see Copyright notice for non-US Government use and distribution.
+# Created, in part, with funding and support from the United States Government. (see Acknowledgments file).
 
-# Carnegie Mellon® is registered in the U.S. Patent and Trademark Office by Carnegie Mellon University.
+# DM22-1011
 
-# This Software includes and/or makes use of Third-Party Software each subject to its own license.
-
-# DM22-0744
 from django.db import models
 from django.db.models import Sum
 from django.template.defaultfilters import slugify
@@ -63,7 +61,7 @@ class AffectedSystems(models.Model):
         if self.ip:
             sets = [int(x) for x in self.ip.split('.')]
             self.ip_int = (
-                sets[0] * 256 ** 3 + sets[1] * 256 ** 2 + sets[2] * 256 + sets[3]
+                sets[0] * 256**3 + sets[1] * 256**2 + sets[2] * 256 + sets[3]
             )
             self.name = self.ip
         super().save()
@@ -165,14 +163,12 @@ class KEV(models.Model):
 class Category(abstract_models.TimeStampedModel):
 
     name = models.CharField(max_length=51, unique=True)
-    remediation = models.TextField(verbose_name="Remediation",
-                                   blank=True)
-    description = models.TextField(verbose_name="Description", 
-                                    blank=True)
-    resources = models.TextField(verbose_name="Resources",
-                                   blank=True)
-    cat_id = models.CharField(max_length=50, verbose_name='Category ID', unique=True, default=0)
-
+    remediation = models.TextField(verbose_name="Remediation", blank=True)
+    description = models.TextField(verbose_name="Description", blank=True)
+    resources = models.TextField(verbose_name="Resources", blank=True)
+    cat_id = models.CharField(
+        max_length=50, verbose_name='Category ID', unique=True, default=0
+    )
 
     def __str__(self):
         return self.name
@@ -184,17 +180,22 @@ class Category(abstract_models.TimeStampedModel):
 class BaseFinding(abstract_models.TimeStampedModel):
     name = models.CharField(max_length=100)
 
-    finding_id = models.CharField(max_length=50, verbose_name='Finding ID', unique=True, default=0)
+    finding_id = models.CharField(
+        max_length=50, verbose_name='Finding ID', unique=True, default=0
+    )
 
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Category", blank=True, null=True, to_field='name')
-    description = models.TextField(verbose_name="Description", 
-                                    blank=True)
-    remediation = models.TextField(verbose_name="Standard Remediation",
-                                   blank=True)
-    references = models.TextField(verbose_name="References",
-                                   blank=True)
-    resources = models.TextField(verbose_name="Resources",
-                                   blank=True)
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.CASCADE,
+        verbose_name="Category",
+        blank=True,
+        null=True,
+        to_field='name',
+    )
+    description = models.TextField(verbose_name="Description", blank=True)
+    remediation = models.TextField(verbose_name="Standard Remediation", blank=True)
+    references = models.TextField(verbose_name="References", blank=True)
+    resources = models.TextField(verbose_name="Resources", blank=True)
 
     severity = models.CharField(max_length=14, default='TBD')
     assessment_type = models.TextField(

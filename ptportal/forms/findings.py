@@ -1,18 +1,16 @@
-# Risk & Vulnerability Reporting Engine
+# Risk & Vulnerability Assessment Reporting Engine
 
-# Copyright 2022 Carnegie Mellon University.
+# Copyright 2022 The Risk & Vulnerability Reporting Engine Contributors, All Rights Reserved.
+# (see Contributors.txt for a full list of Contributors)
 
-# NO WARRANTY. THIS CARNEGIE MELLON UNIVERSITY AND SOFTWARE ENGINEERING INSTITUTE MATERIAL IS FURNISHED ON AN "AS-IS" BASIS. CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER EXPRESSED OR IMPLIED, AS TO ANY MATTER INCLUDING, BUT NOT LIMITED TO, WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY, OR RESULTS OBTAINED FROM USE OF THE MATERIAL. CARNEGIE MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
+# SPDX-License-Identifier: BSD-3-Clause
 
-# Released under a BSD (SEI)-style license, please see license.txt or contact permission@sei.cmu.edu for full terms.
+# Please see additional acknowledgments (including references to third party source code, object code, documentation and other files) in the license.txt file or contact permission@sei.cmu.edu for full terms.
 
-# [DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.  Please see Copyright notice for non-US Government use and distribution.
+# Created, in part, with funding and support from the United States Government. (see Acknowledgments file).
 
-# Carnegie Mellon® is registered in the U.S. Patent and Trademark Office by Carnegie Mellon University.
+# DM22-1011
 
-# This Software includes and/or makes use of Third-Party Software each subject to its own license.
-
-# DM22-0744
 from django import forms
 from django.forms.models import modelformset_factory
 from django.contrib.contenttypes.forms import generic_inlineformset_factory
@@ -51,12 +49,37 @@ class UploadedFindingForm(BaseModelForm):
 
     class Meta:
         model = UploadedFinding
-        exclude = ('uploaded_finding_name', 'uploaded_finding_id', 'business_description', 'NIST_800_53', 'NIST_CSF', 'slug', 'created_at', 'updated_at', 'screenshot_description', 'campaign_description', 'payload_description', 'data_exfil_description')
-        widgets = {'finding': forms.RadioSelect({'class':'form-check-input', 'required':True}),
-                   'severity': forms.RadioSelect({'class':'form-check-input', 'required':True}),
-                   'assessment_type': forms.RadioSelect({'class':'form-check-input', 'required':True}),
-                   'discovery': forms.RadioSelect({'class':'form-check-input', 'required':True}),
-                   'mitigation': forms.RadioSelect({'class':'form-check-input', 'required':True})}
+        exclude = (
+            'uploaded_finding_name',
+            'uploaded_finding_id',
+            'business_description',
+            'NIST_800_53',
+            'NIST_CSF',
+            'slug',
+            'created_at',
+            'updated_at',
+            'screenshot_description',
+            'campaign_description',
+            'payload_description',
+            'data_exfil_description',
+        )
+        widgets = {
+            'finding': forms.RadioSelect(
+                {'class': 'form-check-input', 'required': True}
+            ),
+            'severity': forms.RadioSelect(
+                {'class': 'form-check-input', 'required': True}
+            ),
+            'assessment_type': forms.RadioSelect(
+                {'class': 'form-check-input', 'required': True}
+            ),
+            'discovery': forms.RadioSelect(
+                {'class': 'form-check-input', 'required': True}
+            ),
+            'mitigation': forms.RadioSelect(
+                {'class': 'form-check-input', 'required': True}
+            ),
+        }
 
 
 class EditUploadedFindingForm(BaseModelForm):
@@ -116,6 +139,7 @@ class EditUploadedFindingForm(BaseModelForm):
                 {'class': 'form-check-input', 'required': True}
             ),
         }
+
 
 class FindingForm(BaseModelForm):
     def __init__(self, *args, **kwargs):

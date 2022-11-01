@@ -1,19 +1,16 @@
+# Risk & Vulnerability Assessment Reporting Engine
 
-# Risk & Vulnerability Reporting Engine
+# Copyright 2022 The Risk & Vulnerability Reporting Engine Contributors, All Rights Reserved.
+# (see Contributors.txt for a full list of Contributors)
 
-# Copyright 2022 Carnegie Mellon University.
+# SPDX-License-Identifier: BSD-3-Clause
 
-# NO WARRANTY. THIS CARNEGIE MELLON UNIVERSITY AND SOFTWARE ENGINEERING INSTITUTE MATERIAL IS FURNISHED ON AN "AS-IS" BASIS. CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER EXPRESSED OR IMPLIED, AS TO ANY MATTER INCLUDING, BUT NOT LIMITED TO, WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY, OR RESULTS OBTAINED FROM USE OF THE MATERIAL. CARNEGIE MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
+# Please see additional acknowledgments (including references to third party source code, object code, documentation and other files) in the license.txt file or contact permission@sei.cmu.edu for full terms.
 
-# Released under a BSD (SEI)-style license, please see license.txt or contact permission@sei.cmu.edu for full terms.
+# Created, in part, with funding and support from the United States Government. (see Acknowledgments file).
 
-# [DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.  Please see Copyright notice for non-US Government use and distribution.
+# DM22-1011
 
-# Carnegie Mellon® is registered in the U.S. Patent and Trademark Office by Carnegie Mellon University.
-
-# This Software includes and/or makes use of Third-Party Software each subject to its own license.
-
-# DM22-0744
 from django.core.management import BaseCommand
 from ptportal.models import Report
 

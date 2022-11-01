@@ -36,8 +36,9 @@ class Report(abstract_models.TimeStampedModel):
     hosts_IDd_ext = models.CharField(max_length=10, blank=True)
     hosts_IDd_int = models.CharField(max_length=10, blank=True)
     users_phished = models.CharField(max_length=10, blank=True)
-    password_analysis = models.TextField(blank=True,
-                                        help_text='Use Code View to edit the password analysis content.')
+    password_analysis = models.TextField(
+        blank=True, help_text='Use Code View to edit the password analysis content.'
+    )
 
     # payload_description = models.TextField(
     #     blank=True, verbose_name='Payload Description'
@@ -59,11 +60,11 @@ class Report(abstract_models.TimeStampedModel):
     phishing_results_susceptibility = models.TextField(blank=True)
     noted_system_strengths = models.TextField(blank=True)
 
-    #for RPT app B:
-    emails_identified = models.IntegerField(default=0000, blank= True)
-    emails_breached = models.IntegerField(default=0000, blank= True)
-    credentials_identified = models.IntegerField(default=0000, blank= True)
-    credentials_validated = models.IntegerField(default=0000, blank= True)
+    # for RPT app B:
+    emails_identified = models.IntegerField(default=0000, blank=True)
+    emails_breached = models.IntegerField(default=0000, blank=True)
+    credentials_identified = models.IntegerField(default=0000, blank=True)
+    credentials_validated = models.IntegerField(default=0000, blank=True)
     email_percentage = models.TextField(default="0%", blank=True)
 
     class Meta:

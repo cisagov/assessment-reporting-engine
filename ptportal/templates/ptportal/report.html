@@ -1,14 +1,28 @@
+<!-- Risk & Vulnerability Assessment Reporting Engine
+
+Copyright 2022 The Risk & Vulnerability Reporting Engine Contributors, All Rights Reserved.
+(see Contributors.txt for a full list of Contributors)
+
+SPDX-License-Identifier: BSD-3-Clause
+
+Please see additional acknowledgments (including references to third party source code, object code, documentation and other files) in the license.txt file or contact permission@sei.cmu.edu for full terms.
+
+Created, in part, with funding and support from the United States Government. (see Acknowledgments file).
+
+DM22-1011
+ -->
+
 {% extends 'ptportal/base.html' %}
 {% block active %}#report{% endblock %}
 
 {% block style %}
 <style>
     .header{
-        padding: 10px;  
+        padding: 10px;
         background: white;
         color: black;
         font-size: 20px;
-        position: relative; 
+        position: relative;
         top: -15px;
         margin-left: -18px;
         margin-right: -20px;
@@ -16,7 +30,7 @@
     .float-right{
 		right: 50px !important;
 		position: relative !important;
-		
+
 	}
     .col-span-5{
         border-top:1px solid black!important;
@@ -61,14 +75,14 @@
 					<sds-badge class="float-right">TLP: {{ eng_meta.traffic_light_protocol }}</sds-badge>
 					{% endif %}
 				</div>
-				
+
 				<h2 id="resultSummary"><b>Summary of Results</b></h2>
 				<la>
 					<br>
 				<span class="text-sm text-gray-600">
 					<p>The Department of Homeland Security (DHS) Cybersecurity and Infrastructure Security Agency (CISA) Assessments team conducted a {% if report_type == 'RPT' %}Remote Penetration Test (RPT){% elif report_type == 'HVA' %}High Value Asset (HVA){% else %}Risk and Vulnerability Assessment (RVA){% endif %} at the request of the <mark>{% if eng_meta %} {{eng_meta.customer_long_name}} ({{eng_meta.customer_initials}}){% else %}CUSTOMER NAME (ACRONYM){% endif %}</mark>. <mark>{% if eng_meta %}{{eng_meta.team_lead_name}} ({{eng_meta.team_lead_email}}){% else %}CISA TEAM LEADER (EMAIL){% endif %}</mark> led a CISA Assessment Team remotely{% if report_type != 'RPT' %} and on site at &lsaquo;address&rsaquo; {% endif %}from {% if eng_meta %}{{eng_dates}}{% endif %}.</p>
 				</span>
-				
+
 				<br><p class="text-sm">During testing CISA successfully compromised the following:</p>
 				<sds-textarea placeholder="Type a description of the results in this field" v-model="formData.cisa_results" rows="3"></sds-textarea>
 				<br>
@@ -93,10 +107,10 @@
 					<br>
 					<apexchart height="500" width="100%" :options="findingTableArgs.options" :series="findingTableArgs.data"></apexchart>
 					<span class="text-sm text-gray-600">
-						<p>CISA identified {{findings_breakdown.Critical.count|num_to_word}} ({{findings_breakdown.Critical.count}}) critical-severity {% if findings_breakdown.Critical.count == 1 %}finding{% else %}findings{% endif %}, 
-							{{findings_breakdown.High.count|num_to_word}} ({{findings_breakdown.High.count}}) high-severity  {% if findings_breakdown.High.count == 1 %}finding{% else %}findings{% endif %}, 
-							{{findings_breakdown.Medium.count|num_to_word}} ({{findings_breakdown.Medium.count}}) medium-severity {% if findings_breakdown.Medium.count == 1 %}finding{% else %}findings{% endif %}, 
-							{{findings_breakdown.Low.count|num_to_word}} ({{findings_breakdown.Low.count}}) low-severity {% if findings_breakdown.Low.count == 1 %}finding{% else %}findings{% endif %}, and 
+						<p>CISA identified {{findings_breakdown.Critical.count|num_to_word}} ({{findings_breakdown.Critical.count}}) critical-severity {% if findings_breakdown.Critical.count == 1 %}finding{% else %}findings{% endif %},
+							{{findings_breakdown.High.count|num_to_word}} ({{findings_breakdown.High.count}}) high-severity  {% if findings_breakdown.High.count == 1 %}finding{% else %}findings{% endif %},
+							{{findings_breakdown.Medium.count|num_to_word}} ({{findings_breakdown.Medium.count}}) medium-severity {% if findings_breakdown.Medium.count == 1 %}finding{% else %}findings{% endif %},
+							{{findings_breakdown.Low.count|num_to_word}} ({{findings_breakdown.Low.count}}) low-severity {% if findings_breakdown.Low.count == 1 %}finding{% else %}findings{% endif %}, and
 							{{findings_breakdown.Info.count|num_to_word}} ({{findings_breakdown.Info.count}}) informational-severity {% if findings_breakdown.Info.count == 1 %}finding{% else %}findings{% endif %}.
 						</p>
 					</span>
@@ -177,7 +191,7 @@
 						{% for c in cis_csc %}
 						<tr class="text-center">
 							<td>{{c.CIS_ID}}</td>
-							<td class ="text-left">{{c.name}}</td>	
+							<td class ="text-left">{{c.name}}</td>
 							<td class ="text-left">{{c.finding_ids}}</td>
 						</tr>
 						{% endfor %}
@@ -192,7 +206,7 @@
 						<br>
 						<p>See <a href="#appendix-a">Appendix A</a> for definitions of each level of severity (Critical/High/Medium/Low/Informational).</p>
 					</span>
-					
+
 					{% for item in uploaded_list %}
 						<div class="relative flex flex-col min-w-0 break-words bg-clip-border border rounded border-black/[.125]" style="background-color: rgb(239 239 239)">
 						<table style="font-family: Helvetica; color: #212529;" class="table w-full mb-1 indent-0 border-inherit border-collapse">
@@ -218,7 +232,7 @@
 									{% elif item.mitigation == False %}
 									<td>No</td>
 									{% endif %}
-									
+
 								</tr>
 							</tbody>
 						</table>
@@ -231,10 +245,10 @@
 								<tr><th>Recommended Mitigation</th></tr>
 							</thead>
 							<tbody><tr><td>{{item.remediation}}</td></tr></tbody>
-							
+
 
 							</td></tr>
-						
+
 							<thead>
 								<tr><th>Relevant Screenshots</th></tr>
 							</thead>
@@ -315,8 +329,8 @@
 						<p>Once an organization’s domains have been identified, an attacker then attempts to identify specific networks and servers.</p>
 						<sds-table class="table-prose mb-4" v-bind="networkTableArgs"></sds-table>
 
-						<p>Publicly available resources, such as search engines and blogs, can be searched to identify email addresses associated with the target organization. 
-					
+						<p>Publicly available resources, such as search engines and blogs, can be searched to identify email addresses associated with the target organization.
+
 						<div class="inline flex content-center items-center">
 							<sds-input class="w-32" v-model="formData.emails_identified" placeholder="# of identified emails" @update:model-value="updatePercentage"></sds-input>
 							<p class="ml-2"> email addresses were identified by the attacker.</p>
@@ -331,7 +345,7 @@
 						</div>
 
 						<p class="mb-4">Through Open Source Intelligence gathering, a prospective attacker could readily determine that <b>[[formData.email_percentage]]</b> of email addresses associated with the <mark>{{eng_meta.customer_initials}}</mark> were involved in previous data breaches.</p>
-						
+
 						<sds-file-uploader accept=".csv" allowedFiletypes=["text/csv"] name="emailUpload"></sds-file-uploader>
 						<div class="flex gap-4 mb-4 mt-4">
 							<sds-button variant="primary" @click="uploadEmailCSV">Upload CSV</sds-button>
@@ -339,7 +353,7 @@
 						</div>
 
 						<sds-table v-bind="emailTableArgs" class="table-prose mb-4"></sds-table>
-						
+
 						<div class="inline flex content-center items-center">
 							<sds-input class="w-32" v-model="formData.credentials_identified" placeholder="# of identified creds"></sds-input>
 							<p class="ml-2">sets of credentials (emails and passwords) identified in the wild.</p>
@@ -348,7 +362,7 @@
 							<sds-input class="w-32" v-model="formData.credentials_validated" placeholder="# of validated creds"></sds-input>
 							<p class="ml-2">sets of credentials were validated.</p>
 						</div>
-					
+
 						<hr><br>
 
 						<div class="pad" id="appendix-b">
@@ -835,7 +849,7 @@
 				else {
 					this.formData.email_percentage = Math.round(parseFloat(this.formData.emails_breached)/parseFloat(this.formData.emails_identified) * 100).toString() + "%"
 				}
-				
+
 			}
 		}
 		return functions

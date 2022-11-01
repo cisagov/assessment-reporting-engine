@@ -1,12 +1,23 @@
 # -*- coding: utf-8 -*-
+# Risk & Vulnerability Assessment Reporting Engine
+
+# Copyright 2022 The Risk & Vulnerability Reporting Engine Contributors, All Rights Reserved.
+# (see Contributors.txt for a full list of Contributors)
+
+# SPDX-License-Identifier: BSD-3-Clause
+
+# Please see additional acknowledgments (including references to third party source code, object code, documentation and other files) in the license.txt file or contact permission@sei.cmu.edu for full terms.
+
+# Created, in part, with funding and support from the United States Government. (see Acknowledgments file).
+
+# DM22-1011
 
 import re
 
 
 class Payload(object):
-
     def __init__(self, data, asmt_id=None):
-        """ JSON Related Fields """
+        """JSON Related Fields"""
         if asmt_id:
             self.asmt_id = asmt_id
         else:
@@ -27,7 +38,7 @@ class Payload(object):
         self.technique_mapping = {}
 
     def concatenation(self):
-        """ Concatenates All Attributes to Generate Long Filename """
+        """Concatenates All Attributes to Generate Long Filename"""
         longname = ""
         longname += self.filetype.upper() + "-"
 
@@ -35,80 +46,124 @@ class Payload(object):
             longname += self.codetype + "-"
 
         for i in range(len(self.techniques)):
-            if i == (len(self.techniques)-1):
+            if i == (len(self.techniques) - 1):
                 longname += str(self.techniques[i])
             else:
                 longname += str(self.techniques[i]) + "-"
 
         self.filename = longname
-        #print(self.payload_description)
-        #print(self.techniques)
-        #print(self.filename)
+        # print(self.payload_description)
+        # print(self.techniques)
+        # print(self.filename)
 
     def build_demo_1(self, technique_map):
-        """ Build Technique Map with Captured Techniques """
+        """Build Technique Map with Captured Techniques"""
 
         for technique in self.techniques:
-            """ Break Down Sub Technique """
+            """Break Down Sub Technique"""
             if "." in str(technique):
                 tech, sub = str(technique).split(".")
                 if tech in technique_map:
                     for sub_tech in technique_map[tech].sub_techniques:
                         if tech not in self.technique_mapping:
                             self.technique_mapping[technique_map[tech].id] = {}
-                            self.technique_mapping[technique_map[tech].id]["name"] = technique_map[tech].name
-                            if "sub_techniques" not in self.technique_mapping[technique_map[tech].id]:
-                                self.technique_mapping[technique_map[tech].id]["sub_techniques"] = {}
+                            self.technique_mapping[technique_map[tech].id][
+                                "name"
+                            ] = technique_map[tech].name
+                            if (
+                                "sub_techniques"
+                                not in self.technique_mapping[technique_map[tech].id]
+                            ):
+                                self.technique_mapping[technique_map[tech].id][
+                                    "sub_techniques"
+                                ] = {}
 
-                        if re.match(str(sub),str(sub_tech.id)):
-                            self.technique_mapping[technique_map[tech].id]["sub_techniques"][sub_tech.id] = sub_tech.name
+                        if re.match(str(sub), str(sub_tech.id)):
+                            self.technique_mapping[technique_map[tech].id][
+                                "sub_techniques"
+                            ][sub_tech.id] = sub_tech.name
 
                     if "tactics" not in self.technique_mapping[technique_map[tech].id]:
                         self.technique_mapping[technique_map[tech].id]["tactics"] = {}
 
                     for tactic_name, tactic in technique_map[tech].tactics.items():
-                        self.technique_mapping[technique_map[tech].id]["tactics"][tactic.id] = tactic_name
+                        self.technique_mapping[technique_map[tech].id]["tactics"][
+                            tactic.id
+                        ] = tactic_name
             else:
                 if technique in technique_map:
                     if technique not in self.technique_mapping:
                         self.technique_mapping[technique_map[technique].id] = {}
-                        self.technique_mapping[technique_map[technique].id]["name"] = technique_map[technique].name
+                        self.technique_mapping[technique_map[technique].id][
+                            "name"
+                        ] = technique_map[technique].name
 
-                    if "tactics" not in self.technique_mapping[technique_map[technique].id]:
-                        self.technique_mapping[technique_map[technique].id]["tactics"] = {}
+                    if (
+                        "tactics"
+                        not in self.technique_mapping[technique_map[technique].id]
+                    ):
+                        self.technique_mapping[technique_map[technique].id][
+                            "tactics"
+                        ] = {}
 
                     for tactic_name, tactic in technique_map[technique].tactics.items():
-                        self.technique_mapping[technique_map[technique].id]["tactics"][tactic.id] = tactic_name
+                        self.technique_mapping[technique_map[technique].id]["tactics"][
+                            tactic.id
+                        ] = tactic_name
 
     def construct_payload_to_technique_map(self, technique_map):
-        """ Build Technique Map with Captured Techniques """
+        """Build Technique Map with Captured Techniques"""
 
         for technique in self.techniques:
-            """ Break Down Sub Technique """
+            """Break Down Sub Technique"""
             if "." in str(technique):
                 tech, sub = str(technique).split(".")
                 if tech in technique_map:
 
                     for sub_tech in technique_map[tech].sub_techniques:
                         if tech + "." + sub not in self.technique_mapping:
-                            self.technique_mapping[technique_map[tech].id + "." + sub] = {}
+                            self.technique_mapping[
+                                technique_map[tech].id + "." + sub
+                            ] = {}
 
-                        if re.match(str(sub),str(sub_tech.id)):
-                            self.technique_mapping[technique_map[tech].id + "." + sub]["name"] = sub_tech.name
+                        if re.match(str(sub), str(sub_tech.id)):
+                            self.technique_mapping[technique_map[tech].id + "." + sub][
+                                "name"
+                            ] = sub_tech.name
 
-                    if "tactics" not in self.technique_mapping[technique_map[tech].id + "." + sub]:
-                        self.technique_mapping[technique_map[tech].id + "." + sub]["tactics"] = {}
+                    if (
+                        "tactics"
+                        not in self.technique_mapping[
+                            technique_map[tech].id + "." + sub
+                        ]
+                    ):
+                        self.technique_mapping[technique_map[tech].id + "." + sub][
+                            "tactics"
+                        ] = {}
 
                     for tactic_name, tactic in technique_map[tech].tactics.items():
-                        self.technique_mapping[technique_map[tech].id + "." + sub]["tactics"][tactic.id] = tactic_name
+                        self.technique_mapping[technique_map[tech].id + "." + sub][
+                            "tactics"
+                        ][tactic.id] = tactic_name
             else:
                 if str(technique) in technique_map:
                     if str(technique) not in self.technique_mapping:
                         self.technique_mapping[technique_map[str(technique)].id] = {}
-                        self.technique_mapping[technique_map[str(technique)].id]["name"] = technique_map[str(technique)].name
+                        self.technique_mapping[technique_map[str(technique)].id][
+                            "name"
+                        ] = technique_map[str(technique)].name
 
-                    if "tactics" not in self.technique_mapping[technique_map[str(technique)].id]:
-                        self.technique_mapping[technique_map[str(technique)].id]["tactics"] = {}
+                    if (
+                        "tactics"
+                        not in self.technique_mapping[technique_map[str(technique)].id]
+                    ):
+                        self.technique_mapping[technique_map[str(technique)].id][
+                            "tactics"
+                        ] = {}
 
-                    for tactic_name, tactic in technique_map[str(technique)].tactics.items():
-                        self.technique_mapping[technique_map[str(technique)].id]["tactics"][tactic.id] = tactic_name
+                    for tactic_name, tactic in technique_map[
+                        str(technique)
+                    ].tactics.items():
+                        self.technique_mapping[technique_map[str(technique)].id][
+                            "tactics"
+                        ][tactic.id] = tactic_name

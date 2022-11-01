@@ -18,8 +18,7 @@ election-infrastructure.json
 ptp_export_*
 RVA_Report_*
 mode.txt
-docker/dev/env.txt
-docker/prod/env.txt
+
 
 *.sqlite3
 

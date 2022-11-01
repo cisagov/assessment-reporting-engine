@@ -1,463 +1,327 @@
 {
-  "Reconnaissance": {
-    "ID": "TA0043",
-    "Total": 10,
+  "Collection": {
+    "ID": "TA0009",
     "Techniques": {
-      "1595": {
-        "ID": "T1595",
-        "Name": "Active Scanning",
-        "Sub": {
-          "001": "Scanning IP Blocks",
-          "002": "Vulnerability Scanning"
-        }
-      },
-      "1592": {
-        "ID": "T1592",
-        "Name": "Gather Victim Host Information",
-        "Sub": {
-          "001": "Hardware",
-          "002": "Software",
-          "003": "Firmware",
-          "004": "Client Configurations"
-        }
-      },
-      "1589": {
-        "ID": "T1589",
-        "Name": "Gather Victim Identity Information",
-        "Sub": {
-          "001": "Credentials",
-          "002": "Email Addresses",
-          "003": "Employee Names"
-        }
-      },
-      "1590": {
-        "ID": "T1590",
-        "Name": "Gather Victim Network Information",
-        "Sub": {
-          "001": "Domain Properties",
-          "002": "DNS",
-          "003": "Network Trust Dependencies",
-          "004": "Network Topology",
-          "005": "IP Addresses",
-          "006": "Network Security Appliances"
-        }
-      },
-      "1591": {
-        "ID": "T1591",
-        "Name": "Gather Victim Org Information",
-        "Sub": {
-          "001": "Determine Physical Locations",
-          "002": "Business Relationships",
-          "003": "Identify Business Tempo",
-          "004": "Identify Roles"
-        }
-      },
-      "1598": {
-        "ID": "T1598",
-        "Name": "Phishing for Information",
-        "Sub": {
-          "001": "Spearphishing Service",
-          "002": "Spearphishing Attachment",
-          "003": "Spearphishing Link"
-        }
-      },
-      "1597": {
-        "ID": "T1597",
-        "Name": "Searched Closed Sources",
-        "Sub": {
-          "001": "Threat Intel Vendors",
-          "002": "Purchase Technical Data"
-        }
-      },
-      "1596": {
-        "ID": "T1596",
-        "Name": "Search Open Technical Databases",
-        "Sub": {
-          "001": "DNS/Passive DNS",
-          "002": "WHOIS",
-          "003": "Digital Certificates",
-          "004": "CDNs",
-          "005": "Scan Databases"
-        }
-      },
-      "1593": {
-        "ID": "T1593",
-        "Name": "Search Open Websites/Domains",
-        "Sub": {
-          "001": "Social Media",
-          "002": "Search Engines"
-        }
-      },
-      "1594": {
-        "ID": "T1594",
-        "Name": "Search Victim-Owned Websites",
+      "1005": {
+        "ID": "T1005",
+        "Name": "Data from Local System",
         "Sub": {}
-      }
-    }
-  },
-  "Resource Development": {
-    "ID": "TA0042",
-    "Total": 7,
-    "Techniques": {
-      "1583" : {
-        "ID": "T1583",
-        "Name": "Acquire Infrastructure",
+      },
+      "1025": {
+        "ID": "T1025",
+        "Name": "Data from Removable Media",
+        "Sub": {}
+      },
+      "1039": {
+        "ID": "T1039",
+        "Name": "Data from Network Shared Drive",
+        "Sub": {}
+      },
+      "1056": {
+        "ID": "T1056",
+        "Name": "Input Capture",
         "Sub": {
-          "001": "Domains",
-          "002": "DNS Server",
-          "003": "Virtual Private Server",
-          "004": "Server",
-          "005": "Botnet",
-          "006": "Web Services"
+          "001": "Keylogging",
+          "002": "GUI Input Capture",
+          "003": "Web Portal Capture",
+          "004": "Credentials API Hooking"
         }
       },
-      "1586": {
-        "ID": "T1586",
-        "Name": "Compromise Accounts",
+      "1074": {
+        "ID": "T1074",
+        "Name": "Data Staged",
         "Sub": {
-          "001": "Social Media Accounts",
-          "002": "Email Accounts"
+          "001": "Local Data Staging",
+          "002": "Remote Data Staging"
         }
       },
-      "1584": {
-        "ID": "T1584",
-        "Name": "Compromise Infrastructure",
+      "1113": {
+        "ID": "T1113",
+        "Name": "Screen Capture",
+        "Sub": {}
+      },
+      "1114": {
+        "ID": "T1114",
+        "Name": "Email Collection",
         "Sub": {
-          "001": "Domains",
-          "002": "DNS Server",
-          "003": "Virtual Private Server",
-          "004": "Server",
-          "005": "Botnet",
-          "006": "Web Services"
+          "001": "Local Email Collection",
+          "002": "Remote Email Collection",
+          "003": "Email Forwarding Rule"
         }
       },
-      "1587": {
-        "ID": "T1587",
-        "Name": "Develop Capabilities",
+      "1115": {
+        "ID": "T1115",
+        "Name": "Clipboard Data",
+        "Sub": {}
+      },
+      "1119": {
+        "ID": "T1119",
+        "Name": "Automated Collection",
+        "Sub": {}
+      },
+      "1123": {
+        "ID": "T1123",
+        "Name": "Audio Capture",
+        "Sub": {}
+      },
+      "1125": {
+        "ID": "T1125",
+        "Name": "Video Capture",
+        "Sub": {}
+      },
+      "1185": {
+        "ID": "T1185",
+        "Name": "Browser Session Hijacking",
+        "Sub": {}
+      },
+      "1213": {
+        "ID": "T1213",
+        "Name": "Data from Information Repositories",
         "Sub": {
-          "001": "Malware",
-          "002": "Code Signing Certificates",
-          "003": "Digital Certificates",
-          "004": "Exploits"
+          "001": "Confluence",
+          "002": "Sharepoint",
+          "003": "Code Repositories"
         }
       },
-      "1585": {
-        "ID": "T1585",
-        "Name": "Establish Accounts",
+      "1530": {
+        "ID": "T1530",
+        "Name": "Data from Cloud Storage Object",
+        "Sub": {}
+      },
+      "1557": {
+        "ID": "T1557",
+        "Name": "Adversary-in-the-Middle",
         "Sub": {
-          "001": "Social Media Accounts",
-          "002": "Email Accounts"
+          "001": "LLMNR/NBT-NS Poisoning and SMB Relay",
+          "002": "ARP Cache Poisoning"
         }
       },
-      "1588": {
-        "ID": "T1588",
-        "Name": "Obtain Capabilities",
+      "1560": {
+        "ID": "T1560",
+        "Name": "Archived Collected Data",
         "Sub": {
-          "001": "Malware",
-          "002": "Tool",
-          "003": "Code Signing Capabilities",
-          "004": "Digital Certificates",
-          "005": "Exploits",
-          "006": "Vulnerabilities"
+          "001": "Archive via Utility",
+          "002": "Archive via Library",
+          "003": "Archive via Custom Method"
         }
       },
-      "1608": {
-        "ID": "T1608",
-        "Name": "Stage Capabilities",
+      "1602": {
+        "ID": "T1602",
+        "Name": "Data from Configuration Repository",
         "Sub": {
-          "001": "Upload Malware",
-          "002": "Upload Tool",
-          "003": "Install Digital Certificate",
-          "004": "Drive-by Target",
-          "005": "Link Target"
+          "001": "SNMP (MIB Dump)",
+          "002": "Network Device Configuration Dump"
         }
       }
-    }
+    },
+    "Total": 17
   },
-  "Initial Access": {
-    "ID": "TA0001",
-    "Total": 0,
+  "Command and Control": {
+    "ID": "TA0011",
     "Techniques": {
-      "1189": {
-        "ID": "T1189",
-        "Name": "Drive-by Compromise",
-        "Sub": {}
-      },
-      "1190": {
-        "ID": "T1190",
-        "Name": "Exploit Public-Facing Application",
-        "Sub": {}
-      },
-      "1133": {
-        "ID": "T1133",
-        "Name": "External Remote Services",
-        "Sub": {}
-      },
-      "1200": {
-        "ID": "T1200",
-        "Name": "Hardware Additions",
-        "Sub": {}
-      },
-      "1566": {
-        "ID": "T1566",
-        "Name": "Phishing",
+      "1001": {
+        "ID": "T1001",
+        "Name": "Data Obfuscation",
         "Sub": {
-          "001": "Spearphishing Attachment",
-          "002": "Spearphishing Link",
-          "003": "Spearphishing via Service"
+          "001": "Junk Data",
+          "002": "Steganography",
+          "003": "Protocol Impersonation"
         }
       },
-      "1091": {
-        "ID": "T1091",
-        "Name": "Replication Through Removable Media",
+      "1008": {
+        "ID": "T1008",
+        "Name": "Fallback Channels",
         "Sub": {}
       },
-      "1195": {
-        "ID": "T1195",
-        "Name": "Supply Chain Compromise",
+      "1071": {
+        "ID": "T1071",
+        "Name": "Application Layer Protocol",
         "Sub": {
-          "001": "Compromise Software Dependencies and Development Tools",
-          "002": "Compromise Software Supply Chain",
-          "003": "Compromise Hardware Supply Chain"
+          "001": "Web Protocols",
+          "002": "File Transfer Protocols",
+          "003": "Mail Protocols",
+          "004": "DNS"
         }
       },
-      "1199": {
-        "ID": "T1199",
-        "Name": "Trusted Relationship",
+      "1090": {
+        "ID": "T1090",
+        "Name": "Proxy",
+        "Sub": {
+          "001": "Internal Proxy",
+          "002": "External Proxy",
+          "003": "Multi-hop Proxy",
+          "004": "Domain Fronting"
+        }
+      },
+      "1092": {
+        "ID": "T1092",
+        "Name": "Communication Through Removable Media",
         "Sub": {}
       },
-      "1078": {
-        "ID": "T1078",
-        "Name": "Valid Accounts",
+      "1095": {
+        "ID": "T1095",
+        "Name": "Non-Application Layer Protocol",
+        "Sub": {}
+      },
+      "1102": {
+        "ID": "T1102",
+        "Name": "Web Service",
         "Sub": {
-          "001": "Default Accounts",
-          "002": "Domain Accounts",
-          "003": "Local Accounts",
-          "004": "Cloud Accounts"
+          "001": "Dead Drop Resolver",
+          "002": "Bidirectional Communication",
+          "003": "One-Way Communication"
+        }
+      },
+      "1104": {
+        "ID": "T1104",
+        "Name": "Multi-Stage Channels",
+        "Sub": {}
+      },
+      "1105": {
+        "ID": "T1105",
+        "Name": "Ingress Tool Transfer",
+        "Sub": {}
+      },
+      "1132": {
+        "ID": "T1132",
+        "Name": "Data Encoding",
+        "Sub": {
+          "001": "Standard Encoding",
+          "002": "Non-Standard Encoding"
+        }
+      },
+      "1205": {
+        "ID": "T1205",
+        "Name": "Traffic Signaling",
+        "Sub": {
+          "001": "Port Knocking"
+        }
+      },
+      "1219": {
+        "ID": "T1219",
+        "Name": "Remote Access Software",
+        "Sub": {}
+      },
+      "1568": {
+        "ID": "T1568",
+        "Name": "Dynamic Resolution",
+        "Sub": {
+          "001": "Fast Flux DNS",
+          "002": "Domain Generation Algorithms",
+          "003": "DNS Calculation"
+        }
+      },
+      "1571": {
+        "ID": "T1571",
+        "Name": "Non-Standard Port",
+        "Sub": {}
+      },
+      "1572": {
+        "ID": "T1572",
+        "Name": "Protocol Tunneling",
+        "Sub": {}
+      },
+      "1573": {
+        "ID": "T1573",
+        "Name": "Encrypted Channel",
+        "Sub": {
+          "001": "Symmetric Cryptography",
+          "002": "Asymmetric Cryptography"
         }
       }
-    }
+    },
+    "Total": 16
   },
-  "Execution": {
-    "ID": "TA0002",
-    "Total": 12,
+  "Credential Access": {
+    "ID": "TA0006",
     "Techniques": {
-      "1059": {
-        "ID": "T1059",
-        "Name": "Command and Scripting Interpreter",
+      "1003": {
+        "ID": "T1003",
+        "Name": "OS Credential Dumping",
         "Sub": {
-          "001": "PowerShell",
-          "002": "AppleScript",
-          "003": "Windows Command Shell",
-          "004": "Unix Shell",
-          "005": "Visual Basic",
-          "006": "Python",
-          "007": "JavaScript",
-          "008": "Network Device CLI"
+          "001": "LSASS Memory",
+          "002": "Security Account Manager",
+          "003": "NTDS",
+          "004": "LSA Secrets",
+          "005": "Cached Domain Credentials",
+          "006": "DCSync",
+          "007": "Proc Filesystem",
+          "008": "/etc/password and /etc/shadow"
         }
       },
-      "1609": {
-        "ID": "T1609",
-        "Name": "Container Administration Command",
+      "1040": {
+        "ID": "T1040",
+        "Name": "Network Sniffing",
         "Sub": {}
       },
-      "1610": {
-        "ID": "T1610",
-        "Name": "Deploy Container",
-        "Sub": {}
-      },
-      "1203": {
-        "ID": "T1203",
-        "Name": "Exploitation for Client Execution",
-        "Sub": {}
-      },
-      "1559": {
-        "ID": "T1559",
-        "Name": "Inter-Process Communication",
+      "1056": {
+        "ID": "T1056",
+        "Name": "Input Capture",
         "Sub": {
-          "001": "Component Object Model",
-          "002": "Dynamic Data Exchange"
+          "001": "Keylogging",
+          "002": "GUI Input Capture",
+          "003": "Web Portal Capture",
+          "004": "Credentials API Hooking"
         }
       },
-      "1106": {
-        "ID": "T1106",
-        "Name": "Native API",
+      "1110": {
+        "ID": "T1110",
+        "Name": "Brute Force",
+        "Sub": {
+          "001": "Password Guessing",
+          "002": "Password Cracking",
+          "003": "Password Spraying",
+          "004": "Credential Stuffing"
+        }
+      },
+      "1111": {
+        "ID": "T1111",
+        "Name": "Two-Factor Authentication Interception",
         "Sub": {}
       },
-      "1053": {
-        "ID": "T1053",
-        "Name": "Scheduled Task/Job",
-        "Sub": {
-          "001": "At (Linux)",
-          "002": "At (Windows)",
-          "003": "Cron",
-          "004": "Launchd",
-          "005": "Scheduled Task",
-          "006": "Systemd Timers",
-          "007": "Container Orchestration Job"
-        }
-      },
-      "1129": {
-        "ID": "T1129",
-        "Name": "Shared Modules",
+      "1187": {
+        "ID": "T1187",
+        "Name": "Forced Authentication",
         "Sub": {}
       },
-      "1072": {
-        "ID": "T1072",
-        "Name": "Software Deployment Tools",
+      "1212": {
+        "ID": "T1212",
+        "Name": "Exploitation for Credential Access",
         "Sub": {}
       },
-      "1569": {
-        "ID": "T1569",
-        "Name": "System Services",
-        "Sub": {
-          "001": "Launchctl",
-          "002": "Service Execution"
-        }
-      },
-      "1204": {
-        "ID": "T1204",
-        "Name": "User Execution",
-        "Sub": {
-          "001": "Malicious Link",
-          "002": "Malicious File",
-          "003": "Malicious Image"
-        }
-      },
-      "1047": {
-        "ID": "T1047",
-        "Name": "Windows Management Instrumentation",
-        "Sub": {}
-      }
-    }
-  },
-  "Persistence": {
-    "ID": "TA0003",
-    "Total": 19,
-    "Techniques": {
-      "1098": {
-        "ID": "T1098",
-        "Name": "Account Manipulation",
-        "Sub": {
-          "001": "Additional Cloud Credentials",
-          "002": "Exchange Email Delegate Permissions",
-          "003": "Add Office 365 Global Administrator Role",
-          "004": "SSH Authorized Keys"
-        }
-      },
-      "1197": {
-        "ID": "T1197",
-        "Name": "BITS Jobs",
+      "1528": {
+        "ID": "T1528",
+        "Name": "Steal Application Access Token",
         "Sub": {}
       },
-      "1547": {
-        "ID": "T1547",
-        "Name": "Boot or Logon Autostart Execution",
-        "Sub": {
-          "001": "Registry Run Keys/Startup Folder",
-          "002": "Authentication Pacakge",
-          "003": "Time Providers",
-          "004": "Winlogon Helper DLL",
-          "005": "Security Support Provider",
-          "006": "Kernel Modules and Extensions",
-          "007": "Re-opened Applications",
-          "008": "LSASS Driver",
-          "009": "Shortcut Modification",
-          "010": "Port Monitors",
-          "011": "Plist Modification",
-          "012": "Print Processors",
-          "013": "XDG Autostart Entries",
-          "014": "Active Setup",
-          "015": "Login Items"
-        }
-      },
-      "1037": {
-        "ID": "T1037",
-        "Name": "Boot or Logon Initialization Scripts",
-        "Sub": {
-          "001": "Logon Script (Windows)",
-          "002": "Logon Script (Mac)",
-          "003": "Network Logon Script",
-          "004": "RC Scripts",
-          "005": "Startup Items"
-        }
-      },
-      "1176": {
-        "ID": "T1176",
-        "Name": "Browser Extensions",
+      "1539": {
+        "ID": "T1539",
+        "Name": "Steal Web Session Cookie",
         "Sub": {}
       },
-      "1554": {
-        "ID": "T1554",
-        "Name": "Compromise Client Software Binary",
-        "Sub": {}
-      },
-      "1136": {
-        "ID": "T1136",
-        "Name": "Create Account",
+      "1552": {
+        "ID": "T1552",
+        "Name": "Unsecured Credentials",
         "Sub": {
-          "001": "Local Account",
-          "002": "Domain Account",
-          "003": "Cloud Account"
+          "001": "Credentials in Files",
+          "002": "Credentials in Registry",
+          "003": "Bash History",
+          "004": "Private Keys",
+          "005": "Cloud Instance Metadata API",
+          "006": "Group Policy Preferences",
+          "007": "Container API"
         }
       },
-      "1543": {
-        "ID": "T1543",
-        "Name": "Create or Modify System Process",
+      "1555": {
+        "ID": "T1555",
+        "Name": "Credentials from Password Stores",
         "Sub": {
-          "001": "Launch Agent",
-          "002": "Systemd Service",
-          "003": "Windows Service",
-          "004": "Launch Daemon"
+          "001": "Keychain",
+          "002": "Securityd Memory",
+          "003": "Credentials from Web Browsers",
+          "004": "Windows Credential Manager",
+          "005": "Password Managers"
         }
-      },
-      "1546": {
-        "ID": "T1546",
-        "Name": "Event Triggered Execution",
-        "Sub": {
-          "001": "Change Default File Association",
-          "002": "Screensaver",
-          "003": "Windows Management Instrumentation Event Subscription",
-          "004": "Unix Shell Configuration Modification",
-          "005": "Trap",
-          "006": "LC_LOAD_DYLIB Addition",
-          "007": "Netsh Helper DLL",
-          "008": "Accessibility Features",
-          "009": "AppCert DLLs",
-          "010": "AppInit DLLs",
-          "011": "Application Shimming",
-          "012": "Image File Execution Options Injection",
-          "013": "PowerShell Profile",
-          "014": "Emond",
-          "015": "Component Object Model Hijacking"
-        }
-      },
-      "1133": {
-        "ID": "T1133",
-        "Name": "External Remote Services",
-        "Sub": {}
-      },
-      "1574": {
-        "ID": "T1574",
-        "Name": "Hijack Execution Flow",
-        "Sub": {
-          "001": "DLL Search Order Hijacking",
-          "002": "DLL Side-Loading",
-          "004": "Dylib Hijacking",
-          "005": "Executable Installer File Permissions Weakness",
-          "006": "Dynamic Linker-Hijacking",
-          "007": "Path Interception by PATH Environment Variable",
-          "008": "Path Interception by Order Hijacking",
-          "009": "Path Interception by Unquoted Path",
-          "010": "Services File Permissions Weakness",
-          "011": "Services Registry Permissions Weakness",
-          "012": "COR_PROFILER"
-        }
-      },
-      "1525": {
-        "ID": "T1525",
-        "Name": "Implant Internal Image",
-        "Sub": {}
       },
       "1556": {
         "ID": "T1556",
@@ -469,192 +333,71 @@
           "004": "Network Device Authentication"
         }
       },
-      "1137": {
-        "ID": "T1137",
-        "Name": "Office Application Startup",
+      "1557": {
+        "ID": "T1557",
+        "Name": "Adversary-in-the-Middle",
         "Sub": {
-          "001": "Office Template",
-          "002": "Office Test",
-          "003": "Outlook Forms",
-          "004": "Outlook Home Page",
-          "005": "Outlook Rules",
-          "006": "Add-ins"
+          "001": "LLMNR/NBT-NS Poisoning and SMB Relay",
+          "002": "ARP Cache Poisoning"
         }
       },
-      "1542": {
-        "ID": "T1542",
-        "Name": "Pre-OS Boot",
+      "1558": {
+        "ID": "T1558",
+        "Name": "Steal or Forge Kerberos Tickets",
         "Sub": {
-          "001": "System Firmware",
-          "002": "Component Firmware",
-          "003": "Bootkit",
-          "004": "ROMMONkit",
-          "005": "TFTP Boot"
+          "001": "Golden Ticket",
+          "002": "Silver Ticket",
+          "003": "Kerberoasting",
+          "004": "AS-REP Roasting"
         }
       },
-      "1053": {
-        "ID": "T1053",
-        "Name": "Scheduled Task/Job",
+      "1606": {
+        "ID": "T1606",
+        "Name": "Forge Web Credentials",
         "Sub": {
-          "001": "At (Linux)",
-          "002": "At (Windows)",
-          "003": "Cron",
-          "004": "Launchd",
-          "005": "Scheduled Task",
-          "006": "Systemd Timers",
-          "007": "Container Orchestration Job"
-        }
-      },
-      "1505": {
-        "ID": "T1505",
-        "Name": "Server Software Component",
-        "Sub": {
-          "001": "SQL Stored Procedures",
-          "002": "Transport Agent",
-          "003": "Web Shell",
-          "004": "IIS Components"
-        }
-      },
-      "1205": {
-        "ID": "T1205",
-        "Name": "Traffic Signaling",
-        "Sub": {
-          "001": "Port Knocking"
-        }
-      },
-      "1078": {
-        "ID": "T1078",
-        "Name": "Valid Accounts",
-        "Sub": {
-          "001": "Default Accounts",
-          "002": "Domain Accounts",
-          "003": "Local Accounts",
-          "004": "Cloud Accounts"
+          "001": "Web Cookies",
+          "002": "SAML Tokens"
         }
       }
-    }
+    },
+    "Total": 15
   },
-  "Privilege Escalation": {
-    "ID": "TA0004",
-    "Total": 13,
+  "Defense Evasion": {
+    "ID": "TA0005",
     "Techniques": {
-      "1548": {
-        "ID": "T1548",
-        "Name": "Abuse Elevation Control Mechanism",
-        "Sub": {
-          "001": "Setuid and Setgid",
-          "002": "Bypass User Account Control",
-          "003": "Sudo and Sudo Caching",
-          "004": "Elevated Execution with Prompt"
-        }
-      },
-      "1134": {
-        "ID": "T1134",
-        "Name": "Access Token Manipulation",
-        "Sub": {
-          "001": "Token Impersonation/Theft",
-          "002": "Create Process with Token",
-          "003": "Make and Impersonate Token",
-          "004": "Parent PID Spoofing",
-          "005": "SID-History Injection"
-        }
-      },
-      "1547": {
-        "ID": "T1547",
-        "Name": "Boot or Logon Autostart Execution",
-        "Sub": {
-          "001": "Registry Run Keys/Startup Folder",
-          "002": "Authentication Pacakge",
-          "003": "Time Providers",
-          "004": "Winlogon Helper DLL",
-          "005": "Security Support Provider",
-          "006": "Kernel Modules and Extensions",
-          "007": "Re-opened Applications",
-          "008": "LSASS Driver",
-          "009": "Shortcut Modification",
-          "010": "Port Monitors",
-          "011": "Plist Modification",
-          "012": "Print Processors",
-          "013": "XDG Autostart Entries",
-          "014": "Active Setup",
-          "015": "Login Items"
-        }
-      },
-      "1037": {
-        "ID": "T1037",
-        "Name": "Boot or Logon Initialization Scripts",
-        "Sub": {
-          "001": "Logon Script (Windows)",
-          "002": "Logon Script (Mac)",
-          "003": "Network Logon Script",
-          "004": "RC Scripts",
-          "005": "Startup Items"
-        }
-      },
-      "1543": {
-        "ID": "T1543",
-        "Name": "Create or Modify System Process",
-        "Sub": {
-          "001": "Launch Agent",
-          "002": "Systemd Service",
-          "003": "Windows Service",
-          "004": "Launch Daemon"
-        }
-      },
-      "1484": {
-        "ID": "T1484",
-        "Name": "Domain Policy Modification",
-        "Sub": {
-          "001": "Group Policy Modification",
-          "002": "Domain Trust Modification"
-        }
-      },
-      "1611": {
-        "ID": "T1611",
-        "Name": "Escape to Host",
+      "1006": {
+        "ID": "T1006",
+        "Name": "Direct Volume Access",
         "Sub": {}
       },
-      "1546": {
-        "ID": "T1546",
-        "Name": "Event Triggered Execution",
-        "Sub": {
-          "001": "Change Default File Association",
-          "002": "Screensaver",
-          "003": "Windows Management Instrumentation Event Subscription",
-          "004": "Unix Shell Configuration Modification",
-          "005": "Trap",
-          "006": "LC_LOAD_DYLIB Addition",
-          "007": "Netsh Helper DLL",
-          "008": "Accessibility Features",
-          "009": "AppCert DLLs",
-          "010": "AppInit DLLs",
-          "011": "Application Shimming",
-          "012": "Image File Execution Options Injection",
-          "013": "PowerShell Profile",
-          "014": "Emond",
-          "015": "Component Object Model Hijacking"
-        }
-      },
-      "1068": {
-        "ID": "T1068",
-        "Name": "Exploitation for Privilege Escalation",
+      "1014": {
+        "ID": "T1014",
+        "Name": "Rootkit",
         "Sub": {}
       },
-      "1574": {
-        "ID": "T1574",
-        "Name": "Hijack Execution Flow",
+      "1027": {
+        "ID": "T1027",
+        "Name": "Obfuscated Files or Information",
         "Sub": {
-          "001": "DLL Search Order Hijacking",
-          "002": "DLL Side-Loading",
-          "004": "Dylib Hijacking",
-          "005": "Executable Installer File Permissions Weakness",
-          "006": "Dynamic Linker-Hijacking",
-          "007": "Path Interception by PATH Environment Variable",
-          "008": "Path Interception by Order Hijacking",
-          "009": "Path Interception by Unquoted Path",
-          "010": "Services File Permissions Weakness",
-          "011": "Services Registry Permissions Weakness",
-          "012": "COR_PROFILER"
+          "001": "Binary Padding",
+          "002": "Software Packing",
+          "003": "Steganography",
+          "004": "Compile After Delivery",
+          "005": "Indicator Removal from Tools",
+          "006": "HTML Smuggling"
+        }
+      },
+      "1036": {
+        "ID": "T1036",
+        "Name": "Masquerading",
+        "Sub": {
+          "001": "Invalid Code Signature",
+          "002": "Right-to-Left Override",
+          "003": "Rename System Utilities",
+          "004": "Masquerade Task or Service",
+          "005": "Match Legitimate Name or Location",
+          "006": "Space after Filename",
+          "007": "Double File Extension"
         }
       },
       "1055": {
@@ -674,17 +417,16 @@
           "014": "VDSO Hijacking"
         }
       },
-      "1053": {
-        "ID": "T1053",
-        "Name": "Scheduled Task/Job",
+      "1070": {
+        "ID": "T1070",
+        "Name": "Indicator Removal on Host",
         "Sub": {
-          "001": "At (Linux)",
-          "002": "At (Windows)",
-          "003": "Cron",
-          "004": "Launchd",
-          "005": "Scheduled Task",
-          "006": "Systemd Timers",
-          "007": "Container Orchestration Job"
+          "001": "Clear Windows Event Logs",
+          "002": "Clear Linux or Mac System Logs",
+          "003": "Clear Command History",
+          "004": "File Deletion",
+          "005": "Network Share Connection Removal",
+          "006": "Timestomp"
         }
       },
       "1078": {
@@ -696,21 +438,17 @@
           "003": "Local Accounts",
           "004": "Cloud Accounts"
         }
-      }
-    }
-  },
-  "Defense Evasion": {
-    "ID": "TA0005",
-    "Total": 40,
-    "Techniques": {
-      "1548": {
-        "ID": "T1548",
-        "Name": "Abuse Elevation Control Mechanism",
+      },
+      "1112": {
+        "ID": "T1112",
+        "Name": "Modify Registry",
+        "Sub": {}
+      },
+      "1127": {
+        "ID": "T1127",
+        "Name": "Trusted Developer Utilities Proxy Execution",
         "Sub": {
-          "001": "Setuid and Setgid",
-          "002": "Bypass User Account Control",
-          "003": "Sudo and Sudo Caching",
-          "004": "Elevated Execution with Prompt"
+          "001": "MSBuild"
         }
       },
       "1134": {
@@ -724,37 +462,80 @@
           "005": "SID-History Injection"
         }
       },
-      "1197": {
-        "ID": "T1197",
-        "Name": "BITS Jobs",
-        "Sub": {}
-      },
-      "1612": {
-        "ID": "T1612",
-        "Name": "Build Image on Host",
-        "Sub": {}
-      },
       "1140": {
         "ID": "T1140",
         "Name": "Deobfuscate/Decode Files or Information",
         "Sub": {}
       },
-      "1610": {
-        "ID": "T1610",
-        "Name": "Deploy Container",
+      "1197": {
+        "ID": "T1197",
+        "Name": "BITS Jobs",
         "Sub": {}
       },
-      "1006": {
-        "ID": "T1006",
-        "Name": "Direct Volume Access",
+      "1202": {
+        "ID": "T1202",
+        "Name": "Indirect Command Execution",
         "Sub": {}
       },
-      "1484": {
-        "ID": "T1484",
-        "Name": "Domain Policy Modification",
+      "1205": {
+        "ID": "T1205",
+        "Name": "Traffic Signaling",
         "Sub": {
-          "001": "Group Policy Modification",
-          "002": "Domain Trust Modification"
+          "001": "Port Knocking"
+        }
+      },
+      "1207": {
+        "ID": "T1207",
+        "Name": "Rogue Domain Controller",
+        "Sub": {}
+      },
+      "1211": {
+        "ID": "T1211",
+        "Name": "Exploitation for Defense Evasion",
+        "Sub": {}
+      },
+      "1216": {
+        "ID": "T1216",
+        "Name": "Signed Script Proxy Execution",
+        "Sub": {
+          "001": "PubPrn"
+        }
+      },
+      "1218": {
+        "ID": "T1218",
+        "Name": "Signed Binary Proxy Execution",
+        "Sub": {
+          "001": "Compiled HTML File",
+          "002": "Control Panel",
+          "003": "CMSTP",
+          "004": "InstallUtil",
+          "005": "Mshta",
+          "007": "Msiexec",
+          "008": "Odbcconf",
+          "009": "Regsvcs/Regasm",
+          "010": "Regsvr32",
+          "011": "Rundll32",
+          "012": "Verclsid",
+          "013": "Mavinject",
+          "014": "MMC"
+        }
+      },
+      "1220": {
+        "ID": "T1220",
+        "Name": "XSL Script Processing",
+        "Sub": {}
+      },
+      "1221": {
+        "ID": "T1221",
+        "Name": "Template Injection",
+        "Sub": {}
+      },
+      "1222": {
+        "ID": "T1222",
+        "Name": "File and Directory Permissions Modification",
+        "Sub": {
+          "001": "Windows File and Directory Permissions Modification",
+          "002": "Linux and Mac File and Directory Permissions Modification"
         }
       },
       "1480": {
@@ -764,17 +545,94 @@
           "001": "Environmental Keying"
         }
       },
-      "1211": {
-        "ID": "T1211",
-        "Name": "Exploitation for Defense Evasion",
+      "1484": {
+        "ID": "T1484",
+        "Name": "Domain Policy Modification",
+        "Sub": {
+          "001": "Group Policy Modification",
+          "002": "Domain Trust Modification"
+        }
+      },
+      "1497": {
+        "ID": "T1497",
+        "Name": "Virtualization/Sandbox Evasion",
+        "Sub": {
+          "001": "System Checks",
+          "002": "User Activity Based Checks",
+          "003": "Time Based Evasion"
+        }
+      },
+      "1535": {
+        "ID": "T1535",
+        "Name": "Unused/Unsupported Cloud Regions",
         "Sub": {}
       },
-      "1222": {
-        "ID": "T1222",
-        "Name": "File and Directory Permissions Modification",
+      "1542": {
+        "ID": "T1542",
+        "Name": "Pre-OS Boot",
         "Sub": {
-          "001": "Windows File and Directory Permissions Modification",
-          "002": "Linux and Mac File and Directory Permissions Modification"
+          "001": "System Firmware",
+          "002": "Component Firmware",
+          "003": "Bootkit",
+          "004": "ROMMONkit",
+          "005": "TFTP Boot"
+        }
+      },
+      "1548": {
+        "ID": "T1548",
+        "Name": "Abuse Elevation Control Mechanism",
+        "Sub": {
+          "001": "Setuid and Setgid",
+          "002": "Bypass User Account Control",
+          "003": "Sudo and Sudo Caching",
+          "004": "Elevated Execution with Prompt"
+        }
+      },
+      "1550": {
+        "ID": "T1550",
+        "Name": "Use Alternate Authentication Material",
+        "Sub": {
+          "001": "Application Access Token",
+          "002": "Pass the Hash",
+          "003": "Pass the Ticket",
+          "004": "Web Session Cookie"
+        }
+      },
+      "1553": {
+        "ID": "T1553",
+        "Name": "Subvert Trust Controls",
+        "Sub": {
+          "001": "GateKeeper Bypass",
+          "002": "Code Signing",
+          "003": "SIP and Trust Provider Hijacking",
+          "004": "Install Root Certificate",
+          "005": "Mark-of-the-Web Bypass",
+          "006": "Code Signing Policy Modification"
+        }
+      },
+      "1556": {
+        "ID": "T1556",
+        "Name": "Modify Authentication Process",
+        "Sub": {
+          "001": "Domain Controller",
+          "002": "Password Filter DLL",
+          "003": "Pluggable Authentication Modules",
+          "004": "Network Device Authentication"
+        }
+      },
+      "1562": {
+        "ID": "T1562",
+        "Name": "Impair Defenses",
+        "Sub": {
+          "001": "Disable or Modify Tools",
+          "002": "Disable Windows Event Logging",
+          "003": "Impair Command History Logging",
+          "004": "Disable or Modify System Firewall",
+          "006": "Indicator Blocking",
+          "007": "Disable or Modify Cloud Firewall",
+          "008": "Disable Cloud Logs",
+          "009": "Safe Mode Boot",
+          "010": "Downgrade Attack"
         }
       },
       "1564": {
@@ -809,50 +667,775 @@
           "012": "COR_PROFILER"
         }
       },
-      "1562": {
-        "ID": "T1562",
-        "Name": "Impair Defenses",
+      "1578": {
+        "ID": "T1578",
+        "Name": "Modify Cloud Compute Infrastructure",
         "Sub": {
-          "001": "Disable or Modify Tools",
-          "002": "Disable Windows Event Logging",
-          "003": "Impair Command History Logging",
-          "004": "Disable or Modify System Firewall",
-          "006": "Indicator Blocking",
-          "007": "Disable or Modify Cloud Firewall",
-          "008": "Disable Cloud Logs",
-          "009": "Safe Mode Boot",
-          "010": "Downgrade Attack"
+          "001": "Create Snapshot",
+          "002": "Create Cloud Instance",
+          "003": "Delete Cloud Instance",
+          "004": "Revert Cloud Instance"
         }
       },
-      "1070": {
-        "ID": "T1070",
-        "Name": "Indicator Removal on Host",
+      "1599": {
+        "ID": "T1599",
+        "Name": "Network Boundary Bridging",
         "Sub": {
-          "001": "Clear Windows Event Logs",
-          "002": "Clear Linux or Mac System Logs",
-          "003": "Clear Command History",
-          "004": "File Deletion",
-          "005": "Network Share Connection Removal",
-          "006": "Timestomp"
+          "001": "Network Address Translation Traversal"
         }
       },
-      "1202": {
-        "ID": "T1202",
-        "Name": "Indirect Command Execution",
+      "1600": {
+        "ID": "T1600",
+        "Name": "Weaken Encryption",
+        "Sub": {
+          "001": "Reduce Key Space",
+          "002": "Disable Crypto Hardware"
+        }
+      },
+      "1601": {
+        "ID": "T1601",
+        "Name": "Modify System Image",
+        "Sub": {
+          "001": "Patch System Image",
+          "002": "Downgrade System Image"
+        }
+      },
+      "1610": {
+        "ID": "T1610",
+        "Name": "Deploy Container",
         "Sub": {}
       },
-      "1036": {
-        "ID": "T1036",
-        "Name": "Masquerading",
+      "1612": {
+        "ID": "T1612",
+        "Name": "Build Image on Host",
+        "Sub": {}
+      },
+      "1620": {
+        "ID": "T1620",
+        "Name": "Reflective Code Loading",
+        "Sub": {}
+      }
+    },
+    "Total": 40
+  },
+  "Discovery": {
+    "ID": "TA0007",
+    "Techniques": {
+      "1007": {
+        "ID": "T1007",
+        "Name": "System Service Discovery",
+        "Sub": {}
+      },
+      "1010": {
+        "ID": "T1010",
+        "Name": "Application Window Discovery",
+        "Sub": {}
+      },
+      "1012": {
+        "ID": "T1012",
+        "Name": "Query Registry",
+        "Sub": {}
+      },
+      "1016": {
+        "ID": "T1016",
+        "Name": "System Network Configuration Discovery",
         "Sub": {
-          "001": "Invalid Code Signature",
-          "002": "Right-to-Left Override",
-          "003": "Rename System Utilities",
-          "004": "Masquerade Task or Service",
-          "005": "Match Legitimate Name or Location",
-          "006": "Space after Filename",
-          "007": "Double File Extension"
+          "001": "Internet Connection Discovery"
         }
+      },
+      "1018": {
+        "ID": "T1018",
+        "Name": "Remote System Discovery",
+        "Sub": {}
+      },
+      "1033": {
+        "ID": "T1033",
+        "Name": "System Owner/User Discovery",
+        "Sub": {}
+      },
+      "1040": {
+        "ID": "T1040",
+        "Name": "Network Sniffing",
+        "Sub": {}
+      },
+      "1046": {
+        "ID": "T1046",
+        "Name": "Network Service Scanning",
+        "Sub": {}
+      },
+      "1049": {
+        "ID": "T1049",
+        "Name": "System Network Connections Discovery",
+        "Sub": {}
+      },
+      "1057": {
+        "ID": "T1057",
+        "Name": "Process Discovery",
+        "Sub": {}
+      },
+      "1069": {
+        "ID": "T1069",
+        "Name": "Permission Groups Discovery",
+        "Sub": {
+          "001": "Local Groups",
+          "002": "Domain Groups",
+          "003": "Cloud Groups"
+        }
+      },
+      "1082": {
+        "ID": "T1082",
+        "Name": "System Information Discovery",
+        "Sub": {}
+      },
+      "1083": {
+        "ID": "T1083",
+        "Name": "File and Directory Discovery",
+        "Sub": {}
+      },
+      "1087": {
+        "ID": "T1087",
+        "Name": "Account Discovery",
+        "Sub": {
+          "001": "Local Account",
+          "002": "Domain Account",
+          "003": "Email Account",
+          "004": "Cloud Account"
+        }
+      },
+      "1120": {
+        "ID": "T1120",
+        "Name": "Peripheral Device Discovery",
+        "Sub": {}
+      },
+      "1124": {
+        "ID": "T1124",
+        "Name": "System Time Discovery",
+        "Sub": {}
+      },
+      "1135": {
+        "ID": "T1135",
+        "Name": "Network Share Discovery",
+        "Sub": {}
+      },
+      "1201": {
+        "ID": "T1201",
+        "Name": "Password Policy Discovery",
+        "Sub": {}
+      },
+      "1217": {
+        "ID": "T1217",
+        "Name": "Browser Bookmark Discovery",
+        "Sub": {}
+      },
+      "1482": {
+        "ID": "T1482",
+        "Name": "Domain Trust Discovery",
+        "Sub": {}
+      },
+      "1497": {
+        "ID": "T1497",
+        "Name": "Virtualization/Sandbox Evasion",
+        "Sub": {
+          "001": "System Checks",
+          "002": "User Activity Based Checks",
+          "003": "Time Based Evasion"
+        }
+      },
+      "1518": {
+        "ID": "T1518",
+        "Name": "Software Discovery",
+        "Sub": {
+          "001": "Security Software Discovery"
+        }
+      },
+      "1526": {
+        "ID": "T1526",
+        "Name": "Cloud Service Discovery",
+        "Sub": {}
+      },
+      "1538": {
+        "ID": "T1538",
+        "Name": "Cloud Service Dashboard",
+        "Sub": {}
+      },
+      "1580": {
+        "ID": "T1580",
+        "Name": "Cloud Infrastructure Discovery",
+        "Sub": {}
+      },
+      "1613": {
+        "ID": "T1613",
+        "Name": "Container and Resource Discovery",
+        "Sub": {}
+      },
+      "1614": {
+        "ID": "T1614",
+        "Name": "System Location Discovery",
+        "Sub": {
+          "001": "System Language Discovery"
+        }
+      },
+      "1615": {
+        "ID": "T1615",
+        "Name": "Group Policy Discovery",
+        "Sub": {}
+      },
+      "1619": {
+        "ID": "T1619",
+        "Name": "Cloud Storage Object Discovery",
+        "Sub": {}
+      }
+    },
+    "Total": 29
+  },
+  "Execution": {
+    "ID": "TA0002",
+    "Techniques": {
+      "1047": {
+        "ID": "T1047",
+        "Name": "Windows Management Instrumentation",
+        "Sub": {}
+      },
+      "1053": {
+        "ID": "T1053",
+        "Name": "Scheduled Task/Job",
+        "Sub": {
+          "001": "At (Linux)",
+          "002": "At (Windows)",
+          "003": "Cron",
+          "004": "Launchd",
+          "005": "Scheduled Task",
+          "006": "Systemd Timers",
+          "007": "Container Orchestration Job"
+        }
+      },
+      "1059": {
+        "ID": "T1059",
+        "Name": "Command and Scripting Interpreter",
+        "Sub": {
+          "001": "PowerShell",
+          "002": "AppleScript",
+          "003": "Windows Command Shell",
+          "004": "Unix Shell",
+          "005": "Visual Basic",
+          "006": "Python",
+          "007": "JavaScript",
+          "008": "Network Device CLI"
+        }
+      },
+      "1072": {
+        "ID": "T1072",
+        "Name": "Software Deployment Tools",
+        "Sub": {}
+      },
+      "1106": {
+        "ID": "T1106",
+        "Name": "Native API",
+        "Sub": {}
+      },
+      "1129": {
+        "ID": "T1129",
+        "Name": "Shared Modules",
+        "Sub": {}
+      },
+      "1203": {
+        "ID": "T1203",
+        "Name": "Exploitation for Client Execution",
+        "Sub": {}
+      },
+      "1204": {
+        "ID": "T1204",
+        "Name": "User Execution",
+        "Sub": {
+          "001": "Malicious Link",
+          "002": "Malicious File",
+          "003": "Malicious Image"
+        }
+      },
+      "1559": {
+        "ID": "T1559",
+        "Name": "Inter-Process Communication",
+        "Sub": {
+          "001": "Component Object Model",
+          "002": "Dynamic Data Exchange"
+        }
+      },
+      "1569": {
+        "ID": "T1569",
+        "Name": "System Services",
+        "Sub": {
+          "001": "Launchctl",
+          "002": "Service Execution"
+        }
+      },
+      "1609": {
+        "ID": "T1609",
+        "Name": "Container Administration Command",
+        "Sub": {}
+      },
+      "1610": {
+        "ID": "T1610",
+        "Name": "Deploy Container",
+        "Sub": {}
+      }
+    },
+    "Total": 12
+  },
+  "Exfiltration": {
+    "ID": "TA0010",
+    "Techniques": {
+      "1011": {
+        "ID": "T1011",
+        "Name": "Exfiltration Over Other Network Medium",
+        "Sub": {
+          "001": "Exfiltration Over Bluetooth"
+        }
+      },
+      "1020": {
+        "ID": "T1020",
+        "Name": "Automated Exfiltration",
+        "Sub": {
+          "001": "Traffic Duplication"
+        }
+      },
+      "1029": {
+        "ID": "T1029",
+        "Name": "Scheduled Transfer",
+        "Sub": {}
+      },
+      "1030": {
+        "ID": "T1030",
+        "Name": "Data Transfer Size Limits",
+        "Sub": {}
+      },
+      "1041": {
+        "ID": "T1041",
+        "Name": "Exfiltration Over C2 Channel",
+        "Sub": {}
+      },
+      "1048": {
+        "ID": "T1048",
+        "Name": "Exfiltration Over Alternative Protocol",
+        "Sub": {
+          "001": "Exfiltration Over Symmetric Encrypted Non-C2 Protocol",
+          "002": "Exfiltration Over Asymmetric Encrypted Non-C2 Protocol",
+          "003": "Exfiltration Over Unencrypted/Obfuscated Non-C2 Protocol"
+        }
+      },
+      "1052": {
+        "ID": "T1052",
+        "Name": "Exfiltration Over Physical Medium",
+        "Sub": {
+          "001": "Exfiltration over USB"
+        }
+      },
+      "1537": {
+        "ID": "T1537",
+        "Name": "Transfer Data to Cloud Account",
+        "Sub": {}
+      },
+      "1567": {
+        "ID": "T1567",
+        "Name": "Exfiltration Over Web Service",
+        "Sub": {
+          "001": "Exfiltration to Code Repository",
+          "002": "Exfiltration to Cloud Storage"
+        }
+      }
+    },
+    "Total": 9
+  },
+  "Impact": {
+    "ID": "TA0040",
+    "Techniques": {
+      "1485": {
+        "ID": "T1485",
+        "Name": "Data Destruction",
+        "Sub": {}
+      },
+      "1486": {
+        "ID": "T1486",
+        "Name": "Data Encrypted for Impact",
+        "Sub": {}
+      },
+      "1489": {
+        "ID": "T1489",
+        "Name": "Service Stop",
+        "Sub": {}
+      },
+      "1490": {
+        "ID": "T1490",
+        "Name": "Inhibit System Recovery",
+        "Sub": {}
+      },
+      "1491": {
+        "ID": "T1491",
+        "Name": "Defacement",
+        "Sub": {
+          "001": "Internal Defacement",
+          "002": "External Defacement"
+        }
+      },
+      "1495": {
+        "ID": "T1495",
+        "Name": "Firmware Corruption",
+        "Sub": {}
+      },
+      "1496": {
+        "ID": "T1496",
+        "Name": "Resource Hijacking",
+        "Sub": {}
+      },
+      "1498": {
+        "ID": "T1498",
+        "Name": "Network Denial of Service",
+        "Sub": {
+          "001": "Direct Network Flood",
+          "002": "Reflection Amplification"
+        }
+      },
+      "1499": {
+        "ID": "T1499",
+        "Name": "Endpoint Denial of Service",
+        "Sub": {
+          "001": "OS Exhaustion Flood",
+          "002": "Service Exhaustion Flood",
+          "003": "Application Exhaustion Flood",
+          "004": "Application or System Exploitation"
+        }
+      },
+      "1529": {
+        "ID": "T1529",
+        "Name": "System Shutdown/Reboot",
+        "Sub": {}
+      },
+      "1531": {
+        "ID": "T1531",
+        "Name": "Account Access Removal",
+        "Sub": {}
+      },
+      "1561": {
+        "ID": "T1561",
+        "Name": "Disk Wipe",
+        "Sub": {
+          "001": "Disk Content Wipe",
+          "002": "Disk Structure Wipe"
+        }
+      },
+      "1565": {
+        "ID": "T1565",
+        "Name": "Data Manipulation",
+        "Sub": {
+          "001": "Stored Data Manipulation",
+          "002": "Transmitted Data Manipulation",
+          "003": "Runtime Data Manipulation"
+        }
+      }
+    },
+    "Total": 13
+  },
+  "Initial Access": {
+    "ID": "TA0001",
+    "Techniques": {
+      "1078": {
+        "ID": "T1078",
+        "Name": "Valid Accounts",
+        "Sub": {
+          "001": "Default Accounts",
+          "002": "Domain Accounts",
+          "003": "Local Accounts",
+          "004": "Cloud Accounts"
+        }
+      },
+      "1091": {
+        "ID": "T1091",
+        "Name": "Replication Through Removable Media",
+        "Sub": {}
+      },
+      "1133": {
+        "ID": "T1133",
+        "Name": "External Remote Services",
+        "Sub": {}
+      },
+      "1189": {
+        "ID": "T1189",
+        "Name": "Drive-by Compromise",
+        "Sub": {}
+      },
+      "1190": {
+        "ID": "T1190",
+        "Name": "Exploit Public-Facing Application",
+        "Sub": {}
+      },
+      "1195": {
+        "ID": "T1195",
+        "Name": "Supply Chain Compromise",
+        "Sub": {
+          "001": "Compromise Software Dependencies and Development Tools",
+          "002": "Compromise Software Supply Chain",
+          "003": "Compromise Hardware Supply Chain"
+        }
+      },
+      "1199": {
+        "ID": "T1199",
+        "Name": "Trusted Relationship",
+        "Sub": {}
+      },
+      "1200": {
+        "ID": "T1200",
+        "Name": "Hardware Additions",
+        "Sub": {}
+      },
+      "1566": {
+        "ID": "T1566",
+        "Name": "Phishing",
+        "Sub": {
+          "001": "Spearphishing Attachment",
+          "002": "Spearphishing Link",
+          "003": "Spearphishing via Service"
+        }
+      }
+    },
+    "Total": 0
+  },
+  "Lateral Movement": {
+    "ID": "TA0008",
+    "Techniques": {
+      "1021": {
+        "ID": "T1021",
+        "Name": "Remote Services",
+        "Sub": {
+          "001": "Remote Desktop Protocol",
+          "002": "SMB/Windows Admin Shares",
+          "003": "Distributed Component Object Model",
+          "004": "SSH",
+          "005": "VNC",
+          "006": "Windows Remote Management"
+        }
+      },
+      "1072": {
+        "ID": "T1072",
+        "Name": "Software Deployment Tools",
+        "Sub": {}
+      },
+      "1080": {
+        "ID": "T1080",
+        "Name": "Taint Shared Content",
+        "Sub": {}
+      },
+      "1091": {
+        "ID": "T1091",
+        "Name": "Replication Through Removable Media",
+        "Sub": {}
+      },
+      "1210": {
+        "ID": "T1210",
+        "Name": "Exploitation of Remote Services",
+        "Sub": {}
+      },
+      "1534": {
+        "ID": "T1534",
+        "Name": "Internal Spearphishing",
+        "Sub": {}
+      },
+      "1550": {
+        "ID": "T1550",
+        "Name": "Use Alternate Authentication Material",
+        "Sub": {
+          "001": "Application Access Token",
+          "002": "Pass the Hash",
+          "003": "Pass the Ticket",
+          "004": "Web Session Cookie"
+        }
+      },
+      "1563": {
+        "ID": "T1563",
+        "Name": "Remote Service Session Hijacking",
+        "Sub": {
+          "001": "SSH Hijacking",
+          "002": "RDP Hijacking"
+        }
+      },
+      "1570": {
+        "ID": "T1570",
+        "Name": "Lateral Tool Transfer",
+        "Sub": {}
+      }
+    },
+    "Total": 9
+  },
+  "Persistence": {
+    "ID": "TA0003",
+    "Techniques": {
+      "1037": {
+        "ID": "T1037",
+        "Name": "Boot or Logon Initialization Scripts",
+        "Sub": {
+          "001": "Logon Script (Windows)",
+          "002": "Logon Script (Mac)",
+          "003": "Network Logon Script",
+          "004": "RC Scripts",
+          "005": "Startup Items"
+        }
+      },
+      "1053": {
+        "ID": "T1053",
+        "Name": "Scheduled Task/Job",
+        "Sub": {
+          "001": "At (Linux)",
+          "002": "At (Windows)",
+          "003": "Cron",
+          "004": "Launchd",
+          "005": "Scheduled Task",
+          "006": "Systemd Timers",
+          "007": "Container Orchestration Job"
+        }
+      },
+      "1078": {
+        "ID": "T1078",
+        "Name": "Valid Accounts",
+        "Sub": {
+          "001": "Default Accounts",
+          "002": "Domain Accounts",
+          "003": "Local Accounts",
+          "004": "Cloud Accounts"
+        }
+      },
+      "1098": {
+        "ID": "T1098",
+        "Name": "Account Manipulation",
+        "Sub": {
+          "001": "Additional Cloud Credentials",
+          "002": "Exchange Email Delegate Permissions",
+          "003": "Add Office 365 Global Administrator Role",
+          "004": "SSH Authorized Keys"
+        }
+      },
+      "1133": {
+        "ID": "T1133",
+        "Name": "External Remote Services",
+        "Sub": {}
+      },
+      "1136": {
+        "ID": "T1136",
+        "Name": "Create Account",
+        "Sub": {
+          "001": "Local Account",
+          "002": "Domain Account",
+          "003": "Cloud Account"
+        }
+      },
+      "1137": {
+        "ID": "T1137",
+        "Name": "Office Application Startup",
+        "Sub": {
+          "001": "Office Template",
+          "002": "Office Test",
+          "003": "Outlook Forms",
+          "004": "Outlook Home Page",
+          "005": "Outlook Rules",
+          "006": "Add-ins"
+        }
+      },
+      "1176": {
+        "ID": "T1176",
+        "Name": "Browser Extensions",
+        "Sub": {}
+      },
+      "1197": {
+        "ID": "T1197",
+        "Name": "BITS Jobs",
+        "Sub": {}
+      },
+      "1205": {
+        "ID": "T1205",
+        "Name": "Traffic Signaling",
+        "Sub": {
+          "001": "Port Knocking"
+        }
+      },
+      "1505": {
+        "ID": "T1505",
+        "Name": "Server Software Component",
+        "Sub": {
+          "001": "SQL Stored Procedures",
+          "002": "Transport Agent",
+          "003": "Web Shell",
+          "004": "IIS Components"
+        }
+      },
+      "1525": {
+        "ID": "T1525",
+        "Name": "Implant Internal Image",
+        "Sub": {}
+      },
+      "1542": {
+        "ID": "T1542",
+        "Name": "Pre-OS Boot",
+        "Sub": {
+          "001": "System Firmware",
+          "002": "Component Firmware",
+          "003": "Bootkit",
+          "004": "ROMMONkit",
+          "005": "TFTP Boot"
+        }
+      },
+      "1543": {
+        "ID": "T1543",
+        "Name": "Create or Modify System Process",
+        "Sub": {
+          "001": "Launch Agent",
+          "002": "Systemd Service",
+          "003": "Windows Service",
+          "004": "Launch Daemon"
+        }
+      },
+      "1546": {
+        "ID": "T1546",
+        "Name": "Event Triggered Execution",
+        "Sub": {
+          "001": "Change Default File Association",
+          "002": "Screensaver",
+          "003": "Windows Management Instrumentation Event Subscription",
+          "004": "Unix Shell Configuration Modification",
+          "005": "Trap",
+          "006": "LC_LOAD_DYLIB Addition",
+          "007": "Netsh Helper DLL",
+          "008": "Accessibility Features",
+          "009": "AppCert DLLs",
+          "010": "AppInit DLLs",
+          "011": "Application Shimming",
+          "012": "Image File Execution Options Injection",
+          "013": "PowerShell Profile",
+          "014": "Emond",
+          "015": "Component Object Model Hijacking"
+        }
+      },
+      "1547": {
+        "ID": "T1547",
+        "Name": "Boot or Logon Autostart Execution",
+        "Sub": {
+          "001": "Registry Run Keys/Startup Folder",
+          "002": "Authentication Pacakge",
+          "003": "Time Providers",
+          "004": "Winlogon Helper DLL",
+          "005": "Security Support Provider",
+          "006": "Kernel Modules and Extensions",
+          "007": "Re-opened Applications",
+          "008": "LSASS Driver",
+          "009": "Shortcut Modification",
+          "010": "Port Monitors",
+          "011": "Plist Modification",
+          "012": "Print Processors",
+          "013": "XDG Autostart Entries",
+          "014": "Active Setup",
+          "015": "Login Items"
+        }
+      },
+      "1554": {
+        "ID": "T1554",
+        "Name": "Compromise Client Software Binary",
+        "Sub": {}
       },
       "1556": {
         "ID": "T1556",
@@ -864,57 +1447,51 @@
           "004": "Network Device Authentication"
         }
       },
-      "1578": {
-        "ID": "T1578",
-        "Name": "Modify Cloud Compute Infrastructure",
+      "1574": {
+        "ID": "T1574",
+        "Name": "Hijack Execution Flow",
         "Sub": {
-          "001": "Create Snapshot",
-          "002": "Create Cloud Instance",
-          "003": "Delete Cloud Instance",
-          "004": "Revert Cloud Instance"
+          "001": "DLL Search Order Hijacking",
+          "002": "DLL Side-Loading",
+          "004": "Dylib Hijacking",
+          "005": "Executable Installer File Permissions Weakness",
+          "006": "Dynamic Linker-Hijacking",
+          "007": "Path Interception by PATH Environment Variable",
+          "008": "Path Interception by Order Hijacking",
+          "009": "Path Interception by Unquoted Path",
+          "010": "Services File Permissions Weakness",
+          "011": "Services Registry Permissions Weakness",
+          "012": "COR_PROFILER"
+        }
+      }
+    },
+    "Total": 19
+  },
+  "Privilege Escalation": {
+    "ID": "TA0004",
+    "Techniques": {
+      "1037": {
+        "ID": "T1037",
+        "Name": "Boot or Logon Initialization Scripts",
+        "Sub": {
+          "001": "Logon Script (Windows)",
+          "002": "Logon Script (Mac)",
+          "003": "Network Logon Script",
+          "004": "RC Scripts",
+          "005": "Startup Items"
         }
       },
-      "1112": {
-        "ID": "T1112",
-        "Name": "Modify Registry",
-        "Sub": {}
-      },
-      "1601": {
-        "ID": "T1601",
-        "Name": "Modify System Image",
+      "1053": {
+        "ID": "T1053",
+        "Name": "Scheduled Task/Job",
         "Sub": {
-          "001": "Patch System Image",
-          "002": "Downgrade System Image"
-        }
-      },
-      "1599": {
-        "ID": "T1599",
-        "Name": "Network Boundary Bridging",
-        "Sub": {
-          "001": "Network Address Translation Traversal"
-        }
-      },
-      "1027": {
-        "ID": "T1027",
-        "Name": "Obfuscated Files or Information",
-        "Sub": {
-          "001": "Binary Padding",
-          "002": "Software Packing",
-          "003": "Steganography",
-          "004": "Compile After Delivery",
-          "005": "Indicator Removal from Tools",
-          "006": "HTML Smuggling"
-        }
-      },
-      "1542": {
-        "ID": "T1542",
-        "Name": "Pre-OS Boot",
-        "Sub": {
-          "001": "System Firmware",
-          "002": "Component Firmware",
-          "003": "Bootkit",
-          "004": "ROMMONkit",
-          "005": "TFTP Boot"
+          "001": "At (Linux)",
+          "002": "At (Windows)",
+          "003": "Cron",
+          "004": "Launchd",
+          "005": "Scheduled Task",
+          "006": "Systemd Timers",
+          "007": "Container Orchestration Job"
         }
       },
       "1055": {
@@ -934,92 +1511,10 @@
           "014": "VDSO Hijacking"
         }
       },
-      "1620": {
-        "ID": "T1620",
-        "Name": "Reflective Code Loading",
+      "1068": {
+        "ID": "T1068",
+        "Name": "Exploitation for Privilege Escalation",
         "Sub": {}
-      },
-      "1207": {
-        "ID": "T1207",
-        "Name": "Rogue Domain Controller",
-        "Sub": {}
-      },
-      "1014": {
-        "ID": "T1014",
-        "Name": "Rootkit",
-        "Sub": {}
-      },
-      "1218": {
-        "ID": "T1218",
-        "Name": "Signed Binary Proxy Execution",
-        "Sub": {
-          "001": "Compiled HTML File",
-          "002": "Control Panel",
-          "003": "CMSTP",
-          "004": "InstallUtil",
-          "005": "Mshta",
-          "007": "Msiexec",
-          "008": "Odbcconf",
-          "009": "Regsvcs/Regasm",
-          "010": "Regsvr32",
-          "011": "Rundll32",
-          "012": "Verclsid",
-          "013": "Mavinject",
-          "014": "MMC"
-        }
-      },
-      "1216": {
-        "ID": "T1216",
-        "Name": "Signed Script Proxy Execution",
-        "Sub": {
-          "001": "PubPrn"
-        }
-      },
-      "1553": {
-        "ID": "T1553",
-        "Name": "Subvert Trust Controls",
-        "Sub": {
-          "001": "GateKeeper Bypass",
-          "002": "Code Signing",
-          "003": "SIP and Trust Provider Hijacking",
-          "004": "Install Root Certificate",
-          "005": "Mark-of-the-Web Bypass",
-          "006": "Code Signing Policy Modification"
-        }
-      },
-      "1221": {
-        "ID": "T1221",
-        "Name": "Template Injection",
-        "Sub": {}
-      },
-      "1205": {
-        "ID": "T1205",
-        "Name": "Traffic Signaling",
-        "Sub": {
-          "001": "Port Knocking"
-        }
-      },
-      "1127": {
-        "ID": "T1127",
-        "Name": "Trusted Developer Utilities Proxy Execution",
-        "Sub": {
-          "001": "MSBuild"
-        }
-      },
-      "1535": {
-        "ID": "T1535",
-        "Name": "Unused/Unsupported Cloud Regions",
-        "Sub": {}
-      },
-      "1550": {
-        "ID": "T1550",
-        "Name": "Use Alternate Authentication Material",
-        "Sub": {
-          "001": "Application Access Token",
-          "002": "Pass the Hash",
-          "003": "Pass the Ticket",
-          "004": "Web Session Cookie"
-        }
       },
       "1078": {
         "ID": "T1078",
@@ -1031,780 +1526,285 @@
           "004": "Cloud Accounts"
         }
       },
-      "1497": {
-        "ID": "T1497",
-        "Name": "Virtualization/Sandbox Evasion",
+      "1134": {
+        "ID": "T1134",
+        "Name": "Access Token Manipulation",
         "Sub": {
-          "001": "System Checks",
-          "002": "User Activity Based Checks",
-          "003": "Time Based Evasion"
+          "001": "Token Impersonation/Theft",
+          "002": "Create Process with Token",
+          "003": "Make and Impersonate Token",
+          "004": "Parent PID Spoofing",
+          "005": "SID-History Injection"
         }
       },
-      "1600": {
-        "ID": "T1600",
-        "Name": "Weaken Encryption",
+      "1484": {
+        "ID": "T1484",
+        "Name": "Domain Policy Modification",
         "Sub": {
-          "001": "Reduce Key Space",
-          "002": "Disable Crypto Hardware"
+          "001": "Group Policy Modification",
+          "002": "Domain Trust Modification"
         }
       },
-      "1220": {
-        "ID": "T1220",
-        "Name": "XSL Script Processing",
+      "1543": {
+        "ID": "T1543",
+        "Name": "Create or Modify System Process",
+        "Sub": {
+          "001": "Launch Agent",
+          "002": "Systemd Service",
+          "003": "Windows Service",
+          "004": "Launch Daemon"
+        }
+      },
+      "1546": {
+        "ID": "T1546",
+        "Name": "Event Triggered Execution",
+        "Sub": {
+          "001": "Change Default File Association",
+          "002": "Screensaver",
+          "003": "Windows Management Instrumentation Event Subscription",
+          "004": "Unix Shell Configuration Modification",
+          "005": "Trap",
+          "006": "LC_LOAD_DYLIB Addition",
+          "007": "Netsh Helper DLL",
+          "008": "Accessibility Features",
+          "009": "AppCert DLLs",
+          "010": "AppInit DLLs",
+          "011": "Application Shimming",
+          "012": "Image File Execution Options Injection",
+          "013": "PowerShell Profile",
+          "014": "Emond",
+          "015": "Component Object Model Hijacking"
+        }
+      },
+      "1547": {
+        "ID": "T1547",
+        "Name": "Boot or Logon Autostart Execution",
+        "Sub": {
+          "001": "Registry Run Keys/Startup Folder",
+          "002": "Authentication Pacakge",
+          "003": "Time Providers",
+          "004": "Winlogon Helper DLL",
+          "005": "Security Support Provider",
+          "006": "Kernel Modules and Extensions",
+          "007": "Re-opened Applications",
+          "008": "LSASS Driver",
+          "009": "Shortcut Modification",
+          "010": "Port Monitors",
+          "011": "Plist Modification",
+          "012": "Print Processors",
+          "013": "XDG Autostart Entries",
+          "014": "Active Setup",
+          "015": "Login Items"
+        }
+      },
+      "1548": {
+        "ID": "T1548",
+        "Name": "Abuse Elevation Control Mechanism",
+        "Sub": {
+          "001": "Setuid and Setgid",
+          "002": "Bypass User Account Control",
+          "003": "Sudo and Sudo Caching",
+          "004": "Elevated Execution with Prompt"
+        }
+      },
+      "1574": {
+        "ID": "T1574",
+        "Name": "Hijack Execution Flow",
+        "Sub": {
+          "001": "DLL Search Order Hijacking",
+          "002": "DLL Side-Loading",
+          "004": "Dylib Hijacking",
+          "005": "Executable Installer File Permissions Weakness",
+          "006": "Dynamic Linker-Hijacking",
+          "007": "Path Interception by PATH Environment Variable",
+          "008": "Path Interception by Order Hijacking",
+          "009": "Path Interception by Unquoted Path",
+          "010": "Services File Permissions Weakness",
+          "011": "Services Registry Permissions Weakness",
+          "012": "COR_PROFILER"
+        }
+      },
+      "1611": {
+        "ID": "T1611",
+        "Name": "Escape to Host",
         "Sub": {}
       }
-    }
+    },
+    "Total": 13
   },
-  "Credential Access": {
-    "ID": "TA0006",
-    "Total": 15,
+  "Reconnaissance": {
+    "ID": "TA0043",
     "Techniques": {
-      "1557": {
-        "ID": "T1557",
-        "Name": "Adversary-in-the-Middle",
+      "1589": {
+        "ID": "T1589",
+        "Name": "Gather Victim Identity Information",
         "Sub": {
-          "001": "LLMNR/NBT-NS Poisoning and SMB Relay",
-          "002": "ARP Cache Poisoning"
+          "001": "Credentials",
+          "002": "Email Addresses",
+          "003": "Employee Names"
         }
       },
-      "1110": {
-        "ID": "T1110",
-        "Name": "Brute Force",
+      "1590": {
+        "ID": "T1590",
+        "Name": "Gather Victim Network Information",
         "Sub": {
-          "001": "Password Guessing",
-          "002": "Password Cracking",
-          "003": "Password Spraying",
-          "004": "Credential Stuffing"
+          "001": "Domain Properties",
+          "002": "DNS",
+          "003": "Network Trust Dependencies",
+          "004": "Network Topology",
+          "005": "IP Addresses",
+          "006": "Network Security Appliances"
         }
       },
-      "1555": {
-        "ID": "T1555",
-        "Name": "Credentials from Password Stores",
+      "1591": {
+        "ID": "T1591",
+        "Name": "Gather Victim Org Information",
         "Sub": {
-          "001": "Keychain",
-          "002": "Securityd Memory",
-          "003": "Credentials from Web Browsers",
-          "004": "Windows Credential Manager",
-          "005": "Password Managers"
+          "001": "Determine Physical Locations",
+          "002": "Business Relationships",
+          "003": "Identify Business Tempo",
+          "004": "Identify Roles"
         }
       },
-      "1212": {
-        "ID": "T1212",
-        "Name": "Exploitation for Credential Access",
+      "1592": {
+        "ID": "T1592",
+        "Name": "Gather Victim Host Information",
+        "Sub": {
+          "001": "Hardware",
+          "002": "Software",
+          "003": "Firmware",
+          "004": "Client Configurations"
+        }
+      },
+      "1593": {
+        "ID": "T1593",
+        "Name": "Search Open Websites/Domains",
+        "Sub": {
+          "001": "Social Media",
+          "002": "Search Engines"
+        }
+      },
+      "1594": {
+        "ID": "T1594",
+        "Name": "Search Victim-Owned Websites",
         "Sub": {}
       },
-      "1187": {
-        "ID": "T1187",
-        "Name": "Forced Authentication",
-        "Sub": {}
-      },
-      "1606": {
-        "ID": "T1606",
-        "Name": "Forge Web Credentials",
+      "1595": {
+        "ID": "T1595",
+        "Name": "Active Scanning",
         "Sub": {
-          "001": "Web Cookies",
-          "002": "SAML Tokens"
+          "001": "Scanning IP Blocks",
+          "002": "Vulnerability Scanning"
         }
       },
-      "1056": {
-        "ID": "T1056",
-        "Name": "Input Capture",
+      "1596": {
+        "ID": "T1596",
+        "Name": "Search Open Technical Databases",
         "Sub": {
-          "001": "Keylogging",
-          "002": "GUI Input Capture",
-          "003": "Web Portal Capture",
-          "004": "Credentials API Hooking"
+          "001": "DNS/Passive DNS",
+          "002": "WHOIS",
+          "003": "Digital Certificates",
+          "004": "CDNs",
+          "005": "Scan Databases"
         }
       },
-      "1556": {
-        "ID": "T1556",
-        "Name": "Modify Authentication Process",
+      "1597": {
+        "ID": "T1597",
+        "Name": "Searched Closed Sources",
         "Sub": {
-          "001": "Domain Controller",
-          "002": "Password Filter DLL",
-          "003": "Pluggable Authentication Modules",
-          "004": "Network Device Authentication"
+          "001": "Threat Intel Vendors",
+          "002": "Purchase Technical Data"
         }
       },
-      "1040": {
-        "ID": "T1040",
-        "Name": "Network Sniffing",
-        "Sub": {}
-      },
-      "1003": {
-        "ID": "T1003",
-        "Name": "OS Credential Dumping",
+      "1598": {
+        "ID": "T1598",
+        "Name": "Phishing for Information",
         "Sub": {
-          "001": "LSASS Memory",
-          "002": "Security Account Manager",
-          "003": "NTDS",
-          "004": "LSA Secrets",
-          "005": "Cached Domain Credentials",
-          "006": "DCSync",
-          "007": "Proc Filesystem",
-          "008": "/etc/password and /etc/shadow"
-        }
-      },
-      "1558": {
-        "ID": "T1558",
-        "Name": "Steal or Forge Kerberos Tickets",
-        "Sub": {
-          "001": "Golden Ticket",
-          "002": "Silver Ticket",
-          "003": "Kerberoasting",
-          "004": "AS-REP Roasting"
-        }
-      },
-      "1528": {
-        "ID": "T1528",
-        "Name": "Steal Application Access Token",
-        "Sub": {}
-      },
-      "1539": {
-        "ID": "T1539",
-        "Name": "Steal Web Session Cookie",
-        "Sub": {}
-      },
-      "1111": {
-        "ID": "T1111",
-        "Name": "Two-Factor Authentication Interception",
-        "Sub": {}
-      },
-      "1552": {
-        "ID": "T1552",
-        "Name": "Unsecured Credentials",
-        "Sub": {
-          "001": "Credentials in Files",
-          "002": "Credentials in Registry",
-          "003": "Bash History",
-          "004": "Private Keys",
-          "005": "Cloud Instance Metadata API",
-          "006": "Group Policy Preferences",
-          "007": "Container API"
+          "001": "Spearphishing Service",
+          "002": "Spearphishing Attachment",
+          "003": "Spearphishing Link"
         }
       }
-    }
+    },
+    "Total": 10
   },
-  "Discovery": {
-    "ID": "TA0007",
-    "Total": 29,
+  "Resource Development": {
+    "ID": "TA0042",
     "Techniques": {
-      "1087": {
-        "ID": "T1087",
-        "Name": "Account Discovery",
+      "1583": {
+        "ID": "T1583",
+        "Name": "Acquire Infrastructure",
         "Sub": {
-          "001": "Local Account",
-          "002": "Domain Account",
-          "003": "Email Account",
-          "004": "Cloud Account"
+          "001": "Domains",
+          "002": "DNS Server",
+          "003": "Virtual Private Server",
+          "004": "Server",
+          "005": "Botnet",
+          "006": "Web Services"
         }
       },
-      "1010": {
-        "ID": "T1010",
-        "Name": "Application Window Discovery",
-        "Sub": {}
-      },
-      "1217": {
-        "ID": "T1217",
-        "Name": "Browser Bookmark Discovery",
-        "Sub": {}
-      },
-      "1580": {
-        "ID": "T1580",
-        "Name": "Cloud Infrastructure Discovery",
-        "Sub": {}
-      },
-      "1538": {
-        "ID": "T1538",
-        "Name": "Cloud Service Dashboard",
-        "Sub": {}
-      },
-      "1526": {
-        "ID": "T1526",
-        "Name": "Cloud Service Discovery",
-        "Sub": {}
-      },
-      "1619": {
-        "ID": "T1619",
-        "Name": "Cloud Storage Object Discovery",
-        "Sub": {}
-      },
-      "1613": {
-        "ID": "T1613",
-        "Name": "Container and Resource Discovery",
-        "Sub": {}
-      },
-      "1482": {
-        "ID": "T1482",
-        "Name": "Domain Trust Discovery",
-        "Sub": {}
-      },
-      "1083": {
-        "ID": "T1083",
-        "Name": "File and Directory Discovery",
-        "Sub": {}
-      },
-      "1615": {
-        "ID": "T1615",
-        "Name": "Group Policy Discovery",
-        "Sub": {}
-      },
-      "1046": {
-        "ID": "T1046",
-        "Name": "Network Service Scanning",
-        "Sub": {}
-      },
-      "1135": {
-        "ID": "T1135",
-        "Name": "Network Share Discovery",
-        "Sub": {}
-      },
-      "1040": {
-        "ID": "T1040",
-        "Name": "Network Sniffing",
-        "Sub": {}
-      },
-      "1201": {
-        "ID": "T1201",
-        "Name": "Password Policy Discovery",
-        "Sub": {}
-      },
-      "1120": {
-        "ID": "T1120",
-        "Name": "Peripheral Device Discovery",
-        "Sub": {}
-      },
-      "1069": {
-        "ID": "T1069",
-        "Name": "Permission Groups Discovery",
+      "1584": {
+        "ID": "T1584",
+        "Name": "Compromise Infrastructure",
         "Sub": {
-          "001": "Local Groups",
-          "002": "Domain Groups",
-          "003": "Cloud Groups"
+          "001": "Domains",
+          "002": "DNS Server",
+          "003": "Virtual Private Server",
+          "004": "Server",
+          "005": "Botnet",
+          "006": "Web Services"
         }
       },
-      "1057": {
-        "ID": "T1057",
-        "Name": "Process Discovery",
-        "Sub": {}
-      },
-      "1012": {
-        "ID": "T1012",
-        "Name": "Query Registry",
-        "Sub": {}
-      },
-      "1018": {
-        "ID": "T1018",
-        "Name": "Remote System Discovery",
-        "Sub": {}
-      },
-      "1518": {
-        "ID": "T1518",
-        "Name": "Software Discovery",
+      "1585": {
+        "ID": "T1585",
+        "Name": "Establish Accounts",
         "Sub": {
-          "001": "Security Software Discovery"
+          "001": "Social Media Accounts",
+          "002": "Email Accounts"
         }
       },
-      "1082": {
-        "ID": "T1082",
-        "Name": "System Information Discovery",
-        "Sub": {}
-      },
-      "1614": {
-        "ID": "T1614",
-        "Name": "System Location Discovery",
+      "1586": {
+        "ID": "T1586",
+        "Name": "Compromise Accounts",
         "Sub": {
-          "001": "System Language Discovery"
+          "001": "Social Media Accounts",
+          "002": "Email Accounts"
         }
       },
-      "1016": {
-        "ID": "T1016",
-        "Name": "System Network Configuration Discovery",
+      "1587": {
+        "ID": "T1587",
+        "Name": "Develop Capabilities",
         "Sub": {
-          "001": "Internet Connection Discovery"
+          "001": "Malware",
+          "002": "Code Signing Certificates",
+          "003": "Digital Certificates",
+          "004": "Exploits"
         }
       },
-      "1049": {
-        "ID": "T1049",
-        "Name": "System Network Connections Discovery",
-        "Sub": {}
-      },
-      "1033": {
-        "ID": "T1033",
-        "Name": "System Owner/User Discovery",
-        "Sub": {}
-      },
-      "1007": {
-        "ID": "T1007",
-        "Name": "System Service Discovery",
-        "Sub": {}
-      },
-      "1124": {
-        "ID": "T1124",
-        "Name": "System Time Discovery",
-        "Sub": {}
-      },
-      "1497": {
-        "ID": "T1497",
-        "Name": "Virtualization/Sandbox Evasion",
+      "1588": {
+        "ID": "T1588",
+        "Name": "Obtain Capabilities",
         "Sub": {
-          "001": "System Checks",
-          "002": "User Activity Based Checks",
-          "003": "Time Based Evasion"
+          "001": "Malware",
+          "002": "Tool",
+          "003": "Code Signing Capabilities",
+          "004": "Digital Certificates",
+          "005": "Exploits",
+          "006": "Vulnerabilities"
+        }
+      },
+      "1608": {
+        "ID": "T1608",
+        "Name": "Stage Capabilities",
+        "Sub": {
+          "001": "Upload Malware",
+          "002": "Upload Tool",
+          "003": "Install Digital Certificate",
+          "004": "Drive-by Target",
+          "005": "Link Target"
         }
       }
-    }
-  },
-  "Lateral Movement": {
-    "ID": "TA0008",
-    "Total": 9,
-    "Techniques": {
-      "1210": {
-        "ID": "T1210",
-        "Name": "Exploitation of Remote Services",
-        "Sub": {}
-      },
-      "1534": {
-        "ID": "T1534",
-        "Name": "Internal Spearphishing",
-        "Sub": {}
-      },
-      "1570": {
-        "ID": "T1570",
-        "Name": "Lateral Tool Transfer",
-        "Sub": {}
-      },
-      "1563": {
-        "ID": "T1563",
-        "Name": "Remote Service Session Hijacking",
-        "Sub": {
-          "001": "SSH Hijacking",
-          "002": "RDP Hijacking"
-        }
-      },
-      "1021": {
-        "ID": "T1021",
-        "Name": "Remote Services",
-        "Sub": {
-          "001": "Remote Desktop Protocol",
-          "002": "SMB/Windows Admin Shares",
-          "003": "Distributed Component Object Model",
-          "004": "SSH",
-          "005": "VNC",
-          "006": "Windows Remote Management"
-        }
-      },
-      "1091": {
-        "ID": "T1091",
-        "Name": "Replication Through Removable Media",
-        "Sub": {}
-      },
-      "1072": {
-        "ID": "T1072",
-        "Name": "Software Deployment Tools",
-        "Sub": {}
-      },
-      "1080": {
-        "ID": "T1080",
-        "Name": "Taint Shared Content",
-        "Sub": {}
-      },
-      "1550": {
-        "ID": "T1550",
-        "Name": "Use Alternate Authentication Material",
-        "Sub": {
-          "001": "Application Access Token",
-          "002": "Pass the Hash",
-          "003": "Pass the Ticket",
-          "004": "Web Session Cookie"
-        }
-      }
-    }
-  },
-  "Collection": {
-    "ID": "TA0009",
-    "Total": 17,
-    "Techniques": {
-      "1557": {
-        "ID": "T1557",
-        "Name": "Adversary-in-the-Middle",
-        "Sub": {
-          "001": "LLMNR/NBT-NS Poisoning and SMB Relay",
-          "002": "ARP Cache Poisoning"
-        }
-      },
-      "1560": {
-        "ID": "T1560",
-        "Name": "Archived Collected Data",
-        "Sub": {
-          "001": "Archive via Utility",
-          "002": "Archive via Library",
-          "003": "Archive via Custom Method"
-        }
-      },
-      "1123": {
-        "ID": "T1123",
-        "Name": "Audio Capture",
-        "Sub": {}
-      },
-      "1119": {
-        "ID": "T1119",
-        "Name": "Automated Collection",
-        "Sub": {}
-      },
-      "1185": {
-        "ID": "T1185",
-        "Name": "Browser Session Hijacking",
-        "Sub": {}
-      },
-      "1115": {
-        "ID": "T1115",
-        "Name": "Clipboard Data",
-        "Sub": {}
-      },
-      "1530": {
-        "ID": "T1530",
-        "Name": "Data from Cloud Storage Object",
-        "Sub": {}
-      },
-      "1602": {
-        "ID": "T1602",
-        "Name": "Data from Configuration Repository",
-        "Sub": {
-          "001": "SNMP (MIB Dump)",
-          "002": "Network Device Configuration Dump"
-        }
-      },
-      "1213": {
-        "ID": "T1213",
-        "Name": "Data from Information Repositories",
-        "Sub": {
-          "001": "Confluence",
-          "002": "Sharepoint",
-          "003": "Code Repositories"
-        }
-      },
-      "1005": {
-        "ID": "T1005",
-        "Name": "Data from Local System",
-        "Sub": {}
-      },
-      "1039": {
-        "ID": "T1039",
-        "Name": "Data from Network Shared Drive",
-        "Sub": {}
-      },
-      "1025": {
-        "ID": "T1025",
-        "Name": "Data from Removable Media",
-        "Sub": {}
-      },
-      "1074": {
-        "ID": "T1074",
-        "Name": "Data Staged",
-        "Sub": {
-          "001": "Local Data Staging",
-          "002": "Remote Data Staging"
-        }
-      },
-      "1114": {
-        "ID": "T1114",
-        "Name": "Email Collection",
-        "Sub": {
-          "001": "Local Email Collection",
-          "002": "Remote Email Collection",
-          "003": "Email Forwarding Rule"
-        }
-      },
-      "1056": {
-        "ID": "T1056",
-        "Name": "Input Capture",
-        "Sub": {
-          "001": "Keylogging",
-          "002": "GUI Input Capture",
-          "003": "Web Portal Capture",
-          "004": "Credentials API Hooking"
-        }
-      },
-      "1113": {
-        "ID": "T1113",
-        "Name": "Screen Capture",
-        "Sub": {}
-      },
-      "1125": {
-        "ID": "T1125",
-        "Name": "Video Capture",
-        "Sub": {}
-      }
-    }
-  },
-  "Command and Control": {
-    "ID": "TA0011",
-    "Total": 16,
-    "Techniques": {
-      "1071": {
-        "ID": "T1071",
-        "Name": "Application Layer Protocol",
-        "Sub": {
-          "001": "Web Protocols",
-          "002": "File Transfer Protocols",
-          "003": "Mail Protocols",
-          "004": "DNS"
-        }
-      },
-      "1092": {
-        "ID": "T1092",
-        "Name": "Communication Through Removable Media",
-        "Sub": {}
-      },
-      "1132": {
-        "ID": "T1132",
-        "Name": "Data Encoding",
-        "Sub": {
-          "001": "Standard Encoding",
-          "002": "Non-Standard Encoding"
-        }
-      },
-      "1001": {
-        "ID": "T1001",
-        "Name": "Data Obfuscation",
-        "Sub": {
-          "001": "Junk Data",
-          "002": "Steganography",
-          "003": "Protocol Impersonation"
-        }
-      },
-      "1568": {
-        "ID": "T1568",
-        "Name": "Dynamic Resolution",
-        "Sub": {
-          "001": "Fast Flux DNS",
-          "002": "Domain Generation Algorithms",
-          "003": "DNS Calculation"
-        }
-      },
-      "1573": {
-        "ID": "T1573",
-        "Name": "Encrypted Channel",
-        "Sub": {
-          "001": "Symmetric Cryptography",
-          "002": "Asymmetric Cryptography"
-        }
-      },
-      "1008": {
-        "ID": "T1008",
-        "Name": "Fallback Channels",
-        "Sub": {}
-      },
-      "1105": {
-        "ID": "T1105",
-        "Name": "Ingress Tool Transfer",
-        "Sub": {}
-      },
-      "1104": {
-        "ID": "T1104",
-        "Name": "Multi-Stage Channels",
-        "Sub": {}
-      },
-      "1095": {
-        "ID": "T1095",
-        "Name": "Non-Application Layer Protocol",
-        "Sub": {}
-      },
-      "1571": {
-        "ID": "T1571",
-        "Name": "Non-Standard Port",
-        "Sub": {}
-      },
-      "1572": {
-        "ID": "T1572",
-        "Name": "Protocol Tunneling",
-        "Sub": {}
-      },
-      "1090": {
-        "ID": "T1090",
-        "Name": "Proxy",
-        "Sub": {
-          "001": "Internal Proxy",
-          "002": "External Proxy",
-          "003": "Multi-hop Proxy",
-          "004": "Domain Fronting"
-        }
-      },
-      "1219": {
-        "ID": "T1219",
-        "Name": "Remote Access Software",
-        "Sub": {}
-      },
-      "1205": {
-        "ID": "T1205",
-        "Name": "Traffic Signaling",
-        "Sub": {
-          "001": "Port Knocking"
-        }
-      },
-      "1102": {
-        "ID": "T1102",
-        "Name": "Web Service",
-        "Sub": {
-          "001": "Dead Drop Resolver",
-          "002": "Bidirectional Communication",
-          "003": "One-Way Communication"
-        }
-      }
-    }
-  },
-  "Exfiltration": {
-    "ID": "TA0010",
-    "Total": 9,
-    "Techniques": {
-      "1020": {
-        "ID": "T1020",
-        "Name": "Automated Exfiltration",
-        "Sub": {
-          "001": "Traffic Duplication"
-        }
-      },
-      "1030": {
-        "ID": "T1030",
-        "Name": "Data Transfer Size Limits",
-        "Sub": {}
-      },
-      "1048": {
-        "ID": "T1048",
-        "Name": "Exfiltration Over Alternative Protocol",
-        "Sub": {
-          "001": "Exfiltration Over Symmetric Encrypted Non-C2 Protocol",
-          "002": "Exfiltration Over Asymmetric Encrypted Non-C2 Protocol",
-          "003": "Exfiltration Over Unencrypted/Obfuscated Non-C2 Protocol"
-        }
-      },
-      "1041": {
-        "ID": "T1041",
-        "Name": "Exfiltration Over C2 Channel",
-        "Sub": {}
-      },
-      "1011": {
-        "ID": "T1011",
-        "Name": "Exfiltration Over Other Network Medium",
-        "Sub": {
-          "001": "Exfiltration Over Bluetooth"
-        }
-      },
-      "1052": {
-        "ID": "T1052",
-        "Name": "Exfiltration Over Physical Medium",
-        "Sub": {
-          "001": "Exfiltration over USB"
-        }
-      },
-      "1567": {
-        "ID": "T1567",
-        "Name": "Exfiltration Over Web Service",
-        "Sub": {
-          "001": "Exfiltration to Code Repository",
-          "002": "Exfiltration to Cloud Storage"
-        }
-      },
-      "1029": {
-        "ID": "T1029",
-        "Name": "Scheduled Transfer",
-        "Sub": {}
-      },
-      "1537": {
-        "ID": "T1537",
-        "Name": "Transfer Data to Cloud Account",
-        "Sub": {}
-      }
-    }
-  },
-  "Impact": {
-    "ID": "TA0040",
-    "Total": 13,
-    "Techniques": {
-      "1531": {
-        "ID": "T1531",
-        "Name": "Account Access Removal",
-        "Sub": {}
-      },
-      "1485": {
-        "ID": "T1485",
-        "Name": "Data Destruction",
-        "Sub": {}
-      },
-      "1486": {
-        "ID": "T1486",
-        "Name": "Data Encrypted for Impact",
-        "Sub": {}
-      },
-      "1565": {
-        "ID": "T1565",
-        "Name": "Data Manipulation",
-        "Sub": {
-          "001": "Stored Data Manipulation",
-          "002": "Transmitted Data Manipulation",
-          "003": "Runtime Data Manipulation"
-        }
-      },
-      "1491": {
-        "ID": "T1491",
-        "Name": "Defacement",
-        "Sub": {
-          "001": "Internal Defacement",
-          "002": "External Defacement"
-        }
-      },
-      "1561": {
-        "ID": "T1561",
-        "Name": "Disk Wipe",
-        "Sub": {
-          "001": "Disk Content Wipe",
-          "002": "Disk Structure Wipe"
-        }
-      },
-      "1499": {
-        "ID": "T1499",
-        "Name": "Endpoint Denial of Service",
-        "Sub": {
-          "001": "OS Exhaustion Flood",
-          "002": "Service Exhaustion Flood",
-          "003": "Application Exhaustion Flood",
-          "004": "Application or System Exploitation"
-        }
-      },
-      "1495": {
-        "ID": "T1495",
-        "Name": "Firmware Corruption",
-        "Sub": {}
-      },
-      "1490": {
-        "ID": "T1490",
-        "Name": "Inhibit System Recovery",
-        "Sub": {}
-      },
-      "1498": {
-        "ID": "T1498",
-        "Name": "Network Denial of Service",
-        "Sub": {
-          "001": "Direct Network Flood",
-          "002": "Reflection Amplification"
-        }
-      },
-      "1496": {
-        "ID": "T1496",
-        "Name": "Resource Hijacking",
-        "Sub": {}
-      },
-      "1489": {
-        "ID": "T1489",
-        "Name": "Service Stop",
-        "Sub": {}
-      },
-      "1529": {
-        "ID": "T1529",
-        "Name": "System Shutdown/Reboot",
-        "Sub": {}
-      }
-    }
+    },
+    "Total": 7
   }
 }

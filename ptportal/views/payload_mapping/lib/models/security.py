@@ -1,4 +1,16 @@
 # -*- coding: utf-8 -*-
+# Risk & Vulnerability Assessment Reporting Engine
+
+# Copyright 2022 The Risk & Vulnerability Reporting Engine Contributors, All Rights Reserved.
+# (see Contributors.txt for a full list of Contributors)
+
+# SPDX-License-Identifier: BSD-3-Clause
+
+# Please see additional acknowledgments (including references to third party source code, object code, documentation and other files) in the license.txt file or contact permission@sei.cmu.edu for full terms.
+
+# Created, in part, with funding and support from the United States Government. (see Acknowledgments file).
+
+# DM22-1011
 
 import json
 
@@ -46,38 +58,65 @@ class Security(object):
         self.most_common_techniques = {}
 
     def FilenameSearch_update(self):
-        """ Updated Function for FilenameSearch """
+        """Updated Function for FilenameSearch"""
         for assessment, assessment_data in self.success_payloads.items():
             for payload in assessment_data:
                 if payload["filename"] not in self.filename_success_map:
-                    self.filename_success_map[payload["filename"]] = {"payloads": [], "seen_in": {},
-                                                                      "success_rate_similar": 0.0,
-                                                                      "success_rate_all": 0.0,
-                                                                      "success_rate_within": 0.0}
+                    self.filename_success_map[payload["filename"]] = {
+                        "payloads": [],
+                        "seen_in": {},
+                        "success_rate_similar": 0.0,
+                        "success_rate_all": 0.0,
+                        "success_rate_within": 0.0,
+                    }
 
-                if assessment not in self.filename_success_map[payload["filename"]]["seen_in"]:
-                    self.filename_success_map[payload["filename"]]["seen_in"][assessment] = 0
+                if (
+                    assessment
+                    not in self.filename_success_map[payload["filename"]]["seen_in"]
+                ):
+                    self.filename_success_map[payload["filename"]]["seen_in"][
+                        assessment
+                    ] = 0
 
-                self.filename_success_map[payload["filename"]]["seen_in"][assessment] += 1
-                self.filename_success_map[payload["filename"]]["payloads"].append(payload)
+                self.filename_success_map[payload["filename"]]["seen_in"][
+                    assessment
+                ] += 1
+                self.filename_success_map[payload["filename"]]["payloads"].append(
+                    payload
+                )
 
     def FilenameSearch(self):
-        """ Updated Function for FilenameSearch -> Deprecated (Has Been Updated) """
+        """Updated Function for FilenameSearch -> Deprecated (Has Been Updated)"""
         for assessment, assessment_data in self.success_payloads.items():
             for payload in assessment_data:
                 if payload["filename"] not in self.filename_success_map:
-                    self.filename_success_map[payload["filename"]] = {"payloads": [], "seen_in": [],
-                                                                      "success_rate_similar": 0.0,
-                                                                      "success_rate_all": 0.0,
-                                                                      "success_rate_within": 0.0}
+                    self.filename_success_map[payload["filename"]] = {
+                        "payloads": [],
+                        "seen_in": [],
+                        "success_rate_similar": 0.0,
+                        "success_rate_all": 0.0,
+                        "success_rate_within": 0.0,
+                    }
 
-                if assessment not in self.filename_success_map[payload["filename"]]["seen_in"]:
-                    self.filename_success_map[payload["filename"]]["seen_in"].append(assessment)
+                if (
+                    assessment
+                    not in self.filename_success_map[payload["filename"]]["seen_in"]
+                ):
+                    self.filename_success_map[payload["filename"]]["seen_in"].append(
+                        assessment
+                    )
 
-                self.filename_success_map[payload["filename"]]["payloads"].append(payload)
+                self.filename_success_map[payload["filename"]]["payloads"].append(
+                    payload
+                )
 
-    def SuccessAcrossAssessments(self, global_filename_success_map, global_filename_failed_map, assessment_window_list=None):
-        """ Collects Occurrence Across All Assessments Tracked (Success) """
+    def SuccessAcrossAssessments(
+        self,
+        global_filename_success_map,
+        global_filename_failed_map,
+        assessment_window_list=None,
+    ):
+        """Collects Occurrence Across All Assessments Tracked (Success)"""
         focus_success_map = {}
         focus_failed_map = {}
 
@@ -92,14 +131,21 @@ class Security(object):
             if filename in focus_failed_map:
                 success_attempts = len(focus_success_map[filename]["payloads"])
                 failed_attempts = len(focus_failed_map[filename]["payloads"])
-                self.filename_success_map[filename]["success_rate_all"] = \
-                    round(success_attempts/(success_attempts + failed_attempts) * 100, 2)
+                self.filename_success_map[filename]["success_rate_all"] = round(
+                    success_attempts / (success_attempts + failed_attempts) * 100, 2
+                )
             else:
-                self.filename_success_map[filename]["success_rate_all"] = \
-                    round(len(focus_success_map[filename]["payloads"])/len(focus_success_map[filename]["payloads"]) * 100, 2)
+                self.filename_success_map[filename]["success_rate_all"] = round(
+                    len(focus_success_map[filename]["payloads"])
+                    / len(focus_success_map[filename]["payloads"])
+                    * 100,
+                    2,
+                )
 
-    def success_fail_attempts_within_window(self, focus_success_map, focus_failed_map, assessment_window_list=None):
-        """ Gathers Metrics for Assessments within the 'Days' window -> (Working) """
+    def success_fail_attempts_within_window(
+        self, focus_success_map, focus_failed_map, assessment_window_list=None
+    ):
+        """Gathers Metrics for Assessments within the 'Days' window -> (Working)"""
 
         for filename, assessment_data in focus_success_map.items():
             success_attempts = 0
@@ -107,37 +153,53 @@ class Security(object):
             in_fail = False
             if filename in focus_failed_map:
                 for assessment_name in assessment_data["seen_in"]:
-                    if assessment_name in assessment_window_list and assessment_name in focus_failed_map[filename]["seen_in"]:
-                        success_attempts += focus_success_map[filename]["seen_in"][assessment_name]
-                        failed_attempts += focus_failed_map[filename]["seen_in"][assessment_name]
+                    if (
+                        assessment_name in assessment_window_list
+                        and assessment_name in focus_failed_map[filename]["seen_in"]
+                    ):
+                        success_attempts += focus_success_map[filename]["seen_in"][
+                            assessment_name
+                        ]
+                        failed_attempts += focus_failed_map[filename]["seen_in"][
+                            assessment_name
+                        ]
                         in_fail = True
 
             else:
                 for assessment_name in assessment_data["seen_in"]:
                     if assessment_name in assessment_window_list:
-                        success_attempts += focus_success_map[filename]["seen_in"][assessment_name]
+                        success_attempts += focus_success_map[filename]["seen_in"][
+                            assessment_name
+                        ]
 
             if in_fail:
                 self.filename_success_map[filename]["success_rate_within"] = round(
-                    success_attempts / (success_attempts + failed_attempts) * 100, 2)
+                    success_attempts / (success_attempts + failed_attempts) * 100, 2
+                )
             else:
                 self.filename_success_map[filename]["success_rate_within"] = round(
-                    (success_attempts / success_attempts) * 100, 2)
+                    (success_attempts / success_attempts) * 100, 2
+                )
 
     def SuccessAcrossSimilarAssessments(self, assessment_window_list=None):
-        """ Collects Success Rate if Seen in Other Environments """
+        """Collects Success Rate if Seen in Other Environments"""
         for filename, assessment_data in self.filename_success_map.items():
             if filename in self.filename_failed_map:
                 success_attempts = len(self.filename_success_map[filename]["payloads"])
                 failed_attempts = len(self.filename_failed_map[filename]["payloads"])
-                self.filename_success_map[filename]["success_rate_similar"] = \
-                    round((success_attempts/(success_attempts + failed_attempts)) * 100, 2)
+                self.filename_success_map[filename]["success_rate_similar"] = round(
+                    (success_attempts / (success_attempts + failed_attempts)) * 100, 2
+                )
             else:
-                self.filename_success_map[filename]["success_rate_similar"] = \
-                    round(len(self.filename_success_map[filename]["payloads"])/len(self.filename_success_map[filename]["payloads"]) * 100, 2)
+                self.filename_success_map[filename]["success_rate_similar"] = round(
+                    len(self.filename_success_map[filename]["payloads"])
+                    / len(self.filename_success_map[filename]["payloads"])
+                    * 100,
+                    2,
+                )
 
     def OccurrenceFailedAcrossAssessments(self):
-        """ Collects Occurrence Across All Assessments Tracked (Failed)  """
+        """Collects Occurrence Across All Assessments Tracked (Failed)"""
         for assessment, assessment_data in self.failed_payloads.items():
             for payload in assessment_data:
                 for filename, filename_data in self.filename_failed_map.items():
@@ -147,11 +209,11 @@ class Security(object):
                             break
 
     def GenerateSuccessTechniques(self):
-        """ Extracts the Most Successful Techniques with the Payloads """
+        """Extracts the Most Successful Techniques with the Payloads"""
         most_common = []
 
         if len(self.filename_success_map) == 1:
-            """ If there is only 1 filename, then it is the most successful """
+            """If there is only 1 filename, then it is the most successful"""
             for filename, assessment_data in self.filename_success_map.items():
                 most_common.append(filename)
         else:
@@ -165,16 +227,23 @@ class Security(object):
 
             """ Perform the Checking to Determine Filename with Most Payloads """
             for i in range(len(success_filenames)):
-                """ First Filename Tested Gets Added When Starting """
+                """First Filename Tested Gets Added When Starting"""
                 if not most_common:
                     most_common.append(success_filenames[i])
-                    top_number = len(self.filename_success_map[success_filenames[i]]["payloads"])
+                    top_number = len(
+                        self.filename_success_map[success_filenames[i]]["payloads"]
+                    )
                     continue
 
                 """ If Filename has more payloads, then empty array and add new filename and restart loop """
-                if len(self.filename_success_map[success_filenames[i]]["payloads"]) > top_number:
+                if (
+                    len(self.filename_success_map[success_filenames[i]]["payloads"])
+                    > top_number
+                ):
                     most_common = [success_filenames[i]]
-                    top_number = len(self.filename_success_map[success_filenames[i]]["payloads"])
+                    top_number = len(
+                        self.filename_success_map[success_filenames[i]]["payloads"]
+                    )
                     i = 0
                     continue
 
@@ -185,7 +254,9 @@ class Security(object):
                     if success_name == filename:
                         continue
                     else:
-                        if len(assessment_data["seen_in"]) == len(self.filename_success_map[success_name]["payloads"]):
+                        if len(assessment_data["seen_in"]) == len(
+                            self.filename_success_map[success_name]["payloads"]
+                        ):
                             updated_list.append(filename)
 
             """ Update List If Necessary """
@@ -199,26 +270,31 @@ class Security(object):
         self.add_most_successful_techniques()
 
     def ExtractSuccessPayloads(self, assessment_map, global_success_payloads):
-        """ Retrieves successful payloads to add to instance """
+        """Retrieves successful payloads to add to instance"""
         for assessment_name in assessment_map:
-            self.success_payloads = {assessment_name: global_success_payloads[assessment_name]}
+            self.success_payloads = {
+                assessment_name: global_success_payloads[assessment_name]
+            }
 
     def ExtractFailedPayloads(self, assessment_map, global_failed_payloads):
         for assessment_name in assessment_map:
-            self.failed_payloads = {assessment_name : global_failed_payloads[assessment_name]}
+            self.failed_payloads = {
+                assessment_name: global_failed_payloads[assessment_name]
+            }
 
     def add_most_common_techniques(self, most_common):
-        """ Updates the Most Successful Techniques """
+        """Updates the Most Successful Techniques"""
         for filename in most_common:
             if filename not in self.most_common_techniques:
-                self.most_common_techniques[filename] = self.filename_success_map[filename]
-
+                self.most_common_techniques[filename] = self.filename_success_map[
+                    filename
+                ]
 
     def add_most_successful_techniques(self):
-        """ Looks for the Most Successful Techniques by Success Rate -> (Working) """
-        #print(json.dumps(self.filename_success_map, indent=4))
+        """Looks for the Most Successful Techniques by Success Rate -> (Working)"""
+        # print(json.dumps(self.filename_success_map, indent=4))
         pass
 
     def GetSuccessRateAcrossSimilar(self):
-        """ Gets the Percentage of Success Rates Across All Like Environments """
+        """Gets the Percentage of Success Rates Across All Like Environments"""
         pass

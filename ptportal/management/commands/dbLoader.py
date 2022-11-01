@@ -1,18 +1,16 @@
-# Risk & Vulnerability Reporting Engine
+# Risk & Vulnerability Assessment Reporting Engine
 
-# Copyright 2022 Carnegie Mellon University.
+# Copyright 2022 The Risk & Vulnerability Reporting Engine Contributors, All Rights Reserved.
+# (see Contributors.txt for a full list of Contributors)
 
-# NO WARRANTY. THIS CARNEGIE MELLON UNIVERSITY AND SOFTWARE ENGINEERING INSTITUTE MATERIAL IS FURNISHED ON AN "AS-IS" BASIS. CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER EXPRESSED OR IMPLIED, AS TO ANY MATTER INCLUDING, BUT NOT LIMITED TO, WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY, OR RESULTS OBTAINED FROM USE OF THE MATERIAL. CARNEGIE MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
+# SPDX-License-Identifier: BSD-3-Clause
 
-# Released under a BSD (SEI)-style license, please see license.txt or contact permission@sei.cmu.edu for full terms.
+# Please see additional acknowledgments (including references to third party source code, object code, documentation and other files) in the license.txt file or contact permission@sei.cmu.edu for full terms.
 
-# [DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.  Please see Copyright notice for non-US Government use and distribution.
+# Created, in part, with funding and support from the United States Government. (see Acknowledgments file).
 
-# Carnegie Mellon® is registered in the U.S. Patent and Trademark Office by Carnegie Mellon University.
+# DM22-1011
 
-# This Software includes and/or makes use of Third-Party Software each subject to its own license.
-
-# DM22-0744
 from gettext import find
 from re import sub
 import numpy as np
@@ -149,29 +147,114 @@ class Command(BaseCommand):
 
     def add_acronyms(self):
 
-        acronyms = [("ADCS", "Active Directory Certificate Services"), ("AES", "Advanced Encryption Standard"), ("ARP", "Address Resolution Protocol"), ("ATT&CK", "Adversarial Tactic, Techniques, and Common Knowledge"),
-                    ("AV", "Anti-Virus"), ("C2","Command-and-Control"), ("CA", "Certificate Authority"), ("CIFS", "Common Internet File System"), ("CIS", "Critical Infrastructure Security"),
-                    ("CISA", "Cybersecurity Infrastructure Security Agency"), ("CLI", "Command Line Interface"), ("CMS", "Content Management System"), ("CPL", "Control Panel (File Format)"),
-                    ("CSF", "Cybersecurity Framework"), ("DA", "Domain Administrator"), ("DC", "Domain Controller"), ("DCC2", "Domain Cached Credentials Version 2"), ("DHCP", "Dynamic Host Configuration Protocol"),
-                    ("DHS", "Department of Homeland Security"), ("DLL", "Dynamic-Link Library (File Format)"), ("DLP", "Data Loss Prevention"), ("DNS", "Domain Name System"), ("DoS", "Denial of Service"),
-                    ("EDR", "Endpoint Detection and Response"), ("EWS", "Exchange Web Services"), ("EXE", "Executable (File Format)"), ("FCRM", "Financial Crime Risk Management"), ("FTP", "File Transfer Protocol"),
-                    ("FTPS", "File Transfer Protocol Secure"), ("GPO", "Group Policy Object"), ("HTA","Hyptertext Markup Language Application (File Format)"), ("HTML", "Hypertext Markup Language"), ("HTTP", "Hypertext Transfer Protocol"),
-                    ("HTTPS", "Hyper Text Transfer Protocol Secure"), ("iDRAC", "Integrated Dell Remote Access Controller"), ("IIS", "Internet Information Services"), ("IP", "Internet Protocol"), 
-                    ("IPMI", "Intelligent Platform Management Interface"), ("ISCSI", "Internet Small Computer Systems Interface"), ("JS", "JScript (Microsoft File Format)"), ("LDAP", "Lightweight Directory Access Protocol"),
-                    ("LDAPS", "Secure Lightweight Directory Access Protocol"), ("LFI", "Local File Inclusion"), ("LLMNR", "Link-Local Multicast Name Resolution"), ("LSA", "Local Security Authority"), 
-                    ("LSASS", "Local Security Authority Subsystem Service"), ("MAQ", "Machine Account Quota"), ("mDNS", "Multicast Domain Name System"), ("MitM", "Machine in the Middle"), ("MS-EFSRPC", "Microsoft Encrypting File System Remote Protocol"), 
-                    ("NBT-NS", "NetBIOS Name Service"), ("NIST", "National Institute of Standards and Technology"), ("NTLM", "New Technology Local Area Network Manager"), ("OS", "Operating System"), 
-                    ("OTP", "One Time Password"), ("OWA", "Outlook Web Access"), ("PHI", "Protected Health Information"), ("PHP", "Hypertext Preprocessor"), ("PII", "Personally Identifiable Information"), 
-                    ("POC", "Point of Contact"), ("PSK", "Pre-Shared Key"), ("PTH", "Pass-the-Hash"), ("RADIUS", "Remote Authentication Dial-In User Service"), ("RC4", "Rivest Cipher 4"), ("RDP", "Remote Desktop Protocol"), 
-                    ("RVA", "Risk and Vulnerability Assessment"), ("SAM", "Security Account Manager"), ("SAN", "Subject Alternate Name"), ("SDK", "Software Development Kit"), ("SDLC", "System Development Lifecycle"),
-                    ("SFTP", "Secure Shell File Transfer Protocol"), ("SMB", "Server Message Block"), ("SNMP", "Simple Network Management Protocol"), ("SOCKS", "Socket Secure"), ("SP", "Special Publication"),
-                    ("SPN", "Service Principal Name"), ("SQL", "Structured Query Language"), ("SSH", "Secure Shell"), ("SSL", "Secure Sockets Layer"), ("SSN", "Social Security Number"), ("TCP", "Transmission Control Protocol"),
-                    ("TGS", "Ticket Granting Server"), ("TGT", "Ticket Granting Ticket"), ("TLS", "Transport Layer Security"), ("UDP", "User Datagram Protocol"), ("UPnP", "Universal Plug and Play"),
-                    ("UPS", "Uninterruptible Power Supply"), ("VBA", "Visual Basic for Applications"), ("VPN", "Virtual Private Network"), ("Wi-Fi", "Wireless Fidelity"), ("WMI", "Windows Management Instrumentation"),
-                    ("WPA", "Wireless Fidelity Protected Access"), ("XDR", "Extended Detection and Response"), ("XLL", "Excell Add-In (File Format)"), ("XML", "Extensible Markup Language"), ("XSS", "Cross-Site Scripting"),      ]
-        
+        acronyms = [
+            ("ADCS", "Active Directory Certificate Services"),
+            ("AES", "Advanced Encryption Standard"),
+            ("ARP", "Address Resolution Protocol"),
+            ("ATT&CK", "Adversarial Tactic, Techniques, and Common Knowledge"),
+            ("AV", "Anti-Virus"),
+            ("C2", "Command-and-Control"),
+            ("CA", "Certificate Authority"),
+            ("CIFS", "Common Internet File System"),
+            ("CIS", "Critical Infrastructure Security"),
+            ("CISA", "Cybersecurity Infrastructure Security Agency"),
+            ("CLI", "Command Line Interface"),
+            ("CMS", "Content Management System"),
+            ("CPL", "Control Panel (File Format)"),
+            ("CSF", "Cybersecurity Framework"),
+            ("DA", "Domain Administrator"),
+            ("DC", "Domain Controller"),
+            ("DCC2", "Domain Cached Credentials Version 2"),
+            ("DHCP", "Dynamic Host Configuration Protocol"),
+            ("DHS", "Department of Homeland Security"),
+            ("DLL", "Dynamic-Link Library (File Format)"),
+            ("DLP", "Data Loss Prevention"),
+            ("DNS", "Domain Name System"),
+            ("DoS", "Denial of Service"),
+            ("EDR", "Endpoint Detection and Response"),
+            ("EWS", "Exchange Web Services"),
+            ("EXE", "Executable (File Format)"),
+            ("FCRM", "Financial Crime Risk Management"),
+            ("FTP", "File Transfer Protocol"),
+            ("FTPS", "File Transfer Protocol Secure"),
+            ("GPO", "Group Policy Object"),
+            ("HTA", "Hyptertext Markup Language Application (File Format)"),
+            ("HTML", "Hypertext Markup Language"),
+            ("HTTP", "Hypertext Transfer Protocol"),
+            ("HTTPS", "Hyper Text Transfer Protocol Secure"),
+            ("iDRAC", "Integrated Dell Remote Access Controller"),
+            ("IIS", "Internet Information Services"),
+            ("IP", "Internet Protocol"),
+            ("IPMI", "Intelligent Platform Management Interface"),
+            ("ISCSI", "Internet Small Computer Systems Interface"),
+            ("JS", "JScript (Microsoft File Format)"),
+            ("LDAP", "Lightweight Directory Access Protocol"),
+            ("LDAPS", "Secure Lightweight Directory Access Protocol"),
+            ("LFI", "Local File Inclusion"),
+            ("LLMNR", "Link-Local Multicast Name Resolution"),
+            ("LSA", "Local Security Authority"),
+            ("LSASS", "Local Security Authority Subsystem Service"),
+            ("MAQ", "Machine Account Quota"),
+            ("mDNS", "Multicast Domain Name System"),
+            ("MitM", "Machine in the Middle"),
+            ("MS-EFSRPC", "Microsoft Encrypting File System Remote Protocol"),
+            ("NBT-NS", "NetBIOS Name Service"),
+            ("NIST", "National Institute of Standards and Technology"),
+            ("NTLM", "New Technology Local Area Network Manager"),
+            ("OS", "Operating System"),
+            ("OTP", "One Time Password"),
+            ("OWA", "Outlook Web Access"),
+            ("PHI", "Protected Health Information"),
+            ("PHP", "Hypertext Preprocessor"),
+            ("PII", "Personally Identifiable Information"),
+            ("POC", "Point of Contact"),
+            ("PSK", "Pre-Shared Key"),
+            ("PTH", "Pass-the-Hash"),
+            ("RADIUS", "Remote Authentication Dial-In User Service"),
+            ("RC4", "Rivest Cipher 4"),
+            ("RDP", "Remote Desktop Protocol"),
+            ("RVA", "Risk and Vulnerability Assessment"),
+            ("SAM", "Security Account Manager"),
+            ("SAN", "Subject Alternate Name"),
+            ("SDK", "Software Development Kit"),
+            ("SDLC", "System Development Lifecycle"),
+            ("SFTP", "Secure Shell File Transfer Protocol"),
+            ("SMB", "Server Message Block"),
+            ("SNMP", "Simple Network Management Protocol"),
+            ("SOCKS", "Socket Secure"),
+            ("SP", "Special Publication"),
+            ("SPN", "Service Principal Name"),
+            ("SQL", "Structured Query Language"),
+            ("SSH", "Secure Shell"),
+            ("SSL", "Secure Sockets Layer"),
+            ("SSN", "Social Security Number"),
+            ("TCP", "Transmission Control Protocol"),
+            ("TGS", "Ticket Granting Server"),
+            ("TGT", "Ticket Granting Ticket"),
+            ("TLS", "Transport Layer Security"),
+            ("UDP", "User Datagram Protocol"),
+            ("UPnP", "Universal Plug and Play"),
+            ("UPS", "Uninterruptible Power Supply"),
+            ("VBA", "Visual Basic for Applications"),
+            ("VPN", "Virtual Private Network"),
+            ("Wi-Fi", "Wireless Fidelity"),
+            ("WMI", "Windows Management Instrumentation"),
+            ("WPA", "Wireless Fidelity Protected Access"),
+            ("XDR", "Extended Detection and Response"),
+            ("XLL", "Excell Add-In (File Format)"),
+            ("XML", "Extensible Markup Language"),
+            ("XSS", "Cross-Site Scripting"),
+        ]
+
         for a in acronyms:
-            Acronym.objects.get_or_create(acronym=a[0], definition=a[1], context="Standard acronym included in the application.", auto_found='M', belongs_to_report=Report.object(), include=True)
+            Acronym.objects.get_or_create(
+                acronym=a[0],
+                definition=a[1],
+                context="Standard acronym included in the application.",
+                auto_found='M',
+                belongs_to_report=Report.object(),
+                include=True,
+            )
 
     def handle(self, *args, **options):
         report = Report.object()

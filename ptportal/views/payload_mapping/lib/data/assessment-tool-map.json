@@ -1,207 +1,257 @@
 {
   "Last Updated": "5/20/2022",
-  "tools": {
-    "BananaPhone": {
-      "techniques": [1106],
-      "aliases": ["banana", "phone"]
-    },
-    "Bankai": {
-      "techniques": [1106, 1027],
-      "aliases": []
-    },
-    "NinjaUUID": {
-      "techniques": [1106],
-      "aliases": ["ninja"]
-    },
-    "CactusTorch": {
-      "techniques": [1059.005, 1055],
-      "aliases": ["cactus", "cactus torch", "cac"]
-    },
-    "Demiguise": {
-      "techniques": [1027.006, 1027],
-      "aliases": ["demi"]
-    },
-    "FrostByte": {
-      "techniques": [1027, 1218],
-      "aliases": ["frost byte", "frost"]
-    },
-    "MacroMe": {
-      "techniques": [1059.005, 1027],
-      "aliases": []
-    },
-    "Ivy": {
-      "techniques": [1055.003, 1059.005, 1620, 1027, 1055.012],
-      "aliases": []
-    },
-    "Macro": {
-      "techniques": [1059.005],
-      "aliases": []
-    },
-    "NimGetSyscallStub": {
-      "techniques": [1106],
-      "aliases": ["nim"]
-    },
-    "Object Link Embedded": {
-      "techniques": [1559.002],
-      "aliases": ["ole"]
-    },
-    "ScareCrow": {
-      "techniques": [1574.002, 1106, 1027],
-      "aliases": ["scare", "scary", "crow"]
-    },
-    "SharpShooter": {
-      "techniques": [1027],
-      "aliases": ["sharp", "shooter"]
-    },
-    "TikiTorch": {
-      "techniques": [1059.005, 1055.012],
-      "aliases": ["tiki", "tiki torch"]
-    },
-    "RegAsm": {
-      "techniques": [1218.009],
-      "aliases": []
-    },
-    "VelvetSweatShop": {
-      "techniques": [1027],
-      "aliases": ["velvet", "velvet sweat shop"]
-    }
-  },
-  "obfuscations": {
-    "Password": {
-      "techniques": [1027],
-      "aliases": ["pass", "pw", "protected", "secure", "encrypt", "encrypted"]
-    },
-    "Donut": {
-      "techniques": [1027],
-      "aliases": ["nut"]
-    },
-    "Morph": {
-      "techniques": [1027],
-      "aliases": ["morphhta"]
-    },
-    "MSBuild": {
-      "techniques": [1127.001],
-      "aliases": []
-    },
-    "PEZor": {
-      "techniques": [1027.005, 1106],
-      "aliases": []
-    },
-    "CertUtil": {
-      "techniques": [1140, 1553.004],
-      "aliases": []
-    },
-    "System Call": {
-      "techniques": [1106],
-      "aliases": ["system calls","syscall", "syscalls", "unhook", "unhooked", "unhooking"]
-    },
-    "Sandbox": {
-      "techniques": [1497.001],
-      "aliases": ["sandboxing"]
-    },
-    "AMSI Bypass": {
-      "techniques": [1562.001],
-      "aliases": ["amsi"]
-    },
-    "HTML Smuggling": {
-      "techniques": [1027.006],
-      "aliases": ["smuggling", "smuggle"]
-    },
-    "WeirdHTA": {
-      "techniques": [1027],
-      "aliases": ["weird"]
-    },
-    "xeca": {
-      "techniques": [1027],
-      "aliases": []
-    },
-    "Inceptor": {
-      "techniques": [],
-      "aliases": []
-    }
-  },
-  "filetypes": {
-    "EXE": {
-      "techniques": [1204.002],
-      "aliases": ["executable"]
-    },
-     "PSH": {
-      "techniques": [],
-      "aliases": ["powershell", "ps1"]
-    },
-    "XLSX": {
-      "techniques": [1204.002, 1059.005],
-      "aliases": ["xlsm", "excel", "xls"]
-    },
-    "VBA": {
-      "techniques": [],
-      "aliases": ["visual", "visual basic", "visual basic application"]
-    },
-    "VB": {
-      "techniques": [],
-      "aliases": ["vbscript", "vbs"]
-    },
-    "DLL": {
-      "techniques": [1204.002],
-      "aliases": ["dynamic link", "dynamic link library"]
-    },
-    "JS": {
-      "techniques": [1059.007],
-      "aliases": ["javascript"]
-    },
-    "HTA": {
-      "techniques": [1204.002],
-      "aliases": ["html application"]
-    },
-    "DOC": {
-      "techniques": [1204.002, 1059.005],
-      "aliases": ["docx", "docm", "word", "office document"]
-    },
-    "ISO": {
-      "techniques": [],
-      "aliases": []
-    },
-    "CHM": {
-      "techniques": [1218],
-      "aliases": [ "helpfile", "help file"]
-    },
-    "HTML": {
-      "techniques": [1218.001],
-      "aliases": ["compiled html"]
-    }
-  },
   "code_types": {
-    "GO": {
-      "techniques": [],
-      "aliases": ["golang"]
-    },
     "C": {
-      "techniques": [],
-      "aliases": []
+      "aliases": [],
+      "techniques": []
     },
     "C#": {
-      "techniques": [],
-      "aliases": ["c sharp", "c-sharp"]
+      "aliases": [
+        "c sharp",
+        "c-sharp"
+      ],
+      "techniques": []
+    },
+    "GO": {
+      "aliases": [
+        "golang"
+      ],
+      "techniques": []
     }
   },
   "commands": {
     "Cobalt Strike": {
-      "protocols": {
-        "HTTP": 1071.001,
-        "HTTPS": 1071.001,
-        "DNS": 1071.004
-      },
-      "techniques": [1106],
+      "aliases": [
+        "cs",
+        "cobalt",
+        "cobaltstrike"
+      ],
       "default": true,
-      "aliases": ["cs", "cobalt", "cobaltstrike"]
+      "protocols": {
+        "DNS": 1071.004,
+        "HTTP": 1071.001,
+        "HTTPS": 1071.001
+      },
+      "techniques": [
+        1106
+      ]
+    }
+  },
+  "filetypes": {
+    "CHM": {
+      "aliases": [
+        "helpfile",
+        "help file"
+      ],
+      "techniques": [
+        1218
+      ]
+    },
+    "DLL": {
+      "aliases": [
+        "dynamic link",
+        "dynamic link library"
+      ],
+      "techniques": [
+        1204.002
+      ]
+    },
+    "DOC": {
+      "aliases": [
+        "docx",
+        "docm",
+        "word",
+        "office document"
+      ],
+      "techniques": [
+        1204.002,
+        1059.005
+      ]
+    },
+    "EXE": {
+      "aliases": [
+        "executable"
+      ],
+      "techniques": [
+        1204.002
+      ]
+    },
+    "HTA": {
+      "aliases": [
+        "html application"
+      ],
+      "techniques": [
+        1204.002
+      ]
+    },
+    "HTML": {
+      "aliases": [
+        "compiled html"
+      ],
+      "techniques": [
+        1218.001
+      ]
+    },
+    "ISO": {
+      "aliases": [],
+      "techniques": []
+    },
+    "JS": {
+      "aliases": [
+        "javascript"
+      ],
+      "techniques": [
+        1059.007
+      ]
+    },
+    "PSH": {
+      "aliases": [
+        "powershell",
+        "ps1"
+      ],
+      "techniques": []
+    },
+    "VB": {
+      "aliases": [
+        "vbscript",
+        "vbs"
+      ],
+      "techniques": []
+    },
+    "VBA": {
+      "aliases": [
+        "visual",
+        "visual basic",
+        "visual basic application"
+      ],
+      "techniques": []
+    },
+    "XLSX": {
+      "aliases": [
+        "xlsm",
+        "excel",
+        "xls"
+      ],
+      "techniques": [
+        1204.002,
+        1059.005
+      ]
+    }
+  },
+  "obfuscations": {
+    "AMSI Bypass": {
+      "aliases": [
+        "amsi"
+      ],
+      "techniques": [
+        1562.001
+      ]
+    },
+    "CertUtil": {
+      "aliases": [],
+      "techniques": [
+        1140,
+        1553.004
+      ]
+    },
+    "Donut": {
+      "aliases": [
+        "nut"
+      ],
+      "techniques": [
+        1027
+      ]
+    },
+    "HTML Smuggling": {
+      "aliases": [
+        "smuggling",
+        "smuggle"
+      ],
+      "techniques": [
+        1027.006
+      ]
+    },
+    "Inceptor": {
+      "aliases": [],
+      "techniques": []
+    },
+    "MSBuild": {
+      "aliases": [],
+      "techniques": [
+        1127.001
+      ]
+    },
+    "Morph": {
+      "aliases": [
+        "morphhta"
+      ],
+      "techniques": [
+        1027
+      ]
+    },
+    "PEZor": {
+      "aliases": [],
+      "techniques": [
+        1027.005,
+        1106
+      ]
+    },
+    "Password": {
+      "aliases": [
+        "pass",
+        "pw",
+        "protected",
+        "secure",
+        "encrypt",
+        "encrypted"
+      ],
+      "techniques": [
+        1027
+      ]
+    },
+    "Sandbox": {
+      "aliases": [
+        "sandboxing"
+      ],
+      "techniques": [
+        1497.001
+      ]
+    },
+    "System Call": {
+      "aliases": [
+        "system calls",
+        "syscall",
+        "syscalls",
+        "unhook",
+        "unhooked",
+        "unhooking"
+      ],
+      "techniques": [
+        1106
+      ]
+    },
+    "WeirdHTA": {
+      "aliases": [
+        "weird"
+      ],
+      "techniques": [
+        1027
+      ]
+    },
+    "xeca": {
+      "aliases": [],
+      "techniques": [
+        1027
+      ]
     }
   },
   "security": {
     "Avast Endpoint": {},
     "Bitdefender": {},
+    "CYREN AntiVirus": {},
     "Carbon Black": {},
     "Check Point": {},
-    "Cisco Advanced Malware Protection (AMP)" : {},
+    "Cisco Advanced Malware Protection (AMP)": {},
     "Cisco Firepower": {},
     "Cisco Stealthwatch": {},
     "Cisco Umbrella": {},
@@ -210,16 +260,15 @@
     "CrowdStrike": {},
     "Cylance Endpoint Security": {},
     "Cynet Next-Gen Antivirus (NGAV)": {},
-    "CYREN AntiVirus": {},
     "ESET-NOD32": {},
     "F-Secure": {},
     "FireEye Endpoint Security": {},
     "Fortinet": {},
     "Kaspersky": {},
     "Malwarebytes": {},
+    "McAfee": {},
     "Microsoft Windows Defender": {},
     "Microsoft Windows Defender ATP": {},
-    "McAfee": {},
     "SentinelOne": {},
     "Sophos Intercept X": {},
     "Sophos Intercept X Advanced with Extended Detection and Response (XDR)": {},
@@ -227,5 +276,146 @@
     "Symantec Endpoint Security": {},
     "TrendMicro": {},
     "WebRoot": {}
+  },
+  "tools": {
+    "BananaPhone": {
+      "aliases": [
+        "banana",
+        "phone"
+      ],
+      "techniques": [
+        1106
+      ]
+    },
+    "Bankai": {
+      "aliases": [],
+      "techniques": [
+        1106,
+        1027
+      ]
+    },
+    "CactusTorch": {
+      "aliases": [
+        "cactus",
+        "cactus torch",
+        "cac"
+      ],
+      "techniques": [
+        1059.005,
+        1055
+      ]
+    },
+    "Demiguise": {
+      "aliases": [
+        "demi"
+      ],
+      "techniques": [
+        1027.006,
+        1027
+      ]
+    },
+    "FrostByte": {
+      "aliases": [
+        "frost byte",
+        "frost"
+      ],
+      "techniques": [
+        1027,
+        1218
+      ]
+    },
+    "Ivy": {
+      "aliases": [],
+      "techniques": [
+        1055.003,
+        1059.005,
+        1620,
+        1027,
+        1055.012
+      ]
+    },
+    "Macro": {
+      "aliases": [],
+      "techniques": [
+        1059.005
+      ]
+    },
+    "MacroMe": {
+      "aliases": [],
+      "techniques": [
+        1059.005,
+        1027
+      ]
+    },
+    "NimGetSyscallStub": {
+      "aliases": [
+        "nim"
+      ],
+      "techniques": [
+        1106
+      ]
+    },
+    "NinjaUUID": {
+      "aliases": [
+        "ninja"
+      ],
+      "techniques": [
+        1106
+      ]
+    },
+    "Object Link Embedded": {
+      "aliases": [
+        "ole"
+      ],
+      "techniques": [
+        1559.002
+      ]
+    },
+    "RegAsm": {
+      "aliases": [],
+      "techniques": [
+        1218.009
+      ]
+    },
+    "ScareCrow": {
+      "aliases": [
+        "scare",
+        "scary",
+        "crow"
+      ],
+      "techniques": [
+        1574.002,
+        1106,
+        1027
+      ]
+    },
+    "SharpShooter": {
+      "aliases": [
+        "sharp",
+        "shooter"
+      ],
+      "techniques": [
+        1027
+      ]
+    },
+    "TikiTorch": {
+      "aliases": [
+        "tiki",
+        "tiki torch"
+      ],
+      "techniques": [
+        1059.005,
+        1055.012
+      ]
+    },
+    "VelvetSweatShop": {
+      "aliases": [
+        "velvet",
+        "velvet sweat shop"
+      ],
+      "techniques": [
+        1027
+      ]
+    }
   }
 }

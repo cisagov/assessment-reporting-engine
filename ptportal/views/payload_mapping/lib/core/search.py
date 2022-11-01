@@ -1,16 +1,29 @@
 # -*- coding: utf-8 -*-
+# Risk & Vulnerability Assessment Reporting Engine
+
+# Copyright 2022 The Risk & Vulnerability Reporting Engine Contributors, All Rights Reserved.
+# (see Contributors.txt for a full list of Contributors)
+
+# SPDX-License-Identifier: BSD-3-Clause
+
+# Please see additional acknowledgments (including references to third party source code, object code, documentation and other files) in the license.txt file or contact permission@sei.cmu.edu for full terms.
+
+# Created, in part, with funding and support from the United States Government. (see Acknowledgments file).
+
+# DM22-1011
+
 import re
 
 
 class Search(object):
-    """ Searches Objects """
+    """Searches Objects"""
 
     def __init__(self, parser):
-        """ For Each Payload Search For Every Instance Function """
+        """For Each Payload Search For Every Instance Function"""
         self.parser = parser
 
     def execute_search_on_normal(self):
-        """ Performs the Search on Unmodified JSON File """
+        """Performs the Search on Unmodified JSON File"""
         for payload in self.parser.payloads:
             self.init_tool_search(payload)
             self.init_obfuscation_search(payload)
@@ -19,22 +32,28 @@ class Search(object):
             payload.concatenation()
 
     def execute_search_on_mapped(self):
-        """ Performs Search and Readjustments on already Mapped JSON Files """
+        """Performs Search and Readjustments on already Mapped JSON Files"""
         pass
 
     def init_tool_search(self, payload):
-        """ Search for Every Possible Tool """
+        """Search for Every Possible Tool"""
         tool_list = []
 
         for tool_name, tool_instance in self.parser.tools.items():
-            if not re.search(r'%s\b' %tool_name, payload.payload_description, re.IGNORECASE):
+            if not re.search(
+                r'%s\b' % tool_name, payload.payload_description, re.IGNORECASE
+            ):
                 if tool_instance.aliases:
                     for aliase in tool_instance.aliases:
-                        if re.search(r'%s\b' %aliase, payload.payload_description, re.IGNORECASE):
+                        if re.search(
+                            r'%s\b' % aliase, payload.payload_description, re.IGNORECASE
+                        ):
                             payload.tool_used = True
                             tool_list.append(tool_instance)
                             break
-            elif re.search(r'%s\b' %tool_name, payload.payload_description, re.IGNORECASE):
+            elif re.search(
+                r'%s\b' % tool_name, payload.payload_description, re.IGNORECASE
+            ):
                 payload.tool_used = True
                 tool_list.append(tool_instance)
 
@@ -64,38 +83,50 @@ class Search(object):
                     payload.techniques.append(technique)
 
     def init_obfuscation_search(self, payload):
-        """ Searches for Obfuscation Instances """
+        """Searches for Obfuscation Instances"""
         for obfuscation_name, obfuscation_instance in self.parser.obfuscations.items():
-            if not re.search(r'%s\b' %obfuscation_name, payload.payload_description, re.IGNORECASE):
+            if not re.search(
+                r'%s\b' % obfuscation_name, payload.payload_description, re.IGNORECASE
+            ):
                 if obfuscation_instance.aliases:
                     for aliase in obfuscation_instance.aliases:
-                        if re.search(r'%s\b' %aliase, payload.payload_description, re.IGNORECASE):
+                        if re.search(
+                            r'%s\b' % aliase, payload.payload_description, re.IGNORECASE
+                        ):
                             for technique in obfuscation_instance.techniques:
                                 if technique not in payload.techniques:
                                     payload.techniques.append(technique)
                             break
 
-            elif re.search(r'%s\b' %obfuscation_name, payload.payload_description, re.IGNORECASE):
+            elif re.search(
+                r'%s\b' % obfuscation_name, payload.payload_description, re.IGNORECASE
+            ):
                 payload.tool_used = True
                 for technique in obfuscation_instance.techniques:
                     if technique not in payload.techniques:
                         payload.techniques.append(technique)
 
     def init_file_type_search(self, payload):
-        """ Searches for Filetypes """
+        """Searches for Filetypes"""
         found = False
         types = []
 
         for filetype_name, filetype_instance in self.parser.filetypes.items():
-            if not re.search(r'%s\b' % filetype_name, payload.payload_description, re.IGNORECASE):
+            if not re.search(
+                r'%s\b' % filetype_name, payload.payload_description, re.IGNORECASE
+            ):
                 if filetype_instance.aliases:
                     for aliase in filetype_instance.aliases:
-                        if re.search(r'%s\b' % aliase, payload.payload_description, re.IGNORECASE):
+                        if re.search(
+                            r'%s\b' % aliase, payload.payload_description, re.IGNORECASE
+                        ):
                             if filetype_name not in types:
                                 types.append(filetype_instance)
                                 found = True
 
-            elif re.search(r'%s\b' % filetype_name, payload.payload_description, re.IGNORECASE):
+            elif re.search(
+                r'%s\b' % filetype_name, payload.payload_description, re.IGNORECASE
+            ):
                 if filetype_name not in types:
                     types.append(filetype_instance)
                     found = True
@@ -119,17 +150,23 @@ class Search(object):
                     payload.filetype += str(types[i].name) + "-"
 
     def init_command_search(self, payload):
-        """ Searches Command and Control Information Used """
+        """Searches Command and Control Information Used"""
         command_found = False
 
         for command_name, command_instance in self.parser.commands.items():
-            if not re.search(r'%s\b' % command_name, payload.payload_description, re.IGNORECASE):
+            if not re.search(
+                r'%s\b' % command_name, payload.payload_description, re.IGNORECASE
+            ):
                 if command_instance.aliases:
                     for aliase in command_instance.aliases:
-                        if re.search(r'%s\b' % aliase, payload.payload_description, re.IGNORECASE):
+                        if re.search(
+                            r'%s\b' % aliase, payload.payload_description, re.IGNORECASE
+                        ):
                             payload.command = command_instance
                             command_found = True
-            elif re.search(r'%s\b' % command_name, payload.payload_description, re.IGNORECASE):
+            elif re.search(
+                r'%s\b' % command_name, payload.payload_description, re.IGNORECASE
+            ):
                 payload.command = command_instance
                 command_found = True
 
@@ -150,4 +187,3 @@ class Search(object):
             if re.search(r'%s\b' % payload_name, payload.c2_protocol, re.IGNORECASE):
                 if technique not in payload.techniques:
                     payload.techniques.append(technique)
-

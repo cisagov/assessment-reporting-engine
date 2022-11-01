@@ -48,7 +48,9 @@ from ptportal.models import (
     HVAData,
     CIS_CSC,
     Report,
-    UploadedFinding,
+    BaseFinding,
+    GeneralFinding,
+    SpecificFinding,
     ImageFinding,
     AttackPath,
 )
@@ -73,13 +75,13 @@ if settings.DEBUG:
 
 def tools(request):
 
-    uploaded_list = UploadedFinding.preferred_order.get_preferred_order()
+    uploaded_list = GeneralFinding.objects.all()
     cis_csc_objects = CIS_CSC.objects.all()
     for c in cis_csc_objects:
-        ciscsc_findings = c.findings.all()
+        ciscsc_findings = c.gen_findings.all()
         finding_ids = []
         for count, u in enumerate(uploaded_list):
-            if u.finding in ciscsc_findings:
+            if u in ciscsc_findings:
                 finding_ids.append(count + 1)
         c.finding_ids = ', '.join(str(e) for e in finding_ids)
         c.save()
