@@ -17,18 +17,18 @@
   "devDependencies": {
     "@sds/components-vue3": "file:dependencies/components-vue3",
     "@sds/tailwindcss-3": "file:dependencies/tailwindcss-3",
-    "@tailwindcss/aspect-ratio": "^0.4.0",
-    "@tailwindcss/forms": "^0.5.1",
-    "@tailwindcss/line-clamp": "^0.4.0",
-    "@tailwindcss/typography": "^0.5.2",
-    "autoprefixer": "^10.4.7",
-    "postcss": "^8.4.13",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.3",
+    "@tailwindcss/line-clamp": "^0.4.2",
+    "@tailwindcss/typography": "^0.5.8",
+    "autoprefixer": "^10.4.13",
+    "postcss": "^8.4.18",
     "postcss-cli": "^9.1.0",
     "postcss-import": "^14.1.0",
-    "tailwindcss": "^3.1.7"
+    "tailwindcss": "^3.2.2"
   },
   "dependencies": {
-    "apexcharts": "^3.35.4",
+    "apexcharts": "^3.36.3",
     "vue3-apexcharts": "^1.4.1"
   }
 }
