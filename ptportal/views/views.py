@@ -33,7 +33,6 @@ from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.signals import user_login_failed
-from notifications.signals import notify
 from ..forms import RegistrationForm
 from ..models import *
 import base64
@@ -53,8 +52,6 @@ from builtins import int
 media_path = settings.MEDIA_ROOT
 import shutil
 from zipfile import ZipFile
-
-from notifications.models import Notification
 
 
 class IndexView(generic.ListView):

@@ -19,7 +19,6 @@ from django.urls import path, re_path, include
 from django.contrib.auth import views as auth_views
 
 # from .forms import CustomPasswordResetForm
-import notifications.urls
 from . import views
 
 urlpatterns = [
@@ -246,16 +245,6 @@ urlpatterns += [
 urlpatterns += [
     path('payloads/', views.Payloads.as_view(), name='payloads'),
     path('campaigns/', views.Campaigns.as_view(), name='campaigns'),
-]
-
-# Notifications to users
-urlpatterns += [
-    path('notifications/', include(notifications.urls, namespace='notifications')),
-    path(
-        'read_by_sender/',
-        views.readSenderNotifications,
-        name='read_sender_notifications',
-    ),
 ]
 
 # error handlers
