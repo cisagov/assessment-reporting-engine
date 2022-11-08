@@ -312,8 +312,7 @@ def run(args):
 def install_node_packages():
     print("Installing SDS and running postcss for tailwind.")
     try:
-        subprocess.run(f"npm ci", cwd="./node", shell=True)
-        subprocess.run("npm run collect", cwd="./node", shell=True)
+        subprocess.run(f"npm i", cwd="./node", shell=True)
     except Exception as e:
         print("Error installing SDS and tailwind: " + e)
     print("Successfully installed SDS and tailwind.")

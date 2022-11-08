@@ -5,11 +5,7 @@
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "processcss": "npx postcss tailwind/tailwind.css -o ../ptportal/static/css/sds.tailwind.css",
-    "copySDSjs": "cp ./node_modules/@sds/components-vue3/dist/index.umd.js ../ptportal/static/js/sds.umd.js",
-    "copySDScss": "cp ./node_modules/@sds/components-vue3/dist/style.css ../ptportal/static/css/sds.style.css",
-    "copyApex": "cp ./node_modules/apexcharts/dist/apexcharts.amd.js ../ptportal/static/js/apexcharts.amd.js; cp ./node_modules/apexcharts/dist/apexcharts.css ../ptportal/static/css/apexcharts.css",
-    "collect": "npm run processcss;npm run copySDSjs; npm run copySDScss; npm run copyApex;"
+    "processcss": "npx postcss tailwind/tailwind.css -o ../ptportal/static/css/sds.tailwind.css"
   },
   "keywords": [],
   "author": "",

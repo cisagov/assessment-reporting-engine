@@ -33,18 +33,7 @@
     "./src/*": "./src/*",
     "./volar": "./volar.d.ts"
   },
-  "bugs": {
-    "url": "https://issues.sei.cmu.edu/jira/projects/SDS"
-  },
-  "homepage": "https://designsystem.sei.cmu.edu/",
-  "publishConfig": {
-    "cache": "~/.npm",
-    "registry": "https://artifactory.sei.cmu.edu/artifactory/api/npm/sei-design-system/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://code.sei.cmu.edu/bitbucket/projects/SDS/repos/components-vue3/"
-  },
+  
   "peerDependencies": {
     "vue": ">=3.0.0"
   },
