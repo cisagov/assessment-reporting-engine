@@ -1,0 +1,94 @@
+{
+  "name": "@sds/components-vue3",
+  "version": "2.6.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "serve": "vite preview",
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore . --ignore-path .eslintignore .",
+    "test": "LIB_NAME=SeiDesignSystem LIB_ROOT=src/components vitest run -c vite-library.config.js",
+    "test:watch": "LIB_NAME=SeiDesignSystem LIB_ROOT=src/components vitest -c vite-library.config.js",
+    "bundle:release": "./scripts/bundle-release.sh",
+    "release": "./scripts/release.sh",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook",
+    "gen-volar-dts": "./scripts/gen-component-declarations.sh"
+  },
+  "files": [
+    "dist",
+    "src",
+    "volar.d.ts"
+  ],
+  "sideEffects": false,
+  "main": "./dist/index.umd.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/types/components/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/components/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.umd.js"
+    },
+    "./dist/*": "./dist/*",
+    "./src/*": "./src/*",
+    "./volar": "./volar.d.ts"
+  },
+  "bugs": {
+    "url": "https://issues.sei.cmu.edu/jira/projects/SDS"
+  },
+  "homepage": "https://designsystem.sei.cmu.edu/",
+  "publishConfig": {
+    "cache": "~/.npm",
+    "registry": "https://artifactory.sei.cmu.edu/artifactory/api/npm/sei-design-system/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://code.sei.cmu.edu/bitbucket/projects/SDS/repos/components-vue3/"
+  },
+  "peerDependencies": {
+    "vue": ">=3.0.0"
+  },
+  "devDependencies": {
+    "@floating-ui/dom": "^1.0.3",
+    "@rollup/plugin-eslint": "^8.0.5",
+    "@sds/tailwindcss-3": "^2.0.5",
+    "@shimyshack/uid": "^0.1.7",
+    "@storybook/addon-actions": "^6.3.12",
+    "@storybook/addon-docs": "^6.3.12",
+    "@storybook/addon-essentials": "^6.5.13",
+    "@storybook/addon-links": "^6.5.13",
+    "@storybook/addon-storysource": "^6.5.13",
+    "@storybook/vue3": "^6.5.13",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.3",
+    "@tailwindcss/line-clamp": "^0.4.2",
+    "@tailwindcss/typography": "^0.5.7",
+    "@typescript-eslint/eslint-plugin": "^5.41.0",
+    "@typescript-eslint/parser": "^5.41.0",
+    "@vitejs/plugin-vue": "^3.2.0",
+    "@vue/compiler-sfc": "^3.0.5",
+    "@vue/test-utils": "^2.2.0",
+    "@vueuse/core": "^9.4.0",
+    "autoprefixer": "^10.4.12",
+    "date-fns": "^2.29.3",
+    "esbuild": "^0.15.12",
+    "eslint": "^8.26.0",
+    "eslint-plugin-vue": "^9.6.0",
+    "jsdom": "^20.0.1",
+    "mitt": "^3.0.0",
+    "postcss": "^8.4.18",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "storybook-builder-vite": "^0.1.23",
+    "tailwindcss": "^3.2.1",
+    "typescript": "^4.8.4",
+    "vite": "^3.2.0",
+    "vitest": "^0.24.3",
+    "vue": "^3.0.0",
+    "vue-loader": "^17.0.0",
+    "vue-tsc": "^1.0.9"
+  },
+  "engines": {
+    "node": ">=12.13.0"
+  }
+}

@@ -1,0 +1,38 @@
+// Vitest Snapshot v1
+
+exports[`Popover.vue > matches snapshot 1`] = `
+<div
+  class="inline-block"
+  data-id="sds-popover"
+>
+  <div
+    class="inline-block w-full"
+  >
+    
+    <div>
+      
+      
+    </div>
+    
+  </div>
+  <!---->
+</div>
+`;
+
+exports[`Popover.vue > matches snapshot with no props assigned 1`] = `
+"<div class=\\"inline-block\\" data-id=\\"sds-popover\\">
+  <div class=\\"inline-block w-full\\">
+    <div></div>
+  </div>
+  <!---->
+</div>"
+`;
+
+exports[`Popover.vue > matches snapshot with prop assigned 1`] = `
+"<div class=\\"inline-block\\" data-id=\\"sds-popover\\" popoverclass=\\"test\\" triggerclass=\\"test\\">
+  <div class=\\"inline-block w-full\\">
+    <div></div>
+  </div>
+  <!---->
+</div>"
+`;

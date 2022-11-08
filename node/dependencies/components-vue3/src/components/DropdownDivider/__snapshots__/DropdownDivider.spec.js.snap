@@ -1,0 +1,8 @@
+// Vitest Snapshot v1
+
+exports[`DropdownDivider > should match its default snapshot 1`] = `
+<div
+  class="my-2 border-t border-gray-100 dark:border-gray-600"
+  data-id="sds-dropdown-divider"
+/>
+`;

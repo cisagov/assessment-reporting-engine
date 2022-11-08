@@ -1,0 +1,17 @@
+// Vitest Snapshot v1
+
+exports[`LayoutStacked > should match its default snapshot 1`] = `
+<div
+  class="flex flex-col w-full min-h-screen"
+  data-id="sds-layout-stacked"
+>
+  <!---->
+  <main
+    class="flex-grow"
+  >
+    
+    
+  </main>
+  <!---->
+</div>
+`;

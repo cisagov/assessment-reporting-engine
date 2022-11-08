@@ -1,0 +1,8 @@
+// Vitest Snapshot v1
+
+exports[`FloatingUi.vue > matches snapshot with no props assigned 1`] = `
+"<div class=\\"inline-block\\">
+  <div class=\\"inline-block w-full\\"></div>
+  <!---->
+</div>"
+`;

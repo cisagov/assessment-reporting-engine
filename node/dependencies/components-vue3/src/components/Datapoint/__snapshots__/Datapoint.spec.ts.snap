@@ -1,0 +1,61 @@
+// Vitest Snapshot v1
+
+exports[`Datapoint > should match its default snapshot 1`] = `
+<div>
+  <div
+    class="text-base"
+  >
+    
+    label
+    
+  </div>
+  <div
+    class="flex gap-2"
+  >
+    <div
+      class="font-bold text-3xl text-black dark:text-white"
+    >
+      
+      4000
+      
+    </div>
+    <div
+      class="text-base mt-auto"
+    >
+      
+      context
+      
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Datapoint > should match its variant green, size sm, label, and context slots snapshot 1`] = `
+<div>
+  <div
+    class="text-base"
+  >
+    
+    label
+    
+  </div>
+  <div
+    class="flex gap-2"
+  >
+    <div
+      class="font-bold text-lg text-green-500 dark:text-green-400"
+    >
+      
+      2000
+      
+    </div>
+    <div
+      class="text-base mt-auto"
+    >
+      
+      context
+      
+    </div>
+  </div>
+</div>
+`;

@@ -1,0 +1,11 @@
+// Vitest Snapshot v1
+
+exports[`Tab > should match its default snapshot 1`] = `
+<button
+  class="tab"
+>
+  <!-- @slot Tab content. -->
+  
+  
+</button>
+`;

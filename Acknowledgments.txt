@@ -3,6 +3,6 @@ THIS WORK IS FUNDED IN PART BY:
 
 
 THIS WORK BUILDS UPON THE FOLLOWING PRIOR WORKS:
-1.	Risk & Vulnerability Assessment Reporting Engine, Version v0.9-beta (https://github.com/cisagov/rva-reporting-engine/releases/tag/v0.9-alpha) Copyright 2022 Carnegie Mellon University. DM22-0744. 
+1.	Risk & Vulnerability Assessment Reporting Engine, Version v0.9-beta (https://github.com/cisagov/rva-reporting-engine/releases/tag/v0.9-alpha) Copyright 2022 Carnegie Mellon University. DM22-0744.
 
 DM22-1011

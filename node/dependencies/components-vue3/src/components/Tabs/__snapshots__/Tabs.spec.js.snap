@@ -1,0 +1,22 @@
+// Vitest Snapshot v1
+
+exports[`Tabs > should match its default snapshot 1`] = `
+<div
+  data-id="sds-tabs"
+  id="unique-id"
+>
+  <div
+    class="overflow-x-auto bg-gray-100 dark:bg-gray-700 rounded-t"
+  >
+    <ul
+      class="flex whitespace-nowrap z-10"
+      role="tablist"
+    >
+      
+      
+    </ul>
+  </div>
+  
+  
+</div>
+`;

@@ -15,8 +15,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@sds/components-vue3": "^2.3.0",
-    "@sds/tailwindcss-3": "^1.0.6",
+    "@sds/components-vue3": "file:dependencies/components-vue3",
+    "@sds/tailwindcss-3": "file:dependencies/tailwindcss-3",
     "@tailwindcss/aspect-ratio": "^0.4.0",
     "@tailwindcss/forms": "^0.5.1",
     "@tailwindcss/line-clamp": "^0.4.0",

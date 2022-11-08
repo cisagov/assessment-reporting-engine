@@ -1,0 +1,38 @@
+// Vitest Snapshot v1
+
+exports[`Tooltip.vue > matches snapshot 1`] = `
+<div
+  class="inline-block"
+  data-id="sds-tooltip"
+>
+  <div
+    class="inline-block w-full"
+  >
+    
+    <div>
+      
+      
+    </div>
+    
+  </div>
+  <!---->
+</div>
+`;
+
+exports[`Tooltip.vue > matches snapshot with no props assigned 1`] = `
+"<div class=\\"inline-block\\" data-id=\\"sds-tooltip\\">
+  <div class=\\"inline-block w-full\\">
+    <div></div>
+  </div>
+  <!---->
+</div>"
+`;
+
+exports[`Tooltip.vue > matches snapshot with prop assigned 1`] = `
+"<div class=\\"inline-block\\" data-id=\\"sds-tooltip\\" tooltipclass=\\"test\\" triggerclass=\\"test\\">
+  <div class=\\"inline-block w-full\\">
+    <div></div>
+  </div>
+  <!---->
+</div>"
+`;

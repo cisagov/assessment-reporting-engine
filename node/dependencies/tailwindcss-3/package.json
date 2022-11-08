@@ -1,0 +1,53 @@
+{
+  "name": "@sds/tailwindcss-3",
+  "version": "2.0.6",
+  "description": "The TailwindCSS 3.x configuration for the SEI Design System.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "release": "./scripts/release.sh"
+  },
+  "files": [
+    "tailwindcss",
+    "open-sans"
+  ],
+  "main": "./tailwindcss/tailwind-base.js",
+  "module": "./tailwindcss/tailwind-base.js",
+  "exports": {
+    ".": {
+      "import": "./tailwindcss/tailwind-base.js",
+      "require": "./tailwindcss/tailwind-base.js"
+    },
+    "./tailwindcss/*": "./tailwindcss/*",
+    "./open-sans/*": "./open-sans/*"
+  },
+  "bugs": {
+    "url": "https://issues.sei.cmu.edu/jira/projects/SDS"
+  },
+  "homepage": "https://designsystem.sei.cmu.edu/",
+  "publishConfig": {
+    "cache": "~/.npm",
+    "registry": "https://artifactory.sei.cmu.edu/artifactory/api/npm/sei-design-system/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://code.sei.cmu.edu/bitbucket/projects/SDS/repos/tailwindcss-3/"
+  },
+  "devDependencies": {
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.3",
+    "@tailwindcss/line-clamp": "^0.4.2",
+    "@tailwindcss/typography": "^0.5.7",
+    "@vitejs/plugin-vue": "^3.2.0",
+    "@vue/compiler-sfc": "^3.0.5",
+    "autoprefixer": "^10.4.12",
+    "postcss": "^8.4.18",
+    "tailwindcss": "^3.2.1",
+    "vite": "^3.2.0",
+    "vue": "^3.0.5"
+  },
+  "engines": {
+    "node": ">=12.13.0"
+  }
+}

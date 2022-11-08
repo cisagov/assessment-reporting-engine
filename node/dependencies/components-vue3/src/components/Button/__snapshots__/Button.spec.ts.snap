@@ -1,0 +1,23 @@
+// Vitest Snapshot v1
+
+exports[`Button > should match its default snapshot 1`] = `
+<button
+  class=""
+  data-id="sds-button"
+>
+  
+  Button
+  
+</button>
+`;
+
+exports[`Button > should match its variant primary snapshot 1`] = `
+<button
+  class="btn btn-primary"
+  data-id="sds-button"
+>
+  
+  Button
+  
+</button>
+`;

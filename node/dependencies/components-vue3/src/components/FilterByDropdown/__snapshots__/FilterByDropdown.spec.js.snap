@@ -1,0 +1,10 @@
+// Vitest Snapshot v1
+
+exports[`FilterByDropdown.vue > matches snapshot with no props assigned 1`] = `
+"<div class=\\"inline-block\\" data-id=\\"sds-filter-by-dropdown\\">
+  <div class=\\"inline-block w-full\\"><button id=\\"unique-id\\" class=\\"link link-secondary\\" type=\\"button\\" aria-haspopup=\\"true\\" aria-expanded=\\"false\\"><span>Filter</span><svg class=\\"inline-block self-center w-5 h-5 -mr-1\\" xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 20 20\\" fill=\\"currentColor\\">
+        <path fill-rule=\\"evenodd\\" d=\\"M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z\\" clip-rule=\\"evenodd\\"></path>
+      </svg></button></div>
+  <!---->
+</div>"
+`;

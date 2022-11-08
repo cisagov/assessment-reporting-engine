@@ -1,0 +1,136 @@
+// Vitest Snapshot v1
+
+exports[`Paginator.vue > matches snapshot when currentPage > totalPages - threshold + 1 1`] = `
+"<nav data-id=\\"sds-paginator\\" class=\\"paginator\\" aria-label=\\"Page navigation\\">
+  <div class=\\"btn-toolbar\\" role=\\"toolbar\\">
+    <div class=\\"mr-2 btn-group\\"><button class=\\"flex space-x-1 btn btn-default\\" title=\\"First\\"><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M11 19l-7-7 7-7m8 14l-7-7 7-7\\"></path>
+        </svg><span class=\\"sr-only sm:not-sr-only\\">First</span></button><button class=\\"flex space-x-1 btn btn-default\\" title=\\"Prev\\"><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M15 19l-7-7 7-7\\"></path>
+        </svg><span class=\\"sr-only sm:not-sr-only\\">Prev</span></button></div>
+    <div class=\\"hidden btn-group md:block\\"><button class=\\"btn btn-default\\">1</button><button class=\\"shadow-none border-transparent btn btn-default\\" disabled=\\"\\">...</button><button class=\\"btn btn-default\\">11</button><button class=\\"active btn btn-default\\">12</button><button class=\\"btn btn-default\\">13</button><button class=\\"btn btn-default\\">14</button><button class=\\"btn btn-default\\">15</button></div>
+    <div class=\\"block mx-0 currentPageLabelContainer btn-group md:hidden\\"><span class=\\"inline-block px-3 pt-2 currentPageLabel\\"> Page 12</span></div>
+    <div class=\\"ml-2 btn-group\\"><button class=\\"flex space-x-1 btn btn-default\\" title=\\"Next\\"><span class=\\"sr-only sm:not-sr-only\\">Next</span><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M9 5l7 7-7 7\\"></path>
+        </svg></button><button class=\\"flex space-x-1 btn btn-default\\" title=\\"Last\\"><span class=\\"sr-only sm:not-sr-only\\">Last</span><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M13 5l7 7-7 7M5 5l7 7-7 7\\"></path>
+        </svg></button></div>
+  </div>
+</nav>"
+`;
+
+exports[`Paginator.vue > matches snapshot when threshold is >= totalPages prop 1`] = `
+"<nav data-id=\\"sds-paginator\\" class=\\"paginator\\" aria-label=\\"Page navigation\\">
+  <div class=\\"btn-toolbar\\" role=\\"toolbar\\">
+    <div class=\\"mr-2 btn-group\\"><button disabled=\\"\\" class=\\"flex space-x-1 btn btn-default\\" title=\\"First\\"><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M11 19l-7-7 7-7m8 14l-7-7 7-7\\"></path>
+        </svg><span class=\\"sr-only sm:not-sr-only\\">First</span></button><button disabled=\\"\\" class=\\"flex space-x-1 btn btn-default\\" title=\\"Prev\\"><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M15 19l-7-7 7-7\\"></path>
+        </svg><span class=\\"sr-only sm:not-sr-only\\">Prev</span></button></div>
+    <div class=\\"hidden btn-group md:block\\"><button class=\\"active btn btn-default\\">1</button><button class=\\"btn btn-default\\">2</button><button class=\\"btn btn-default\\">3</button></div>
+    <div class=\\"block mx-0 currentPageLabelContainer btn-group md:hidden\\"><span class=\\"inline-block px-3 pt-2 currentPageLabel\\"> Page 1</span></div>
+    <div class=\\"ml-2 btn-group\\"><button class=\\"flex space-x-1 btn btn-default\\" title=\\"Next\\"><span class=\\"sr-only sm:not-sr-only\\">Next</span><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M9 5l7 7-7 7\\"></path>
+        </svg></button><button class=\\"flex space-x-1 btn btn-default\\" title=\\"Last\\"><span class=\\"sr-only sm:not-sr-only\\">Last</span><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M13 5l7 7-7 7M5 5l7 7-7 7\\"></path>
+        </svg></button></div>
+  </div>
+</nav>"
+`;
+
+exports[`Paginator.vue > matches snapshot with currentPage and totalPages prop assigned 1`] = `
+"<nav data-id=\\"sds-paginator\\" class=\\"paginator\\" aria-label=\\"Page navigation\\">
+  <div class=\\"btn-toolbar\\" role=\\"toolbar\\">
+    <div class=\\"mr-2 btn-group\\"><button class=\\"flex space-x-1 btn btn-default\\" title=\\"First\\"><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M11 19l-7-7 7-7m8 14l-7-7 7-7\\"></path>
+        </svg><span class=\\"sr-only sm:not-sr-only\\">First</span></button><button class=\\"flex space-x-1 btn btn-default\\" title=\\"Prev\\"><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M15 19l-7-7 7-7\\"></path>
+        </svg><span class=\\"sr-only sm:not-sr-only\\">Prev</span></button></div>
+    <div class=\\"hidden btn-group md:block\\"><button class=\\"btn btn-default\\">1</button><button class=\\"btn btn-default\\">2</button><button class=\\"active btn btn-default\\">3</button><button class=\\"btn btn-default\\">4</button><button class=\\"btn btn-default\\">5</button><button class=\\"shadow-none border-transparent btn btn-default\\" disabled=\\"\\">...</button><button class=\\"btn btn-default\\">10</button></div>
+    <div class=\\"block mx-0 currentPageLabelContainer btn-group md:hidden\\"><span class=\\"inline-block px-3 pt-2 currentPageLabel\\"> Page 3</span></div>
+    <div class=\\"ml-2 btn-group\\"><button class=\\"flex space-x-1 btn btn-default\\" title=\\"Next\\"><span class=\\"sr-only sm:not-sr-only\\">Next</span><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M9 5l7 7-7 7\\"></path>
+        </svg></button><button class=\\"flex space-x-1 btn btn-default\\" title=\\"Last\\"><span class=\\"sr-only sm:not-sr-only\\">Last</span><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M13 5l7 7-7 7M5 5l7 7-7 7\\"></path>
+        </svg></button></div>
+  </div>
+</nav>"
+`;
+
+exports[`Paginator.vue > matches snapshot with currentPage, threshold, loading, and totalPages prop assigned 1`] = `
+"<nav data-id=\\"sds-paginator\\" class=\\"paginator\\" aria-label=\\"Page navigation\\">
+  <div class=\\"btn-toolbar\\" role=\\"toolbar\\">
+    <div class=\\"mr-2 btn-group\\"><button disabled=\\"\\" class=\\"flex space-x-1 btn btn-default\\" title=\\"First\\"><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M11 19l-7-7 7-7m8 14l-7-7 7-7\\"></path>
+        </svg><span class=\\"sr-only sm:not-sr-only\\">First</span></button><button disabled=\\"\\" class=\\"flex space-x-1 btn btn-default\\" title=\\"Prev\\"><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M15 19l-7-7 7-7\\"></path>
+        </svg><span class=\\"sr-only sm:not-sr-only\\">Prev</span></button></div>
+    <div class=\\"hidden btn-group md:block\\"><button class=\\"btn btn-default\\" disabled=\\"\\">1</button><button class=\\"shadow-none border-transparent btn btn-default\\" disabled=\\"\\">...</button><button class=\\"btn btn-default\\" disabled=\\"\\">13</button><button class=\\"btn btn-default\\" disabled=\\"\\">14</button><button class=\\"btn btn-default\\" disabled=\\"\\">15</button><button class=\\"btn btn-default\\" disabled=\\"\\">16</button><button class=\\"btn btn-default\\" disabled=\\"\\">17</button><button class=\\"btn btn-default\\" disabled=\\"\\">18</button><button class=\\"btn btn-default\\" disabled=\\"\\">19</button><button class=\\"active btn btn-default\\" disabled=\\"\\">20</button><button class=\\"btn btn-default\\" disabled=\\"\\">21</button><button class=\\"btn btn-default\\" disabled=\\"\\">22</button><button class=\\"btn btn-default\\" disabled=\\"\\">23</button><button class=\\"btn btn-default\\" disabled=\\"\\">24</button><button class=\\"btn btn-default\\" disabled=\\"\\">25</button><button class=\\"btn btn-default\\" disabled=\\"\\">26</button><button class=\\"btn btn-default\\" disabled=\\"\\">27</button><button class=\\"shadow-none border-transparent btn btn-default\\" disabled=\\"\\">...</button><button class=\\"btn btn-default\\" disabled=\\"\\">100</button></div>
+    <div class=\\"block mx-0 currentPageLabelContainer btn-group md:hidden\\"><span class=\\"inline-block px-3 pt-2 currentPageLabel\\"> Page 20</span></div>
+    <div class=\\"ml-2 btn-group\\"><button disabled=\\"\\" class=\\"flex space-x-1 btn btn-default\\" title=\\"Next\\"><span class=\\"sr-only sm:not-sr-only\\">Next</span><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M9 5l7 7-7 7\\"></path>
+        </svg></button><button disabled=\\"\\" class=\\"flex space-x-1 btn btn-default\\" title=\\"Last\\"><span class=\\"sr-only sm:not-sr-only\\">Last</span><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M13 5l7 7-7 7M5 5l7 7-7 7\\"></path>
+        </svg></button></div>
+  </div>
+</nav>"
+`;
+
+exports[`Paginator.vue > matches snapshot with loading and totalPages prop assigned 1`] = `
+"<nav data-id=\\"sds-paginator\\" class=\\"paginator\\" aria-label=\\"Page navigation\\">
+  <div class=\\"btn-toolbar\\" role=\\"toolbar\\">
+    <div class=\\"mr-2 btn-group\\"><button disabled=\\"\\" class=\\"flex space-x-1 btn btn-default\\" title=\\"First\\"><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M11 19l-7-7 7-7m8 14l-7-7 7-7\\"></path>
+        </svg><span class=\\"sr-only sm:not-sr-only\\">First</span></button><button disabled=\\"\\" class=\\"flex space-x-1 btn btn-default\\" title=\\"Prev\\"><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M15 19l-7-7 7-7\\"></path>
+        </svg><span class=\\"sr-only sm:not-sr-only\\">Prev</span></button></div>
+    <div class=\\"hidden btn-group md:block\\"><button class=\\"active btn btn-default\\" disabled=\\"\\">1</button><button class=\\"btn btn-default\\" disabled=\\"\\">2</button><button class=\\"btn btn-default\\" disabled=\\"\\">3</button><button class=\\"btn btn-default\\" disabled=\\"\\">4</button><button class=\\"btn btn-default\\" disabled=\\"\\">5</button><button class=\\"shadow-none border-transparent btn btn-default\\" disabled=\\"\\">...</button><button class=\\"btn btn-default\\" disabled=\\"\\">10</button></div>
+    <div class=\\"block mx-0 currentPageLabelContainer btn-group md:hidden\\"><span class=\\"inline-block px-3 pt-2 currentPageLabel\\"> Page 1</span></div>
+    <div class=\\"ml-2 btn-group\\"><button disabled=\\"\\" class=\\"flex space-x-1 btn btn-default\\" title=\\"Next\\"><span class=\\"sr-only sm:not-sr-only\\">Next</span><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M9 5l7 7-7 7\\"></path>
+        </svg></button><button disabled=\\"\\" class=\\"flex space-x-1 btn btn-default\\" title=\\"Last\\"><span class=\\"sr-only sm:not-sr-only\\">Last</span><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M13 5l7 7-7 7M5 5l7 7-7 7\\"></path>
+        </svg></button></div>
+  </div>
+</nav>"
+`;
+
+exports[`Paginator.vue > matches snapshot with no props assigned 1`] = `"<!---->"`;
+
+exports[`Paginator.vue > matches snapshot with threshold and totalPages prop assigned 1`] = `
+"<nav data-id=\\"sds-paginator\\" class=\\"paginator\\" aria-label=\\"Page navigation\\">
+  <div class=\\"btn-toolbar\\" role=\\"toolbar\\">
+    <div class=\\"mr-2 btn-group\\"><button disabled=\\"\\" class=\\"flex space-x-1 btn btn-default\\" title=\\"First\\"><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M11 19l-7-7 7-7m8 14l-7-7 7-7\\"></path>
+        </svg><span class=\\"sr-only sm:not-sr-only\\">First</span></button><button disabled=\\"\\" class=\\"flex space-x-1 btn btn-default\\" title=\\"Prev\\"><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M15 19l-7-7 7-7\\"></path>
+        </svg><span class=\\"sr-only sm:not-sr-only\\">Prev</span></button></div>
+    <div class=\\"hidden btn-group md:block\\"><button class=\\"active btn btn-default\\">1</button><button class=\\"btn btn-default\\">2</button><button class=\\"btn btn-default\\">3</button><button class=\\"btn btn-default\\">4</button><button class=\\"btn btn-default\\">5</button><button class=\\"btn btn-default\\">6</button><button class=\\"btn btn-default\\">7</button><button class=\\"btn btn-default\\">8</button><button class=\\"btn btn-default\\">9</button><button class=\\"btn btn-default\\">10</button><button class=\\"shadow-none border-transparent btn btn-default\\" disabled=\\"\\">...</button><button class=\\"btn btn-default\\">100</button></div>
+    <div class=\\"block mx-0 currentPageLabelContainer btn-group md:hidden\\"><span class=\\"inline-block px-3 pt-2 currentPageLabel\\"> Page 1</span></div>
+    <div class=\\"ml-2 btn-group\\"><button class=\\"flex space-x-1 btn btn-default\\" title=\\"Next\\"><span class=\\"sr-only sm:not-sr-only\\">Next</span><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M9 5l7 7-7 7\\"></path>
+        </svg></button><button class=\\"flex space-x-1 btn btn-default\\" title=\\"Last\\"><span class=\\"sr-only sm:not-sr-only\\">Last</span><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M13 5l7 7-7 7M5 5l7 7-7 7\\"></path>
+        </svg></button></div>
+  </div>
+</nav>"
+`;
+
+exports[`Paginator.vue > matches snapshot with totalPages prop assigned 1`] = `
+"<nav data-id=\\"sds-paginator\\" class=\\"paginator\\" aria-label=\\"Page navigation\\">
+  <div class=\\"btn-toolbar\\" role=\\"toolbar\\">
+    <div class=\\"mr-2 btn-group\\"><button disabled=\\"\\" class=\\"flex space-x-1 btn btn-default\\" title=\\"First\\"><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M11 19l-7-7 7-7m8 14l-7-7 7-7\\"></path>
+        </svg><span class=\\"sr-only sm:not-sr-only\\">First</span></button><button disabled=\\"\\" class=\\"flex space-x-1 btn btn-default\\" title=\\"Prev\\"><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M15 19l-7-7 7-7\\"></path>
+        </svg><span class=\\"sr-only sm:not-sr-only\\">Prev</span></button></div>
+    <div class=\\"hidden btn-group md:block\\"><button class=\\"active btn btn-default\\">1</button><button class=\\"btn btn-default\\">2</button><button class=\\"btn btn-default\\">3</button><button class=\\"btn btn-default\\">4</button><button class=\\"btn btn-default\\">5</button><button class=\\"shadow-none border-transparent btn btn-default\\" disabled=\\"\\">...</button><button class=\\"btn btn-default\\">10</button></div>
+    <div class=\\"block mx-0 currentPageLabelContainer btn-group md:hidden\\"><span class=\\"inline-block px-3 pt-2 currentPageLabel\\"> Page 1</span></div>
+    <div class=\\"ml-2 btn-group\\"><button class=\\"flex space-x-1 btn btn-default\\" title=\\"Next\\"><span class=\\"sr-only sm:not-sr-only\\">Next</span><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M9 5l7 7-7 7\\"></path>
+        </svg></button><button class=\\"flex space-x-1 btn btn-default\\" title=\\"Last\\"><span class=\\"sr-only sm:not-sr-only\\">Last</span><svg class=\\"w-4 h-4 my-auto\\" fill=\\"none\\" stroke=\\"currentColor\\" viewBox=\\"0 0 24 24\\" xmlns=\\"http://www.w3.org/2000/svg\\">
+          <path stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\" stroke-width=\\"3\\" d=\\"M13 5l7 7-7 7M5 5l7 7-7 7\\"></path>
+        </svg></button></div>
+  </div>
+</nav>"
+`;
