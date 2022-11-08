@@ -19,7 +19,6 @@ import math
 import os
 import re, csv
 import base64
-from cairosvg import svg2png
 from io import TextIOWrapper
 from django.core import serializers as JSONserializers
 from rest_framework import serializers

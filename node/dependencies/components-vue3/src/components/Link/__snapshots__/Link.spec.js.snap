@@ -1,0 +1,11 @@
+// Vitest Snapshot v1
+
+exports[`Link > should match its default snapshot 1`] = `
+<a
+  class=""
+  data-id="sds-link"
+>
+  
+  
+</a>
+`;

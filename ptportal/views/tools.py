@@ -19,7 +19,6 @@ import glob
 import os
 import netaddr, socket
 import re
-import pyminizip
 import pyzipper
 import shutil
 import subprocess

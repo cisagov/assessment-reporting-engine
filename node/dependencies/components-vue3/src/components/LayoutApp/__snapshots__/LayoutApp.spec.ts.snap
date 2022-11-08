@@ -1,0 +1,116 @@
+// Vitest Snapshot v1
+
+exports[`LayoutApp > should match its default snapshot 1`] = `
+<div
+  class="flex flex-col h-screen dark:text-gray-50"
+  data-id="sds-layout-app"
+>
+  <div
+    class="bg-gray-900 dark:bg-gray-800 text-white px-4 py-2 flex flex-shrink-0"
+  >
+    <div
+      class="my-auto"
+    >
+      <!---->
+      <!---->
+    </div>
+    <div
+      class="ml-auto my-auto flex gap-2 flex-shrink-0"
+    >
+      
+      
+    </div>
+  </div>
+  <div
+    class="flex flex-grow flex-shrink-0"
+  >
+    <!---->
+    <!---->
+    <aside
+      class="hidden md:block bg-gray-900 dark:bg-gray-800 text-white flex-shrink-0 z-50 w-72"
+    >
+      <div
+        class="h-screen flex flex-col sticky top-0"
+      >
+        <div
+          class="overflow-y-auto flex-grow overscroll-contain"
+        >
+          <!---->
+          <!---->
+        </div>
+        <!---->
+      </div>
+    </aside>
+    <section
+      class="flex flex-col items-stretch flex-grow min-w-0"
+    >
+      <main
+        class="flex-grow pb-4 bg-gray-100 dark:bg-gray-900"
+      >
+        <div
+          class="bg-white dark:bg-gray-700 shadow px-4 py-3 sticky top-0 z-40 flex flex-col gap-4 md:flex-row"
+        >
+          <div
+            class="flex-grow my-auto flex flex-row gap-2"
+          >
+            
+            <p
+              class="text-2xl font-semibold text-gray-700 dark:text-gray-100"
+            />
+            
+          </div>
+          <!---->
+        </div>
+        <div
+          class="p-4"
+        >
+          
+          Button
+          
+        </div>
+      </main>
+      
+      
+      <footer
+        class="bg-gray-900 dark:bg-gray-800 text-xs text-light px-4 pt-4 pb-16 flex flex-col lg:flex-row gap-4"
+      >
+        <div
+          class="flex-shrink-0 flex order-2 lg:order-1"
+        >
+          <a
+            class="my-auto"
+            data-id="sds-link"
+            href="https://sei.cmu.edu"
+            rel="noopener noreferrer"
+            target="_blank"
+            title="Software Engineering Institute"
+          >
+            
+            <img
+              alt="Software Engineering Institute"
+              class="h-10"
+              src="/src/assets/images/Software_Engineering_Institute_Unitmark_White.svg"
+            />
+            
+          </a>
+        </div>
+        <!---->
+        <div
+          class="flex-shrink-0 flex lg:ml-auto order-3"
+        >
+          <div
+            class="my-auto"
+          >
+            
+            <p>
+              © 2022 Carnegie Mellon University
+            </p>
+            
+          </div>
+        </div>
+      </footer>
+      <!---->
+    </section>
+  </div>
+</div>
+`;

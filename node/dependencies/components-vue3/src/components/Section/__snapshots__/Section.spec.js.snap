@@ -1,0 +1,25 @@
+// Vitest Snapshot v1
+
+exports[`Section > should match its default snapshot 1`] = `
+<div
+  class="block bg-white dark:bg-gray-800 dark:border-gray-700"
+  data-id="sds-section"
+>
+  <header
+    class=""
+  >
+    <div
+      class="flex px-4 py-3"
+    >
+      <div
+        class="self-center flex-grow"
+      >
+        <!---->
+        <!---->
+      </div>
+      <!---->
+    </div>
+  </header>
+  <!---->
+</div>
+`;

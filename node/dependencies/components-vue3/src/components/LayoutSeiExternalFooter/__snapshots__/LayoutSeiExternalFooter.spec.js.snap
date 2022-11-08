@@ -1,0 +1,275 @@
+// Vitest Snapshot v1
+
+exports[`LayoutSeiExternalFooter > should match its default snapshot 1`] = `
+<footer
+  data-id="sds-layout-sei-external-footer"
+>
+  <div
+    class="py-8 text-white bg-gray-500"
+  >
+    <div
+      class="container px-4 mx-auto space-y-6 md:px-8"
+    >
+      <ul
+        class="grid grid-cols-1 gap-6 md:grid-cols-3"
+      >
+        <li>
+          <a
+            class="hover:underline focus:underline focus:outline-none"
+            href="https://vulcoord.cert.org/VulReport/"
+          >
+            Report a Vulnerability to CERT/CC
+          </a>
+        </li>
+        <li>
+          <a
+            class="hover:underline focus:underline focus:outline-none"
+            href="https://sei.cmu.edu/subscribe-to-sei-bulletin/"
+          >
+            Subscribe to SEI Bulletin
+          </a>
+        </li>
+        <li>
+          <a
+            class="hover:underline focus:underline focus:outline-none"
+            href="https://sei.cmu.edu/legal/request-permission-to-use-sei-material"
+          >
+            Request Permission to Use SEI Materials
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div
+    class="py-8 text-gray-100 bg-gray-900"
+  >
+    <div
+      class="container px-4 mx-auto space-y-6 md:px-8"
+    >
+      <div
+        class="grid grid-cols-1 gap-8 md:grid-cols-3"
+      >
+        <div>
+          <address
+            class="not-italic"
+          >
+             Carnegie Mellon University
+            <br />
+             Software Engineering Institute
+            <br />
+             4500 Fifth Avenue
+            <br />
+             Pittsburgh, PA 15213-2612
+            <br />
+            <a
+              class="hover:underline"
+              href="tel:412-268-5800"
+              target="_self"
+            >
+              412-268-5800
+            </a>
+          </address>
+        </div>
+        <ul
+          class="space-x-2"
+        >
+          <li
+            class="inline-block"
+          >
+            <a
+              class="inline-block hover:border-b-0 hover:opacity-50 focus:border-b-0 focus:opacity-50 facebook"
+              href="https://www.facebook.com/SEICMU/"
+              rel="noopener"
+              style="height: 30px; width: 30px; background-repeat: no-repeat; background-image: url(/src/assets/images/sprites-social.png); background-size: auto 100%;"
+              target="_blank"
+            >
+              <span
+                class="sr-only"
+              >
+                Facebook
+              </span>
+            </a>
+          </li>
+          <li
+            class="inline-block"
+          >
+            <a
+              class="inline-block hover:border-b-0 hover:opacity-50 focus:border-b-0 focus:opacity-50 twitter"
+              href="https://twitter.com/sei_cmu"
+              rel="noopener"
+              style="height: 30px; width: 30px; background-repeat: no-repeat; background-image: url(/src/assets/images/sprites-social.png); background-size: auto 100%;"
+              target="_blank"
+            >
+              <span
+                class="sr-only"
+              >
+                Twitter
+              </span>
+            </a>
+          </li>
+          <li
+            class="inline-block"
+          >
+            <a
+              class="inline-block hover:border-b-0 hover:opacity-50 focus:border-b-0 focus:opacity-50 linkedin"
+              href="https://www.linkedin.com/company/software-engineering-institute"
+              rel="noopener"
+              style="height: 30px; width: 30px; background-repeat: no-repeat; background-image: url(/src/assets/images/sprites-social.png); background-size: auto 100%;"
+              target="_blank"
+            >
+              <span
+                class="sr-only"
+              >
+                LinkedIn
+              </span>
+            </a>
+          </li>
+          <li
+            class="inline-block"
+          >
+            <a
+              class="inline-block hover:border-b-0 hover:opacity-50 focus:border-b-0 focus:opacity-50 youtube"
+              href="https://www.youtube.com/user/TheSEICMU"
+              rel="noopener"
+              style="height: 30px; width: 30px; background-repeat: no-repeat; background-image: url(/src/assets/images/sprites-social.png); background-size: auto 100%;"
+              target="_blank"
+            >
+              <span
+                class="sr-only"
+              >
+                YouTube
+              </span>
+            </a>
+          </li>
+          <li
+            class="inline-block"
+          >
+            <a
+              class="inline-block hover:border-b-0 hover:opacity-50 focus:border-b-0 focus:opacity-50 itunes"
+              href="https://podcasts.apple.com/us/podcast/software-engineering-institute-sei-podcast-series/id566573552?mt=2"
+              rel="noopener"
+              style="height: 30px; width: 30px; background-repeat: no-repeat; background-image: url(/src/assets/images/sprites-social.png); background-size: auto 100%; border-radius: 50%;"
+              target="_blank"
+            >
+              <span
+                class="sr-only"
+              >
+                iTunes
+              </span>
+            </a>
+          </li>
+        </ul>
+        <div>
+          <a
+            class="py-8 text-xl text-center transition-colors duration-100 rounded-none btn btn-outline btn-light btn-lg btn-block"
+            href="https://sei.cmu.edu/contact-us/"
+            target="_self"
+          >
+             Contact Us 
+          </a>
+        </div>
+      </div>
+      <ul
+        class="space-x-1 text-sm"
+      >
+        <li
+          class="inline-block"
+        >
+          <a
+            class="hover:underline"
+            href="https://www.sei.cmu.edu/locations/index.cfm"
+            target="_self"
+          >
+            Office Locations
+          </a>
+        </li>
+        <li
+          class="inline-block"
+        >
+           | 
+        </li>
+        <li
+          class="inline-block"
+        >
+          <a
+            class="hover:underline"
+            href="https://www.sei.cmu.edu/additional-sites-directory/index.cfm"
+            target="_self"
+          >
+            Additional Sites Directory
+          </a>
+        </li>
+        <li
+          class="inline-block"
+        >
+           | 
+        </li>
+        <li
+          class="inline-block"
+        >
+          <a
+            class="hover:underline"
+            href="https://www.sei.cmu.edu/legal/index.cfm"
+            target="_self"
+          >
+            Legal
+          </a>
+        </li>
+        <li
+          class="inline-block"
+        >
+           | 
+        </li>
+        <li
+          class="inline-block"
+        >
+          <a
+            class="hover:underline"
+            href="https://www.sei.cmu.edu/legal/privacy-notice/index.cfm"
+            target="_self"
+          >
+            Privacy Notice
+          </a>
+        </li>
+        <li
+          class="inline-block"
+        >
+           | 
+        </li>
+        <li
+          class="inline-block"
+        >
+          <a
+            class="hover:underline"
+            href="https://www.cmu.edu/hr/ethics-hotline/"
+            target="_self"
+          >
+            CMU Ethics Hotline
+          </a>
+        </li>
+        <li
+          class="inline-block"
+        >
+           | 
+        </li>
+        <li
+          class="inline-block"
+        >
+          <a
+            class="hover:underline"
+            href="https://www.sei.cmu.edu/index.cfm"
+            target="_self"
+          >
+            www.sei.cmu.edu
+          </a>
+        </li>
+      </ul>
+      <div
+        class="text-sm"
+      >
+         © 2022 Carnegie Mellon University 
+      </div>
+    </div>
+  </div>
+</footer>
+`;

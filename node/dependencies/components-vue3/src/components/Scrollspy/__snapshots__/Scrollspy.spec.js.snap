@@ -1,0 +1,8 @@
+// Vitest Snapshot v1
+
+exports[`Scrollspy > should match its default snapshot 1`] = `
+<nav>
+  
+  
+</nav>
+`;

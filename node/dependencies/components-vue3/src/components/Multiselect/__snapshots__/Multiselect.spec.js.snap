@@ -1,0 +1,14 @@
+// Vitest Snapshot v1
+
+exports[`Multiselect.vue > matches snapshot with no props assigned 1`] = `
+"<div data-id=\\"sds-multiselect\\" class=\\"sds-multiselect canSearch\\" data-v-00d7dde3=\\"\\">
+  <ul class=\\"tag-list single\\" data-v-00d7dde3=\\"\\">
+    <li style=\\"width: 0px;\\" class=\\"tag-list-item input\\" data-v-00d7dde3=\\"\\"><span class=\\"faux-input\\" aria-hidden=\\"true\\" data-v-00d7dde3=\\"\\"></span>
+      <!----><input placeholder=\\"\\" style=\\"width: 0px;\\" autocapitalize=\\"off\\" autocomplete=\\"off\\" spellcheck=\\"false\\" autocorrect=\\"off\\" type=\\"text\\" class=\\"p-0 m-0 border-0 focus:shadow-none focus:ring-0\\" data-v-00d7dde3=\\"\\">
+    </li>
+  </ul>
+  <!---->
+  <div aria-hidden=\\"true\\" class=\\"multiselect-caret\\" data-v-00d7dde3=\\"\\"></div>
+  <!---->
+</div>"
+`;

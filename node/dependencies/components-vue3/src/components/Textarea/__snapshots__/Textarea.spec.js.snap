@@ -1,0 +1,43 @@
+// Vitest Snapshot v1
+
+exports[`Textarea.vue > matches snapshot with disabled prop assigned 1`] = `
+"<div data-id=\\"sds-textarea\\"><textarea class=\\"form-control\\" rows=\\"5\\" maxlength=\\"524288\\" placeholder=\\"\\" disabled=\\"\\"></textarea>
+  <!---->
+</div>"
+`;
+
+exports[`Textarea.vue > matches snapshot with maxlength and count-characters prop assigned 1`] = `
+"<div data-id=\\"sds-textarea\\"><textarea class=\\"form-control\\" rows=\\"5\\" maxlength=\\"50\\" placeholder=\\"\\"></textarea>
+  <div data-id=\\"sds-character-counter\\" class=\\"text-right text-gray-500\\">50</div>
+</div>"
+`;
+
+exports[`Textarea.vue > matches snapshot with no props assigned 1`] = `
+"<div data-id=\\"sds-textarea\\"><textarea class=\\"form-control\\" rows=\\"5\\" maxlength=\\"524288\\" placeholder=\\"\\"></textarea>
+  <!---->
+</div>"
+`;
+
+exports[`Textarea.vue > matches snapshot with placeholder prop assigned 1`] = `
+"<div data-id=\\"sds-textarea\\"><textarea class=\\"form-control\\" rows=\\"5\\" maxlength=\\"524288\\" placeholder=\\"This is a placeholder\\"></textarea>
+  <!---->
+</div>"
+`;
+
+exports[`Textarea.vue > matches snapshot with readonly prop assigned 1`] = `
+"<div data-id=\\"sds-textarea\\"><textarea class=\\"form-control\\" rows=\\"5\\" maxlength=\\"524288\\" placeholder=\\"\\" readonly=\\"\\"></textarea>
+  <!---->
+</div>"
+`;
+
+exports[`Textarea.vue > matches snapshot with rows prop assigned 1`] = `
+"<div data-id=\\"sds-textarea\\"><textarea class=\\"form-control\\" rows=\\"2\\" maxlength=\\"524288\\" placeholder=\\"\\"></textarea>
+  <!---->
+</div>"
+`;
+
+exports[`Textarea.vue > matches snapshot with value prop assigned 1`] = `
+"<div data-id=\\"sds-textarea\\" value=\\"This is the text content\\"><textarea class=\\"form-control\\" rows=\\"5\\" maxlength=\\"524288\\" placeholder=\\"\\"></textarea>
+  <!---->
+</div>"
+`;

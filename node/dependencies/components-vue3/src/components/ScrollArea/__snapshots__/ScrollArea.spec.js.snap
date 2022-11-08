@@ -1,0 +1,11 @@
+// Vitest Snapshot v1
+
+exports[`ScrollArea > should match its default snapshot 1`] = `
+<div
+  class="scroll-area"
+  data-id="sds-scroll-area"
+>
+  
+  
+</div>
+`;

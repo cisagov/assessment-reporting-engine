@@ -1,0 +1,12 @@
+// Vitest Snapshot v1
+
+exports[`LayoutSeiExternalHeaderContent > should match its default snapshot 1`] = `
+<div
+  class="space-y-4"
+  data-id="sds-layout-sei-external-header-content"
+>
+  <!---->
+  <!---->
+  <!---->
+</div>
+`;

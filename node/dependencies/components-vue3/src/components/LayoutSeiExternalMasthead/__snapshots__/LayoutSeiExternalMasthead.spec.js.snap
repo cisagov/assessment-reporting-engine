@@ -1,0 +1,16 @@
+// Vitest Snapshot v1
+
+exports[`LayoutSeiExternalMasthead > should match its default snapshot 1`] = `
+<div
+  class="py-8 bg-white"
+  data-id="sds-layout-sei-external-masthead"
+>
+  <div
+    class="container px-4 mx-auto md:px-8"
+  >
+    
+    <!---->
+    
+  </div>
+</div>
+`;

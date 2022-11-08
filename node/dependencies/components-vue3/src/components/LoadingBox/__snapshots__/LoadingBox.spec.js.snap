@@ -1,0 +1,15 @@
+// Vitest Snapshot v1
+
+exports[`LoadingBox.vue > matches snapshot 1`] = `
+<span
+  class="loadingBox rounded flex flex-row relative overflow-hidden bg-gray-200 w-full h-full"
+  data-id="sds-loading-box"
+  data-v-73fb2d42=""
+/>
+`;
+
+exports[`LoadingBox.vue > matches snapshot with no props assigned 1`] = `"<span data-id=\\"sds-loading-box\\" class=\\"loadingBox rounded flex flex-row relative overflow-hidden bg-gray-200 w-full h-full\\" data-v-73fb2d42=\\"\\"></span>"`;
+
+exports[`LoadingBox.vue > matches snapshot with width and height prop assigned 1`] = `"<span data-id=\\"sds-loading-box\\" class=\\"loadingBox rounded flex flex-row relative overflow-hidden bg-gray-200 w-1/2 h-32\\" data-v-73fb2d42=\\"\\"></span>"`;
+
+exports[`LoadingBox.vue > matches snapshot with width prop assigned 1`] = `"<span data-id=\\"sds-loading-box\\" class=\\"loadingBox rounded flex flex-row relative overflow-hidden bg-gray-200 w-1/2 h-full\\" data-v-73fb2d42=\\"\\"></span>"`;
