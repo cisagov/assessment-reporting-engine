@@ -59,7 +59,9 @@ docker/images/*
 *.zip
 *.tar
 
-ptportal/static/*
+ptportal/static/rest_framework/*
+ptportal/static/webfonts/*
+ptportal/static/admin/js/*
 ptportal.log
 mode.txt
 
