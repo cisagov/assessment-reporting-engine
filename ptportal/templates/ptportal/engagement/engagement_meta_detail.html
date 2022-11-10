@@ -39,6 +39,9 @@ DM22-1011
   <p>Customer Initials: {{ object.customer_initials }}</p>
   <p>Point of Contact: {{ object.customer_POC_name }}</p>
   <p>POC Email: {{ object.customer_POC_email }}</p>
+  <p>State: {{ object.customer_state }}</p>
+  <p>Sector: {{ object.customer_sector }}</p>
+  <p>Critical Infrastructure Type: {{ object.customer_ci_type }}</p>
 </sds-section>
 
 <sds-section type="simple" class="mb-4 w-1/2">
@@ -87,7 +90,7 @@ DM22-1011
   <template #title>
     <h4>Additional Information</h4>
   </template>
-  <p>Traffic Light Protocol: {{ object.traffic_light_protocol }}{% if object.traffic_light_protocol == 'Amber' %} <i class="fa fa-circle" style="color:orange"></i>{% elif object.traffic_light_protocol == 'Red' %} <i class="fa fa-circle" style="color:red"></i>{% endif %}</p>
+  <p>Traffic Light Protocol: {{ object.traffic_light_protocol }}{% if object.traffic_light_protocol == 'Amber' %} <i class="fa fa-circle" style="color:orange"></i>{% elif object.traffic_light_protocol == 'Amber+Strict' %} <i class="fa fa-circle" style="color:orange"></i>{% elif object.traffic_light_protocol == 'Red' %} <i class="fa fa-circle" style="color:red"></i>{% endif %}</p>
   <p>Constraint: {{ object.assessment_constraint }}</p>
 </sds-section>
 {% endblock %}

@@ -43,11 +43,11 @@ def max_value_current_year():
 
 
 STATUS_CHOICES = (
-    ('Canceled', "Canceled"),
-    ('Completed', "Completed"),
-    ('In Progress', "In Progress"),
-    ('Not Started', "Not Started"),
-    ('On Hold', "On Hold"),
+    ('Canceled', 'Canceled'),
+    ('Completed', 'Completed'),
+    ('In Progress', 'In Progress'),
+    ('Not Started', 'Not Started'),
+    ('On Hold', 'On Hold'),
 )
 
 
@@ -84,7 +84,101 @@ class HVATarget(abstract_models.TimeStampedModel):
 
 
 class EngagementMeta(abstract_models.TimeStampedModel):
-    TLP_CHOICES = (('Amber', 'Amber'), ('Red', 'Red'))
+    TLP_CHOICES = (
+        ('Amber', 'Amber'), 
+        ('Amber+Strict', 'Amber+Strict'),
+        ('Red', 'Red'),
+    )
+
+    SECTOR_CHOICES = (
+        ('Federal', 'Federal'),
+        ('State', 'State'),
+        ('Local', 'Local'),
+        ('Tribal', 'Tribal'),
+        ('Territorial', 'Territorial'),
+        ('Private', 'Private'),
+        ('Other', 'Other'),
+    )
+
+    CI_TYPE_CHOICES = (
+        ('Chemical', 'Chemical'),
+        ('Commercial Facilities', 'Commercial Facilities'),
+        ('Communications', 'Communications'),
+        ('Critical Manufacturing', 'Critical Manufacturing'),
+        ('Dams', 'Dams'),
+        ('Defense Industrial Base', 'Defense Industrial Base'),
+        ('Emergency Services', 'Emergency Services'),
+        ('Energy', 'Energy'),
+        ('Financial Services', 'Financial Services'),
+        ('Food and Agriculture', 'Food and Agriculture'),
+        ('Government Facilities', 'Government Facilities'),
+        ('Healthcare and Public Health', 'Healthcare and Public Health'),
+        ('Identifying Critical Infrastructure During COVID-19', 'Identifying Critical Infrastructure During COVID-19'),
+        ('Information Technology', 'Information Technology'),
+        ('Nuclear Reactors, Materials, and Waste', 'Nuclear Reactors, Materials, and Waste'),
+        ('Sector-Specific Agencies', 'Sector-Specific Agencies'),
+        ('Transportation Systems', 'Transportation Systems'),
+        ('Water and Wastewater Systems', 'Water and Wastewater Systems'),
+    )
+
+    STATE_CHOICES = (
+        ('AK', 'Alaska'),
+        ('AL', 'Alabama'),
+        ('AR', 'Arkansas'),
+        ('AS', 'American Samoa'),
+        ('AZ', 'Arizona'),
+        ('CA', 'California'),
+        ('CO', 'Colorado'),
+        ('CT', 'Connecticut'),
+        ('DC', 'District of Columbia'),
+        ('DE', 'Delaware'),
+        ('FL', 'Florida'),
+        ('GA', 'Georgia'),
+        ('GU', 'Guam'),
+        ('HI', 'Hawaii'),
+        ('IA', 'Iowa'),
+        ('ID', 'Idaho'),
+        ('IL', 'Illinois'),
+        ('IN', 'Indiana'),
+        ('KS', 'Kansas'),
+        ('KY', 'Kentucky'),
+        ('LA', 'Louisiana'),
+        ('MA', 'Massachusetts'),
+        ('MD', 'Maryland'),
+        ('ME', 'Maine'),
+        ('MI', 'Michigan'),
+        ('MN', 'Minnesota'),
+        ('MO', 'Missouri'),
+        ('MP', 'Northern Mariana Islands'),
+        ('MS', 'Mississippi'),
+        ('MT', 'Montana'),
+        ('NC', 'North Carolina'),
+        ('ND', 'North Dakota'),
+        ('NE', 'Nebraska'),
+        ('NH', 'New Hampshire'),
+        ('NJ', 'New Jersey'),
+        ('NM', 'New Mexico'),
+        ('NV', 'Nevada'),
+        ('NY', 'New York'),
+        ('OH', 'Ohio'),
+        ('OK', 'Oklahoma'),
+        ('OR', 'Oregon'),
+        ('PA', 'Pennsylvania'),
+        ('PR', 'Puerto Rico'),
+        ('RI', 'Rhode Island'),
+        ('SC', 'South Carolina'),
+        ('SD', 'South Dakota'),
+        ('TN', 'Tennessee'),
+        ('TX', 'Texas'),
+        ('UT', 'Utah'),
+        ('VA', 'Virginia'),
+        ('VI', 'U.S. Virgin Islands'),
+        ('VT', 'Vermont'),
+        ('WA', 'Washington'),
+        ('WI', 'Wisconsin'),
+        ('WV', 'West Virginia'),
+        ('WY', 'Wyoming'),
+    )
 
     asmt_id = models.CharField(
         max_length=8,
@@ -143,6 +237,27 @@ class EngagementMeta(abstract_models.TimeStampedModel):
         blank=True,
         validators=[EmailValidator()],
         verbose_name="Customer POC \n" + "Email Address",
+    )
+    customer_state = models.CharField(
+        max_length=20,
+        blank=True,
+        choices=STATE_CHOICES,
+        default="PA",
+        verbose_name="State"
+    )
+    customer_sector = models.CharField(
+        max_length=20,
+        blank=True,
+        choices=SECTOR_CHOICES,
+        default="",
+        verbose_name="Sector"
+    )
+    customer_ci_type = models.CharField(
+        max_length=75,
+        blank=True,
+        choices=CI_TYPE_CHOICES,
+        default="",
+        verbose_name="Critical Infrastructure Type"
     )
 
     # Test Details
