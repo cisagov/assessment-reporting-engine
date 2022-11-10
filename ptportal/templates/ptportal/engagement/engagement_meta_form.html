@@ -93,7 +93,7 @@ DM22-1011
 			<div class="grid grid-cols-6 gap-2 mb-8">
 				<div class="col-span-3">
 					<h4><b>{{ form.customer_long_name.label_tag }}</b></h4>
-					<sds-input v-model="formData.customer_long_name" placeholder="Oz corp"></sds-input>
+					<sds-input v-model="formData.customer_long_name" placeholder="Oz Corp"></sds-input>
 				</div>
 				<div class="col-span-3">
 					<h4><b>{{ form.customer_initials.label_tag }}</b></h4>
@@ -101,11 +101,23 @@ DM22-1011
 				</div>
 				<div class="col-span-3">
 					<h4><b>{{ form.customer_POC_name.label_tag }}</b></h4>
-					<sds-input v-model="formData.customer_POC_name" placeholder="John Doe POC"></sds-input>
+					<sds-input v-model="formData.customer_POC_name" placeholder="John Doe"></sds-input>
 				</div>
 				<div class="col-span-3">
 					<h4><b>{{ form.customer_POC_email.label_tag }}</b></h4>
-					<sds-input v-model="formData.customer_POC_email" placeholder="johndoe@company.com" type="email"></sds-input>
+					<sds-input v-model="formData.customer_POC_email" placeholder="John.Doe@company.com" type="email"></sds-input>
+				</div>
+				<div class="col-span-1">
+					<h4><b>{{ form.customer_state.label_tag }}</b></h4>
+      				<sds-select v-model="formData.customer_state" :options="state_options"/>
+				</div>
+				<div class="col-span-2">
+					<h4><b>{{ form.customer_sector.label_tag }}</b></h4>
+					<sds-select v-model="formData.customer_sector" :options="sector_options"/>
+				</div>
+				<div class="col-span-3">
+					<h4><b>{{ form.customer_ci_type.label_tag }}</b></h4>
+					<sds-select v-model="formData.customer_ci_type" :options="ci_options"/>
 				</div>
 			</div>
 
@@ -115,15 +127,15 @@ DM22-1011
 			<div class="grid grid-cols-6 gap-2 mb-8">
 				<div class="col-span-3">
 					<h4><b>{{ form.team_lead_name.label_tag }}</b></h4>
-					<sds-input v-model="formData.team_lead_name" placeholder="Team Lead"></sds-input>
+					<sds-input v-model="formData.team_lead_name" placeholder="Jane Doe"></sds-input>
 				</div>
 				<div class="col-span-3">
 					<h4><b>{{ form.team_lead_email.label_tag }}</b></h4>
-					<sds-input v-model="formData.team_lead_email" placeholder="johndoe@comapny.com" type="email"></sds-input>
+					<sds-input v-model="formData.team_lead_email" placeholder="Jane.Doe@cisa.dhs.gov.com" type="email"></sds-input>
 				</div>
 				<div class="col-span-full">
 					<h4><b>{{ form.business_goal.label_tag }}</b></h4>
-					<sds-textarea v-model="formData.business_goal" placeholder="Enter a brief description of the goal of the test.." v-bind:rows="3"></sds-textarea>
+					<sds-textarea v-model="formData.business_goal" placeholder="Enter a brief description of the assessment business goal." v-bind:rows="3"></sds-textarea>
 				</div>
 			</div>
 
@@ -268,7 +280,6 @@ DM22-1011
 	})
 
 	function pageData() {
-		console.log("{{object.traffic_light_protocol}}")
 		data = {
 			//Form data
 			formData: {
@@ -276,6 +287,9 @@ DM22-1011
 				customer_initials: "{{ object.customer_initials }}",
 				customer_POC_name: "{{ object.customer_POC_name }}",
 				customer_POC_email: "{{ object.customer_POC_email }}",
+				customer_state: "{{ object.customer_state }}",
+				customer_sector: "{{ object.customer_sector }}",
+				customer_ci_type: "{{ object.customer_ci_type }}",
 				team_lead_name: "{{ object.team_lead_name }}",
 				team_lead_email: "{{ object.team_lead_email }}",
 				technical_lead_name: "{{ object.technical_lead_name }}",
@@ -318,6 +332,93 @@ DM22-1011
 				invalid: false,
 				maxlength: 50
 			},
+			state_options: [
+		    	{ id: 1, value: 'AK', text: 'AK' },
+				{ id: 2, value: 'AL', text: 'AL' },
+				{ id: 3, value: 'AR', text: 'AR' },
+				{ id: 4, value: 'AS', text: 'AS' },
+				{ id: 5, value: 'AZ', text: 'AZ' },
+				{ id: 6, value: 'CA', text: 'CA' },
+				{ id: 7, value: 'CO', text: 'CO' },
+				{ id: 8, value: 'CT', text: 'CT' },
+				{ id: 9, value: 'DC', text: 'DC' },
+				{ id: 10, value: 'DE', text: 'DE' },
+				{ id: 11, value: 'FL', text: 'FL' },
+				{ id: 12, value: 'GA', text: 'GA' },
+				{ id: 13, value: 'GU', text: 'GU' },
+				{ id: 14, value: 'HI', text: 'HI' },
+				{ id: 15, value: 'IA', text: 'IA' },
+				{ id: 16, value: 'ID', text: 'ID' },
+				{ id: 17, value: 'IL', text: 'IL' },
+				{ id: 18, value: 'IN', text: 'IN' },
+				{ id: 19, value: 'KS', text: 'KS' },
+				{ id: 20, value: 'KY', text: 'KY' },
+				{ id: 21, value: 'LA', text: 'LA' },
+				{ id: 22, value: 'MA', text: 'MA' },
+				{ id: 23, value: 'MD', text: 'MD' },
+				{ id: 24, value: 'ME', text: 'ME' },
+				{ id: 25, value: 'MI', text: 'MI' },
+				{ id: 26, value: 'MN', text: 'MN' },
+				{ id: 27, value: 'MO', text: 'MO' },
+				{ id: 28, value: 'MP', text: 'MP' },
+				{ id: 29, value: 'MS', text: 'MS' },
+				{ id: 30, value: 'MT', text: 'MT' },
+				{ id: 31, value: 'NC', text: 'NC' },
+				{ id: 32, value: 'ND', text: 'ND' },
+				{ id: 33, value: 'NE', text: 'NE' },
+				{ id: 34, value: 'NH', text: 'NH' },
+				{ id: 35, value: 'NJ', text: 'NJ' },
+				{ id: 36, value: 'NM', text: 'NM' },
+				{ id: 37, value: 'NV', text: 'NV' },
+				{ id: 38, value: 'NY', text: 'NY' },
+				{ id: 39, value: 'OH', text: 'OH' },
+				{ id: 40, value: 'OK', text: 'OK' },
+				{ id: 41, value: 'OR', text: 'OR' },
+				{ id: 42, value: 'PA', text: 'PA' },
+				{ id: 43, value: 'PR', text: 'PR' },
+				{ id: 44, value: 'RI', text: 'RI' },
+				{ id: 45, value: 'SC', text: 'SC' },
+				{ id: 46, value: 'SD', text: 'SD' },
+				{ id: 47, value: 'TN', text: 'TN' },
+				{ id: 48, value: 'TX', text: 'TX' },
+				{ id: 49, value: 'UT', text: 'UT' },
+				{ id: 50, value: 'VA', text: 'VA' },
+				{ id: 51, value: 'VI', text: 'VI' },
+				{ id: 52, value: 'VT', text: 'VT' },
+				{ id: 53, value: 'WA', text: 'WA' },
+				{ id: 54, value: 'WI', text: 'WI' },
+				{ id: 55, value: 'WV', text: 'WV' },
+				{ id: 56, value: 'WY', text: 'WY' }
+		    ],
+		    sector_options: [
+		        { id: 1, value: 'Federal', text: 'Federal' },
+		        { id: 2, value: 'State', text: 'State' },
+		        { id: 3, value: 'Local', text: 'Local' },
+		        { id: 4, value: 'Tribal', text: 'Tribal' },
+		        { id: 5, value: 'Territorial', text: 'Territorial' },
+		        { id: 6, value: 'Private', text: 'Private' },
+		        { id: 7, value: 'Other', text: 'Other' }
+		    ],
+		    ci_options: [
+		    	{ id: 1, value: 'Chemical', text: 'Chemical' },
+				{ id: 2, value: 'Commercial Facilities', text: 'Commercial Facilities' },
+				{ id: 3, value: 'Communications', text: 'Communications' },
+				{ id: 4, value: 'Critical Manufacturing', text: 'Critical Manufacturing' },
+				{ id: 5, value: 'Dams', text: 'Dams' },
+				{ id: 6, value: 'Defense Industrial Base', text: 'Defense Industrial Base' },
+				{ id: 7, value: 'Emergency Services', text: 'Emergency Services' },
+				{ id: 8, value: 'Energy', text: 'Energy' },
+				{ id: 9, value: 'Financial Services', text: 'Financial Services' },
+				{ id: 10, value: 'Food and Agriculture', text: 'Food and Agriculture' },
+				{ id: 11, value: 'Government Facilities', text: 'Government Facilities' },
+				{ id: 12, value: 'Healthcare and Public Health', text: 'Healthcare and Public Health' },
+				{ id: 13, value: 'Identifying Critical Infrastructure During COVID-19', text: 'Identifying Critical Infrastructure During COVID-19' },
+				{ id: 14, value: 'Information Technology', text: 'Information Technology' },
+				{ id: 15, value: 'Nuclear Reactors', text: 'Nuclear Reactors' },
+				{ id: 16, value: 'Sector-Specific Agencies', text: 'Sector-Specific Agencies' },
+				{ id: 17, value: 'Transportation Systems', text: 'Transportation Systems' },
+				{ id: 18, value: 'Water and Wastewater Systems', text: 'Water and Wastewater Systems' }
+		    ],
 			TLP_Button_Options: {
 				stacked: true,
 				options: [
@@ -328,6 +429,11 @@ DM22-1011
 					},
 					{
 						id: 2,
+						value: "Amber+Strict",
+						text: "Amber+Strict"
+					},
+					{
+						id: 3,
 						value: "Red",
 						text: "Red"
 					}
