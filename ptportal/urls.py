@@ -247,6 +247,10 @@ urlpatterns += [
     path('campaigns/', views.Campaigns.as_view(), name='campaigns'),
 ]
 
+urlpatterns += [
+    path('risk_score/', views.RiskScoring.as_view(), name='risk_score'),
+]
+
 # error handlers
 urlpatterns += [
     path('404/', views.custom_page_not_found, name='handler404'),
