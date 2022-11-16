@@ -71,3 +71,4 @@ class RiskScoring(generic.base.TemplateView):
             except (KeyError, ValidationError) as e:
                 return HttpResponse(status=400, reason=e)
         return HttpResponse(status=200)
+        
