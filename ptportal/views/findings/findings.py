@@ -122,37 +122,6 @@ def ajax_get_payloads(request):
     return JsonResponse(data=data)
 
 
-class UploadedFindingSeverityDisplay(generic.ListView):
-    model = Payload
-    template_name = 'ptportal/finding/finding_severity_list.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['paths'] = Payload.objects.all()
-        return context
-
-
-class UploadedFindingSeverityListView(View):
-    def get(self, request, *args, **kwargs):
-        view = UploadedFindingSeverityDisplay.as_view()
-        return view(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        postData = json.loads(request.POST['data'])
-        uploadedPaths = []
-        for index, data in enumerate(postData):
-            obj = Payload.objects.create(
-                payload_description=data['payload_description'],
-                c2_protocol=data['c2_protocol'],
-                border_protection=data['border_protection'],
-                host_protection=data['host_protection'],
-            )
-            obj.save()
-            uploadedPaths.append(obj)
-
-        return HttpResponse(status=200)
-
-
 class UploadedFindingUpdateView(generic.edit.UpdateView):
     model = UploadedFinding
     form_class = EditUploadedFindingForm
