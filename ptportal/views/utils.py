@@ -319,18 +319,6 @@ def generateEntryJson(filename):
         # concatenate data with the updated mapped_payloads list
         data.extend(mapped_payloads)
 
-    for ex in exfil:
-        ex_entry = {}
-        ex_entry['asmt_id'] = 'RV' + str(asmt_id)
-        ex_entry['protocol'] = str(ex.protocol)
-        ex_entry['datatype '] = str(ex.datatype)
-        ex_entry['created_at'] = str(ex.created_at)
-        ex_entry['date_time'] = str(ex.date_time)
-        ex_entry['result'] = str(ex.result)
-        full_exfil = {}
-        full_exfil.update(ex_entry)
-        data.append(full_exfil)
-
     if ransom:
         ransom_entry = {}
         ransom_entry['asmt_id'] = 'RV' + str(asmt_id)

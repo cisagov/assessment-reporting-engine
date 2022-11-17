@@ -1079,54 +1079,6 @@ def insert_findings_slides(prs, report_type, rva_info, ss_info, media_path):
             # since table is wide, adjust the font size
             table_adjust_fontsize(table, 10)
 
-        elif fname.startswith("Sensitive Data Exfiltration"):
-            slide = prs.slides.add_slide(sshot_slide_layout)
-            title = slide.shapes.title
-            run = title.text_frame.paragraphs[0].add_run()
-            run.text = severity
-            run.font.size = Pt(40)
-            title.text_frame.add_paragraph()
-            run = title.text_frame.paragraphs[1].add_run()
-            run.text = fname
-            run.font.size = Pt(24)
-
-            sde_payloads = af.model_gen(rva_info, "ptportal.sensitivedataexfil")
-
-            sde_row_info = []
-            for ele in sde_payloads:
-                sde_row_info.append(ele["fields"])
-
-            # set the shape and create the table
-            rows = 1 + len(sde_row_info)
-            cols = 4
-            left = Inches(0.4)
-            top = Inches(2.0)
-            width = Inches(15)
-            height = Inches(0.8)
-
-            shapes = slide.shapes
-            table = shapes.add_table(rows, cols, left, top, width, height).table
-            tbl = table._graphic_frame._element.graphic.graphicData.tbl
-            tbl[0][-1].text = LightStyle1Accent6
-            table.columns[0].width = Inches(1.3)
-            table.columns[1].width = Inches(3.7)
-            table.columns[2].width = Inches(2.7)
-            table.columns[3].width = Inches(1.5)
-
-            # add the table header
-            cell_text(table, 0, 0, "Protocol", "c", tbl_text)
-            cell_text(table, 0, 1, "Datatype", "c", tbl_text)
-            cell_text(table, 0, 2, "Date/Time Started", "c", tbl_text)
-            cell_text(table, 0, 3, "Result", "c", tbl_text)
-
-            # fill in the the rows
-            for i, r in enumerate(sde_row_info):
-                cell_text(table, i + 1, 0, r["protocol"], "c", tbl_text, Pt(16))
-                cell_text(table, i + 1, 1, r["datatype"], "l", tbl_text, Pt(16))
-                cell_text(table, i + 1, 2, r["date_time"], "c", tbl_text, Pt(16))
-                r_txt, r_color = blocked(r["result"])
-                cell_text(table, i + 1, 3, r_txt, "c", r_color, Pt(16))
-
         else:
             if len(scrn_shots) == 0:
                 slide = prs.slides.add_slide(sshot_slide_layout)

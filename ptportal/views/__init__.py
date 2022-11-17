@@ -26,6 +26,6 @@ from .narrative import *
 from .payload_mapping import *
 from .payloads import *
 from .campaigns import *
-from .sensitive_data_exfil import *
+from .data_exfil import *
 from .ransomware import *
 from .risk_score import *

@@ -1,0 +1,242 @@
+<!-- Risk & Vulnerability Assessment Reporting Engine
+
+Copyright 2022 The Risk & Vulnerability Reporting Engine Contributors, All Rights Reserved.
+(see Contributors.txt for a full list of Contributors)
+
+SPDX-License-Identifier: BSD-3-Clause
+
+Please see additional acknowledgments (including references to third party source code, object code, documentation and other files) in the license.txt file or contact permission@sei.cmu.edu for full terms.
+
+Created, in part, with funding and support from the United States Government. (see Acknowledgments file).
+
+DM22-1011
+ -->
+
+{% extends 'ptportal/base.html' %}
+{% load humanize %}
+{% block style %}
+<style>
+    .header{
+        padding: 10px;
+        background: white;
+        color: black;
+        font-size: 20px;
+        position: relative;
+        top: -15px;
+        margin-left: -18px;
+        margin-right: -20px;
+    }
+  .col-span-5{
+        border-top:1px solid black!important;
+        border-color:#1b1c1d!important;
+    margin-bottom: 50px !important;
+    }
+  .float-left{
+    display: inline-block;
+    position: relative;
+    top: -40px;
+  }
+  .right-block{
+    display:inline-block;
+    vertical-align:top;
+    font-size: 11pt;
+  }
+  .space{
+    padding: 4px;
+  }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="header">
+  <h2> Data Exfiltration</h2>
+</div>
+<br>
+
+<div class="col-span-5">
+  {% csrf_token %}
+    <sds-section class="col-span-5" type="accented">
+        <span class="border-top border-dark"></span>
+            <template #title><b>DATA EXFILTRATION</b></template>
+              <!-- Data Exfiltration Table -->
+              <sds-section>
+                <div class="mb-8">
+                  <sds-table :fields="fields" :items="items" class="table-prose" v-bind="exfilTableArgs">
+                      <template #cell(id)="{item}"></template>
+                      <template #cell(protocol)="{item}">
+                        <sds-select v-model="item.protocol" :options="protocol_options"/>
+                      </template>
+                      <template #cell(datatype)="{item}">
+                        <sds-input v-model="item.datatype" placeholder="Data Type"></sds-input>
+                      </template>
+                      <template #cell(date_time)="{item}">
+                        <sds-datepicker v-model="item.date_time" :min="calendar.min" :max="calendar.max" mode="dateTime" :size="calendar.size"/>
+                      </template>
+                      <template #cell(detection)="{item}">
+                        <div class="right-block">
+                          <sds-toggle-switch v-model="item.detection"/>
+                        </div>
+                        <div v-if="item.detection" class="right-block space">
+                          <p>Detected</p>
+                        </div>
+                        <div v-if="!item.detection" class="right-block space">
+                          <p>Not Detected</p>
+                        </div>
+                      </template>
+                      <template #cell(prevention)="{item}">
+                        <div class="right-block">
+                          <sds-toggle-switch v-model="item.prevention"/>
+                        </div>
+                        <div v-if="item.prevention" class="right-block space">
+                          <p>Blocked</p>
+                        </div>
+                        <div v-if="!item.prevention" class="right-block space">
+                          <p>Not Blocked</p>
+                        </div>
+                      </template>
+                      <template #cell(delete)="{item}">
+                        <sds-button type="button" @click="deleteRow(item)" ><img class="w-8 h-8" src="/static/icons/trash-solid.svg"></sds-button>
+                      </template>
+                  </sds-table>
+                  <sds-button type="button" @click="addRow"><img class="w-8 h-8" src="/static/icons/plus-solid.svg"></sds-button>
+                </div>
+              </sds-section>
+          </sds-section>
+    <sds-button variant="primary" class="float-right" @click="submitDataExfil"><i class="fas fa-save"></i> Save</sds-button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function pageData() {
+    data = {
+      overwriteWarning: false,
+      //to display pop up notification
+      notify: null,
+      // data exfiltration table columns
+      exfilTableArgs: {
+          fields: [
+            {
+              key: "id",
+              label:"#"
+            },
+            {
+              key: "protocol",
+              label: "Protocol"
+            },
+            {
+              key: "datatype",
+              label: "Data Type"
+            },
+            {
+              key: "date_time",
+              label: "Date/Time Started",
+            },
+            {
+              key: "detection",
+              label: "Detection"
+            },
+            {
+              key: "prevention",
+              label: "Prevention"
+            },
+            {
+              key: "delete",
+            }
+          ],
+          items: []
+      },
+      protocol_options: [
+            { id: 1, value: 'HTTP', text: 'HTTP' },
+            { id: 2, value: 'HTTPS', text: 'HTTPS' },
+            { id: 3, value: 'FTP', text: 'FTP' },
+            { id: 4, value: 'SFTP', text: 'SFTP' },
+            { id: 5, value: 'ICMP', text: 'ICMP' },
+            { id: 6, value: 'SMB', text: 'SMB' },
+            { id: 7, value: 'DNS', text: 'DNS' },
+            { id: 8, value: 'SMTP', text: 'SMTP' },
+      ],
+      calendar: {
+        date: null,
+        max: null,
+        min: null,
+        mode: 'dateTime',
+        size: 'md'
+      },
+    }
+
+
+    {% for de in data_exfil %}
+
+        newdate = null
+
+        {% if de.date_time != null %}
+          date = "{{de.date_time | date:"m/d/Y h:i a"}}"
+          newdate = new Date (date.replace(/\./g, ''))
+        {% endif %}
+
+        {% if de.detection == "N" %}
+          detect = false
+        {% else %}
+          detect = true
+        {% endif %}
+
+        {% if de.prevention == "N" %}
+          prevent = false
+        {% else %}
+          prevent = true
+        {% endif %}
+
+        data.exfilTableArgs.items.push({id: "{{de.order}}", protocol: "{{de.protocol}}", datatype: "{{de.datatype}}", date_time: newdate, detection: detect, prevention: prevent})
+
+    {% empty %}
+      data.exfilTableArgs.items.push({id: 1, protocol: "HTTP", datatype: "Social Security Numbers (10 MB)", date_time: null, detection: false, prevention: false})
+      data.exfilTableArgs.items.push({id: 2, protocol: "HTTPS", datatype: "Social Security Numbers (10 MB)", date_time: null, detection: false, prevention: false})
+      data.exfilTableArgs.items.push({id: 3, protocol: "FTP", datatype: "Social Security Numbers (10 MB)", date_time: null, detection: false, prevention: false})
+      data.exfilTableArgs.items.push({id: 4, protocol: "SFTP", datatype: "Social Security Numbers (10 MB)", date_time: null, detection: false, prevention: false})
+      data.exfilTableArgs.items.push({id: 5, protocol: "ICMP", datatype: "Social Security Numbers (10 MB)", date_time: null, detection: false, prevention: false})
+      data.exfilTableArgs.items.push({id: 6, protocol: "SMB", datatype: "Social Security Numbers (10 MB)", date_time: null, detection: false, prevention: false})
+      data.exfilTableArgs.items.push({id: 7, protocol: "DNS", datatype: "Social Security Numbers (10 MB)", date_time: null, detection: false, prevention: false})
+      data.exfilTableArgs.items.push({id: 8, protocol: "SMTP", datatype: "Social Security Numbers (10 MB)", date_time: null, detection: false, prevention: false})
+
+    {% endfor %}
+
+    return data
+
+  }
+
+  function pageMethods() {
+    pageFunctions = {
+      submitDataExfil: function() {
+        formattedData = JSON.parse(JSON.stringify(this.exfilTableArgs.items))
+        fetch(window.location.href, {
+          method: "POST",
+          body: JSON.stringify(formattedData),
+          credentials: "same-origin",
+          headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
+        }).then(response => {
+          if(response.ok) {
+            this.displayNotification({title: "Data Exfiltration Results Saved", variant:"success", text: "Data Exfiltration results saved successfully."})
+          }
+          else {
+            this.displayNotification({text: "Bad response received from server. Check for errors in forms and try again.", title: "Error saving data", variant:"danger"})
+          }
+        }).catch(error => {
+          this.displayNotification({text: error, title: "Error saving data", variant:"danger"})
+        })
+      },
+
+      addRow: async function () {
+        this.exfilTableArgs.items.push({id: this.exfilTableArgs.items.length + 1, protocol: "", datatype: "", date_time: null, detection: false, prevention: false})
+      },
+
+      deleteRow: function(item) {
+        this.exfilTableArgs.items.splice(this.exfilTableArgs.items.indexOf(item), 1)
+      },
+
+    }
+
+    return pageFunctions
+  }
+</script>
+{% endblock %}

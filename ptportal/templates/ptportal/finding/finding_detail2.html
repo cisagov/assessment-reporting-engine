@@ -242,46 +242,6 @@ DM22-1011
       <dd class="col-sm-8">{{weak.get_host_protection_display}}</dd>
       </dl>
     {% endfor %}
-    {% elif object.finding.name == "Sensitive Data Exfiltration" %}
-    <div class='row mb-3'>
-      <div class='col-md'>
-        <h4>Exfiltrated Data</h4>
-      </div>
-      <div class='col-md text-right'>
-        <a class="btn btn-outline-primary" href ="{% url 'sensitive_data_exfil' %}"><i class="fa fa-edit"></i>
-        {% if sensitive_data_exfil %}
-         Edit Data Exfils
-        {% else %}
-        Add Data Exfils
-        {% endif %}
-        </a>
-      </div>
-    </div>
-    {% if object.data_exfil_description %}
-    <div class='row mb-3'>
-      <div class='col-md'>
-  	    <p>{{object.data_exfil_description}}</p>
-      </div>
-  	</div>
-    {% endif %}
-    {% for exfil in sensitive_data_exfil %}
-      <h5>Data Exfil: {{forloop.counter}}</h5>
-      <dl class="row">
-
-      <dt class="col-sm-4">Protocol</dt>
-      <dd class="col-sm-8">{{exfil.get_protocol_display}}</dd>
-
-      <dt class="col-sm-4">Datatype</dt>
-      <dd class="col-sm-8">{{exfil.datatype}}</dd>
-
-      <dt class="col-sm-4">Date/Time Started</dt>
-      <dd class="col-sm-8">{{exfil.date_time}}</dd>
-
-      <dt class="col-sm-4">Result</dt>
-      <dd class="col-sm-8">{{exfil.get_result_display}}</dd>
-      </dl>
-    {% endfor %}
-    {% endif %}
     {% if object.finding.name != 'Spear Phishing Susceptibility' and object.finding.name != 'Spear Phishing Weaknesses' and object.finding.name != 'Sensitive Data Exfiltration'  and object.finding.name != 'Ransomware' %}
       <div class='row mb-3'>
         <div class='col-md'>

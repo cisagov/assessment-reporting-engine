@@ -622,9 +622,6 @@ def insert_ndf_table(doc, db, ndf_tag, media_path):
             ptp_ndf_screen_text = 'Phishing Assessment Results'
             ptp_ndf_screenshot_note = ele["campaign_description"]
 
-        elif fname.startswith("Sensitive Data Exfiltration"):
-            ptp_ndf_screen_text = 'Sensitive Data Exfiltration Results'
-            ptp_ndf_screenshot_note = ele["data_exfil_description"]
         elif fname.startswith("Ransomware"):
             ptp_ndf_screen_text = 'Ransomware Impact'
             ptp_ndf_screenshot_note = ""
@@ -789,38 +786,6 @@ def insert_ndf_table(doc, db, ndf_tag, media_path):
             caption = xu.insert_caption(doc, "Phishing Assessment Results")
             campaign_table._tbl.addnext(caption._p)
 
-        elif fname.startswith("Sensitive Data Exfiltration"):
-            sde = af.model_gen(db, "ptportal.sensitivedataexfil")
-
-            sde_table = ndf_table.cell(9, 0).add_table(1, 4)
-            sde_table.style = doc.styles['Report Default Table']
-
-            sde_table.cell(0, 0).text = "Protocol"
-            sde_table.cell(0, 1).text = "Datatype"
-            sde_table.cell(0, 2).text = "Date/Time Started"
-            sde_table.cell(0, 3).text = "Result"
-
-            for idx, ele in enumerate(sde):
-                vals = ele['fields']
-                row = sde_table.add_row()
-
-                row.cells[0].text = vals['protocol']
-                row.cells[1].text = vals['datatype']
-                row.cells[2].text = vals['date_time']
-
-                if vals['result'] == 'B':
-                    row.cells[3].text = "Blocked"
-                    row.cells[3].paragraphs[0].runs[0].font.color.rgb = RGBColor(
-                        79, 174, 91
-                    )
-                else:
-                    row.cells[3].text = "Not Blocked"
-                    row.cells[3].paragraphs[0].runs[0].font.color.rgb = RGBColor(
-                        255, 0, 0
-                    )
-
-            caption = xu.insert_caption(doc, "Sensitive Data Exfiltration")
-            sde_table._tbl.addnext(caption._p)
         elif fname.startswith("Ransomware"):
             rsw_info = af.get_db_info(db, "ransomware", "keyNA", True)
             vals = rsw_info["fields"]

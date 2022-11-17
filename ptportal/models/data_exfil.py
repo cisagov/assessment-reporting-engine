@@ -12,40 +12,45 @@
 # DM22-1011
 
 from django.db import models
-from django.db.models import Sum
 from django.template.defaultfilters import slugify
 from django.urls import reverse
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
-
-import datetime
-
 from . import abstract_models
 
 
-class SensitiveDataExfil(abstract_models.TimeStampedModel):
+class DataExfil(abstract_models.TimeStampedModel):
     PROTOCOL_CHOICES = (
         ("HTTP", "HTTP"),
         ("HTTPS", "HTTPS"),
         ("FTP", "FTP"),
+        ("SFTP", "SFTP"),
         ("ICMP", "ICMP"),
         ("SMB", "SMB"),
         ("DNS", "DNS"),
         ("SMTP", "SMTP"),
     )
-    RESULT_CHOICES = (("B", "Blocked"), ("N", "Not Blocked"))
+
+    DETECTION_CHOICES = (("D", "Detected"), ("N", "Not Detected"))
+    PREVENTION_CHOICES = (("B", "Blocked"), ("N", "Not Blocked"))
+
+    order = models.IntegerField(unique=False)
+
     protocol = models.CharField(
         choices=PROTOCOL_CHOICES, max_length=5, default="HTTP", verbose_name="Protocol"
     )
     datatype = models.CharField(
-        default="Social Security Numbers (10MB)",
-        max_length=55,
+        default="Social Security Numbers (10 MB)",
+        max_length=100,
         verbose_name="Data Type",
     )
-    created_at = models.DateTimeField(auto_now_add=True)
+    # created_at = models.DateTimeField(auto_now_add=True)
     date_time = models.DateTimeField(verbose_name="Date Time", null=True, blank=True)
-    result = models.CharField(
-        max_length=12, choices=RESULT_CHOICES, default="B", verbose_name="Result"
+    detection = models.CharField(
+        max_length=12, choices=DETECTION_CHOICES, default="D", verbose_name="Detection"
+    )
+    prevention = models.CharField(
+        max_length=12, choices=PREVENTION_CHOICES, default="B", verbose_name="Prevention"
     )
 
     def save(self, *args, **kwargs):
@@ -53,7 +58,7 @@ class SensitiveDataExfil(abstract_models.TimeStampedModel):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return "Sensitive Data Exfiltration"
+        return self.protocol + ": " + self.datatype
 
     class Meta:
-        verbose_name_plural = "Sensitive Data Exfiltration"
+        verbose_name_plural = "Data Exfiltration"
