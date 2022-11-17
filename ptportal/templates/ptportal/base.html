@@ -128,42 +128,48 @@ DM22-1011
                   },
                   {
                     id: 8,
+                    title: "Ransomware",
+                    href: "{% url 'ransomware' %}",
+                    iconUrl: "{% static 'icons/upload-solid.svg' %}" // to be replaced with different icon
+                  },
+                  {
+                    id: 9,
                     title: "Risk Scoring",
                     href: "{% url 'risk_score' %}",
                     iconUrl: "{% static 'icons/calculator-solid.svg' %}"
                   },
                   {
-                    id: 9,
+                    id: 10,
                     title: "Report",
                     href: "{% url 'report' %}",
                     iconUrl: "{% static 'icons/file-alt-solid.svg' %}",
                   },
                   {
-                    id: 10,
+                    id: 11,
                     title: "Activity Tracker",
                     href: "{% url 'activity_tracker' %}",
                     iconUrl: "{% static 'icons/table-solid.svg' %}"
                   },
                   {
-                    id: 11,
+                    id: 12,
                     title: "Attack Paths",
                     href: "{% url 'attack-paths' %}",
                     iconUrl: "{% static 'icons/project-diagram-solid.svg' %}"
                   },
                   {
-                    id: 12,
+                    id: 13,
                     title: "ATT&CK",
                     href: "{% url 'attack-matrix' %}",
                     iconUrl: "{% static 'icons/a.svg' %}"
                   },
                   {
-                    id: 13,
+                    id: 14,
                     title: "Tools",
                     href: "{% url 'tools' %}",
                     iconUrl: "{% static 'icons/wrench-solid.svg' %}"
                   },
                   {
-                    id: 14,
+                    id: 15,
                     title: "Election Infrastructure",
                     href: "{% url 'ei' %}",
                     iconUrl: "{% static 'icons/poll-h-solid.svg' %}"
@@ -173,7 +179,7 @@ DM22-1011
               //Side bar links for if the phishing findings are added to the engagement.
               phishingLinks: {
                 port: {
-                  id: 15,
+                  id: 16,
                   title: "Port Mapping",
                   href: "{% url 'port_mapping' %}",
                   iconUrl: "{% static 'icons/network-wired-solid.svg' %}"
@@ -183,12 +189,12 @@ DM22-1011
               narrativeLinks:
               {
                 phishing: {
-                  id: 16,
+                  id: 17,
                   title: "Phishing",
                   href: "{% url 'narratives' 'phishing' %}",
                 },
                 external: {
-                  id: 17,
+                  id: 18,
                   title: "External",
                   href: "{% url 'narratives' 'external' %}",
                 },

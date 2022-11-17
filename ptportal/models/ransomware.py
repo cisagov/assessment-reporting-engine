@@ -12,43 +12,54 @@
 # DM22-1011
 
 from django.db import models
-from django.db.models import Sum
 from django.template.defaultfilters import slugify
 from django.urls import reverse
-from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
-
-import datetime
-
 from . import abstract_models
 
 
 class Ransomware(abstract_models.TimeStampedModel):
-    created_at = models.DateTimeField(auto_now_add=True)
 
-    wormable_machines = models.PositiveIntegerField(
-        default=0, verbose_name="Wormable Machines", blank=True, null=True
+    TRIGGER_CHOICES = (("Y", "Yes"), ("N", "No"))
+
+    order = models.IntegerField(unique=False)
+
+    disabled = models.IntegerField(unique=False)
+
+    description = models.CharField(
+        max_length=100, verbose_name="Description"
     )
 
-    wormable_HVAs = models.PositiveIntegerField(
-        default=0, verbose_name="Wormable High Value Assets", blank=True, null=True
+    trigger = models.CharField(
+        max_length=5, choices=TRIGGER_CHOICES, default="N", verbose_name="Action"
     )
 
-    network_susc = models.FloatField(
-        default=0,
-        blank=True,
-        verbose_name="Network Susceptibility %",
-        validators=[MinValueValidator(0.00), MaxValueValidator(100)],
-        null=True,
-    )
+    time_start = models.DateTimeField(verbose_name="Start Time", null=True, blank=True)
+    time_end = models.DateTimeField(verbose_name="End Time", null=True, blank=True)
 
     def save(self, *args, **kwargs):
         super().full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return "Ransomware"
+        return self.description
 
     class Meta:
-        verbose_name_plural = "Ransomware"
+        verbose_name_plural = "Ransomware Susceptibility"
+
+
+class RansomwareScenarios(abstract_models.TimeStampedModel):
+
+    vuln = models.IntegerField(unique=False)
+    total = models.IntegerField(unique=False)
+
+    def save(self, *args, **kwargs):
+        super().full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return "Ransomware Scenarios"
+
+    class Meta:
+        verbose_name_plural = "Ransomware Scenarios"

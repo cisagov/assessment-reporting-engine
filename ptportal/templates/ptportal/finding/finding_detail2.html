@@ -119,35 +119,6 @@ DM22-1011
 	</div> <!-- col-md-6 -->
 
 	<div class="col-md-6">
-    {% if object.finding.name == "Ransomware" %}
-    <div class='row mb-3'>
-        <div class='col-md'>
-          <h4>Ransomware</h4>
-        </div>
-         <div class='col-md text-right'>
-          {% if ransomware %}
-          {% for r in ransomware %}<a class="btn btn-outline-primary" href ="{% url 'ransomware_update' r.id %}"><i class="fa fa-edit"></i> Edit Ransomware stats{% endfor %}
-          {% else %}
-          <a class="btn btn-outline-primary" href ="{% url 'ransomware' %}"><i class="fa fa-edit"></i> Add Ransomware stats
-          {% endif %}
-          </a>
-        </div>
-      </div>
-      <dl class="row">
-        {% for r in ransomware %}
-
-
-        <dt class="col-sm-4"># of Wormable Machines</dt>
-        <dd class="col-sm-8">{{r.wormable_machines}}</dd>
-
-        <dt class="col-sm-4"># of Wormable High Value Assets</dt>
-        <dd class="col-sm-8">{{r.wormable_HVAs}}</dd>
-
-        <dt class="col-sm-4">% of Network Susceptibility</dt>
-        <dd class="col-sm-8">{{r.network_susc}}</dd>
-  </dl>
-  {% endfor %}
-    {% endif %}
     {% if object.finding.name == "Spear Phishing Susceptibility" %}
       <div class='row mb-3'>
         <div class='col-md'>
@@ -242,7 +213,7 @@ DM22-1011
       <dd class="col-sm-8">{{weak.get_host_protection_display}}</dd>
       </dl>
     {% endfor %}
-    {% if object.finding.name != 'Spear Phishing Susceptibility' and object.finding.name != 'Spear Phishing Weaknesses' and object.finding.name != 'Sensitive Data Exfiltration'  and object.finding.name != 'Ransomware' %}
+    {% if object.finding.name != 'Spear Phishing Susceptibility' and object.finding.name != 'Spear Phishing Weaknesses' %}
       <div class='row mb-3'>
         <div class='col-md'>
           <h4>Screenshots</h4>

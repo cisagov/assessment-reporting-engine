@@ -245,6 +245,7 @@ urlpatterns += [
 # Services
 urlpatterns += [
     path('data_exfiltration/', views.DataExfiltration.as_view(), name='data_exfiltration'),
+    path('ransomware/', views.RansomwareSusceptibility.as_view(), name='ransomware'),
 ]
 
 urlpatterns += [

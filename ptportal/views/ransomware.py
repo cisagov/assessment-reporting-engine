@@ -13,88 +13,86 @@
 # This Software includes and/or makes use of Third-Party Software each subject to its own license.
 
 # DM22-0744
-from django.contrib import messages
-from ..forms import RansomwareForm
-from ..models import UploadedFinding, Ransomware
-from django.shortcuts import redirect, render
+from django.core.exceptions import ValidationError
 from django.views import generic
-from django.urls import reverse
+from django.http import HttpResponse
+import json
+from ..models import Ransomware, RansomwareScenarios
 
 
-def ransomware_redirect(request):
-    if Ransomware.objects.exists():
-        return redirect('ransomware_update', Ransomware.objects.first().pk)
-    else:
-        return redirect('ransomware')
-
-
-def get_ransomware_finding():
-    return UploadedFinding.objects.filter(slug="ransomware").first()
-
-
-class RansomwareCreate(generic.edit.CreateView):
-    model = Ransomware
-    template_name = "ptportal/finding/ransomware/ransomware.html"
-    form_class = RansomwareForm
+class RansomwareSusceptibility(generic.base.TemplateView):
+    template_name = "ptportal/ransomware.html"
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['finding'] = get_ransomware_finding()
-        context['edit'] = UploadedFinding.objects.filter(slug="ransomware").exists()
-        print(context)
-        return context
-
-    def get_success_url(self):
-        finding = get_ransomware_finding()
-        return finding.get_absolute_url()
-
-    def post(self, request, *args, **kwargs):
-        print("in ransomware vreate view")
-        form = self.get_form()
-        finding = get_ransomware_finding()
-        if form.is_valid():
-            form.save()
-            print(form)
-        else:
-            print(form.errors)
-            return super().post(self, request, *args, **kwargs)
-        messages.get_messages(
-            request
-        )  # Clears the messages to eliminate duplicates alerts in template
-        messages.success(request, finding.finding, extra_tags=finding.slug)
-        return redirect('index')
-
-
-class RansomwareUpdate(generic.edit.UpdateView):
-    model = Ransomware
-    template_name = "ptportal/finding/ransomware/ransomware.html"
-    form_class = RansomwareForm
-
-    def get_success_url(self):
-        finding = get_ransomware_finding()
-        return finding.get_absolute_url()
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['finding'] = get_ransomware_finding()
-        context['edit'] = UploadedFinding.objects.filter(slug="ransomware").exists()
+        context = {}
+        context['scenarios'] = RansomwareScenarios.objects.all().first()
+        context['ransomware'] = Ransomware.objects.all().order_by('order')
         return context
 
     def post(self, request, *args, **kwargs):
-        print("in update------------------")
-        self.object = self.get_object()
-        context = super().get_context_data(**kwargs)
-        form = self.get_form()
-        finding = get_ransomware_finding()
-        if form.is_valid():
-            form.save()
-        else:
-            print(form.errors)
-            context = super().get_context_data(**kwargs)
-            context['object'] = form
-            return super().post(self, request, *args, **kwargs)
-        messages.get_messages(
-            request
-        )  # Clears the messages to eliminate duplicates alerts in template
-        messages.success(request, finding.finding, extra_tags=finding.slug)
-        return redirect('index')
+        postData = json.loads(request.body)
+
+        RansomwareScenarios.objects.all().delete()
+
+        try:
+            vuln = int(postData['vuln'])
+            total = int(postData['total'])
+            
+        except ValueError:
+            vuln = 0
+            total = 0
+
+        try:
+                RansomwareScenarios.objects.create(
+                    vuln=vuln,
+                    total=total
+                )
+
+        except (KeyError, ValidationError) as e:
+            return HttpResponse(status=400, reason=e)
+
+
+        for order, data in enumerate(postData['results']):
+            if (
+                data['description']
+                == data['trigger']
+                == data['time_start']
+                == data['time_end']
+                == data['disabled']
+                == ""
+            ):
+                continue
+
+            if data['trigger'] == False:
+                trigger = "N"
+            else:
+                trigger = "Y"
+
+            obj = Ransomware.objects.filter(description=data['description'])
+
+            if obj.exists():
+                try:
+                    obj.update(
+                        trigger=trigger,
+                        time_start=data['time_start'],
+                        time_end=data['time_end'],
+                        disabled=data['disabled']
+                    )
+
+                except (KeyError, ValidationError) as e:
+                    return HttpResponse(status=400, reason=e)
+
+            else:
+                try:
+                    Ransomware.objects.create(
+                        order=order + 1,
+                        description=data['description'],
+                        trigger=trigger,
+                        time_start=data['time_start'],
+                        time_end=data['time_end'],
+                        disabled=data['disabled']
+                    )
+
+                except (KeyError, ValidationError) as e:
+                    return HttpResponse(status=400, reason=e)
+        return HttpResponse(status=200)
