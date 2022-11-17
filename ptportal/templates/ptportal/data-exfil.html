@@ -35,7 +35,6 @@ DM22-1011
 <nav aria-label="breadcrumb">
 	<ol class="breadcrumb">
 	 <li class="breadcrumb-item"><a href="{% url 'index' %}">Dashboard</a></li>
-	 <li class="breadcrumb-item"><a href="{% url 'finding_severity' finding.severity %}">{{ finding.severity }}</a></li>
 	 <li class="breadcrumb-item active"><a href="{% url 'finding_detail' finding.slug %}"> {{ finding }} Details</a></li>
 	 <li class="breadcrumb-item active">Exfiltrated Data</li>
 	</ol>

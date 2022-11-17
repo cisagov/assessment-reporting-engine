@@ -204,11 +204,6 @@ urlpatterns += [
         views.UploadedFindingDelete.as_view(),
         name='finding_delete',
     ),
-    re_path(
-        '(?P<severity>\w+)/',
-        views.UploadedFindingSeverityListView.as_view(),
-        name='finding_severity',
-    ),
     path(
         'ajax/ajax-get-payloads/',
         views.ajax_get_payloads,

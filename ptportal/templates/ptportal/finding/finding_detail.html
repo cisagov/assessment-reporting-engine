@@ -58,9 +58,6 @@ DM22-1011
       <li class="breadcrumb-item"><a href="{% url 'report' %}">Report</a></li>
     {% else %}
       <li class="breadcrumb-item"><a href="{% url 'index' %}">Dashboard</a></li>
-      {% if previous_url|stringformat:"s" == object.severity|stringformat:"s" %}
-        <li class="breadcrumb-item">	<a href="{% url 'finding_severity' object.severity %}">{{object.severity}}</a></li>
-      {% endif %}
     {% endif %}
 	 <li class="breadcrumb-item active">{{object.uploaded_finding_name}} Details</li>
 
