@@ -56,6 +56,7 @@ allModels = [
     Acronym,
     KEV,
     KEVMetadata,
+    DataExfil,
 ]
 
 # registering list of models

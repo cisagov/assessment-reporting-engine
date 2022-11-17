@@ -242,6 +242,11 @@ urlpatterns += [
     path('campaigns/', views.Campaigns.as_view(), name='campaigns'),
 ]
 
+# Services
+urlpatterns += [
+    path('data_exfiltration/', views.DataExfiltration.as_view(), name='data_exfiltration'),
+]
+
 urlpatterns += [
     path('risk_score/', views.RiskScoring.as_view(), name='risk_score'),
 ]
