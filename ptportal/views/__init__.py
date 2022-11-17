@@ -28,3 +28,4 @@ from .payloads import *
 from .campaigns import *
 from .sensitive_data_exfil import *
 from .ransomware import *
+from .risk_score import *

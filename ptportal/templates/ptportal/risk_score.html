@@ -1,0 +1,168 @@
+<!-- Risk & Vulnerability Assessment Reporting Engine
+
+Copyright 2022 The Risk & Vulnerability Reporting Engine Contributors, All Rights Reserved.
+(see Contributors.txt for a full list of Contributors)
+
+SPDX-License-Identifier: BSD-3-Clause
+
+Please see additional acknowledgments (including references to third party source code, object code, documentation and other files) in the license.txt file or contact permission@sei.cmu.edu for full terms.
+
+Created, in part, with funding and support from the United States Government. (see Acknowledgments file).
+
+DM22-1011
+ -->
+
+{% extends 'ptportal/base.html' %}
+{% block active %}#riskScore{% endblock %}
+
+
+{% block content %}
+{% csrf_token %}
+	<h1 class='text-2xl font-bold'>Risk Scoring</h1>
+	<hr />
+
+	<sds-table class="table-prose mb-2" v-bind="scoreTableArgs">
+		<template #cell(id)="{item}"></template>
+		<template #cell(finding)="{item}"></template>
+		<template #cell(severity)="{item}"></template>
+		<template #cell(magnitude)="{item}">
+			<sds-input v-model="item.magnitude" placeholder="0-100"></sds-input>
+		</template>
+		<template #cell(probability)="{item}">
+			<sds-input v-model="item.probability" placeholder="0-100"></sds-input>
+		</template>
+		<template #cell(kev)="{item}"></template>
+		<template #cell(mitigation)="{item}"></template>
+		<template #cell(score)="{item}"></template>
+	</sds-table>
+
+	<div style="width:25%; margin-left: auto; margin-right: 0;">
+		<sds-table class="table-prose mb-2" v-bind="totalTableArgs">
+			<template #cell(total)="{item}"></template>
+			<template #cell(mitigated)="{item}"></template>
+		</sds-table>
+	</div>
+	<sds-button variant="primary" class="float-right" @click="submitRiskScore"><i class="fas fa-save"></i> Save</sds-button>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+	function pageData() {
+		data = {
+			overwriteWarning: false,
+			scoreTableArgs: {
+				fields: [
+					{
+						key: "uploaded_finding_id",
+						label: "#",
+						sortable: true
+					},
+					{
+						key: "uploaded_finding_name",
+						label: "Finding Name",
+						sortable: true
+					},
+					{
+						key: "severity",
+						label: "Severity",
+						sortable: true
+					},
+					{
+						key: "magnitude",
+						label: "Magnitude (%)",
+						sortable: true
+					},
+					{
+						key: "probability",
+						label: "Probability (%)",
+						sortable: true
+					},
+					{
+						key: "kev",
+						label: "KEV",
+						sortable: true
+					},
+					{
+						key: "mitigation",
+						label: "Mitigation Status",
+						sortable: true
+					},
+					{
+						key: "risk_score",
+						label: "Risk Score",
+						sortable: true
+					}
+				],
+				items: []
+			},
+
+			totalTableArgs: {
+				fields: [
+					{
+						key: "total",
+						label: "Total Risk Score",
+						align: "right",
+						sortable: false
+					},
+					{
+						key: "mitigated",
+						label: "Mitigated Risk Score",
+						sortable: false
+					}
+				],
+				items: []
+			}
+		}
+
+		total_risk = 0
+		mitigated_risk = 0
+
+		{% for finding in findings %}
+
+			{% if finding.KEV != null %}
+				iskev = "True"
+			{% else %}
+				iskev = "False"
+			{% endif %}
+
+			total_risk += parseInt("{{finding.risk_score}}")
+			console.log("{{finding.mitigation}}")
+			{% if finding.mitigation != True %}
+				mitigated_risk += parseInt("{{finding.risk_score}}")
+			{% endif %}
+
+			data.scoreTableArgs.items.push({uploaded_finding_id: "{{finding.uploaded_finding_id}}", uploaded_finding_name: "{{finding.uploaded_finding_name}}", severity: "{{finding.severity}}", magnitude: "{{finding.magnitude}}", probability: "{{finding.probability}}", kev: iskev, mitigation: "{{finding.mitigation}}", risk_score: "{{finding.risk_score}}"})
+		{% endfor %}
+
+		data.totalTableArgs.items.push({total: total_risk, mitigated: mitigated_risk})
+
+		return data
+	}
+
+	function pageMethods() {
+		pageFunctions = {
+			submitRiskScore: function() {
+				formattedData = JSON.parse(JSON.stringify(this.scoreTableArgs.items))
+				fetch(window.location.href, {
+					method: "POST",
+					body: JSON.stringify(formattedData),
+					credentials: "same-origin",
+					headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
+				}).then(response => {
+					if(response.ok) {
+						this.displayNotification({title: "Risk Score Saved", variant:"success", text: "Risk scoring data saved successfully. Refresh page to see updated Risk Score."})
+					}
+					else {
+						this.displayNotification({text: "Bad response received from server. Check for errors in forms and try again.", title: "Error saving data", variant:"danger"})
+					}
+				}).catch(error => {
+					this.displayNotification({text: error, title: "Error saving data", variant:"danger"})
+				})
+			}
+		}
+
+		return pageFunctions
+	}
+</script>
+{% endblock %}

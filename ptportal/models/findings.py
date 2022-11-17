@@ -376,6 +376,27 @@ class UploadedFinding(abstract_models.TimeStampedModel):
         null=True,
     )
 
+    magnitude = models.IntegerField(
+        default=0,
+        blank=True,
+        null=True,
+        verbose_name='Magnitude'
+    )
+
+    probability = models.IntegerField(
+        default=0,
+        blank=True,
+        null=True,
+        verbose_name='Probability'
+    )
+
+    risk_score = models.IntegerField(
+        default=0,
+        blank=True,
+        null=True,
+        verbose_name='Risk Score'
+    )
+
     slug = models.SlugField(max_length=255, blank=True)
 
     objects = UploadedFindingsOrderManager()
