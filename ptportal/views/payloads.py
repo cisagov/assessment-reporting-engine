@@ -13,40 +13,77 @@
 # This Software includes and/or makes use of Third-Party Software each subject to its own license.
 
 # DM22-0744
-from extra_views import ModelFormSetView
+from django.core.exceptions import ValidationError
+from django.views import generic
+from django.http import HttpResponse
+import json
+from ..models import Payload
 
-from django.http import JsonResponse
-from django.contrib import messages
 
-from ptportal.models import UploadedFinding, Payload
-
-
-class Payloads(ModelFormSetView):
-    model = Payload
-    template_name = 'ptportal/finding/weakness/payloads.html'
-    factory_kwargs = {"can_order": True}
+class PayloadResults(generic.base.TemplateView):
+    template_name = "ptportal/payloads.html"
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['edit'] = Payload.objects.exists()
+        context = {}
+        context['payloads'] = Payload.objects.all().order_by('order')
         return context
 
-    def get(self, request, *args, **kwargs):
-        if Payload.objects.exists():
-            self.factory_kwargs['extra'] = 0
-        else:
-            self.factory_kwargs['extra'] = 1
-        return super().get(self, request, *args, **kwargs)
-
     def post(self, request, *args, **kwargs):
-        print(request.POST)
-        if request.POST.get('delete') != '':
-            payloads = request.POST.get('delete').split(',')
-            for payload in payloads:
-                Payload.objects.filter(pk=payload).delete()
+        postData = json.loads(request.body)
+        diff = Payload.objects.all().count() - len(postData)
 
-        if formset.is_valid():
-            print("is_valid(): ", formset.is_valid())
-        else:
-            print("invalid: ", formset)
-        return super().post(self, request, *args, **kwargs)
+        for i in range(diff):
+            Payload.objects.order_by('-order')[0].delete()
+
+        Payload.objects.all().delete()
+
+        for order, data in enumerate(postData):
+            if (
+                data['payload_description']
+                == data['attack_name']
+                == data['c2_protocol']
+                == ""
+            ):
+                continue
+
+            if data['host_protection'] == False:
+                host = "N"
+            else:
+                host = "B"
+
+            if data['border_protection'] == False:
+                border = "N"
+            else:
+                border = "B"
+
+            obj = Payload.objects.filter(order=order + 1)
+
+            if obj.exists():
+                try:
+                    obj.update(
+                        payload_description=data['payload_description'],
+                        attack_name=data['attack_name'],
+                        c2_protocol=data['c2_protocol'],
+                        host_protection=host,
+                        border_protection=border,
+                        locked=data['locked']
+                    )
+
+                except (KeyError, ValidationError) as e:
+                    return HttpResponse(status=400, reason=e)
+
+            else:
+                try:
+                    Payload.objects.create(
+                        order=order + 1,
+                        payload_description=data['payload_description'],
+                        attack_name=data['attack_name'],
+                        c2_protocol=data['c2_protocol'],
+                        host_protection=host,
+                        border_protection=border,
+                        locked=data['locked']
+                    )
+
+                except (KeyError, ValidationError) as e:
+                    return HttpResponse(status=400, reason=e)
+        return HttpResponse(status=200)

@@ -238,7 +238,7 @@ urlpatterns += [
 
 # Additional Finding Data
 urlpatterns += [
-    path('payloads/', views.Payloads.as_view(), name='payloads'),
+    path('payloads/', views.PayloadResults.as_view(), name='payloads'),
     path('campaigns/', views.Campaigns.as_view(), name='campaigns'),
 ]
 
