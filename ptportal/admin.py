@@ -57,6 +57,8 @@ allModels = [
     KEV,
     KEVMetadata,
     DataExfil,
+    Ransomware,
+    RansomwareScenarios,
 ]
 
 # registering list of models

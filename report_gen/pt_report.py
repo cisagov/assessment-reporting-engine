@@ -622,9 +622,6 @@ def insert_ndf_table(doc, db, ndf_tag, media_path):
             ptp_ndf_screen_text = 'Phishing Assessment Results'
             ptp_ndf_screenshot_note = ele["campaign_description"]
 
-        elif fname.startswith("Ransomware"):
-            ptp_ndf_screen_text = 'Ransomware Impact'
-            ptp_ndf_screenshot_note = ""
         else:
             finding_sshot = af.find_screenshots(ss_info, fpk)
 
@@ -786,23 +783,6 @@ def insert_ndf_table(doc, db, ndf_tag, media_path):
             caption = xu.insert_caption(doc, "Phishing Assessment Results")
             campaign_table._tbl.addnext(caption._p)
 
-        elif fname.startswith("Ransomware"):
-            rsw_info = af.get_db_info(db, "ransomware", "keyNA", True)
-            vals = rsw_info["fields"]
-
-            rsw_table = ndf_table.cell(9, 0).add_table(4, 2)
-            rsw_table.style = doc.styles['Report Default Table']
-
-            rsw_table.cell(0, 0).text = "Ransomware Impact"
-            rsw_table.cell(1, 0).text = "Wormable machines:"
-            rsw_table.cell(1, 1).text = str(vals['wormable_machines'])
-            rsw_table.cell(2, 0).text = "Wormable High Value Assets:"
-            rsw_table.cell(2, 1).text = str(vals['wormable_HVAs'])
-            rsw_table.cell(3, 0).text = "Network susceptibility:"
-            rsw_table.cell(3, 1).text = str(vals["network_susc"]) + "%"
-
-            caption = xu.insert_caption(doc, "Ransomware Impact Results")
-            rsw_table._tbl.addnext(caption._p)
         else:
             screenshot_cell = ndf_table.cell(9, 0)
             for sshot in finding_sshot:

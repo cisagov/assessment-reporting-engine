@@ -271,13 +271,12 @@ def insert_notice_slide(prs, report_type):
     notice_placeholder.text = notice.format(report_type)
 
 
-def insert_agenda_slide(prs, report_type, rware):
+def insert_agenda_slide(prs, report_type):
     """Generates the agenda slide. Puts in specific agenda depending on the report.
 
     Args:
         prs (pptx presentation): The Powerpoint presentation.
         report_type (str): The type of report being generated. I.e. RVA, RPT, or HVA.
-        rware (bool): Wether ransomware is part of the presentation.
     """
     agenda_slide_layout = prs.slide_layouts[3]
     slide = prs.slides.add_slide(agenda_slide_layout)
@@ -301,9 +300,6 @@ def insert_agenda_slide(prs, report_type, rware):
         run.text += "Attack Path\n"
 
     run.text += "Findings\n"
-
-    if rware:
-        run.text += "Ransomware\n"
 
     run.text += "Observations\n"
 
@@ -1121,157 +1117,6 @@ def insert_findings_slides(prs, report_type, rva_info, ss_info, media_path):
                     )
 
 
-"""
-def insert_ransomware_slide(prs, report_type, rva_info, rware):
-    if rware:
-        add_section_title(prs, "Ransomware")
-
-        # add ransomware Susceptibility slide
-        rware = prs.slide_layouts[14]
-        slide = prs.slides.add_slide(rware)
-        title = slide.shapes.title.text = 'Ransomware Susceptibility'
-
-        para1 = "Ransomware thrives on easily-accessible avenues of infection, privilege escalation, and lateral movement"
-
-        para2 = "Phishing" + \
-            "\nVulnerable network services resulting in RCE (e.g. EternalBlue)" + \
-            "\nAccount credential acquisition via discovery (T1078, T1171), credential dumping (T1003), kerberoasting (T1208), or LLMNR/NBT-NS poisoning (T1171)" + \
-            "\nLack of network segmentation" + \
-            "\nFaulty patch management"
-
-        details = slide.placeholders[1].text_frame
-        paragraph = details.paragraphs[0]
-        paragraph.level = 1
-        run = paragraph.add_run()
-        run.text = para1
-
-        paragraph = details.add_paragraph()
-        paragraph.level = 2
-        run = paragraph.add_run()
-        run.text = para2
-
-
-        # add ransomware Impact slide
-        # XXX need to pull variables in from JSON for impact information
-        rware = prs.slide_layouts[14]
-        slide = prs.slides.add_slide(rware)
-        title = slide.shapes.title.text = 'Ransomware Impact'
-
-
-        wormable_machines = str(rware_info["wormable_machines"])
-        wormable_hvas = str(rware_info["wormable_HVAs"])
-        network_susc = str(rware_info["network_susc"])
-
-        impact1 = wormable_machines + " wormable machines" + \
-            "\n" + wormable_hvas + " wormable high value assets" + \
-            "\n" + network_susc + "% of the network susceptibility "
-
-        impact2 = "The median cost of a ransomware attack " + \
-            "on businesses was $133,000 in 2018. " + \
-            "\nRecovery costs can include legal, hardware, software, " + \
-            "and labor costs to execute a recovery plan"
-
-        details = slide.placeholders[1].text_frame
-        paragraph = details.paragraphs[0]
-        paragraph.level = 1
-        run = paragraph.add_run()
-        run.text = impact1
-
-        paragraph = details.add_paragraph() # add some space
-
-        paragraph = details.add_paragraph()
-        paragraph.level = 1
-        run = paragraph.add_run()
-        run.text = impact2
-
-        # add ransomware Prevention slide
-
-        rware = prs.slide_layouts[15]
-        slide = prs.slides.add_slide(rware)
-        title = slide.shapes.title.text = 'Prevention'
-
-        # add ransomware What to do slide
-        if_infected = ["Isolate the infected computer immediately",
-                       "Isolate or power-off affected devices that have not yet been completely corrupted. ",
-                       "Immediately secure backup data or systems by taking them offline.",
-                       "LINK-LINE",
-                       "If available, collect and secure partial portions of the ransomed data that might exist. ",
-                       "If possible, change all online account passwords and network passwords after removing the system from the network",
-                       "Delete Registry values and files to stop the program from loading" ]
-
-        rware = prs.slide_layouts[14]
-        slide = prs.slides.add_slide(rware)
-        title = slide.shapes.title.text = 'What to do if you’re infected'
-
-        # use the default first paragraph before adding more paragraphs
-        details = slide.placeholders[1].text_frame
-        paragraph = details.paragraphs[0]
-        paragraph.level = 1
-        run = paragraph.add_run()
-        run.font.size = Pt(20)
-        run.text = if_infected[0]
-
-        for infected in if_infected[1:]:
-            paragraph = details.add_paragraph()
-            paragraph.level = 1
-            # special case the one sentence with links embedded
-            if "LINK-LINE" in infected:
-                rtmp = paragraph.add_run()
-                rtmp.font.size = Pt(20)
-                rtmp.text = "Contact law enforcement immediately. We encourage you to contact "
-                add_hyperlink(paragraph,
-                              "CISA",
-                              "https://www.us-cert.gov/report")
-
-                rtmp = paragraph.add_run()
-                rtmp.font.size = Pt(20)
-                rtmp.text = ", local "
-
-                add_hyperlink(paragraph,
-                         "FBI",
-                         "https://www.fbi.gov/contact-us/field-offices/listing_by_state")
-
-                rtmp = paragraph.add_run()
-                rtmp.font.size = Pt(20)
-                rtmp.text = " or "
-
-                add_hyperlink(paragraph,
-                         "USSS",
-                         "https://www.secretservice.gov/contact/")
-
-                rtmp = paragraph.add_run()
-                rtmp.font.size = Pt(20)
-                rtmp.text = " field office immediately."
-
-            else:
-                run = paragraph.add_run()
-                run.font.size = Pt(20)
-                run.text = infected
-
-    # add ransomware Sources
-        rware = prs.slide_layouts[14]
-        slide = prs.slides.add_slide(rware)
-        title = slide.shapes.title.text = 'Sources'
-
-
-        details = slide.placeholders[1].text_frame
-        paragraph = details.paragraphs[0]
-        paragraph.level = 1
-        add_hyperlink(paragraph, None,
-                      "https://attack.mitre.org/")
-
-        paragraph = details.add_paragraph()
-        paragraph.level = 1
-        add_hyperlink(paragraph, None,
-                      "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-184.pdf")
-
-        paragraph = details.add_paragraph()
-        paragraph.level = 1
-        add_hyperlink(paragraph, None,
-                      "https://www.us-cert.gov/sites/default/files/publications/Ransomware_Executive_One-Pager_and_Technical_Document-FINAL.pdf")
-"""
-
-
 def insert_observation_slide(prs):
     """Generates the final observations slide.
 
@@ -1444,17 +1289,12 @@ def generate_ptp_slides(template, output, draft, json, media):
     ip_ext = rep_fields["IP_scanned_ext"]
     ip_int = rep_fields["IP_scanned_int"]
 
-    rware_info = af.get_db_info(rva_info, "ransomware.fields", "keyNA")
-    rware = True  # ransomware model is in JSON output
-    if rware_info == "<not set: keyNA>":
-        rware = False
-
     # ---- open the powerpoint template
     prs = pptx.Presentation(template)
 
     insert_title_slide(prs, report_type, rva_info, draft)
     insert_notice_slide(prs, report_type)
-    insert_agenda_slide(prs, report_type, rware)
+    insert_agenda_slide(prs, report_type)
     insert_timeframe(prs, report_type, rva_info)
     insert_scope_slide(prs, report_type, rva_info, ip_ext, ip_int)
 
