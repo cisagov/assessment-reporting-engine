@@ -294,6 +294,10 @@ function pageMethods() {
 
 		deletePayload: function(item) {
 			this.PayloadTableArgs.items.splice(this.PayloadTableArgs.items.indexOf(item), 1)
+
+			this.PayloadTableArgs.items.forEach((element, index) => {
+				element.id = index + 1
+			})
 		},
 
 		parseData: async function(overwrite) {
