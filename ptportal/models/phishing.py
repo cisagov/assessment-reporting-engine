@@ -71,19 +71,35 @@ class Campaign(abstract_models.TimeStampedModel):
 
 
 class Payload(abstract_models.TimeStampedModel):
-    WEAKNESSES_CHOICES = ((True, 'Blocked'), (False, 'Not Blocked'))
-    payload_description = models.TextField()
-    c2_protocol = models.TextField(default="HTTPS")
-    border_protection = models.BooleanField(
-        blank=True,
-        choices=WEAKNESSES_CHOICES,
-        default=False,
+    RESULT_CHOICES = (("B", "Blocked"), ("N", "Not Blocked"))
+    payload_description = models.CharField(
+        max_length=200,
+        verbose_name="Payload Description"
     )
-    host_protection = models.BooleanField(
+    attack_name = models.CharField(
         blank=True,
-        choices=WEAKNESSES_CHOICES,
-        default=True,
+        max_length=200,
+        verbose_name="MITRE ATT&CK Format"
     )
+    c2_protocol = models.CharField(
+        blank=True,
+        max_length=10,
+        verbose_name="C2 Protocol"
+    )
+    host_protection = models.CharField(
+        blank=True,
+        max_length=12,
+        choices=RESULT_CHOICES,
+        default="B",
+    )
+    border_protection = models.CharField(
+        blank=True,
+        max_length=12,
+        choices=RESULT_CHOICES,
+        default="N",
+    )
+    locked = models.IntegerField(unique=False)
+    
     order = models.PositiveIntegerField(blank=True, default=1)
 
     def save(self, *args, **kwargs):
@@ -91,8 +107,8 @@ class Payload(abstract_models.TimeStampedModel):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return "Spearphishing Weaknesses"
+        return self.payload_description + " (" + self.c2_protocol + ")" 
 
     class Meta:
-        verbose_name_plural = "Spearphishing Payloads"
+        verbose_name_plural = "Payload Testing Results"
         ordering = ["order"]

@@ -1,0 +1,350 @@
+<!-- Risk & Vulnerability Assessment Reporting Engine
+
+Copyright 2022 The Risk & Vulnerability Reporting Engine Contributors, All Rights Reserved.
+(see Contributors.txt for a full list of Contributors)
+
+SPDX-License-Identifier: BSD-3-Clause
+
+Please see additional acknowledgments (including references to third party source code, object code, documentation and other files) in the license.txt file or contact permission@sei.cmu.edu for full terms.
+
+Created, in part, with funding and support from the United States Government. (see Acknowledgments file).
+
+DM22-1011
+ -->
+
+{% extends 'ptportal/base.html' %}
+{% load humanize %}
+{% block style %}
+<style>
+    .header{
+        padding: 10px;
+        background: white;
+        color: black;
+        font-size: 20px;
+        position: relative;
+        top: -15px;
+        margin-left: -18px;
+        margin-right: -20px;
+    }
+	.col-span-5{
+        border-top:1px solid black!important;
+        border-color:#1b1c1d!important;
+		margin-bottom: 50px !important;
+    }
+	.float-left{
+		display: inline-block;
+		position: relative;
+		top: -40px;
+	}
+	.right-block{
+		display:inline-block;
+		vertical-align:top;
+		font-size: 11pt;
+	}
+	.space{
+		padding: 4px;
+	}
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="header">
+  <h2> Payload Testing Results</h2>
+</div>
+
+<div class="col-span-5">
+	{% csrf_token %}
+
+		<sds-modal size="sm" v-model="overwriteWarning">
+			<template #title>
+				<p>Warning</p>
+			</template>
+			<p class="mb-2">Are you sure you want to overwrite? All current data will be lost.</p>
+			<div class="flex gap-2">
+				<sds-button variant="primary" @click="this.overwriteWarning=false;parseData(true)">Confirm</sds-button>
+				<sds-button variant="danger" @click="this.overwriteWarning = false">Cancel</sds-button>
+			</div>
+		</sds-modal>
+		<sds-section class="mb-4">
+			<template #title>
+				<p class="text-2xl font-bold">Payload Data Upload</p>
+				<sds-file-uploader v-bind="fileUploadArgs" @add="addFile"></sds-file-uploader>
+			</template>
+			<div class="grid gap-2 grid-cols-2">
+				<div class="flex gap-2">
+					<sds-button variant="primary" @click="parseData(false)"><i class="fas fa-plus-circle"></i> Append</sds-button>
+					<sds-button variant="primary" @click="this.overwriteWarning = true"><i class="fas fa-times-circle"></i> Overwrite</sds-button>
+				</div>
+			</div>
+		</sds-section>
+    <sds-section class="col-span-5" type="accented">
+        <span class="border-top border-dark"></span>
+            <template #title><b>PAYLOAD TESTING RESULTS</b></template>
+			<!-- Payloads Table -->
+			<sds-section>
+				<div class="mb-8">
+					<sds-table :fields="fields" :items="items" class="table-prose" v-bind="PayloadTableArgs" :maxlength="200">
+							<template #cell(payload_description)="{item}">
+								<sds-textarea v-model="item.payload_description" rows="1" placeholder="Payload Description" :maxlength="200"></sds-textarea>
+							</template>
+							<template #cell(attack_name)="{item}">
+								<sds-textarea v-model="item.attack_name" rows="1" placeholder="MITRE ATT&CK Format" :disabled="Boolean(item.locked)"></sds-textarea>
+							</template>
+							<template #cell(c2_protocol)="{item}">
+								<sds-input v-model="item.c2_protocol" placeholder="Protocol"></sds-input>
+							</template>
+							<template #cell(host_protection)="{item}">
+								<div class="right-block">
+									<sds-toggle-switch v-model="item.host_protection"/>
+								</div>
+								<div v-if="item.host_protection" class="right-block space">
+									<p>Blocked</p>
+								</div>
+								<div v-if="!item.host_protection" class="right-block space">
+									<p>Not Blocked</p>
+								</div>
+							</template>
+							<template #cell(border_protection)="{item}">
+								<div class="right-block">
+									<sds-toggle-switch v-model="item.border_protection"/>
+								</div>
+								<div v-if="item.border_protection" class="right-block space">
+									<p>Blocked</p>
+								</div>
+								<div v-if="!item.border_protection" class="right-block space">
+									<p>Not Blocked</p>
+								</div>
+							</template>
+
+								<template #cell(lock)="{item}">
+	                <div v-if="item.locked">
+	                	<sds-floating-ui
+							        popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+							        placement="top"
+							        arrow-class="absolute bg-black w-2 h-2 rotate-45"
+							        placement-top-arrow-class="-bottom-1"
+							        placement-right-arrow-class="-left-1"
+							        placement-bottom-arrow-class="-top-1"
+							        placement-left-arrow-class="-right-1"
+							        :will-open="willOpen"
+							        :will-close="willClose"
+							      >
+							      <template #trigger="{ open, close }">
+	                  	<sds-button variant="primary" type="button" @click="item.locked = Boolean(0)" @mouseover="open" @mouseout="close">Unlock</sds-button>
+	                	</template>
+	                	<template #default>
+					          <div class="p-2">
+					            <p>Unlock to customize the MITRE ATT&CK Format. Keep in mind the MITRE ATT&CK Format will NOT automatically generate for any payload that is unlocked.</p>
+					          </div>
+					        	</template>
+					      		</sds-floating-ui>
+	                </div>
+
+	                <div v-if="!item.locked">
+	                	<sds-floating-ui
+							        popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+							        placement="top"
+							        arrow-class="absolute bg-black w-2 h-2 rotate-45"
+							        placement-top-arrow-class="-bottom-1"
+							        placement-right-arrow-class="-left-1"
+							        placement-bottom-arrow-class="-top-1"
+							        placement-left-arrow-class="-right-1"
+							        :will-open="willOpen"
+							        :will-close="willClose"
+							      >
+							      <template #trigger="{ open, close }">
+	                  	<sds-button variant="primary" type="button" @click="item.locked = Boolean(1)" @mouseover="open" @mouseout="close">Lock</sds-button>
+	                	</template>
+	                	<template #default>
+					          <div class="p-2">
+					            <p>Lock to automatically generate the MITRE ATT&CK Format when the page is saved. Keep in mind any pre-existing ATT&CK contents will be overwritten by a new format based on the Payload Description for any payload that is locked.</p>
+					          </div>
+					        	</template>
+					      		</sds-floating-ui>
+	                </div>
+	              </template>
+
+							<template #cell(delete)="{item}">
+								<sds-button type="button" @click="deletePayload(item)" ><img class="w-8 h-8" src="/static/icons/trash-solid.svg"></sds-button>
+							</template>
+					</sds-table>
+					<sds-button type="button" @click="addPayload"><img class="w-8 h-8" src="/static/icons/plus-solid.svg"></sds-button>
+				</div>
+			</sds-section>
+		</sds-section>
+		<!-- Save Button -->
+		<sds-button variant="primary" class="float-right" @click="submitPayloads"> Save</sds-button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function pageData() {
+	data = {
+		fileList: [],
+		formData: [],
+		overwriteWarning: false,
+		//to display pop up notification
+		notify: null,
+		// payload table columns
+		PayloadTableArgs: {
+				fields: [
+					{
+					 	key: "id",
+					 	label:"#",
+					},
+					{
+						key: "payload_description",
+						label: "Payload Description"
+					},
+					{
+						key: "attack_name",
+						label: "MITRE ATT&CK Format"
+					},
+					{
+						key: "c2_protocol",
+						label: "C2 Protocol"
+					},
+					{
+						key: "host_protection",
+						label: "Host Protection"
+					},
+					{
+						key: "border_protection",
+						label: "Border Protection",
+					},
+					{
+						key: "lock",
+					},
+					{
+						key: "delete",
+					}
+				],
+				items: []
+		},
+		fileUploadArgs: {
+			helperText: "Upload a CSV under 10 MB with the following headers: Description,ATT&CK,Protocol,Host,Border and row format: <string>,<string>,<string>,<B/N>,<B/N>",
+			accept: ".csv",
+			allowedFiletypes: ["text/csv"],
+			name: "payloadUpload",
+			multiple: false
+		}
+	}
+
+	{% for payload in payloads %}
+
+		{% if payload.host_protection == "N" %}
+      host = false
+    {% else %}
+      host = true
+    {% endif %}
+
+    {% if payload.border_protection == "N" %}
+      border = false
+    {% else %}
+      border = true
+    {% endif %}
+
+		data.PayloadTableArgs.items.push({id: "{{payload.order}}", payload_description: "{{payload.payload_description}}", attack_name: "{{payload.attack_name}}", c2_protocol: "{{payload.c2_protocol}}", host_protection: host, border_protection: border, locked: parseInt("{{payload.locked}}")})
+
+	{% endfor %}
+
+	return data
+}
+
+function pageMethods() {
+	pageFunctions = {
+		submitPayloads: function() {
+
+			this.PayloadTableArgs.items.forEach(element => {
+				if (element.payload_description == "") {
+					this.notify = true
+				}
+			})
+
+			// if description field is empty show pop up notification
+			if (this.notify) {
+				this.displayNotification({title: "Error Saving Data", text: "One or more Payloads are missing a description. Please enter a description for each payload before saving.", variant: "danger"})
+				this.notify = false
+			}
+
+			else {
+				formattedData = JSON.parse(JSON.stringify(this.PayloadTableArgs.items))
+				fetch(window.location.href, {
+					method: "POST",
+					body: JSON.stringify(formattedData),
+					credentials: "same-origin",
+					headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
+				}).then(response => {
+				if(response.ok) {
+					this.displayNotification({title: "Payloads Saved", text: "Payload data saved successfully. Refresh page to see updated MITRE ATT&CK Formats.", variant: "success"})
+				}
+				else {
+					this.displayNotification({title: "Error saving data", text: 'Bad response received from server. Check for errors in forms and try again.', variant: "danger"})
+				}
+				}).catch(error => {
+					this.displayNotification({title: "Error saving data", text: error, variant: "danger"})
+				})
+			}
+		},
+
+		addPayload: async function () {
+			this.PayloadTableArgs.items.push({id: this.PayloadTableArgs.items.length + 1, payload_description: "", attack_name: "", c2_protocol: "", host_protection: true, border_protection: false, locked: 1})
+		},
+
+		deletePayload: function(item) {
+			this.PayloadTableArgs.items.splice(this.PayloadTableArgs.items.indexOf(item), 1)
+		},
+
+		parseData: async function(overwrite) {
+			//May change this to disable button instead of a check.
+			if (document.getElementsByName('payloadUpload')[0].files.length == 0) {
+				return
+			}
+
+			const fileName = document.getElementsByName('payloadUpload')[0].files[0]
+			let payloadString = null
+			await fileName.text().then(text => {payloadString = text})
+
+			// add error handling
+
+			if (overwrite) {
+				this.PayloadTableArgs.items = []
+			}
+
+			var lines = payloadString.split('\n')
+			var length = lines.length
+
+			for (var i = 1; i < length; i++) {
+				values = lines[i].split(',')
+
+				if (values[3][0] == "N") {
+					h = false
+				}
+				else {
+					h = true
+				}
+			    
+				if (values[4][0] == "N") {
+					b = false
+				}
+				else {
+					b = true
+				}
+
+				if (values[1] == "") {
+					lock = true
+				}
+				else {
+					lock = false
+				}
+
+				this.PayloadTableArgs.items.push({id: this.PayloadTableArgs.items.length + 1, payload_description: values[0], attack_name: values[1], c2_protocol: values[2], host_protection: h, border_protection: b, locked: lock})
+			}
+		}
+    }
+
+    return pageFunctions
+}
+</script>
+{% endblock %}
