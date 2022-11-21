@@ -83,7 +83,7 @@ DM22-1011
 			<!-- Payloads Table -->
 			<sds-section>
 				<div class="mb-8">
-					<sds-table :fields="fields" :items="items" class="table-prose" v-bind="PayloadTableArgs" :maxlength="200">
+					<sds-table :fields="fields" :items="items" class="table-prose" v-bind="PayloadTableArgs">
 							<template #cell(payload_description)="{item}">
 								<sds-textarea v-model="item.payload_description" rows="1" placeholder="Payload Description" :maxlength="200"></sds-textarea>
 							</template>

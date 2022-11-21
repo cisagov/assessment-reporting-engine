@@ -32,10 +32,9 @@ class PayloadResults(generic.base.TemplateView):
         postData = json.loads(request.body)
         diff = Payload.objects.all().count() - len(postData)
 
-        for i in range(diff):
-            Payload.objects.order_by('-order')[0].delete()
-
-        Payload.objects.all().delete()
+        if diff > 0:
+            for i in range(diff):
+                Payload.objects.order_by('-order')[0].delete()
 
         for order, data in enumerate(postData):
             if (
