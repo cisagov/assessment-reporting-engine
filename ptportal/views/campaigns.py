@@ -13,49 +13,86 @@
 # This Software includes and/or makes use of Third-Party Software each subject to its own license.
 
 # DM22-0744
-from django.contrib import messages
-from django.http import JsonResponse
-from django.urls import reverse
-from django import forms
-from django.shortcuts import redirect
-from django.views import generic, View
-
-from extra_views import ModelFormSetView
-
-from ptportal.models import UploadedFinding, Campaign
+from django.core.exceptions import ValidationError
+from django.views import generic
+from django.http import HttpResponse
+import json
+from ..models import Campaign
 
 
-class Campaigns(ModelFormSetView):
-    model = Campaign
-    template_name = 'ptportal/finding/susceptibility/campaigns.html'
+class Campaigns(generic.base.TemplateView):
+    template_name = "ptportal/campaigns.html"
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['finding'] = get_campaign_finding()
-        context['edit'] = Campaign.objects.exists()
+        context = {}
+        context['campaigns'] = Campaign.objects.all().order_by('order')
         return context
 
-    def get_success_url(self):
-        finding = get_campaign_finding()
-        return finding.get_absolute_url()
-
-    def get(self, request, *args, **kwargs):
-        if Campaign.objects.exists():
-            self.factory_kwargs['extra'] = 0
-        else:
-            self.factory_kwargs['extra'] = 1
-        return super().get(self, request, *args, **kwargs)
-
     def post(self, request, *args, **kwargs):
-        print(request.POST)
-        if request.POST.get('delete') != '':
-            deletions = request.POST.get('delete').split(",")
-            for to_delete in deletions:
-                Campaign.objects.filter(pk=to_delete).delete()
+        postData = json.loads(request.body)
+        diff = Campaign.objects.all().count() - len(postData['results'])
 
-        formset = self.construct_formset()
-        if formset.is_valid():
-            print("is_valid(): ", formset.is_valid())
-        else:
-            print("invalid: ", formset)
-        return super().post(self, request, *args, **kwargs)
+        if diff > 0:
+            for i in range(diff):
+                Campaign.objects.order_by('-order')[0].delete()
+
+        for order, data in enumerate(postData['results']):
+            if (
+                data['emails_sent']
+                == data['emails_delivered']
+                == data['total_clicks']
+                == data['unique_clicks']
+                == data['time_to_first_click']
+                == data['creds_harvested']
+                == data['number_exploited']
+                == data['length_of_campaign']
+                == ""
+            ):
+                continue
+
+            try:
+                click_rate = int(data['unique_clicks']) / int(data['emails_delivered'])
+            except:
+                click_rate = 0.0
+
+            obj = Campaign.objects.filter(order=order + 1)
+
+            if obj.exists():
+                try:
+                    obj.update(
+                        emails_sent=data['emails_sent'] or 0,
+                        emails_delivered=data['emails_delivered'] or 0,
+                        total_clicks=data['total_clicks'] or 0,
+                        unique_clicks=data['unique_clicks'] or 0,
+                        click_rate=click_rate,
+                        time_to_first_click=data['time_to_first_click'] or "00:00:00",
+                        creds_harvested=data['creds_harvested'] or 0,
+                        number_exploited=data['number_exploited'] or 0,
+                        length_of_campaign=data['length_of_campaign'] or 0,
+                        campaign_description=postData['descriptions'][order]['campaign_description'] or ""
+                    )
+                    
+
+                except (KeyError, ValidationError) as e:
+                    return HttpResponse(status=400, reason=e)
+                
+
+            else:
+                try:
+                    Campaign.objects.create(
+                        order=order + 1,
+                        emails_sent=data['emails_sent'] or 0,
+                        emails_delivered=data['emails_delivered'] or 0,
+                        total_clicks=data['total_clicks'] or 0,
+                        unique_clicks=data['unique_clicks'] or 0,
+                        click_rate=click_rate,
+                        time_to_first_click=data['time_to_first_click'] or "00:00:00",
+                        creds_harvested=data['creds_harvested'] or 0,
+                        number_exploited=data['number_exploited'] or 0,
+                        length_of_campaign=data['length_of_campaign'] or 0,
+                        campaign_description=postData['descriptions'][order]['campaign_description'] or ""
+                    )
+
+                except (KeyError, ValidationError) as e:
+                    return HttpResponse(status=400, reason=e)
+        return HttpResponse(status=200)

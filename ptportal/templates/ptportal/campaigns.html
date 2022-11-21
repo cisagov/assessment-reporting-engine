@@ -1,0 +1,303 @@
+<!-- Risk & Vulnerability Assessment Reporting Engine
+
+Copyright 2022 The Risk & Vulnerability Reporting Engine Contributors, All Rights Reserved.
+(see Contributors.txt for a full list of Contributors)
+
+SPDX-License-Identifier: BSD-3-Clause
+
+Please see additional acknowledgments (including references to third party source code, object code, documentation and other files) in the license.txt file or contact permission@sei.cmu.edu for full terms.
+
+Created, in part, with funding and support from the United States Government. (see Acknowledgments file).
+
+DM22-1011
+ -->
+
+{% extends 'ptportal/base.html' %}
+{% load humanize %}
+{% block style %}
+<style>
+    .header{
+        padding: 10px;
+        background: white;
+        color: black;
+        font-size: 20px;
+        position: relative;
+        top: -15px;
+        margin-left: -18px;
+        margin-right: -20px;
+    }
+	.col-span-5{
+        border-top:1px solid black!important;
+        border-color:#1b1c1d!important;
+		margin-bottom: 50px !important;
+    }
+	.float-left{
+		display: inline-block;
+		position: relative;
+		top: -40px;
+	}
+	.right-block{
+		display:inline-block;
+		vertical-align:top;
+		font-size: 11pt;
+	}
+	.space{
+		padding: 4px;
+	}
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="header">
+  <h2> Phishing Campaign Results</h2>
+</div>
+
+<div class="col-span-5">
+	{% csrf_token %}
+
+    <sds-section class="col-span-10" type="accented">
+        <span class="border-top border-dark"></span>
+            <template #title><b>PHISHING CAMPAIGN RESULTS</b></template>
+			<!-- Campaign Table -->
+			<sds-section>
+				<div class="mb-8">
+					<sds-table :fields="fields" :items="items" class="table-prose" v-bind="CampaignTableArgs">
+						<template #cell(emails_sent)="{item}">
+                        	<sds-input v-model="item.emails_sent" placeholder="#"></sds-input>
+                    	</template>
+                    	<template #cell(emails_delivered)="{item}">
+                        	<sds-input v-model="item.emails_delivered" placeholder="#"></sds-input>
+                    	</template>
+                    	<template #cell(total_clicks)="{item}">
+                        	<sds-input v-model="item.total_clicks" placeholder="#"></sds-input>
+                    	</template>
+                    	<template #cell(unique_clicks)="{item}">
+                        	<sds-input v-model="item.unique_clicks" placeholder="#"></sds-input>
+                    	</template>
+                    	<template #cell(time_to_first_click)="{item}">
+                    		<sds-floating-ui
+								popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+								placement="top"
+								arrow-class="absolute bg-black w-2 h-2 rotate-45"
+								placement-top-arrow-class="-bottom-1"
+								placement-right-arrow-class="-left-1"
+								placement-bottom-arrow-class="-top-1"
+								placement-left-arrow-class="-right-1"
+								:will-open="willOpen"
+								:will-close="willClose"
+							>
+							<template #trigger="{ open, close }">
+                        	<sds-input v-model="item.time_to_first_click" placeholder="HH:MM:SS" @mouseover="open" @mouseout="close"></sds-input>
+                    		</template>
+                    		<template #default>
+					        	<div class="p-2">
+					        	<p>Valid formats:<br>1) # days, HH:MM:SS (e.g., 1 day, 01:23:45)<br>2) HH:MM:SS (e.g., 25:23:45)</p>
+					        	</div>
+					        </template>
+					      	</sds-floating-ui>
+	              		</template>
+                    	<template #cell(creds_harvested)="{item}">
+                    		<sds-floating-ui
+								popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+								placement="top"
+								arrow-class="absolute bg-black w-2 h-2 rotate-45"
+								placement-top-arrow-class="-bottom-1"
+								placement-right-arrow-class="-left-1"
+								placement-bottom-arrow-class="-top-1"
+								placement-left-arrow-class="-right-1"
+								:will-open="willOpen"
+								:will-close="willClose"
+							>
+							<template #trigger="{ open, close }">
+                        	<sds-input v-model="item.creds_harvested" placeholder="#" @mouseover="open" @mouseout="close"></sds-input>
+                    		</template>
+                    		<template #default>
+					        	<div class="p-2">
+					        	<p>Leave blank if credential harvesting WAS NOT performed. Enter "0" if credential harvesting WAS performed, but no credentials were received.</p>
+					        	</div>
+					        </template>
+					      	</sds-floating-ui>
+	              		</template>
+                    	<template #cell(number_exploited)="{item}">
+                        	<sds-input v-model="item.number_exploited" placeholder="#"></sds-input>
+                    	</template>
+                    	<template #cell(length_of_campaign)="{item}">
+                        	<sds-input v-model="item.length_of_campaign" placeholder="#"></sds-input>
+                    	</template>
+						<template #cell(delete)="{item}">
+							<div style="width:20px; padding:10px 0px 0px 0px">
+							<sds-button type="button" @click="deleteCampaign(item)" ><img class="w-8 h-8" src="/static/icons/trash-solid.svg"></sds-button>
+							</div>
+						</template>
+					</sds-table>
+					<sds-button type="button" @click="addCampaign"><img class="w-8 h-8" src="/static/icons/plus-solid.svg"></sds-button>
+				</div>
+			</sds-section>
+		</sds-section>
+
+		<sds-section class="col-span-5" type="accented">
+        <span class="border-top border-dark"></span>
+        	<template #title><b>PHISHING CAMPAIGN DESCRIPTIONS</b></template>
+			<!-- Campaign Descriptions -->
+			<sds-section>
+				<div class="mb-8">
+					<sds-table :fields="fields" :items="items" class="table-prose" v-bind="CampaignDescArgs">
+						<template #cell(campaign_description)="{item}">
+                        	<sds-textarea v-model="item.campaign_description" rows="1" placeholder="Campaign Description" :maxlength="5000"></sds-textarea>
+                    	</template>
+					</sds-table>
+				</div>
+			</sds-section>
+		</sds-section>
+		<!-- Save Button -->
+		<sds-button variant="primary" class="float-right" @click="submitCampaigns"> Save</sds-button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function pageData() {
+	data = {
+		formData: [],
+		overwriteWarning: false,
+		//to display pop up notification
+		notify: null,
+		// campaign table columns
+		CampaignTableArgs: {
+				fields: [
+					{
+					 	key: "id",
+					 	label:"#",
+					},
+					{
+						key: "emails_sent",
+						label: "Emails Sent"
+					},
+					{
+						key: "emails_delivered",
+						label: "Emails Delivered"
+					},
+					{
+						key: "total_clicks",
+						label: "Total Clicks"
+					},
+					{
+						key: "unique_clicks",
+						label: "Unique Clicks"
+					},
+					{
+						key: "time_to_first_click",
+						label: "Time to First Click",
+					},
+					{
+						key: "creds_harvested",
+						label: "Credentials Harvested",
+					},
+					{
+						key: "number_exploited",
+						label: "Users Exploited",
+					},
+					{
+						key: "length_of_campaign",
+						label: "Length of Campaign (Days)",
+					},
+					{
+						key: "delete",
+					},
+					{
+						key: "campaign_description",
+					}
+				],
+				items: []
+		},
+		CampaignDescArgs: {
+				fields: [
+					{
+						key: "id",
+						label: "#",
+					},
+					{
+						key: "campaign_description",
+						label: "Campaign Description"
+					}
+				],
+				items: []
+		}
+	}
+
+	{% for campaign in campaigns %}
+
+		data.CampaignTableArgs.items.push({id: "{{campaign.order}}", emails_sent: "{{campaign.emails_sent}}", emails_delivered: "{{campaign.emails_delivered}}", total_clicks: "{{campaign.total_clicks}}", unique_clicks: "{{campaign.unique_clicks}}", time_to_first_click: "{{campaign.time_to_first_click}}", creds_harvested: "{{campaign.creds_harvested}}", number_exploited: "{{campaign.number_exploited}}", length_of_campaign: "{{campaign.length_of_campaign}}"})
+
+		data.CampaignDescArgs.items.push({id: "{{campaign.order}}", campaign_description: "{{campaign.campaign_description}}"})
+
+	{% endfor %}
+
+	return data
+}
+
+function pageMethods() {
+	pageFunctions = {
+		submitCampaigns: function() {
+
+			this.CampaignTableArgs.items.forEach(element => {
+				if (parseInt(element.unique_clicks) > parseInt(element.emails_delivered)) {
+					this.notify_clickrate = true
+				}
+			})
+
+			// if description field is empty show pop up notification
+			if (this.notify_clickrate) {
+				this.displayNotification({title: "Error Saving Data", text: "In order to calculate a valid click rate, the number of emails delivered must be greater than or equal to number of unique clicks.", variant: "danger"})
+				this.notify_clickrate = false
+			}
+
+			else {
+				formattedData = {}
+				formattedData['results'] = JSON.parse(JSON.stringify(this.CampaignTableArgs.items))
+	        	formattedData['descriptions'] = JSON.parse(JSON.stringify(this.CampaignDescArgs.items))
+	        	
+				fetch(window.location.href, {
+					method: "POST",
+					body: JSON.stringify(formattedData),
+					credentials: "same-origin",
+					headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
+				}).then(response => {
+				if(response.ok) {
+					this.displayNotification({title: "Campaign(s) Saved", text: "Campaign data saved successfully.", variant: "success"})
+				}
+				else {
+					this.displayNotification({title: "Error saving data", text: 'Bad response received from server. Check for errors in forms and try again.', variant: "danger"})
+				}
+				}).catch(error => {
+					this.displayNotification({title: "Error saving data", text: error, variant: "danger"})
+				})
+			}
+		},
+
+		addCampaign: async function () {
+			this.CampaignTableArgs.items.push({id: this.CampaignTableArgs.items.length + 1, emails_sent: "", emails_delivered: "", total_clicks: "", unique_clicks: "", time_to_first_click: "", creds_harvested: "", number_exploited: "", length_of_campaign: ""})
+
+			this.CampaignDescArgs.items.push({id: this.CampaignDescArgs.items.length + 1, campaign_description: ""})
+		},
+
+		deleteCampaign: function(item) {
+			row = parseInt(this.CampaignTableArgs.items.indexOf(item))
+			this.CampaignTableArgs.items.splice(this.CampaignTableArgs.items.indexOf(item), 1)
+			this.CampaignDescArgs.items.splice(row, 1)
+
+			this.CampaignTableArgs.items.forEach((element, index) => {
+				element.id = index + 1
+			})
+
+			this.CampaignDescArgs.items.forEach((element, index) => {
+				element.id = index + 1
+			})
+		}
+
+	}
+
+    return pageFunctions
+}
+</script>
+{% endblock %}
