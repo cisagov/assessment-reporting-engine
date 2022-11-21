@@ -253,97 +253,95 @@ function pageData() {
 }
 
 function pageMethods() {
-    pageFunctions = {
-      submitPayloads: function() {
+	pageFunctions = {
+		submitPayloads: function() {
 
-      	this.PayloadTableArgs.items.forEach(element => {
-					if (element.payload_description == "") {
-						this.notify = true
-					}
-				})
-
-				// if description field is empty show pop up notification
-				if (this.notify) {
-					this.displayNotification({title: "Error Saving Data", text: "One or more Payloads are missing a description. Please enter a description for each payload before saving.", variant: "danger"})
-					this.notify = false
+			this.PayloadTableArgs.items.forEach(element => {
+				if (element.payload_description == "") {
+					this.notify = true
 				}
+			})
 
-				else {
-		      formattedData = JSON.parse(JSON.stringify(this.PayloadTableArgs.items))
-		      fetch(window.location.href, {
-		        method: "POST",
-		        body: JSON.stringify(formattedData),
-		        credentials: "same-origin",
-		        headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
-		      }).then(response => {
-		        if(response.ok) {
-		          this.displayNotification({title: "Payloads Saved", text: "Payload data saved successfully. Refresh page to see updated MITRE ATT&CK Formats.", variant: "success"})
-		        }
-		        else {
-		          this.displayNotification({title: "Error saving data", text: 'Bad response received from server. Check for errors in forms and try again.', variant: "danger"})
-		        }
-		      }).catch(error => {
-		        this.displayNotification({title: "Error saving data", text: error, variant: "danger"})
-		      })
-		    }
-		  },
-		  addPayload: async function () {
-				this.PayloadTableArgs.items.push({id: this.PayloadTableArgs.items.length + 1, payload_description: "", attack_name: "", c2_protocol: "", host_protection: true, border_protection: false, locked: 1})
-			},
-
-      deletePayload: function(item) {
-				this.PayloadTableArgs.items.splice(this.PayloadTableArgs.items.indexOf(item), 1)
-			},
-
-    	parseData: async function(overwrite) {
-				//May change this to disable button instead of a check.
-				if (document.getElementsByName('payloadUpload')[0].files.length == 0) {
-					return
-				}
-
-				const fileName = document.getElementsByName('payloadUpload')[0].files[0]
-				let payloadString = null
-				await fileName.text().then(text => {payloadString = text})
-
-				// add error handling
-
-				if (overwrite) {
-					this.PayloadTableArgs.items = []
-				}
-
-				var lines = payloadString.split('\n')
-				var length = lines.length
-
-				for (var i = 1; i < length; i++) {
-					values = lines[i].split(',')
-					console.log(values[4])
-
-					if (values[3][0] == "N") {
-			      h = false
-					}
-			    else {
-			      h = true
-			    }
-			    
-			    if (values[4][0] == "N") {
-			      b = false
-					}
-			    else {
-			      b = true
-			    }
-
-			    console.log(b)
-
-			    if (values[1] == "") {
-			    	lock = true
-			    }
-			    else {
-			    	lock = false
-			    }
-
-					this.PayloadTableArgs.items.push({id: this.PayloadTableArgs.items.length + 1, payload_description: values[0], attack_name: values[1], c2_protocol: values[2], host_protection: h, border_protection: b, locked: lock})
-				}
+			// if description field is empty show pop up notification
+			if (this.notify) {
+				this.displayNotification({title: "Error Saving Data", text: "One or more Payloads are missing a description. Please enter a description for each payload before saving.", variant: "danger"})
+				this.notify = false
 			}
+
+			else {
+				formattedData = JSON.parse(JSON.stringify(this.PayloadTableArgs.items))
+				fetch(window.location.href, {
+					method: "POST",
+					body: JSON.stringify(formattedData),
+					credentials: "same-origin",
+					headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
+				}).then(response => {
+				if(response.ok) {
+					this.displayNotification({title: "Payloads Saved", text: "Payload data saved successfully. Refresh page to see updated MITRE ATT&CK Formats.", variant: "success"})
+				}
+				else {
+					this.displayNotification({title: "Error saving data", text: 'Bad response received from server. Check for errors in forms and try again.', variant: "danger"})
+				}
+				}).catch(error => {
+					this.displayNotification({title: "Error saving data", text: error, variant: "danger"})
+				})
+			}
+		},
+
+		addPayload: async function () {
+			this.PayloadTableArgs.items.push({id: this.PayloadTableArgs.items.length + 1, payload_description: "", attack_name: "", c2_protocol: "", host_protection: true, border_protection: false, locked: 1})
+		},
+
+		deletePayload: function(item) {
+			this.PayloadTableArgs.items.splice(this.PayloadTableArgs.items.indexOf(item), 1)
+		},
+
+		parseData: async function(overwrite) {
+			//May change this to disable button instead of a check.
+			if (document.getElementsByName('payloadUpload')[0].files.length == 0) {
+				return
+			}
+
+			const fileName = document.getElementsByName('payloadUpload')[0].files[0]
+			let payloadString = null
+			await fileName.text().then(text => {payloadString = text})
+
+			// add error handling
+
+			if (overwrite) {
+				this.PayloadTableArgs.items = []
+			}
+
+			var lines = payloadString.split('\n')
+			var length = lines.length
+
+			for (var i = 1; i < length; i++) {
+				values = lines[i].split(',')
+
+				if (values[3][0] == "N") {
+					h = false
+				}
+				else {
+					h = true
+				}
+			    
+				if (values[4][0] == "N") {
+					b = false
+				}
+				else {
+					b = true
+				}
+
+				if (values[1] == "") {
+					lock = true
+				}
+				else {
+					lock = false
+				}
+
+				this.PayloadTableArgs.items.push({id: this.PayloadTableArgs.items.length + 1, payload_description: values[0], attack_name: values[1], c2_protocol: values[2], host_protection: h, border_protection: b, locked: lock})
+			}
+		}
     }
 
     return pageFunctions
