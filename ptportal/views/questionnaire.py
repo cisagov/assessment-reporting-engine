@@ -13,14 +13,16 @@
 # This Software includes and/or makes use of Third-Party Software each subject to its own license.
 
 # DM22-0744
+import json
 from django import forms
 from django.shortcuts import redirect, render
 from django.views import generic
 from django.urls import reverse_lazy
 from django.contrib import messages
+from django.forms.models import modelformset_factory
 
 from ptportal.forms import ElectionInfrastructureForm
-from ptportal.models import ElectionInfrastructureQuestionnaire
+from ptportal.models import ElectionInfrastructureQuestionnaire, ElectionSystems
 
 
 def EI_redirect(request):
@@ -34,79 +36,144 @@ class EICreate(generic.edit.CreateView):
     model = ElectionInfrastructureQuestionnaire
     form_class = ElectionInfrastructureForm
     template_name = 'ptportal/ei/election_infrastructure_form.html'
-    success_url = reverse_lazy('index')
+    success_url = reverse_lazy('ei_update')
 
     def get_object(self):
-        return ElectionInfrastructureQuestionnaire.objects.first()
+        return ElectionInfrastructureQuestionnaire.object()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['systems'] = ElectionSystems.objects.all().order_by('order')
+        return context
 
     def post(self, request, *args, **kwargs):
-        form = self.get_form()
+        postData = json.loads(request.body)
+
+        diff = ElectionSystems.objects.all().count() - len(postData['systems'])
+
+        if diff > 0:
+            for i in range(diff):
+                ElectionSystems.objects.order_by('-order')[0].delete()
+
+        for order, data in enumerate(postData['systems']):
+            if (
+                data['ei_make']
+                == data['ei_model']
+                == data['ei_model_num']
+                == ""
+            ):
+                continue
+
+            obj = ElectionSystems.objects.filter(order=order + 1)
+
+            if obj.exists():
+                try:
+                    obj.update(
+                        ei_make=data['ei_make'],
+                        ei_model=data['ei_model'],
+                        ei_model_num=data['ei_model_num']
+                    )
+                    
+
+                except (KeyError, ValidationError) as e:
+                    return HttpResponse(status=400, reason=e)
+                
+
+            else:
+                try:
+                    ElectionSystems.objects.create(
+                        order=order + 1,
+                        ei_make=data['ei_make'],
+                        ei_model=data['ei_model'],
+                        ei_model_num=data['ei_model_num']
+                    )
+
+                except (KeyError, ValidationError) as e:
+                    return HttpResponse(status=400, reason=e)
+
+        form = ElectionInfrastructureForm(postData['questions'])
+        
         if form.is_valid():
-            print('form is valid!')
             form.save()
-            messages.get_messages(
-                request
-            )  # Clears the messages to eliminate duplicate alerts in template
-            messages.success(request, "EI Questionnaire")
             return redirect(self.success_url)
         else:
-            print('form.errors', form.errors)
-            # print('form.clean: ', form.cleaned_data)
-            context = super().get_context_data(**kwargs)
-            context['form'] = form
-            return render(request, self.template_name, context)
+            return HttpResponse(status=400, reason=form.errors)
 
 
 class EIUpdate(generic.edit.UpdateView):
     model = ElectionInfrastructureQuestionnaire
     form_class = ElectionInfrastructureForm
     template_name = 'ptportal/ei/election_infrastructure_form.html'
+    success_url = reverse_lazy('ei_update')
 
     def get_object(self):
-        return ElectionInfrastructureQuestionnaire.objects.first()
+        return ElectionInfrastructureQuestionnaire.object()
+
+    def get_form_kwargs(self):
+        """Return the keyword arguments for instantiating the form."""
+        kwargs = super().get_form_kwargs()
+        if hasattr(self, 'object'):
+            kwargs.update({'instance': self.object})
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        print('context: ', context)
+        context['systems'] = ElectionSystems.objects.all().order_by('order')
         return context
 
     def post(self, request, *args, **kwargs):
-        questionnaire = self.get_object()
-        form = ElectionInfrastructureForm(request.POST, instance=questionnaire)
+        postData = json.loads(request.body)
+
+        diff = ElectionSystems.objects.all().count() - len(postData['systems'])
+
+        if diff > 0:
+            for i in range(diff):
+                ElectionSystems.objects.order_by('-order')[0].delete()
+
+        for order, data in enumerate(postData['systems']):
+            if (
+                data['ei_make']
+                == data['ei_model']
+                == data['ei_model_num']
+                == ""
+            ):
+                continue
+
+            obj = ElectionSystems.objects.filter(order=order + 1)
+
+            if obj.exists():
+                try:
+                    obj.update(
+                        ei_make=data['ei_make'],
+                        ei_model=data['ei_model'],
+                        ei_model_num=data['ei_model_num']
+                    )
+                    
+
+                except (KeyError, ValidationError) as e:
+                    return HttpResponse(status=400, reason=e)
+                
+
+            else:
+                try:
+                    ElectionSystems.objects.create(
+                        order=order + 1,
+                        ei_make=data['ei_make'],
+                        ei_model=data['ei_model'],
+                        ei_model_num=data['ei_model_num']
+                    )
+
+                except (KeyError, ValidationError) as e:
+                    return HttpResponse(status=400, reason=e)
+
+        form = ElectionInfrastructureForm(postData['questions'], instance=ElectionInfrastructureQuestionnaire.objects.first())
         if form.is_valid():
-            print('form is valid!')
             form.save()
-            messages.get_messages(
-                request
-            )  # Clears the messages to eliminate duplicate alerts in template
-            messages.success(request, "EI Questionnaire Successfully Updated!")
-
-            return redirect(questionnaire)
+            return redirect(self.success_url)
         else:
-            print('form.errors', form.errors)
-            # print('form.clean: ', form.cleaned_data)
-            context = super().get_context_data(**kwargs)
-            context['form'] = form
-            return render(request, self.template_name, context)
-
-
-# class EIDetail(generic.DetailView):
-#     model = ElectionInfrastructureQuestionnaire
-#     template_name = 'ptportal/ei/election_infrastructure_detail.html'
-
-#     def get_object(self):
-#         return ElectionInfrastructureQuestionnaire.objects.first()
-
-
-class EIDelete(generic.edit.DeleteView):
-    model = ElectionInfrastructureQuestionnaire
-    success_url = reverse_lazy('index')
-    template_name = 'ptportal/ei/election_infrastructure_confirm_delete.html'
-
-    def get_object(self):
-        return ElectionInfrastructureQuestionnaire.objects.first()
+            return HttpResponse(status=400, reason=form.errors)
 
 
 def EIModalDelete(request):
     ElectionInfrastructureQuestionnaire.objects.first().delete()
-    return redirect('index')
+    return redirect('ei_create')
