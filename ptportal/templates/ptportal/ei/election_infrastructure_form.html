@@ -45,30 +45,36 @@ DM22-1011
 
 </div>
 <br>
-<form action="" method="POST" novalidate>
+<form @submit="submitEI" class="block">
 
 {% csrf_token %}
 
-<div class="col-span-5 mb-5 ">
+<div class="col-span-5 mb-5">
     <sds-section class="col-span-5" type="accented">
         <span class="border-top border-dark"></span>
         <template #title><b>ELECTION SYSTEMS</b></template>
+            <!-- Election Systems Table -->
+            <sds-section>
+                <div class="mb-8">
+                    <sds-table :fields="fields" :items="items" class="table-prose" v-bind="EITableArgs">
+                            <template #cell(ei_make)="{item}">
+                                <sds-input v-model="item.ei_make" placeholder="Make"></sds-input>
+                            </template>
+                            <template #cell(ei_model)="{item}">
+                                <sds-input v-model="item.ei_model" placeholder="Model"></sds-input>
+                            </template>
+                            <template #cell(ei_model_num)="{item}">
+                                <sds-input v-model="item.ei_model_num" placeholder="#"></sds-input>
+                            </template>
 
-            <div class="d-flex gap-x-6 items-end mb-8">
-                <div class="p-2 flex-fill">
-                    Make
-                    <textarea class="form-control" rows="1" id="{{ form.ei_make.id }}" name="{{ form.ei_make.name }}" placeholder="Enter election system Make information">{{form.ei_make.value}}</textarea>
+                            <template #cell(delete)="{item}">
+                                <sds-button type="button" @click="deleteSystem(item)" ><img class="w-8 h-8" src="/static/icons/trash-solid.svg"></sds-button>
+                            </template>
+                    </sds-table>
+                    <sds-button type="button" @click="addSystem"><img class="w-8 h-8" src="/static/icons/plus-solid.svg"></sds-button>
                 </div>
-                <div class="p-2 flex-fill">
-                    Model
-                    <textarea class="form-control" rows="1" id="{{ form.ei_model.id }}" name="{{ form.ei_model.name }}" placeholder="Enter election system Model information">{{form.ei_model.value}}</textarea>
-                </div>
-                <div class="p-2 flex-fill">
-                    Model Number
-                    <textarea class="form-control" rows="1" id="{{ form.ei_model_num.id }}" name="{{ form.ei_model_num.name }}" placeholder="Enter election system Model Number">{{form.ei_model_num.value}}</textarea>
-                </div>
-
-        </div>
+            </sds-section>
+        </sds-section>
     </sds-section>
 </div>
 
@@ -76,131 +82,260 @@ DM22-1011
     <sds-section class="col-span-5" type="accented">
         <span class="border-top border-dark"></span>
             <template #title><b>ELECTION INFRASTRUCTURE QUESTIONNAIRE</b></template>
-            <!-- Toast message for Questionnaire saved -->
-            {% for message in messages %}
-            <div aria-live="assertive" class="grid grid-cols-7" style="position:relative;z-index: 999999; min-width: 200px;">
-            <div id="questionnaire_alert" class="toast" role="alert" data-delay="2000" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                    <strong class="mr-auto">Questionnaire Saved</strong>
-                    <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="toast-body">
-                {{ message }}
-                </div>
-            </div>
 
-            </div>
-            {% endfor %}
-
-            <!-- This is for the json button and last modified time -->
+            <!-- Last modified time, download JSON button, and delete button -->
             {% if object %}
-            <div class="row mb-3">
-            <div class="col-md-6">
-                <p>Last modified on {{object.updated_at | naturaltime}}</p>
-            </div>
-            <div class="col-md-6 text-right">
-                {% if asmt_id != '' %}
-                    <a class="btn btn-success" href ="{% url 'generateEIJSON' %}"><i class="fa fa-download"></i> Download JSON</a>
-                {% else %}
-                    <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="bottom" title="Engagement data must be entered before downloading JSON">
-                    <a class="btn btn-success disabled" href ="{% url 'generateEIJSON' %}"><i class="fa fa-download"></i> Download JSON</a></span>
-                {% endif %}
-            </div>
-            </div>
 
-            <!-- Modal -->
-            <div class="modal fade" id="deleteEIModal" tabindex="-1" role="dialog" aria-labelledby="deleteEIModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Delete Saved Election Infrastructure Questionnaire?</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                    </button>
+                <div class="row mb-3">
+                <div class="col-md-6">
+                    <p>Last modified: {{object.updated_at | naturaltime}}</p>
+                    <br>
                 </div>
-                <div class="modal-body">
-                    <p>Are you sure you want to delete the Election Infrastructure Questionnaire?</p>
+                <div class="col-md-6" style="float:left">
+                    {% if asmt_id != '' %}
+                        <sds-button style="margin:5px" variant="success" type="button" @click="redirectLink('{% url "generateEIJSON" %}')"> Download JSON</sds-button>
+                    {% else %}
+                        <sds-floating-ui
+                            popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                            placement="top"
+                            arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                            placement-top-arrow-class="-bottom-1"
+                            placement-right-arrow-class="-left-1"
+                            placement-bottom-arrow-class="-top-1"
+                            placement-left-arrow-class="-right-1"
+                            :will-open="willOpen"
+                            :will-close="willClose"
+                        >
+                        <template #trigger="{ open, close }">
+                        <sds-button style="margin:5px" variant="secondary" type="button" @mouseover="open" @mouseout="close"> Download JSON</sds-button>
+                        </template>
+                        <template #default>
+                            <div class="p-2">
+                                <p>Assessment Details must be entered to download EI JSON.</p>
+                            </div>
+                        </template>
+                        </sds-floating-ui>
+                    {% endif %}
+
+                    <sds-button style="margin:5px;" variant="danger" type="button" @click="this.deleteWarning = true"> Delete Questionnaire</sds-button>
+                
+                    <sds-modal size="sm" v-model="deleteWarning">
+                    <template #title>
+                        <p>Warning</p>
+                    </template>
+                    <p class="mb-2">Are you sure you want to delete this Election Infrastructure Questionnaire? All current data will be lost.</p>
+                    <div class="flex gap-2">
+                        <sds-button variant="danger" @click="this.deleteWarning=false;redirectLink('{% url "ei_modal_delete" %}')">Delete</sds-button>
+                        <sds-button variant="secondary" @click="this.deleteWarning = false">Cancel</sds-button>
+                    </div>
+                    </sds-modal>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <a class="btn btn-danger" href ="{% url 'ei_modal_delete' %}"><i class="fa fa-trash"></i> Yes, Delete</a>
                 </div>
-                </div>
-            </div>
-            </div>
+
+                <br><br><br>
 
             {% endif %}
 
             {% for q in form %}
                 {% if q.name == 'q4A' or q.name == 'q9A' %}
-                <div class='form-row mb-3 d-none' {% if q.name == 'q4A' %}id='q4AField'{% elif q.name == 'q9A' %}id='q9AField'{% endif %}>
-                    <div class="col-md-7">
-                        <h6 class="control-label">{{ q.label_tag }} {{ q.help_text }}</h6>
-                        <textarea class="form-control" id="{{ q.id }}" name="{{ q.name }}">{{q.value}}</textarea>
+                    <div class='form-row mb-3 d-none' id='{{ q.name }}Field'>
+                        <div class="col-md-7">
+                            <h6 class="control-label">{{ q.label_tag }} {{ q.help_text }}</h6>
+                            <sds-textarea v-model="formData.{{ q.name }}" placeholder="Description" v-bind:rows="3"></sds-textarea>
+                        </div>
                     </div>
-                </div>
-                {% elif q.name == 'ei_make' or q.name == 'ei_model' or q.name == 'ei_model_num' %}
+                {% elif q.name == 'q24' or q.name == 'q25' or q.name == 'q26' or q.name == 'q27' %}
+                    <div class="form-row mb-3">
+                        <div class="col-md-7">
+                            <h6 class="control-label">{{ q.label_tag }} {{ q.help_text }}</h6>
+                            <sds-radio-group name="{{ q.name }}" :options="secureOptions" :stacked="true" v-model="formData.{{ q.name }}" class="mb-4"></sds-radio-group>    
+                        </div>
+                    </div>
                 {% else %}
-                <div class="form-row mb-3">
-                    <div class="col-md-7">
-                    {% with WIDGET_ERROR_CLASS='is-invalid' %}
-                    <h6 class="control-label">{{ q.label_tag }} {{ q.help_text }}</h6>
-                    <!-- <h4><small class="text-muted control-label ">{{ q.help_text }}</small></h4> -->
-                    {% for radio in q %}
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" id="{{ radio.id_for_label }}" name="{{ radio.data.name }}" value="{{ radio.data.value }}" {% if radio.data.selected %}checked{% endif %}>
-                        <label class="form-check-label" for="{{ radio.id_for_label }}">{{radio.choice_label}}</label>
+                    <div class="form-row mb-3">
+                        <div class="col-md-7">
+                            <h6 class="control-label">{{ q.label_tag }} {{ q.help_text }}</h6>
+                            <sds-radio-group name="{{ q.name }}" :options="scopeOptions" :stacked="true" v-model="formData.{{ q.name }}" class="mb-4"></sds-radio-group>    
+                        </div>
                     </div>
-                    {% endfor %}
-                    {% endwith %}
-                    </div>
-                </div>
                 {% endif %}
                 <br>
             {% endfor %}
 
-            <button type="submit" id="submit" class="btn btn-primary">{% if object %}Save{% else %}Submit{% endif %}</button>
-            </form>
+        <sds-button type="submit" variant="primary">Save</sds-button>
+        <br>
     </sds-section>
 </div>
+</form>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    $(document).ready(function(){
-        $('#questionnaire_alert').toast('show');
-
-        if (document.querySelector("input[name='q4']").value === 'Yes') {
-        document.getElementById('q4AField').classList.remove('d-none');
+    function pageData() {
+        data = {
+            formData: {
+                q1: "{{ object.q1 }}",
+                q2: "{{ object.q2 }}",
+                q3: "{{ object.q3 }}",
+                q4: "{{ object.q4 }}",
+                q4A: "{{ object.q4A }}",
+                q5: "{{ object.q5 }}",
+                q6: "{{ object.q6 }}",
+                q7: "{{ object.q7 }}",
+                q8: "{{ object.q8 }}",
+                q9: "{{ object.q9 }}",
+                q9A: "{{ object.q9A }}",
+                q10: "{{ object.q10 }}",
+                q11: "{{ object.q11 }}",
+                q12: "{{ object.q12 }}",
+                q13: "{{ object.q13 }}",
+                q14: "{{ object.q14 }}",
+                q15: "{{ object.q15 }}",
+                q16: "{{ object.q16 }}",
+                q17: "{{ object.q17 }}",
+                q18: "{{ object.q18 }}",
+                q19: "{{ object.q19 }}",
+                q20: "{{ object.q20 }}",
+                q21: "{{ object.q21 }}",
+                q22: "{{ object.q22 }}",
+                q23: "{{ object.q23 }}",
+                q24: "{{ object.q24 }}",
+                q25: "{{ object.q25 }}",
+                q26: "{{ object.q26 }}",
+                q27: "{{ object.q27 }}",
+            },
+            scopeOptions: [
+                {
+                    id: 1,
+                    value: "Yes",
+                    text: "Yes"
+                },
+                {
+                    id: 2,
+                    value: "No",
+                    text: "No"
+                },
+                {
+                    id: 3,
+                    value: "Not Applicable",
+                    text: "Not Applicable"
+                },
+                {
+                    id: 4,
+                    value: "TBD",
+                    text: "To Be Determined"
+                }
+            ],
+            
+            secureOptions: [
+                {
+                    id: 1,
+                    value: "1",
+                    text: "Least Secure"
+                },
+                {
+                    id: 2,
+                    value: "2",
+                    text: "Moderately Secure"
+                },
+                {
+                    id: 3,
+                    value: "3",
+                    text: "Secure"
+                },
+                {
+                    id: 4,
+                    value: "4",
+                    text: "Very Secure"
+                },
+                {
+                    id: 5,
+                    value: "5",
+                    text: "Most Secure"
+                },
+                {
+                    id: 6,
+                    value: "TBD",
+                    text: "To Be Determined"
+                }
+            ],
+            deleteWarning: false,
+            EITableArgs: {
+                fields: [
+                    {
+                        key: "id",
+                        label: "#"
+                    },
+                    {
+                        key: "ei_make",
+                        label:"Make"
+                    },
+                    {
+                        key: "ei_model",
+                        label: "Model"
+                    },
+                    {
+                        key: "ei_model_num",
+                        label: "Model Number"
+                    },
+                    {
+                        key: "delete",
+                    }
+                ],
+                items: []
+            }
         }
 
-        if (document.querySelector("input[name='q9']").value === 'Yes') {
-            document.getElementById('q9AField').classList.remove('d-none');
+        {% for system in systems %}
+
+            data.EITableArgs.items.push({id: "{{system.order}}", ei_make: "{{system.ei_make | safe}}", ei_model: "{{system.ei_model | safe}}", ei_model_num: "{{system.ei_model_num | safe}}"})
+
+        {% endfor %}
+
+        return data
+    }
+
+    function pageMethods() {
+        pageFunctions = {
+            submitEI: function (event) {
+                event.preventDefault()
+                formattedData = {}
+                formattedData['systems'] = JSON.parse(JSON.stringify(this.EITableArgs.items))
+                formattedData['questions'] = JSON.parse(JSON.stringify(this.formData))
+                fetch(window.location.href, {
+                    method: "POST",
+                    body: JSON.stringify(formattedData),
+                    credentials: "same-origin",
+                    headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
+                }).then(response => {
+                    if (response.ok) {
+                        this.displayNotification({title: "EI Data Saved", variant:"success", text: "EI data has successfully saved!"})
+                        this.redirectLink("{% url 'ei_update'%}")
+                    }
+                    else {
+                        this.displayNotification({title: "Error Saving Data", text: 'Bad response received from server. Check for errors in forms and try again.', variant: "danger"})
+                    }
+                }).catch(error => {
+                    this.displayNotification({text: error, title: "Error Saving EI Data", variant:"danger"})
+                })
+            },
+
+            addSystem: async function () {
+                this.EITableArgs.items.push({id: this.EITableArgs.items.length + 1, ei_make: "", ei_model: "", ei_model_num: ""})
+            },
+
+            deleteSystem: function(item) {
+                row = parseInt(this.EITableArgs.items.indexOf(item))
+                this.EITableArgs.items.splice(this.EITableArgs.items.indexOf(item), 1)
+
+                this.EITableArgs.items.forEach((element, index) => {
+                    element.id = index + 1
+                })
+            }
         }
 
-
-        $("input[name='q4']").change(function (event) {
-            console.log('this.value: ', this.value)
-            if (this.value === 'Yes') {
-                document.getElementById('q4AField').classList.remove('d-none');
-            }
-            if (this.value != 'Yes') {
-                document.getElementById('q4AField').classList.add('d-none');
-        }
-        });
-        $("input[name='q9']").change(function (event) {
-            console.log('this.value: ', this.value)
-            if (this.value === 'Yes') {
-                document.getElementById('q9AField').classList.remove('d-none');
-            }
-            if (this.value != 'Yes') {
-                document.getElementById('q9AField').classList.add('d-none');
-            }
-        });
-
-    });
+        return pageFunctions
+    }
 
 </script>
 

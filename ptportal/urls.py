@@ -164,16 +164,6 @@ urlpatterns += [
         views.EIUpdate.as_view(),
         name='ei_update',
     ),
-    # path(
-    #     'election-infrastructure-questionnaire/detail',
-    #     views.EIDetail.as_view(),
-    #     name='ei_detail',
-    # ),
-    path(
-        'election-infrastructure-questionnaire/delete/',
-        views.EIDelete.as_view(),
-        name='ei_delete',
-    ),
     path('election-infrastructure/delete', views.EIModalDelete, name='ei_modal_delete'),
 ]
 

@@ -47,6 +47,7 @@ allModels = [
     RPTBreachedEmails,
     PortMappingHost,
     ElectionInfrastructureQuestionnaire,
+    ElectionSystems,
     AttackPath,
     Campaign,
     Payload,
