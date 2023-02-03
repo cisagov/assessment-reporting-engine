@@ -19,22 +19,25 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, get_object_or_404
 from django.views import generic
 from django.contrib import messages
+from django.core import serializers
 from django.template.defaultfilters import slugify
+from django.http import HttpResponse
+import json
 from ptportal.forms import NarrativeForm
-from ptportal.models import Narrative, NarrativeType, ToolScreenshot
+from ptportal.models import Narrative, NarrativeType, NarrativeScreenshot, Tools, ATTACK
 
 
 def ajax_get_narrative_images(request):
     narrative = Narrative.objects.filter(slug=request.GET.get('narrative')).first()
-    images = ToolScreenshot.objects.filter(narrative=narrative).values()
+    images = NarrativeScreenshot.objects.filter(narrative=narrative).values()
     data = {}
     data['images'] = list(images)
     return JsonResponse(data, safe=False)
 
 
 def ajax_delete_narrative_images(request):
-    if ToolScreenshot.objects.filter(file=request.POST.get('image')).exists():
-        image = ToolScreenshot.objects.filter(file=request.POST.get('image')).first()
+    if NarrativeScreenshot.objects.filter(file=request.POST.get('image')).exists():
+        image = NarrativeScreenshot.objects.filter(file=request.POST.get('image')).first()
         image.delete()
         return JsonResponse({})
     else:
@@ -49,56 +52,84 @@ class NarrativeEdit(generic.edit.UpdateView):
     def get_object(self):
         return get_object_or_404(
             Narrative,
-            type__slug=self.kwargs['narrative_type'],
+            assessment_type__slug=self.kwargs['narrative_assessment_type'],
             slug=self.kwargs['narrative_name'],
         )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['screenshots'] = ToolScreenshot.objects.filter(
-            narrative=self.get_object()
-        )
+        narrative = self.get_object()
+        context['diagram'] = NarrativeScreenshot.objects.filter(narrative=self.get_object()).first()
+        context['all_tools'] = serializers.serialize("json", Tools.objects.all())
+        context['used_tools'] = serializers.serialize("json", narrative.tools.all())
+        context['techniques'] = serializers.serialize("json", ATTACK.objects.all())
+
         return context
 
     def post(self, request, *args, **kwargs):
+        postData = json.loads(request.POST['data'])
+
+        try:
+            diagram = request.FILES['file']
+        except:
+            diagram = False
+
         narrative = self.get_object()
-        form = NarrativeForm(request.POST or None, instance=narrative)
-        files = [
-            request.FILES.get('file[%d]' % i) for i in range(0, len(request.FILES))
-        ]
-        files = list(reversed(files))
-        names = request.POST.getlist('file_name')
-        captions = request.POST.getlist('file_captions')
-        pks = request.POST.getlist('file_pk')
-        order = 0
-        for pk, name, caption in zip_longest(pks, names, captions):
-            if pk == "":
-                f = files.pop()
-                image = ToolScreenshot(
-                    narrative=narrative,
-                    file=f,
-                    slug=slugify(name),
-                    caption=caption,
-                    order=order,
-                    ext=f.name.split('.')[-1],
+        techniques = []
+        tools = []
+
+        if len(postData['imageUpload']) == 0 or postData['newImage'] == True:
+            try:
+                NarrativeScreenshot.objects.filter(narrative=narrative).first().delete()
+            except Exception as e:
+                print(e)
+
+        if len(postData['imageUpload']) > 0:
+            for index, data in enumerate(postData['imageUpload']):
+                if postData['newImage'] == False:
+                    obj = NarrativeScreenshot.objects.get(narrative=narrative)
+                    obj.caption = data['caption']
+                    obj.save()
+                else:
+                    obj = NarrativeScreenshot.objects.create(
+                        file=diagram,
+                        caption=data['caption'],
+                        narrative=narrative
+                    )
+
+        for i in postData['newTools']:
+            try:
+                Tools.objects.create(
+                    name=i['toolName'],
+                    url=i['toolURL']
                 )
-                image.save()
-            else:
-                image = ToolScreenshot.objects.get(pk=pk)
-                image.caption = caption
-                image.order = order
-                image.save()
-            order += 1
+            except:
+                continue
 
-        if form.is_valid():
-            print("form is valid!")
-            narrative = form.save()
-        else:
-            print('form is not valid')
-            print('form.errors: ', form.errors)
-            return super().post(self, request, *args, **kwargs)
+        for i in postData['selectedTools']:
+            tool = Tools.objects.get(name=i)
+            try:
+                tools.append(Tools.objects.get(
+                    name=i)
+                )
+            except:
+                continue
 
-        return redirect(narrative.type)
+        narrative.tools.clear()
+        narrative.tools.add(*tools)
+
+        for i in postData['selectedTechniques']:
+            try:
+                techniques.append(ATTACK.objects.get(
+                    name=i)
+                )
+            except:
+                continue
+
+        narrative.attack.clear()
+        narrative.attack.add(*techniques)
+
+        return HttpResponse(status=200)
 
 
 class Narratives(generic.ListView):
@@ -106,13 +137,13 @@ class Narratives(generic.ListView):
     template_name = 'ptportal/narrative/narrative_list.html'
 
     def get_queryset(self):
-        self.type = get_object_or_404(NarrativeType, slug=self.kwargs['narrative_type'])
-        return Narrative.objects.filter(type=self.type)
+        self.assessment_type = get_object_or_404(NarrativeType, slug=self.kwargs['narrative_assessment_type'])
+        return Narrative.objects.filter(assessment_type=self.assessment_type)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['narrative_type'] = get_object_or_404(
-            NarrativeType, slug=self.kwargs['narrative_type']
+        context['narrative_assessment_type'] = get_object_or_404(
+            NarrativeType, slug=self.kwargs['narrative_assessment_type']
         )
         return context
 

@@ -18,369 +18,372 @@ DM22-1011
 {% block active %}#narrative{% endblock %}
 {% block style %}
 <style>
-    #myDropzone {
-        border-radius: 20px;
-        padding: 20px;
-        min-height: 400px;
-        width: 100%;
+    .header{
+        padding: 10px;
+        background: white;
+        color: black;
+        font-size: 20px;
         position: relative;
-        border-style: dotted;
-        border-color: rgba(0, 0, 0, 0.3);
+        top: -15px;
+        margin-left: -18px;
+        margin-right: -20px;
     }
-    .underline-on-hover:hover {
-        text-decoration: underline;
+    .col-span-5{
+        border-top:1px solid black!important;
+        border-color:#1b1c1d!important;
+        margin-bottom: 50px !important;
     }
-    .input-group .form-control {
-        margin: 0px !important;
+    .float-left{
+        display: inline-block;
+        position: relative;
+        top: -40px;
     }
-    #sortable div.card {
-      overflow: visible;
+    .right-block{
+        display:inline-block;
+        vertical-align:top;
+        font-size: 11pt;
     }
-    /* https://getflywheel.com/layout/flexbox-create-modern-card-design-layout/ */
-    .cards {
-        display: flex;
-        flex-wrap: wrap;
-     }
-
-    .card {
-        flex: 1 0 300px;
-        box-sizing: border-box;
-        margin: 1rem .25em;
-        width: 5rem;
+    .space{
+        padding: 4px;
     }
-
-    @media screen and (min-width: 40em) {
-        .card {
-           max-width: calc(50% -  1em);
-        }
-    }
-
-    @media screen and (min-width: 60em) {
-        .card {
-            max-width: calc(25% - 1em);
-        }
-    }
-    .thumbnailSize{
-      /* width: 10em; */
-      position: relative;
-      float: left;
-      /* width:  300px; */
-      height: 300px;
-      background-position: 50% 50%;
-      background-repeat:   no-repeat;
-      background-size:     cover;
-    }
-    </style>
+</style>
 {% endblock %}
 
 {% block content %}
-<h1><i class="fas fa-edit"></i> {{ object.type }}: {{ object.name }}</h1>
-<!-- add breadcrumbs -->
-<hr />
+{% csrf_token %}
+<div class="header">
+  <h2>{{ object.name}} </h2>
+</div>
 
-<nav aria-label="breadcrumb">
-	<ol class="breadcrumb">
-	    <li class="breadcrumb-item"><a href="{% url 'index' %}">Dashboard</a></li>
-	    <li class="breadcrumb-item"><a href="{% url 'narrative-types' %}">Narratives</a></li>
-	    <li class="breadcrumb-item"><a href="{% url 'narratives' object.type.slug %}">{{ object.type.name }}</a></li>
-        <li class="breadcrumb-item active">{{object.name}} Edit</li>
-	</ol>
-</nav>
-<!-- <div class="row mb-3">
-	<div class="col-md-6">
-		<p>Last modified on {{object.updated_at | naturaltime}}</p>
-	</div>
-</div> -->
+<div class="col-span-5">
 
-<form id='form' action="" enctype="multipart/form-data" method="POST" class="needs-validation" novalidate>
-    {% csrf_token %}
-    <!-- add dropzone -->
-    <label class= "h3">Tool Screenshots</label>
-    <div class="form-row">
-        <div class="col-md-12">
-            <button type="button" class="btn btn-primary fileinput-button text-primary'"><i class="fas fa-images"></i> Add Tool Screenshot(s)</button>
+    <sds-section class="mb-4">
+        <template #title>
+            <p>Download the Attack Path template here and follow the instructions in the document to construct/save your attack path diagram. Upload the attack path image file below.</p>
+            <sds-link href="{{ MEDIA_URL }}attackpath.pptx" variant="primary">Attack Path Template</sds-link>
+        </template>
+        <sds-file-uploader v-bind="attackPathUploadArgs" @add="addFile">
+        </sds-file-uploader>
+    </sds-section>
+
+    <sds-section v-for="file in formData.imageUpload" :key="file" type="simple" class="mb-4">
+        <template #title class="">
+            <img :src="[[file.imgURL]]"></img>
+        </template>
+        <div class="grid grid-cols-2 mb-2">
+            <h4>Caption:</h4>
+            <sds-button type="button" class="justify-self-end" @click="deleteFile(file)"><img class="w-8 h-8" src="/static/icons/trash-solid.svg"></sds-button>
         </div>
-    </div><!-- end form-row -->
+        <sds-textarea v-model="file.caption" :rows="1"></sds-textarea>
+    </sds-section>
 
-    <br />
-    <form-section class="row">
-        <div class="col-md-8">
-            <div id="myDropzone" class="mb-3 bg-light dropzoneContainer">
-                <!-- align-middle -->
-                <div class='row  my-auto mx-auto align-middle'>
-                  <div class='col-sm-12'>
-                    <div id='dropzonePreText' class="text-center">
-                      <h3>Drag &amp; drop your files here or <span class='fileinput-button  text-primary' style='cursor:pointer'><u>Browse</u></span></h3>
-                      <i class="fas fa-10x fa-cloud-upload-alt" style='opacity:.5;'></i>
+    <sds-section v-bind="toolSectionArgs" class="mb-4">
+        <template #title>
+            <span class="font-bold">TOOLS</span>
+        </template>
+        <div class="grid place-items-center">
+            <sds-search-box class="w-1/2 place-self-center" :disableSearch="true" variant="primary" placeholder="Search Term" v-model="toolSectionArgs.searchTerm" @update:model-value="filterTools(toolSectionArgs.searchTerm)"></sds-search-box>
+            <sds-scroll-area class="px-4 pt-4 place-self-center h-80 w-11/12" id="toolList">
+                <div v-for="tool in toolSectionArgs.toolSearchList" :key="tool.fields.name" :id="tool.fields.name" class="grid grid-cols-2 border-b border-slate-700 hover:bg-gray-700/[.1]">
+                    <div class="py-2 px-4">
+                        <div class="font-bold">
+                        <input v-if="formData.oldTools.includes(tool.fields.name)" type="checkbox" :id="tool.fields.name" name="tool" :value="tool.fields.name" :checked="true"><input v-else type="checkbox" :id="tool.fields.name" name="tool" :value="tool.fields.name">  [[tool.fields.name]]</div>
                     </div>
-                  </div>
+                    <div class="py-2">
+                        [[tool.fields.url]]
+                    </div>
                 </div>
-
-                <div id='sortable' class='previewContainer cards'> <!-- handler for list of images -->
-                  <div class='template '>
-                    <div class="card dz-preview preview" style='cursor:move;'>
-                      <img type='file' data-dz-thumbnail class="card-img-top thumbnailSize" />
-                      <div data-dz-card-body class="card-body">
-                        <label for="file_name" class='control-label'>Title</label>
-                        <div class="input-group input-group-sm mb-1 form-group">
-
-                          <div class="input-group-prepend">
-                            <button class="btn btn-outline-secondary editButton" type="button" id="button-addon1">Edit</button>
-                          </div>
-                          <input id="file_name" type="text" class="form-control required" name="file_name" placeholder="file-name" data-dz-name-field required disabled>
-                          <input id="file_pk" type="text" class="form-control d-none" name="file_pk" value="" data-dz-pk>
-                          <div class="input-group-append">
-                            <span id='file_type' class="input-group-text">.png</span>
-                          </div>
-
-                        </div>
-                        <small id="fileNameHelp" class="form-text text-muted mb-2">Renames file in PTPortal Server.</small>
-                        <label for="file_captions control-label required">Caption</label>
-                        <div class="input-group input-group-sm mb-2">
-                          <textarea id="file_captions" class="form-control required" rows="1" name="file_captions" data-dz-caption-field required></textarea>
-                        </div>
-                          <!-- <p class='card-text'><span data-dz-remove id="delete" class="delete underline-on-hover" style='cursor:pointer'><small class='text-danger'>Delete Image</small></span></p> -->
-                          <button data-dz-remove id='delete' type="button" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
-                      </div>
-                      <div class="card-footer text-muted">
-                        <!-- <span id='orderNum'>1</span> -->
-                        <small id="orderNum" class="form-text text-muted">1</small>
-                        <p class="dz-error-message text-danger"><span data-dz-errormessage></span></p>
-                      </div>
-                    </div>
-                  </div>
+            </sds-scroll-area>
+        
+            <br><br>
+            <div style="margin: 0 auto; text-align: center; min-width: 800px">
+                <div style="padding: 0px 20px 0px 0px; float: left;">
+                    <sds-floating-ui
+                        popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                        placement="top"
+                        arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                        placement-top-arrow-class="-bottom-1"
+                        placement-right-arrow-class="-left-1"
+                        placement-bottom-arrow-class="-top-1"
+                        placement-left-arrow-class="-right-1"
+                        :will-open="willOpen"
+                        :will-close="willClose"
+                    >
+                        <template #trigger="{ open, close }">
+                            <sds-input v-model="toolSectionArgs.newTool" id="toolName" placeholder="Tool Name" @mouseover="open" @mouseout="close" style="width:100%"></sds-input>
+                        </template>
+                        <template #default>
+                            <div class="p-2">
+                                <p>ONLY enter tools that have been thoroughly vetted, are from a trusted source, and are deemed safe to use.</p>
+                            </div>
+                        </template>
+                    </sds-floating-ui>
+                </div>
+                <div style="float: left;">
+                    <sds-floating-ui
+                        popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                        placement="top"
+                        arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                        placement-top-arrow-class="-bottom-1"
+                        placement-right-arrow-class="-left-1"
+                        placement-bottom-arrow-class="-top-1"
+                        placement-left-arrow-class="-right-1"
+                        :will-open="willOpen"
+                        :will-close="willClose"
+                    >
+                        <template #trigger="{ open, close }">
+                            <sds-input v-model="toolSectionArgs.newURL" id="toolURL" placeholder="URL" @mouseover="open" @mouseout="close" style="width: 200%"></sds-input>
+                        </template>
+                        <template #default>
+                            <div class="p-2">
+                                <p>ONLY enter a URL if it is a verified, trusted resource that is directly associated with the tool.</p>
+                            </div>
+                        </template>
+                    </sds-floating-ui>
+                </div>
+                <div style="width: 10%; float: right;">
+                    <sds-floating-ui
+                        popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                        placement="top"
+                        arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                        placement-top-arrow-class="-bottom-1"
+                        placement-right-arrow-class="-left-1"
+                        placement-bottom-arrow-class="-top-1"
+                        placement-left-arrow-class="-right-1"
+                        :will-open="willOpen"
+                        :will-close="willClose"
+                    >
+                        <template #trigger="{ open, close }">
+                            <sds-button variant="primary" @click="addTool" @mouseover="open" @mouseout="close">+</sds-button>
+                        </template>
+                        <template #default>
+                            <div class="p-2">
+                                <p>New tools will appear at the top of the list until the page is saved and refreshed.</p>
+                            </div>
+                        </template>
+                    </sds-floating-ui>
                 </div>
             </div>
         </div>
-    </form-section>
+        <div class="flex flex-row-reverse"></div>
+    </sds-section>
 
-    <form-section class="row">
-        <div class="col-md-8">
-            {{ form|crispy }}
+    <sds-section v-bind="attackSectionArgs" class="mb-4">
+        <template #title>
+            <span class="font-bold">MITRE ATT&CK TECHNIQUES</span>
+        </template>
+        <div class="grid place-items-center">
+            <sds-search-box class="w-1/2 place-self-center" :disableSearch="true" variant="primary" placeholder="Search Term" v-model="attackSectionArgs.searchTerm" @update:model-value="filterTechniques(attackSectionArgs.searchTerm)"></sds-search-box>
+            <sds-scroll-area class="px-4 pt-4 place-self-center h-80 w-11/12">
+                <div v-for="technique in attackSectionArgs.attackSearchList" :key="technique.fields.t_id" :id="technique.fields.t_id" class="grid grid-cols-2 border-b border-slate-700 hover:bg-gray-700/[.1]">
+                    <div class="py-2 px-4">
+                        <div class="font-bold">
+                        <input v-if="formData.oldTechniques.includes(technique.fields.name)" type="checkbox" :id="technique.fields.t_id" name="attack" :value="technique.fields.name" :checked="true"><input v-else type="checkbox" :id="technique.fields.t_id" name="attack" :value="technique.fields.name">  [[technique.fields.name]]</div>
+                        <div>[[technique.fields.tactics]]</div>
+                    </div>
+                    <div class="py-2">
+                        [[technique.fields.description]]
+                    </div>
+                </div>
+            </sds-scroll-area>
         </div>
-    </form-section>
-    <input name="save" value="Save" type="submit" id="submit" class="btn btn-primary" />
-</form>
+        
+        <div class="flex flex-row-reverse"></div>
+    </sds-section>
+    <div class="flex flex-row-reverse">
+        <sds-button variant="primary" @click="saveAttackPath">Save</sds-button>
+    </div>
+</div>
+{% endblock %}
 
-<link href="{{ STATIC_URL }}/css/dropzone-basic.css" rel="stylesheet" />
-<link href="{{ STATIC_URL }}/css/dropzone.css" rel="stylesheet" />
+{% block scripts %}
+<script>
+    function pageData() {
+        let pageData = {
+            formData: {
+                imageUpload: [],
+                newImage: false,
+                oldTools: [],
+                selectedTools: [],
+                newTools: [],
+                selectedTechniques: [],
+                oldTechniques: []
+            },
+            fileList: [],
+            attackPathUploadArgs: {
+                helperText: "Upload a JPG, JPEG, or PNG under 10 MB. This will replace the current diagram once the page is saved.",
+                accept: ".jpg, .jpeg, .png",
+                allowedFiletypes: ["image/jpg", "image/jpeg", "image/JPG", "image/JPEG", "image/png", "image/PNG"],
+                name: "attackPathUpload",
+                multiple: false
+            },
+            toolSectionArgs: {
+                type: "accented",
+                hideContent: false,
+                toolSearchList: [],
+                searchTerm: "",
+                newTool: "",
+                newURL: ""
+            },
+            attackSectionArgs: {
+                type: "accented",
+                hideContent: false,
+                attackSearchList: [],
+                //selectedTechniques: [],
+                searchTerm: "",
+            },
+            toolData: function() {
+                var tool_list = [];
+                var tools = {{ all_tools | safe }};
+                for (i = 0; i < tools.length; i++) {
+                    const proxy = new Proxy(tools[i], {});
+                    tool_list.push(proxy);
+                }
 
-<script src="{{ STATIC_URL }}/js/dropzone.js"></script>
-<script type='text/javascript'>
+                return tool_list;
+            },
+            filteredMultiselectOptions() {
+                return pageData.toolSectionArgs.toolSearchList;
+            },
+            attackData: function() {
+                var attack_list = [];
+                var techniques = {{ techniques | safe }};
+                for (i = 0; i < techniques.length; i++) {
+                    const proxy = new Proxy(techniques[i], {});
+                    attack_list.push(proxy);
+                }
 
+                return attack_list;
+            },
+        }
 
-/* Sortable Feature for Dropzone */
-$("#sortable").sortable({
- 	helper: 'clone',
-    cursor: 'move',
-    opacity: .8,
-    forceHelperSize: true,
-    revert: 250,
-    scroll: false,
-    tolerance: 'pointer',
+        {% for i in object.attack.all %}
 
-    update: function(event, ui) {
-        let $lis = $(this).children('div');
-        $lis.each(function() {
-            newVal = $(this).index() + 1;
-            $(this).find('small#orderNum').html(newVal);
-        });
+            pageData.formData.oldTechniques.push("{{i.name}}")
+
+        {% endfor %}
+        
+        {% for i in object.tools.all %}
+            
+            pageData.formData.oldTools.push("{{i.name}}")
+
+        {% endfor %}
+
+        pageData.toolSectionArgs.toolSearchList = pageData.toolData().filter(tool => tool)
+        pageData.attackSectionArgs.attackSearchList = pageData.attackData().filter(technique => technique)
+
+        {% if diagram %}
+
+            pageData.formData.imageUpload.push({uuid: "{{diagram.uuid}}", imgURL: window.location.origin + '/media/' + "{{diagram.file}}", caption: "{{diagram.caption}}"})
+
+        {% endif %}
+
+        return pageData
     }
 
-});
+    function pageMethods() {
+        pageFunctions = {
+            addFile: function (event) {
+                this.fileList.splice(0, 1)
+                this.formData.imageUpload.splice(0, 1)
+                this.formData.newImage = true
+                const files = Array.from(event.files)
+                Array.prototype.push.apply(this.fileList, files)
 
-  $('#myDropzone').on('click', '.editButton', function() {
-    $(this).parent().next().prop('disabled', false);
-  });
+                for (let file in files) {
+                    this.formData.imageUpload.push({file: files[file], imgURL: URL.createObjectURL(files[file]), caption: "", uuid: null})
+                }
 
-  // the function for replacing the array
-// reference: https://stackoverflow.com/questions/40202086/dropzone-js-jquery-ui-sortable-queue
-function newDropzoneArray(oldArray){
-    // on the webpage search for all the images that have been uploaded
-    var imageTags = $('img.card-img-top');
-    // the new array where we will put in the new files
-    var current_queue = [];
+                this.displayNotification({'title': 'Image Added', text: 'The Attack Path diagram successfully uploaded and will replace any diagram that was previously uploaded.', variant:'info'})
+            },
+            deleteFile: function (file) {
+                index = this.fileList.indexOf(file.file)
+                if(index != -1){
+                    this.fileList.splice(index, 1)
+                    URL.revokeObjectURL(this.formData.imageUpload.imgURL)
+                }
+                
+                index = this.formData.imageUpload.indexOf(file)
+                this.formData.imageUpload.splice(index, 1)
+            },
+            addTool: function() {
+                toolName = this.toolSectionArgs.newTool
+                toolURL = this.toolSectionArgs.newURL
+                this.formData.newTools.push({toolName, toolURL})
 
-    // iterate through all the images that have been uploaded by the user
-    imageTags.each(function (index, imageTag) {
-        // get the image name from the images
-        imageName = imageTag.alt;
+                var newTool = document.createElement("div")
+                newTool.setAttribute("id", toolName)
+                newTool.setAttribute("class", "grid grid-cols-2 border-b border-slate-700 hover:bg-gray-700/[.1]")
 
-        // now we will iterate through the old array
-        for (i = 0; i < oldArray.length; i++) {
-            /** if the name of the image on the website is the same as the image from the old array
-             * we will add it to the new array. You can see this as sorting the array.
-             */
-            if (imageName === oldArray[i].name) {
-                current_queue.push(oldArray[i]);
-            }
-        }
-    });
-    // now we return the new dropzone array so that we can replace it.
-    return current_queue;
-}
-/* Dropzone Configuration */
-var myDropzone = new Dropzone('form', {
-	url: "{% url 'narrative_edit' object.type.slug object.slug %}",
-    acceptedFiles: 'image/*',
-    autoDiscover: false,
-    autoProcessQueue: false,
-    autoQueue: true,
-	addRemoveLinks: false,
-    clickable: ".fileinput-button",
-	headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() } ,
-    hiddenInputContainer: '#myDropzone',
-    maxFiles: 100,
-	maxFilesize: 256,
-	parallelUploads: 20,
-    previewsContainer: '.previewContainer',
-    previewTemplate: $('.template').html(),
-	uploadMultiple: true,
-    thumbnailWidth: 300,
-	thumbnailHeight: 300,
+                var toolDiv = document.createElement("div")
+                toolDiv.setAttribute("class", "py-2 px-4")
 
-	init: function() {
+                var toolNameDiv = document.createElement("div")
+                toolNameDiv.setAttribute("class", "font-bold")
+                toolstr = "<input type=\"checkbox\" id=\"" + toolName + "\" name=\"tool\" value=\"" + toolName + "\" checked=\"true\"> " + toolName
+                toolNameDiv.innerHTML = toolstr
 
-		var myDropzone = this,
-		    form = $("#form"),
-		    submitButton = $("#submit"),
-            filesCount = 1;
-        $('.template').remove();
+                var urlDiv = document.createElement("div")
+                urlDiv.setAttribute("class", "py-2")
+                urlDiv.innerHTML = toolURL
 
-        // Handle Images for Tool Screenshot Update
-        $.ajax({
-          url: "{% url 'ajax_get_narrative_images' %}",
-          data: {
-            'narrative': "{{ object.slug }}",
-          },
-          success: function (data) {
-            $.each(data['images'], function(key, value) {
-                var mockFile = { name: value.file, size: value.size, caption: value.caption, pk: value.id, extension: value.ext };
-                console.log('value.caption: ', value.caption );
-                myDropzone.emit("addedfile", mockFile);
-                myDropzone.options.thumbnail.call(myDropzone, mockFile, '/media/' + value.file);
-            });
-          }// success
-        }); //ajax
+                toolDiv.appendChild(toolNameDiv)
+                newTool.appendChild(toolDiv)
+                newTool.appendChild(urlDiv)
+                
+                document.getElementById("toolList").insertBefore(newTool, document.getElementById("toolList").firstChild);
+                this.toolSectionArgs.newTool = ""
+                this.toolSectionArgs.newURL = ""
+            },
+            filterTools: function(searchTerm) {
+                this.toolSectionArgs.toolSearchList = this.toolData().filter(tool => tool.fields.name.toLowerCase().includes(searchTerm.toLowerCase()))
+            },
+            filterTechniques: function(searchTerm) {
+                this.attackSectionArgs.attackSearchList = this.attackData().filter(technique => technique.fields.name.toLowerCase().includes(searchTerm.toLowerCase()) || technique.fields.tactics.toLowerCase().includes(searchTerm.toLowerCase()) || technique.fields.description.toLowerCase().includes(searchTerm.toLowerCase()) || technique.fields.t_id.toLowerCase().includes(searchTerm.toLowerCase()))
+            },
+            saveAttackPath: function () {
+                let add_tools = document.querySelectorAll('input[name="tool"]:checked')
+                
+                add_tools.forEach((checkbox) => {
+                    this.formData.selectedTools.push(checkbox.value)
+                })
 
-        /* Form Submission Logic */
-		submitButton.click(function(event){
-			form.addClass("was-validated");
-            numImageErrors = $('.dz-error').length;
-            console.log('numImageErrors: ', numImageErrors);
+                let attack_techniques = document.querySelectorAll('input[name="attack"]:checked')
 
-			// if form is not valid
-			if ( (form.get(0).checkValidity() === false) || (numImageErrors > 0)) {
-                event.preventDefault();
-				event.stopPropagation();
-		    }
-            else {
-                warnMessage = null;
-                // no new files, just updates to captions and or description
-                if (myDropzone.files.length == 0) {
-                    form.submit();
+                attack_techniques.forEach((checkbox) => {
+                    this.formData.selectedTechniques.push(checkbox.value)
+                })
+
+                const formData = new FormData()
+                formData.append('data', JSON.stringify(this.formData))
+                formData.append('file', this.fileList[0])
+                
+                fetch(window.location.href, {
+                    method: "POST",
+                    body: formData,
+                    credentials: "same-origin",
+                    headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
+                }).then(response => {
+                if(response.ok) {
+
+                    this.formData.newTools = []
+                    this.formData.selectedTools = []
+                    this.formData.selectedTechniques = []
+                    this.fileList = []
+                    this.formData.newImage = false
+
+                    this.displayNotification({title: "Attack Path Saved", text: "Attack Path saved successfully.", variant: "success"})
                 }
                 else {
-                    // actual form isn't being sent
-                    event.preventDefault();
-                    // // reorder image queue
-                    myDropzone.files = newDropzoneArray(myDropzone.files);
-                    // dropzone will not sow submit the request
-                    event.stopPropagation();
-                    myDropzone.enqueueFiles(myDropzone.getFilesWithStatus(Dropzone.ADDED));
-                    myDropzone.processQueue();
+                    this.displayNotification({title: "Error saving data", text: 'Bad response received from server. Check for errors in forms and try again.', variant: "danger"})
                 }
-            }
-		}); //submit click
-        myDropzone.on("successmultiple", function(files, response) {
-            // redirecting user on success. No message atm.
-            warnMessage = null;
-            var url = document.location.origin;
-            window.location.replace(url);
-        });
+                }).catch(error => {
+                    this.displayNotification({title: "Error saving data", text: error, variant: "danger"})
+                })
+            },
+        }
 
-		myDropzone.on("addedfile", function(file) {
-            // Remove myDropzone before class
-            $('#dropzonePreText').addClass('d-none');
-
-            /* Set default input fields */
-            // image pk if it's already on the server
-            inputPk = $(file.previewElement).find('input#file_pk');
-            inputPk.val(file.pk);
-
-            inputFileName = $(file.previewElement).find('input#file_name');
-            inputExt = $(file.previewElement).find("span#file_type");
-            inputCaption = $(file.previewElement).find("textarea#file_captions");
-
-            // On Finding Update
-            let temp = file.name.split('.'),
-                extension = temp[temp.length-1],
-                name = file.name;
-
-            // Edit Images on Server
-            if ( name.includes('/') ) {
-                temp = name.split('/');
-                temp = temp[temp.length-1];
-                temp = temp.split('.');
-                name = temp[0];
-                extension = file.extension;
-            }
-            else {
-                name = name.substr(0, name.indexOf('.'));
-            }
-
-            inputFileName.val(name);
-            inputExt.text('.'+extension);
-            if (file.caption ) {
-                inputCaption.val(file.caption);
-            }
-            else {
-                inputCaption.val(name);
-            }
-
-            $(file.previewElement).find('small#orderNum').html(filesCount);
-            filesCount++;
-
-		}); // addedFile
-
-
-        myDropzone.on("removedfile", function(file) {
-            // if file is on server, remove the file with ajax
-            // add an if statement so it only checks if the file is known to exist on server
-            $.ajax({
-                type: "POST",
-                url: "{% url 'ajax_delete_narrative_image' %}",
-                data: {
-                    'image': file.name,
-                    'csrfmiddlewaretoken': '{{csrf_token}}'
-                },
-            });
-
-            filesCount--;
-            // run through cards and renumber them
-            divs = $('.card small#orderNum');
-            $.each(divs, function( index, value ) {
-                $(value).html((index+1));
-            });
-
-            let cardCount = $('.card').length;
-		    if (cardCount < 1) {
-                $('#dropzonePreText').removeClass('d-none');
-			}
-		}); // removedFile
-
-        myDropzone.on('error', function(file, message) {
-            console.log('this, message: ', file, message);
-            // add error message to this file template
-            console.log('this.previewElement: ', file.previewElement);
-            console.log($(file.previewElement));
-            $(file.previewElement).addClass('border-danger');
-        }); // onerror
-
-		} // end of init function ()
-
-}); // end of myDropzone configuration
-
-
+        return pageFunctions
+    }
 </script>
 {% endblock %}

@@ -53,13 +53,15 @@ allModels = [
     Payload,
     NarrativeType,
     Narrative,
-    ToolScreenshot,
+    NarrativeScreenshot,
     Acronym,
     KEV,
     KEVMetadata,
     DataExfil,
     Ransomware,
     RansomwareScenarios,
+    ATTACK,
+    Tools
 ]
 
 # registering list of models

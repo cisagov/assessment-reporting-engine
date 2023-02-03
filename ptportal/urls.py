@@ -128,12 +128,12 @@ urlpatterns += [
 urlpatterns += [
     path('narrative/', views.NarrativeTypes.as_view(), name='narrative-types'),
     path(
-        'narrative/<slug:narrative_type>/',
+        'narrative/<slug:narrative_assessment_type>/',
         views.Narratives.as_view(),
         name='narratives',
     ),
     path(
-        'narrative/<slug:narrative_type>/<slug:narrative_name>/edit/',
+        'narrative/<slug:narrative_assessment_type>/<slug:narrative_name>/edit/',
         views.NarrativeEdit.as_view(),
         name='narrative_edit',
     ),
