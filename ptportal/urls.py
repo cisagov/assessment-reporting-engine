@@ -138,6 +138,15 @@ urlpatterns += [
         name='narrative_edit',
     ),
     path(
+        'narrative/<slug:narrative_assessment_type>/<slug:narrative_name>/delete/',
+        views.NarrativeDelete.as_view(),
+        name='narrative_delete',
+    ),
+    path(
+        'narrative/<slug:narrative_assessment_type>/create/',
+        views.NarrativeCreate.as_view(), name='narrative_create'
+    ),
+    path(
         'ajax/ajax-get-narrative-screenshots/',
         views.ajax_get_narrative_images,
         name='ajax_get_narrative_images',

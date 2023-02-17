@@ -88,6 +88,8 @@ class Narrative(abstract_models.TimeStampedModel):
         NarrativeType, null=True, blank=True, on_delete=models.SET_NULL
     )
 
+    order = models.PositiveIntegerField(blank=True, default=1)
+
     name = models.CharField(
         max_length=255, verbose_name="Name of Narrative Section", blank=False
     )
@@ -108,13 +110,13 @@ class Narrative(abstract_models.TimeStampedModel):
     )
     
     class Meta:
-        ordering = ['assessment_type', 'name']
+        ordering = ['order']
 
     def __str__(self):
-        return f"{self.assessment_type}: {self.name}"
+        return f"{self.assessment_type}: {self.name} {self.order}"
 
     def save(self, *args, **kwargs):
-        self.slug = '-'.join((slugify(self.assessment_type), slugify(self.name)))
+        self.slug = '-'.join((slugify(self.assessment_type), slugify(self.name), slugify(self.order)))
         super().full_clean()
         super().save(*args, **kwargs)
 
@@ -130,6 +132,7 @@ class NarrativeScreenshot(models.Model):
         Narrative,
         null=True,
         blank=True,
+        related_name="screenshots",
         on_delete=models.CASCADE,
         verbose_name="Associated Narrative",
     )

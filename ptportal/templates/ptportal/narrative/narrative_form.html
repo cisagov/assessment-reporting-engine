@@ -52,7 +52,7 @@ DM22-1011
 {% block content %}
 {% csrf_token %}
 <div class="header">
-  <h2>{{ object.name}} </h2>
+    <h2>{% if object.name %}{{ object.name }}{% else %}New Attack Path{% endif %}</h2>
 </div>
 
 <div class="col-span-5">
@@ -342,6 +342,7 @@ DM22-1011
                 this.attackSectionArgs.attackSearchList = this.attackData().filter(technique => technique.fields.name.toLowerCase().includes(searchTerm.toLowerCase()) || technique.fields.tactics.toLowerCase().includes(searchTerm.toLowerCase()) || technique.fields.description.toLowerCase().includes(searchTerm.toLowerCase()) || technique.fields.t_id.toLowerCase().includes(searchTerm.toLowerCase()))
             },
             saveAttackPath: function () {
+
                 let add_tools = document.querySelectorAll('input[name="tool"]:checked')
                 
                 add_tools.forEach((checkbox) => {
@@ -373,6 +374,18 @@ DM22-1011
                     this.formData.newImage = false
 
                     this.displayNotification({title: "Attack Path Saved", text: "Attack Path saved successfully.", variant: "success"})
+                    
+                    base = String(window.location.origin)
+                    path = String(window.location.pathname)
+                    if (path.includes("phishing") && path.includes("create")) {
+                        window.location.href=base.concat("/ptportal/narrative/phishing")
+                    }
+                    else if (path.includes("external") && path.includes("create")) {
+                        window.location.href=base.concat("/ptportal/narrative/external")
+                    }
+                    else if (path.includes("create")) {
+                        window.location.href=base.concat("/ptportal/narrative/internal")
+                    }
                 }
                 else {
                     this.displayNotification({title: "Error saving data", text: 'Bad response received from server. Check for errors in forms and try again.', variant: "danger"})
