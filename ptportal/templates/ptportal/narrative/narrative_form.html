@@ -191,7 +191,7 @@ DM22-1011
         <div class="flex flex-row-reverse"></div>
     </sds-section>
     <div class="flex flex-row-reverse">
-        <sds-button variant="primary" @click="saveAttackPath">Save</sds-button>
+        <sds-button variant="primary" @click="saveDetails">Save</sds-button>
     </div>
 </div>
 {% endblock %}
@@ -229,7 +229,6 @@ DM22-1011
                 type: "accented",
                 hideContent: false,
                 attackSearchList: [],
-                //selectedTechniques: [],
                 searchTerm: "",
             },
             toolData: function() {
@@ -341,7 +340,7 @@ DM22-1011
             filterTechniques: function(searchTerm) {
                 this.attackSectionArgs.attackSearchList = this.attackData().filter(technique => technique.fields.name.toLowerCase().includes(searchTerm.toLowerCase()) || technique.fields.tactics.toLowerCase().includes(searchTerm.toLowerCase()) || technique.fields.description.toLowerCase().includes(searchTerm.toLowerCase()) || technique.fields.t_id.toLowerCase().includes(searchTerm.toLowerCase()))
             },
-            saveAttackPath: function () {
+            saveDetails: function () {
 
                 let add_tools = document.querySelectorAll('input[name="tool"]:checked')
                 
@@ -373,7 +372,7 @@ DM22-1011
                     this.fileList = []
                     this.formData.newImage = false
 
-                    this.displayNotification({title: "Attack Path Saved", text: "Attack Path saved successfully.", variant: "success"})
+                    this.displayNotification({title: "Narrative Details Saved", text: "Narative details have been saved successfully.", variant: "success"})
                     
                     base = String(window.location.origin)
                     path = String(window.location.pathname)
@@ -388,10 +387,10 @@ DM22-1011
                     }
                 }
                 else {
-                    this.displayNotification({title: "Error saving data", text: 'Bad response received from server. Check for errors in forms and try again.', variant: "danger"})
+                    this.displayNotification({title: "Error Saving Data", text: "Bad response received from server. Check for errors in form and try again.", variant: "danger"})
                 }
                 }).catch(error => {
-                    this.displayNotification({title: "Error saving data", text: error, variant: "danger"})
+                    this.displayNotification({title: "Error Saving Data", text: error, variant: "danger"})
                 })
             },
         }

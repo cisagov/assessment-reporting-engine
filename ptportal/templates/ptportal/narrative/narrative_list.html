@@ -27,15 +27,18 @@ DM22-1011
     </template>
 </sds-section>
 <br>
-<sds-section v-for="path in formData.attackPaths" :key="file" type="simple" class="mb-4">
-    <template #title class="">
-        <br><h1 style="font-size:20pt; float:left">[[path.name]] [[path.order]]</h1><br><br><br>
-        <div style="width:50%">
-            <img :src="[[path.imgURL]]" onerror="this.style.display='none'" />
+<sds-section v-for="path in formData.attackPaths" :key="path.order" type="simple" class="mb-4">
+    <template #title>
+        <h1 style="font-size:20pt; float:left">[[path.name]] [[path.order]]</h1><div style="padding:0px 10px 0px 0px; float:right"><sds-button variant="danger" @click="redirectLink([[path.delete_slug]])">Delete</sds-button></div><div style="padding:0px 10px 0px 0px; float:right"><sds-button variant="primary" @click="redirectLink([[path.steps]])">Edit Steps</sds-button></div><div style="padding:0px 10px 0px 0px; float:right"><sds-button variant="primary" @click="redirectLink([[path.slug]])">Edit Details</sds-button></div>
+    </template>
+        <div v-if="path.imgURL" style="width:60%">
+            <img :src="[[path.imgURL]]" />
         </div>
         <br><br>
-        <div style="padding:0px 10px 0px 0px; float:left"><sds-button variant="primary" @click="redirectLink([[path.slug]])">Overview</sds-button></div><div style="padding:0px 10px 0px 0px; float:left"><sds-button variant="primary" @click="redirectLink([[path.slug]])">Steps</sds-button></div><div style="padding:0px 10px 0px 0px; float:left"><sds-button variant="danger" @click="redirectLink([[path.delete_slug]])">Delete</sds-button></div><br><br><br>
-    </template>
+        <strong>Tools:</strong> [[path.tools]]
+        <br>
+        <strong>Techniques:</strong> [[path.techniques]]
+        <br>
 </sds-section>
 
 {% endblock %}
@@ -44,29 +47,44 @@ DM22-1011
 
 <script>
 function pageData() {
-        let pageData = {
-            formData: {
-                attackPaths: [],
-            },
-        }
+    let pageData = {
+        formData: {
+            attackPaths: [],
+        },
+    }
 
-        {% for path, screenshot in paths %}
+    {% for path, screenshot in paths %}
 
-            slug = "{{path.slug}}" + "/edit"
-            delete_slug = "{{path.slug}}" + "/delete"
+        slug = "{{path.slug}}" + "/edit"
+        steps = "{{path.slug}}" + "/steps"
+        delete_slug = "{{path.slug}}" + "/delete"
 
-            {% if screenshot == "None" %}
-                imgURL = ""
-            {% else %}
-                imgURL = window.location.origin + "/media/" + "{{screenshot.file}}"
-            {% endif %}
+        {% if screenshot.file %}
+            imgURL = window.location.origin + "/media/" + "{{screenshot.file}}"
+        {% else %}
+            imgURL = ""
+        {% endif %}
 
-            pageData.formData.attackPaths.push({name: "{{path.name}}", order: "{{path.order}}", imgURL: imgURL, slug: slug, delete_slug: delete_slug})
+        tools = []
+        techniques = []
 
+        {% for tool in path.tools.all %}
+            tools.push("{{tool.name}}")
         {% endfor %}
 
-        return pageData
-    }
+        {% for technique in path.attack.all %}
+            techniques.push("{{technique.name}}")
+        {% endfor %}
+
+        tool_list = tools.join(', ')
+        technique_list = techniques.join(', ')
+
+        pageData.formData.attackPaths.push({name: "{{path.name}}", order: "{{path.order}}", imgURL: imgURL, slug: slug, steps: steps, delete_slug: delete_slug, tools: tool_list, techniques: technique_list})
+
+    {% endfor %}
+
+    return pageData
+}
 </script>
 
 {% endblock %}

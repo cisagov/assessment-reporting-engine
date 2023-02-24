@@ -25,7 +25,7 @@ from django.http import HttpResponse
 from django.urls import reverse_lazy, reverse
 import json
 from ptportal.forms import NarrativeForm
-from ptportal.models import Narrative, NarrativeType, NarrativeScreenshot, Tools, ATTACK
+from ptportal.models import Narrative, NarrativeType, NarrativeScreenshot, Tools, ATTACK, NarrativeStep
 
 
 def ajax_get_narrative_images(request):
@@ -70,9 +70,9 @@ class NarrativeCreate(generic.edit.CreateView):
 
         try:
             narrative = Narrative.objects.create(
-                        assessment_type=narrative_type,
-                        order=order,
-                        name=str(self.kwargs['narrative_assessment_type']).capitalize() + " Attack Path",
+                        assessment_type = narrative_type,
+                        order = order,
+                        name = str(self.kwargs['narrative_assessment_type']).capitalize() + " Attack Path",
                     )
         except Exception as e:
             print(e)
@@ -96,9 +96,9 @@ class NarrativeCreate(generic.edit.CreateView):
                         obj.save()
                     else:
                         obj = NarrativeScreenshot.objects.create(
-                            file=diagram,
-                            caption=data['caption'],
-                            narrative=narrative
+                            file = diagram,
+                            caption = data['caption'],
+                            narrative = narrative
                         )
                 except Exception as e:
                     continue
@@ -197,9 +197,9 @@ class NarrativeEdit(generic.edit.UpdateView):
                         obj.save()
                     else:
                         obj = NarrativeScreenshot.objects.create(
-                            file=diagram,
-                            caption=data['caption'],
-                            narrative=narrative
+                            file = diagram,
+                            caption = data['caption'],
+                            narrative = narrative
                         )
                 except Exception as e:
                     print(e)
@@ -245,6 +245,68 @@ class NarrativeEdit(generic.edit.UpdateView):
             narrative.attack.add(*techniques)
         except Exception as e:
             print(e)
+
+        return HttpResponse(status=200)
+
+
+class NarrativeSteps(generic.base.TemplateView):
+    model = Narrative
+    template_name = 'ptportal/narrative/narrative_steps.html'
+
+    def get_object(self):
+        return get_object_or_404(
+            Narrative,
+            assessment_type__slug=self.kwargs['narrative_assessment_type'],
+            slug=self.kwargs['narrative_name'],
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['name'] = str(self.get_object().name) + " " + str(self.get_object().order)
+        context['steps'] = NarrativeStep.objects.filter(narrative=self.get_object())
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        postData = json.loads(request.POST['data'])
+
+        narrative = self.get_object()
+        uploadedSteps = []
+
+        for index, data in enumerate(postData):
+            if data['uuid'] is not None:
+                obj = NarrativeStep.objects.get(uuid=data['uuid'])
+                obj.order = index + 1
+                obj.description = data['description']
+                obj.caption = data['caption']
+                obj.save()
+                uploadedSteps.append(obj)
+
+            else:
+                if data['imgOrder'] is not None:
+                    filename = "file" + str(data['imgOrder'])
+                    file = request.FILES[filename]
+                    obj = NarrativeStep.objects.create(
+                        order = index + 1,
+                        description = data['description'],
+                        caption = data['caption'],
+                        file = file,
+                        narrative = narrative
+                    )
+
+                else:
+                    obj = NarrativeStep.objects.create(
+                        order = index + 1,
+                        description = data['description'],
+                        narrative = narrative
+                    )
+
+                uploadedSteps.append(obj)
+
+        deletedSteps = set(NarrativeStep.objects.filter(narrative=self.get_object())) - set(uploadedSteps)
+
+        for deleted in deletedSteps:
+            deleted.delete()
 
         return HttpResponse(status=200)
 
@@ -295,12 +357,14 @@ class Narratives(generic.ListView):
         context['narrative_assessment_type'] = get_object_or_404(
             NarrativeType, slug=self.kwargs['narrative_assessment_type']
         )
-        
+
         self.assessment_type = get_object_or_404(NarrativeType, slug=self.kwargs['narrative_assessment_type'])
         context['paths'] = []
 
         for i in Narrative.objects.filter(assessment_type=self.assessment_type):
             context['paths'].append(tuple((i, i.screenshots.first())))
+            for j in i.tools.all():
+                print(str(j.name))
 
         return context
 

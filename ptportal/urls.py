@@ -143,6 +143,11 @@ urlpatterns += [
         name='narrative_delete',
     ),
     path(
+        'narrative/<slug:narrative_assessment_type>/<slug:narrative_name>/steps/',
+        views.NarrativeSteps.as_view(),
+        name='narrative_steps',
+    ),
+    path(
         'narrative/<slug:narrative_assessment_type>/create/',
         views.NarrativeCreate.as_view(), name='narrative_create'
     ),

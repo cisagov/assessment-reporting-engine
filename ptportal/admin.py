@@ -54,6 +54,7 @@ allModels = [
     NarrativeType,
     Narrative,
     NarrativeScreenshot,
+    NarrativeStep,
     Acronym,
     KEV,
     KEVMetadata,

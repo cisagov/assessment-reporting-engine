@@ -22,6 +22,10 @@ def define_uploadpath(instance, filename):
     return f"screenshots/narrative/{instance.narrative.slug}/{str(instance.uuid) + '.' + filename.split('.')[-1]}"
 
 
+def define_uploadpath_steps(instance, filename):
+    return f"screenshots/narrative/steps/{instance.narrative.slug}/{str(instance.uuid) + '.' + filename.split('.')[-1]}"
+
+
 class NarrativeType(models.Model):
     NARRATIVE_TYPE_CHOICES = (
         ('External', "External"),
@@ -128,6 +132,7 @@ class NarrativeScreenshot(models.Model):
     file = models.ImageField(upload_to=define_uploadpath, blank=True)
     caption = models.CharField(max_length=250, blank=True)
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
     narrative = models.ForeignKey(
         Narrative,
         null=True,
@@ -136,15 +141,44 @@ class NarrativeScreenshot(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Associated Narrative",
     )
+
     order = models.PositiveIntegerField(blank=True, default=1)
 
     class Meta:
-        verbose_name_plural = 'Narrative Screenshots'
+        verbose_name_plural = "Narrative Screenshots"
         ordering = ['narrative', 'order']
 
     def __str__(self):
-        return str(self.narrative.name) + ":\t\t" + str(self.file.name)
+        return str(self.narrative.name) + " " + str(self.narrative.order) + ":\t\t" + str(self.file.name)
 
     def delete(self, *args, **kwargs):
         self.file.delete(True)
         super(NarrativeScreenshot, self).delete(*args, **kwargs)
+
+
+class NarrativeStep(abstract_models.TimeStampedModel):
+    narrative = models.ForeignKey(
+        Narrative, 
+        null=True, 
+        blank=True,
+        related_name="steps",
+        on_delete=models.CASCADE,
+        verbose_name="Associated Narrative",
+    )
+
+    order = models.PositiveIntegerField(blank=True, default=1)
+
+    description = models.CharField(
+        max_length=5000, verbose_name="Step Description", blank=True
+    )
+    file = models.ImageField(upload_to=define_uploadpath_steps, blank=True)
+    caption = models.CharField(max_length=250, blank=True)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    
+    class Meta:
+        verbose_name_plural = "Narrative Steps"
+        ordering = ['narrative', 'order']
+
+    def __str__(self):
+        return f"{self.narrative.name} {self.narrative.order}: Step {self.order}"
+
