@@ -323,7 +323,6 @@ Once the containers are created, run the following commands:
 > docker-compose run web python manage.py migrate
 > docker-compose run web python manage.py set_report_type --type [RVA/RPT/HVA]
 > docker-compose run web python manage.py dbLoader
-> docker-compose run web python manage.py attack_framework attack.csv
 ```
 
 The database is populated now with the information needed to enter findings. The final step is to create a login for yourself by running the command:

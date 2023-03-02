@@ -23,9 +23,10 @@ from django.core import serializers
 from django.template.defaultfilters import slugify
 from django.http import HttpResponse
 from django.urls import reverse_lazy, reverse
+from django.db.models.functions import Lower
 import json
 from ptportal.forms import NarrativeForm
-from ptportal.models import Narrative, NarrativeType, NarrativeScreenshot, Tools, ATTACK, NarrativeStep
+from ptportal.models import Narrative, NarrativeType, Tools, ATTACK, NarrativeStep
 
 
 def ajax_get_narrative_images(request):
@@ -62,58 +63,60 @@ class NarrativeCreate(generic.edit.CreateView):
 
         try:
             diagram = request.FILES['file']
-        except:
+        except Exception as e:
+            print(e)
             diagram = False
 
         order = Narrative.objects.filter(assessment_type__slug=self.kwargs['narrative_assessment_type']).count() + 1
         narrative_type = NarrativeType.objects.filter(slug=self.kwargs['narrative_assessment_type']).first()
 
-        try:
-            narrative = Narrative.objects.create(
-                        assessment_type = narrative_type,
-                        order = order,
-                        name = str(self.kwargs['narrative_assessment_type']).capitalize() + " Attack Path",
-                    )
-        except Exception as e:
-            print(e)
-            return HttpResponse(status=500)
+        if diagram:
+            try:
+                narrative = Narrative.objects.create(
+                            assessment_type = narrative_type,
+                            order = order,
+                            name = str(self.kwargs['narrative_assessment_type']).capitalize() + " Attack Path",
+                            file = diagram,
+                            caption = postData['imageUpload'][0]['caption'],
+                        )
+            except Exception as e:
+                print(e)
+
+        else:
+            try:
+                narrative = Narrative.objects.create(
+                            assessment_type = narrative_type,
+                            order = order,
+                            name = str(self.kwargs['narrative_assessment_type']).capitalize() + " Attack Path",
+                        )
+            except Exception as e:
+                print(e)
+                return HttpResponse(status=500)
+
 
         techniques = []
         tools = []
 
-        if len(postData['imageUpload']) == 0 or postData['newImage'] == True:
-            try:
-                NarrativeScreenshot.objects.filter(narrative=narrative).first().delete()
-            except Exception as e:
-                print(e)
-
-        if len(postData['imageUpload']) > 0:
-            for index, data in enumerate(postData['imageUpload']):
+        for i in postData['newTools']:
+            if (Tools.objects.filter(name=i['toolName']).exists()):
                 try:
-                    if postData['newImage'] == False:
-                        obj = NarrativeScreenshot.objects.get(narrative=narrative)
-                        obj.caption = data['caption']
-                        obj.save()
-                    else:
-                        obj = NarrativeScreenshot.objects.create(
-                            file = diagram,
-                            caption = data['caption'],
-                            narrative = narrative
-                        )
+                    tool = Tools.objects.get(name=i['toolName'])
+                    tool.url=i['toolURL']
+                    tool.save()
                 except Exception as e:
+                    print(e)
+                    continue
+            else:
+                try:
+                    Tools.objects.create(
+                        name=i['toolName'],
+                        url=i['toolURL']
+                    )
+                except Exception as e:
+                    print(e)
                     continue
 
-        for i in postData['newTools']:
-            try:
-                Tools.objects.create(
-                    name=i['toolName'],
-                    url=i['toolURL']
-                )
-            except Exception as e:
-                print(e)
-                continue
-
-        for i in postData['selectedTools']:
+        for i in postData['tools']:
             tool = Tools.objects.get(name=i)
             try:
                 tools.append(Tools.objects.get(
@@ -124,12 +127,11 @@ class NarrativeCreate(generic.edit.CreateView):
                 continue
 
         try:
-            narrative.tools.clear()
             narrative.tools.add(*tools)
         except Exception as e:
             print(e)
 
-        for i in postData['selectedTechniques']:
+        for i in postData['techniques']:
             try:
                 techniques.append(ATTACK.objects.get(
                     name=i)
@@ -139,7 +141,6 @@ class NarrativeCreate(generic.edit.CreateView):
                 continue
 
         try:
-            narrative.attack.clear()
             narrative.attack.add(*techniques)
         except Exception as e:
             print(e)
@@ -162,8 +163,8 @@ class NarrativeEdit(generic.edit.UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         narrative = self.get_object()
-        context['diagram'] = NarrativeScreenshot.objects.filter(narrative=self.get_object()).first()
-        context['all_tools'] = serializers.serialize("json", Tools.objects.all())
+        context['diagram'] = narrative.file
+        context['all_tools'] = serializers.serialize("json", Tools.objects.all().order_by(Lower('name')))
         context['used_tools'] = serializers.serialize("json", narrative.tools.all())
         context['techniques'] = serializers.serialize("json", ATTACK.objects.all())
 
@@ -182,41 +183,40 @@ class NarrativeEdit(generic.edit.UpdateView):
         techniques = []
         tools = []
 
-        if len(postData['imageUpload']) == 0 or postData['newImage'] == True:
+        if postData['deleteImage'] == True:
+            narrative.file.delete()
+
+        if diagram:
             try:
-                NarrativeScreenshot.objects.filter(narrative=narrative).first().delete()
+                narrative.file = diagram
             except Exception as e:
                 print(e)
 
-        if len(postData['imageUpload']) > 0:
-            for index, data in enumerate(postData['imageUpload']):
+        try:
+            narrative.caption = postData['imageUpload'][0]['caption']
+        except Exception as e:
+            print(e)
+
+        for i in postData['newTools']:
+            if (Tools.objects.filter(name=i['toolName']).exists()):
                 try:
-                    if postData['newImage'] == False:
-                        obj = NarrativeScreenshot.objects.get(narrative=narrative)
-                        obj.caption = data['caption']
-                        obj.save()
-                    else:
-                        obj = NarrativeScreenshot.objects.create(
-                            file = diagram,
-                            caption = data['caption'],
-                            narrative = narrative
-                        )
+                    tool = Tools.objects.get(name=i['toolName'])
+                    tool.url=i['toolURL']
+                    tool.save()
+                except Exception as e:
+                    print(e)
+                    continue
+            else:
+                try:
+                    Tools.objects.create(
+                        name=i['toolName'],
+                        url=i['toolURL']
+                    )
                 except Exception as e:
                     print(e)
                     continue
 
-        for i in postData['newTools']:
-            try:
-                Tools.objects.create(
-                    name=i['toolName'],
-                    url=i['toolURL']
-                )
-            except Exception as e:
-                print(e)
-                continue
-
-        for i in postData['selectedTools']:
-            tool = Tools.objects.get(name=i)
+        for i in postData['tools']:
             try:
                 tools.append(Tools.objects.get(
                     name=i)
@@ -225,13 +225,16 @@ class NarrativeEdit(generic.edit.UpdateView):
                 print(e)
                 continue
 
+        tool_backup = narrative.tools
+
         try:
             narrative.tools.clear()
             narrative.tools.add(*tools)
         except Exception as e:
             print(e)
+            narrative.tools = tool_backup
 
-        for i in postData['selectedTechniques']:
+        for i in postData['techniques']:
             try:
                 techniques.append(ATTACK.objects.get(
                     name=i)
@@ -240,11 +243,16 @@ class NarrativeEdit(generic.edit.UpdateView):
                 print(e)
                 continue
 
+        attack_backup = narrative.attack
+        
         try:
             narrative.attack.clear()
             narrative.attack.add(*techniques)
         except Exception as e:
             print(e)
+            narrative.attack = attack_backup
+
+        narrative.save()
 
         return HttpResponse(status=200)
 
@@ -359,16 +367,6 @@ class Narratives(generic.ListView):
         )
 
         self.assessment_type = get_object_or_404(NarrativeType, slug=self.kwargs['narrative_assessment_type'])
-        context['paths'] = []
-
-        for i in Narrative.objects.filter(assessment_type=self.assessment_type):
-            context['paths'].append(tuple((i, i.screenshots.first())))
-            for j in i.tools.all():
-                print(str(j.name))
+        context['paths'] = Narrative.objects.filter(assessment_type=self.assessment_type)
 
         return context
-
-
-class NarrativeTypes(generic.ListView):
-    model = NarrativeType
-    template_name = 'ptportal/narrative/narrative_types_list.html'

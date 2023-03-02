@@ -51,7 +51,6 @@ from ptportal.models import (
     GeneralFinding,
     SpecificFinding,
     ImageFinding,
-    AttackPath,
 )
 
 from ptportal.views.utils import (

@@ -17,26 +17,6 @@ from . import abstract_models
 from . import findings
 
 
-class AttackFramework(abstract_models.TimeStampedModel):
-    name = models.CharField(max_length=100)
-    description = models.TextField(blank=True)
-    tactics = models.CharField(blank=True, max_length=200)
-    mitigation = models.TextField(blank=True)
-    examples = models.TextField(blank=True)
-    url = models.CharField(max_length=60)
-    is_subtechnique = models.BooleanField(default=False, blank=True, null=True)
-    T_id = models.CharField(max_length=10)
-    subtechnique_id = models.CharField(max_length=255, blank=True)
-    used = models.BooleanField(default=False, blank=True)
-
-    class Meta:
-        verbose_name_plural = 'MITRE Attack Framework'
-        ordering = ['T_id']
-
-    def __str__(self):
-        return self.name
-
-
 class NISTControl(models.Model):
     NIST_ID = models.TextField(blank=True)
     name = models.TextField(blank=True)

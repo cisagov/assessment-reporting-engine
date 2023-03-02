@@ -31,7 +31,7 @@ DM22-1011
     <template #title>
         <h1 style="font-size:20pt; float:left">[[path.name]] [[path.order]]</h1><div style="padding:0px 10px 0px 0px; float:right"><sds-button variant="danger" @click="redirectLink([[path.delete_slug]])">Delete</sds-button></div><div style="padding:0px 10px 0px 0px; float:right"><sds-button variant="primary" @click="redirectLink([[path.steps]])">Edit Steps</sds-button></div><div style="padding:0px 10px 0px 0px; float:right"><sds-button variant="primary" @click="redirectLink([[path.slug]])">Edit Details</sds-button></div>
     </template>
-        <div v-if="path.imgURL" style="width:60%">
+        <div v-if="path.imgURL" style="width:80%">
             <img :src="[[path.imgURL]]" />
         </div>
         <br><br>
@@ -53,14 +53,14 @@ function pageData() {
         },
     }
 
-    {% for path, screenshot in paths %}
+    {% for path in paths %}
 
         slug = "{{path.slug}}" + "/edit"
         steps = "{{path.slug}}" + "/steps"
         delete_slug = "{{path.slug}}" + "/delete"
 
-        {% if screenshot.file %}
-            imgURL = window.location.origin + "/media/" + "{{screenshot.file}}"
+        {% if path.file %}
+            imgURL = window.location.origin + "/media/" + "{{path.file}}"
         {% else %}
             imgURL = ""
         {% endif %}

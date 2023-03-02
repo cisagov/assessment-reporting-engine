@@ -59,8 +59,7 @@ DM22-1011
 
     <sds-section class="mb-4">
         <template #title>
-            <p>Download the Attack Path template here and follow the instructions in the document to construct/save your attack path diagram. Upload the attack path image file below.</p>
-            <sds-link href="{{ MEDIA_URL }}attackpath.pptx" variant="primary">Attack Path Template</sds-link>
+            <p>Download the <sds-link href="{{ MEDIA_URL }}attack-path-template.pptx" variant="primary">Attack Path Template</sds-link> and follow the instructions in the document to construct/save your attack path diagram. Upload the attack path image file below.</p>
         </template>
         <sds-file-uploader v-bind="attackPathUploadArgs" @add="addFile">
         </sds-file-uploader>
@@ -84,10 +83,10 @@ DM22-1011
         <div class="grid place-items-center">
             <sds-search-box class="w-1/2 place-self-center" :disableSearch="true" variant="primary" placeholder="Search Term" v-model="toolSectionArgs.searchTerm" @update:model-value="filterTools(toolSectionArgs.searchTerm)"></sds-search-box>
             <sds-scroll-area class="px-4 pt-4 place-self-center h-80 w-11/12" id="toolList">
-                <div v-for="tool in toolSectionArgs.toolSearchList" :key="tool.fields.name" :id="tool.fields.name" class="grid grid-cols-2 border-b border-slate-700 hover:bg-gray-700/[.1]">
+                <div v-for="tool in toolSectionArgs.toolSearchList" :key="tool.fields.name" class="grid grid-cols-2 border-b border-slate-700 hover:bg-gray-700/[.1]">
                     <div class="py-2 px-4">
                         <div class="font-bold">
-                        <input v-if="formData.oldTools.includes(tool.fields.name)" type="checkbox" :id="tool.fields.name" name="tool" :value="tool.fields.name" :checked="true"><input v-else type="checkbox" :id="tool.fields.name" name="tool" :value="tool.fields.name">  [[tool.fields.name]]</div>
+                        <input v-if="formData.tools.includes(tool.fields.name)" type="checkbox" :id="tool.fields.name" name="tool" :value="tool.fields.name" :checked="true" @click=checkTool(tool.fields.name)><input v-else type="checkbox" :id="tool.fields.name" name="tool" :value="tool.fields.name" @click=checkTool(tool.fields.name)>  [[tool.fields.name]]</div>
                     </div>
                     <div class="py-2">
                         [[tool.fields.url]]
@@ -178,7 +177,7 @@ DM22-1011
                 <div v-for="technique in attackSectionArgs.attackSearchList" :key="technique.fields.t_id" :id="technique.fields.t_id" class="grid grid-cols-2 border-b border-slate-700 hover:bg-gray-700/[.1]">
                     <div class="py-2 px-4">
                         <div class="font-bold">
-                        <input v-if="formData.oldTechniques.includes(technique.fields.name)" type="checkbox" :id="technique.fields.t_id" name="attack" :value="technique.fields.name" :checked="true"><input v-else type="checkbox" :id="technique.fields.t_id" name="attack" :value="technique.fields.name">  [[technique.fields.name]]</div>
+                        <input v-if="formData.techniques.includes(technique.fields.name)" type="checkbox" :id="technique.fields.name" name="attack" :value="technique.fields.name" :checked="true" @click=checkTechnique(technique.fields.name)><input v-else type="checkbox" :id="technique.fields.name" name="attack" :value="technique.fields.name" @click=checkTechnique(technique.fields.name)>  [[technique.fields.name]]</div>
                         <div>[[technique.fields.tactics]]</div>
                     </div>
                     <div class="py-2">
@@ -202,12 +201,10 @@ DM22-1011
         let pageData = {
             formData: {
                 imageUpload: [],
-                newImage: false,
-                oldTools: [],
-                selectedTools: [],
+                deleteImage: false,
+                tools: [],
                 newTools: [],
-                selectedTechniques: [],
-                oldTechniques: []
+                techniques: []
             },
             fileList: [],
             attackPathUploadArgs: {
@@ -234,15 +231,18 @@ DM22-1011
             toolData: function() {
                 var tool_list = [];
                 var tools = {{ all_tools | safe }};
+
                 for (i = 0; i < tools.length; i++) {
                     const proxy = new Proxy(tools[i], {});
                     tool_list.push(proxy);
                 }
 
+                for (i = 0; i < pageData.formData.newTools.length; i++) {
+                    const proxy = new Proxy({model: 'ptportal.tools', pk: 0, fields: {name: pageData.formData.newTools[i]['toolName'], url: pageData.formData.newTools[i]['toolURL']}}, {});
+                    tool_list.unshift(proxy)
+                }
+
                 return tool_list;
-            },
-            filteredMultiselectOptions() {
-                return pageData.toolSectionArgs.toolSearchList;
             },
             attackData: function() {
                 var attack_list = [];
@@ -258,24 +258,24 @@ DM22-1011
 
         {% for i in object.attack.all %}
 
-            pageData.formData.oldTechniques.push("{{i.name}}")
+            pageData.formData.techniques.push("{{i.name}}")
 
         {% endfor %}
         
         {% for i in object.tools.all %}
             
-            pageData.formData.oldTools.push("{{i.name}}")
+            pageData.formData.tools.push("{{i.name}}")
 
         {% endfor %}
 
-        pageData.toolSectionArgs.toolSearchList = pageData.toolData().filter(tool => tool)
-        pageData.attackSectionArgs.attackSearchList = pageData.attackData().filter(technique => technique)
-
         {% if diagram %}
 
-            pageData.formData.imageUpload.push({uuid: "{{diagram.uuid}}", imgURL: window.location.origin + '/media/' + "{{diagram.file}}", caption: "{{diagram.caption}}"})
+            pageData.formData.imageUpload.push({imgURL: window.location.origin + '/media/' + "{{object.file}}", caption: "{{object.caption}}"})
 
         {% endif %}
+
+        pageData.toolSectionArgs.toolSearchList = pageData.toolData().filter(tool => tool)
+        pageData.attackSectionArgs.attackSearchList = pageData.attackData().filter(technique => technique)
 
         return pageData
     }
@@ -285,17 +285,17 @@ DM22-1011
             addFile: function (event) {
                 this.fileList.splice(0, 1)
                 this.formData.imageUpload.splice(0, 1)
-                this.formData.newImage = true
                 const files = Array.from(event.files)
                 Array.prototype.push.apply(this.fileList, files)
 
                 for (let file in files) {
-                    this.formData.imageUpload.push({file: files[file], imgURL: URL.createObjectURL(files[file]), caption: "", uuid: null})
+                    this.formData.imageUpload.push({file: files[file], imgURL: URL.createObjectURL(files[file]), caption: ""})
                 }
 
-                this.displayNotification({'title': 'Image Added', text: 'The Attack Path diagram successfully uploaded and will replace any diagram that was previously uploaded.', variant:'info'})
+                this.displayNotification({'title': 'Image Added', text: 'The attack path diagram successfully uploaded and will replace any diagram that was previously uploaded.', variant:'info'})
             },
             deleteFile: function (file) {
+                this.formData.deleteImage = true
                 index = this.fileList.indexOf(file.file)
                 if(index != -1){
                     this.fileList.splice(index, 1)
@@ -310,29 +310,33 @@ DM22-1011
                 toolURL = this.toolSectionArgs.newURL
                 this.formData.newTools.push({toolName, toolURL})
 
-                var newTool = document.createElement("div")
-                newTool.setAttribute("id", toolName)
-                newTool.setAttribute("class", "grid grid-cols-2 border-b border-slate-700 hover:bg-gray-700/[.1]")
+                const proxy = new Proxy({model: 'ptportal.tools', pk: 0, fields: {name: toolName, url: toolURL}}, {});
+                this.toolSectionArgs.toolSearchList.unshift(proxy)
 
-                var toolDiv = document.createElement("div")
-                toolDiv.setAttribute("class", "py-2 px-4")
+                this.formData.tools.push(toolName)
 
-                var toolNameDiv = document.createElement("div")
-                toolNameDiv.setAttribute("class", "font-bold")
-                toolstr = "<input type=\"checkbox\" id=\"" + toolName + "\" name=\"tool\" value=\"" + toolName + "\" checked=\"true\"> " + toolName
-                toolNameDiv.innerHTML = toolstr
-
-                var urlDiv = document.createElement("div")
-                urlDiv.setAttribute("class", "py-2")
-                urlDiv.innerHTML = toolURL
-
-                toolDiv.appendChild(toolNameDiv)
-                newTool.appendChild(toolDiv)
-                newTool.appendChild(urlDiv)
-                
-                document.getElementById("toolList").insertBefore(newTool, document.getElementById("toolList").firstChild);
                 this.toolSectionArgs.newTool = ""
                 this.toolSectionArgs.newURL = ""
+            },
+            checkTool: function(tool) {
+                if (document.getElementById(tool).checked) {
+                    this.formData.tools.push(tool)
+                }
+                
+                else {
+                    index = this.formData.tools.indexOf(tool)
+                    this.formData.tools.splice(index, 1)
+                }
+            },
+            checkTechnique: function(technique) {
+                if (document.getElementById(technique).checked) {
+                    this.formData.techniques.push(technique)
+                }
+                
+                else {
+                    index = this.formData.techniques.indexOf(technique)
+                    this.formData.techniques.splice(index, 1)
+                }
             },
             filterTools: function(searchTerm) {
                 this.toolSectionArgs.toolSearchList = this.toolData().filter(tool => tool.fields.name.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -341,18 +345,6 @@ DM22-1011
                 this.attackSectionArgs.attackSearchList = this.attackData().filter(technique => technique.fields.name.toLowerCase().includes(searchTerm.toLowerCase()) || technique.fields.tactics.toLowerCase().includes(searchTerm.toLowerCase()) || technique.fields.description.toLowerCase().includes(searchTerm.toLowerCase()) || technique.fields.t_id.toLowerCase().includes(searchTerm.toLowerCase()))
             },
             saveDetails: function () {
-
-                let add_tools = document.querySelectorAll('input[name="tool"]:checked')
-                
-                add_tools.forEach((checkbox) => {
-                    this.formData.selectedTools.push(checkbox.value)
-                })
-
-                let attack_techniques = document.querySelectorAll('input[name="attack"]:checked')
-
-                attack_techniques.forEach((checkbox) => {
-                    this.formData.selectedTechniques.push(checkbox.value)
-                })
 
                 const formData = new FormData()
                 formData.append('data', JSON.stringify(this.formData))
@@ -366,12 +358,6 @@ DM22-1011
                 }).then(response => {
                 if(response.ok) {
 
-                    this.formData.newTools = []
-                    this.formData.selectedTools = []
-                    this.formData.selectedTechniques = []
-                    this.fileList = []
-                    this.formData.newImage = false
-
                     this.displayNotification({title: "Narrative Details Saved", text: "Narative details have been saved successfully.", variant: "success"})
                     
                     base = String(window.location.origin)
@@ -384,6 +370,9 @@ DM22-1011
                     }
                     else if (path.includes("create")) {
                         window.location.href=base.concat("/ptportal/narrative/internal")
+                    }
+                    else {
+                        location.reload()
                     }
                 }
                 else {

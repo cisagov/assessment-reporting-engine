@@ -19,7 +19,7 @@ import uuid
 
 
 def define_uploadpath(instance, filename):
-    return f"screenshots/narrative/{instance.narrative.slug}/{str(instance.uuid) + '.' + filename.split('.')[-1]}"
+    return f"screenshots/narrative/{instance.slug}/{str(instance.uuid) + '.' + filename.split('.')[-1]}"
 
 
 def define_uploadpath_steps(instance, filename):
@@ -57,7 +57,7 @@ class NarrativeType(models.Model):
 
 
 class Tools(models.Model):
-    name = models.CharField(max_length=150, blank=True)
+    name = models.CharField(max_length=150, blank=True, unique=True)
     url = models.CharField(max_length=200, blank=True)
 
     def __str__(self):
@@ -99,6 +99,10 @@ class Narrative(abstract_models.TimeStampedModel):
     )
 
     slug = models.SlugField(max_length=255, blank=True)
+
+    file = models.ImageField(upload_to=define_uploadpath, blank=True)
+    caption = models.CharField(max_length=250, blank=True)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     
     tools = models.ManyToManyField(
         Tools,
@@ -114,6 +118,7 @@ class Narrative(abstract_models.TimeStampedModel):
     )
     
     class Meta:
+        verbose_name_plural = "Narratives"
         ordering = ['order']
 
     def __str__(self):
@@ -126,34 +131,6 @@ class Narrative(abstract_models.TimeStampedModel):
 
     def get_absolute_url(self):
         return reverse('narrative_edit', [self.assessment_type.slug, self.slug])
-
-
-class NarrativeScreenshot(models.Model):
-    file = models.ImageField(upload_to=define_uploadpath, blank=True)
-    caption = models.CharField(max_length=250, blank=True)
-    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-
-    narrative = models.ForeignKey(
-        Narrative,
-        null=True,
-        blank=True,
-        related_name="screenshots",
-        on_delete=models.CASCADE,
-        verbose_name="Associated Narrative",
-    )
-
-    order = models.PositiveIntegerField(blank=True, default=1)
-
-    class Meta:
-        verbose_name_plural = "Narrative Screenshots"
-        ordering = ['narrative', 'order']
-
-    def __str__(self):
-        return str(self.narrative.name) + " " + str(self.narrative.order) + ":\t\t" + str(self.file.name)
-
-    def delete(self, *args, **kwargs):
-        self.file.delete(True)
-        super(NarrativeScreenshot, self).delete(*args, **kwargs)
 
 
 class NarrativeStep(abstract_models.TimeStampedModel):

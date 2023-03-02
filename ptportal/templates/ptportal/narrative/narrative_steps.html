@@ -75,7 +75,7 @@ DM22-1011
     </sds-section>
   </div>
 
-  <div style="float:left; width:17%; height:80%; right:1%; background-color:#ffffff; padding:10px; position:absolute; border:1px solid #DDDDDD; overflow:auto;">
+  <div style="float:left; width:17%; right:1%; background-color:#ffffff; padding:10px; position:absolute; border:1px solid #DDDDDD; overflow:auto;">
     <div v-for="(step, i) in steps" :key="step" class="step" draggable="true" @dragover="(e) => onDragOver(step, i, e)" @dragend="(e) => finishDrag(step, i, e)" @dragstart="(e) => startDrag(step, i, e)" :class="{over: (step === over.step && step !== dragFrom), [over.dir]: (step === over.step && step !== dragFrom) }">
       <div style="float:left; padding:19px 15px 0px 10px; cursor:pointer"><div style="width:15px; height:2px; background-color:gray; margin:2px 0;"></div><div style="width:15px; height:2px; background-color:gray; margin:2px 0;"></div></div><div style="float:left; padding:12px 0px 10px 0px">Step [[step.order]]</div><div class="delete" style="float:right; padding:0px 8px 0px 0px; font-size:20pt"><sds-button @click="deleteFile(step)">&#10799;</sds-button></div>
       <br><br>

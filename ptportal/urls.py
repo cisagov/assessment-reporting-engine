@@ -79,13 +79,6 @@ urlpatterns += [
 # Report
 urlpatterns += [
     path('report', views.ReportUpdate.as_view(), name='report'),
-    path('attack-matrix/', views.ATTACKMatrixUpdate.as_view(), name="attack-matrix"),
-    path('attack-paths', views.AttackPathView.as_view(), name="attack-paths"),
-    path(
-        'ajax/ajax-get-attack-paths/',
-        views.ajax_get_attack_paths,
-        name='ajax_get_attack_paths',
-    ),
 ]
 
 # Assessment Activity Tracker
@@ -126,7 +119,6 @@ urlpatterns += [
 
 # Narrative
 urlpatterns += [
-    path('narrative/', views.NarrativeTypes.as_view(), name='narrative-types'),
     path(
         'narrative/<slug:narrative_assessment_type>/',
         views.Narratives.as_view(),
