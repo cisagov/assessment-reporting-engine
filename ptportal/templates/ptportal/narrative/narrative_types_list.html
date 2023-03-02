@@ -36,15 +36,11 @@ DM22-1011
               </tr>
             </thead>
             <tbody>
-              {% for narrative_type in object_list %}
-                {% if report_type == 'RPT' and narrative_type.name == 'Internal' %}
-                  <!-- print nothing -->
-                {% else %}
-                  <tr>
-                    <td><a href="{% url 'narratives' narrative_type.slug %}">{{ narrative_type.name }}</a></td>
-                    <td>{{ narrative_type.description }}</td>
-                  </tr>
-                {% endif %
+              {% for narrative_assessment_type in object_list %}
+                <tr>
+                  <td><a href="{% url 'narratives' narrative_assessment_type.slug %}">{{ narrative_assessment_type.name }}</a></td>
+                  <!--<td>{{ narrative_type.description }}</td>
+                </tr>
               {% endfor %}
             </tbody>
           </table>

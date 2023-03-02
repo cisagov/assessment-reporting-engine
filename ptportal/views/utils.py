@@ -242,7 +242,6 @@ def generateEntryJson(filename):
     uploaded_findings = UploadedFinding.objects.all()
     campaigns = Campaign.objects.all()
     payloads = Payload.objects.all()
-    af = AttackFramework.objects.all()
     csc = CIS_CSC.objects.all()
     data = []
 
@@ -396,8 +395,6 @@ def serializeJSON(filename=None):
         + list(AssessmentScenarios.objects.filter(used=True))
         + list(Campaign.objects.all())
         + list(Payload.objects.all())
-        + list(AttackPath.objects.all())
-        + list(AttackFramework.objects.filter(used=True))
         + list(RPTBreachedEmails.objects.all())
         + list(RPTIdentifiedNetworks.objects.all())
         + list(NarrativeType.objects.all())

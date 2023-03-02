@@ -16,40 +16,75 @@ DM22-1011
 {% load humanize %}
 {% block active %}#narrative{% endblock %}
 {% block content %}
-<h1><i class="fas fa-edit"></i> {{ narrative_type }}</h1>
-<!-- add breadcrumbs -->
-<hr />
-<nav aria-label="breadcrumb">
-	<ol class="breadcrumb">
-	    <li class="breadcrumb-item"><a href="{% url 'index' %}">Dashboard</a></li>
-	    <li class="breadcrumb-item"><a href="{% url 'narrative-types' %}">Narratives</a></li>
-        <li class="breadcrumb-item active">{{ narrative_type.name}}</li>
-	</ol>
-</nav>
+{% csrf_token %}
 
-<div class="row">
-    <div class="col-md-8">
-        <table class="table table-hover">
-            <thead>
-              <tr>
-                <th scope="col">Narrative</th>
-                <th scope="col">Tools</th>
-                <th scope="col">Description</th>
-                <!-- <th scope="col">Last Modified</th> -->
-              </tr>
-            </thead>
-            <tbody>
-                {% for narrative in object_list %}
-              <tr>
-                <td><a href="{% url 'narrative_edit' narrative.type.slug narrative.slug %}">{{ narrative.name }}</a></td>
-                <td>{{ narrative.tools }}</td>
-                <td>{{ narrative.tool_output_description }}</td>
-                <!-- <td>{{ narrative.updated_at | naturaltime }}</td> -->
-              </tr>
-                {% endfor %}
-            </tbody>
-          </table>
-    </div>
-</div>
+<sds-section type="accented">
+    <template #title>
+        <p class="text-2xl font-bold">{{ narrative_assessment_type }}</p>
+        <br>
+        <sds-button variant="primary" @click="redirectLink('{% url "narrative_create" narrative_assessment_type.name|lower %}')">+ Attack Path</sds-button>
+        <br>
+    </template>
+</sds-section>
+<br>
+<sds-section v-for="path in formData.attackPaths" :key="path.order" type="simple" class="mb-4">
+    <template #title>
+        <h1 style="font-size:20pt; float:left">[[path.name]] [[path.order]]</h1><div style="padding:0px 10px 0px 0px; float:right"><sds-button variant="danger" @click="redirectLink([[path.delete_slug]])">Delete</sds-button></div><div style="padding:0px 10px 0px 0px; float:right"><sds-button variant="primary" @click="redirectLink([[path.steps]])">Edit Steps</sds-button></div><div style="padding:0px 10px 0px 0px; float:right"><sds-button variant="primary" @click="redirectLink([[path.slug]])">Edit Details</sds-button></div>
+    </template>
+        <div v-if="path.imgURL" style="width:80%">
+            <img :src="[[path.imgURL]]" />
+        </div>
+        <br><br>
+        <strong>Tools:</strong> [[path.tools]]
+        <br>
+        <strong>Techniques:</strong> [[path.techniques]]
+        <br>
+</sds-section>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+function pageData() {
+    let pageData = {
+        formData: {
+            attackPaths: [],
+        },
+    }
+
+    {% for path in paths %}
+
+        slug = "{{path.slug}}" + "/edit"
+        steps = "{{path.slug}}" + "/steps"
+        delete_slug = "{{path.slug}}" + "/delete"
+
+        {% if path.file %}
+            imgURL = window.location.origin + "/media/" + "{{path.file}}"
+        {% else %}
+            imgURL = ""
+        {% endif %}
+
+        tools = []
+        techniques = []
+
+        {% for tool in path.tools.all %}
+            tools.push("{{tool.name}}")
+        {% endfor %}
+
+        {% for technique in path.attack.all %}
+            techniques.push("{{technique.name}}")
+        {% endfor %}
+
+        tool_list = tools.join(', ')
+        technique_list = techniques.join(', ')
+
+        pageData.formData.attackPaths.push({name: "{{path.name}}", order: "{{path.order}}", imgURL: imgURL, slug: slug, steps: steps, delete_slug: delete_slug, tools: tool_list, techniques: technique_list})
+
+    {% endfor %}
+
+    return pageData
+}
+</script>
 
 {% endblock %}

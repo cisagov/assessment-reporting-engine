@@ -14,5 +14,3 @@
 
 # DM22-0744
 from .report import *
-from .attack_paths import *
-from .attack_matrix import *

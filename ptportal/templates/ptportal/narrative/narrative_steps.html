@@ -1,0 +1,217 @@
+<!-- Risk & Vulnerability Assessment Reporting Engine
+
+Copyright 2022 The Risk & Vulnerability Reporting Engine Contributors, All Rights Reserved.
+(see Contributors.txt for a full list of Contributors)
+
+SPDX-License-Identifier: BSD-3-Clause
+
+Please see additional acknowledgments (including references to third party source code, object code, documentation and other files) in the license.txt file or contact permission@sei.cmu.edu for full terms.
+
+Created, in part, with funding and support from the United States Government. (see Acknowledgments file).
+
+DM22-1011
+ -->
+
+{% extends 'ptportal/base.html' %}
+{% block active %}#attackpaths{% endblock %}
+{% load humanize %}
+
+{% block style %}
+
+<style>
+
+  .step:hover {
+    background-color: #DDDDDD;
+  }
+
+  .delete:hover {
+    color: #AB2317;
+  }
+
+  .over {
+    opacity: .5;
+    outline: 1px dashed #BBBBBB;
+    outline-offset: -1px;
+  }
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+
+<sds-section class="mb-4" style="border:1px solid #DDDDDD;" type="simple" class="mb-4">
+  <template #title>
+    <h1 style="font-size:16pt;">{{ name }}</h1>
+  </template>
+  <sds-file-uploader v-bind="fileUploadArgs" @add="addFile">
+  </sds-file-uploader>
+  <br>
+  <sds-button variant="primary" @click="addStep()" style="float:left">+ Step Without Screenshot</sds-button><sds-button variant="primary" @click="saveSteps" style="float:right">Save</sds-button>
+  <br><br><br>
+</sds-section>
+
+<div>
+  <div style="float:left; width:78%">
+    <sds-section v-for="step in steps" :key="step.order" type="simple" class="mb-4">
+      <template #title>
+        <h1 style="font-size:16pt; float:left">Step [[step.order]]</h1><sds-button type="button" class="justify-self-end" style="float:right; padding: 5px 0px 0px 0px" @click="deleteFile(step)"><img class="w-8 h-8" src="/static/icons/trash-solid.svg"></sds-button>
+      </template>
+      <br>
+      <div class="grid grid-cols-2 mb-2">
+        <h4>Description:</h4>
+      </div>
+      <sds-textarea v-model="step.description" :rows="3"></sds-textarea>
+      <br>
+      <div v-if="step.imgURL">
+        <img :src="[[step.imgURL]]" onerror="this.style.display='none'" />
+        <br>
+        <div class="grid grid-cols-2 mb-2">
+          <h4>Caption:</h4>
+        </div>
+        <sds-textarea v-model="step.caption" :rows="1"></sds-textarea>
+      </div>
+    </sds-section>
+  </div>
+
+  <div style="float:left; width:17%; right:1%; background-color:#ffffff; padding:10px; position:absolute; border:1px solid #DDDDDD; overflow:auto;">
+    <div v-for="(step, i) in steps" :key="step" class="step" draggable="true" @dragover="(e) => onDragOver(step, i, e)" @dragend="(e) => finishDrag(step, i, e)" @dragstart="(e) => startDrag(step, i, e)" :class="{over: (step === over.step && step !== dragFrom), [over.dir]: (step === over.step && step !== dragFrom) }">
+      <div style="float:left; padding:19px 15px 0px 10px; cursor:pointer"><div style="width:15px; height:2px; background-color:gray; margin:2px 0;"></div><div style="width:15px; height:2px; background-color:gray; margin:2px 0;"></div></div><div style="float:left; padding:12px 0px 10px 0px">Step [[step.order]]</div><div class="delete" style="float:right; padding:0px 8px 0px 0px; font-size:20pt"><sds-button @click="deleteFile(step)">&#10799;</sds-button></div>
+      <br><br>
+    </div>
+  </div>
+</div>
+
+<br><br>
+
+<div style="float:left; width:78%; border:1px solid #DDDDDD;">
+    <sds-section>
+      <sds-button variant="primary" @click="addStep()" style="float:left">+ Step Without Screenshot</sds-button><sds-button variant="primary" @click="saveSteps" style="float:right">Save</sds-button>
+      <br><br><br>
+    </sds-section>
+  </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function pageData() {
+  let pageData = {
+    fileList: [],
+    steps: [],
+    fileUploadArgs: {
+      helperText: "Upload a screenshot to generate a corresponding step. Multiple screenshots can be uploaded at the same time or subsequently.",
+      accept: ".jpg, .jpeg, .png",
+      allowedFiletypes: ["image/jpg", "image/jpeg", "image/JPG", "image/JPEG", "image/png", "image/PNG"],
+      name: "stepScreenshotUpload",
+      multiple: true,
+    },
+    over: {},
+    startLoc: 0,
+    dragging: false,
+    dragFrom: {}
+  }
+
+  {% for step in steps %}
+    
+    {% if step.file %}
+      imgURL = window.location.origin + "/media/" + "{{step.file}}"
+      caption = "{{step.caption}}"
+    {% else %}
+      imgURL = ""
+      caption = ""
+    {% endif %}
+
+      pageData.steps.push({order: "{{step.order}}", uuid: "{{step.uuid}}", imgURL: imgURL, caption: caption, description: "{{step.description}}"})
+
+  {% endfor %}
+
+  return pageData
+}
+
+function pageMethods() {
+  methods = {
+    addStep: function () {
+      this.steps.push({order: this.steps.length + 1, imgOrder: null, uuid: null, imgURL: "", caption: "", description: ""})
+    },
+    addFile: function (event) {
+      const files = Array.from(event.files)
+      newFiles = files.filter(file => !this.fileList.includes(file))
+      imgOrder = this.fileList.length
+      Array.prototype.push.apply(this.fileList, newFiles)
+      for(let file in newFiles) {
+        this.steps.push({order: this.steps.length + 1, imgOrder: imgOrder, uuid: null, imgURL: URL.createObjectURL(newFiles[file]), caption: "", description: ""})
+        imgOrder++
+      }
+      this.displayNotification({'title': 'Images added', text: 'File added to list! Make sure to save the new images.', variant:"info"})
+    },
+    deleteFile: function (step) {
+      index = this.steps.indexOf(step.file)
+      if(index != -1){
+        this.steps.splice(index,1)
+        URL.revokeObjectURL(this.steps.imgURL)
+      }
+      
+      index = this.steps.indexOf(step)
+      this.steps.splice(index, 1)
+
+      this.steps.forEach((step, index) => {
+        step.order = index + 1
+      })
+    },
+    startDrag(step, i, e) {
+      this.startLoc = e.clientY
+      this.dragging = true
+      this.dragFrom = step
+    },
+    finishDrag(step, pos) {
+      this.steps.splice(pos, 1)
+      this.steps.splice(this.over.pos, 0, step)
+      this.over = {}
+
+      this.steps.forEach((step, index) => {
+        step.order = index + 1
+      })
+    },
+    onDragOver(step, pos, e) {
+      const dir = (this.startLoc < e.clientY) ? 'down': 'up';
+      setTimeout(() => {
+        this.over = { step, pos, dir };
+      }, 50)
+    },
+    saveSteps: function () {
+      const formData = new FormData()
+      formData.append('data', JSON.stringify(this.steps))
+      let num = 0
+
+      for(const file in this.fileList) {
+        formData.append('file' + num.toString(), this.fileList[file])
+        num += 1
+      }
+
+      fetch(window.location.href, {
+        method: "POST",
+        body: formData,
+        credentials: "same-origin",
+        headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
+      }).then(response => {
+        if (response.ok) {
+
+          this.fileList = []
+          this.displayNotification({title: 'Narrative Steps Saved', text: 'Narrative steps and images have been saved successfully.', variant:"success"})
+          location.reload()
+        }
+        else {
+          this.displayNotification({title: "Error Saving Data", text: "Bad response received from server. Check for errors in form and try again.", variant: "danger"})
+        }
+        }).catch(error => {
+          this.displayNotification({title: "Error Saving Data", text: error, variant: "danger"})
+        })
+    }
+  }
+
+  return methods
+}
+</script>
+{% endblock %}

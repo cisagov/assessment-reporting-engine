@@ -1,0 +1,48 @@
+<!-- Risk & Vulnerability Assessment Reporting Engine
+
+Copyright 2022 The Risk & Vulnerability Reporting Engine Contributors, All Rights Reserved.
+(see Contributors.txt for a full list of Contributors)
+
+SPDX-License-Identifier: BSD-3-Clause
+
+Please see additional acknowledgments (including references to third party source code, object code, documentation and other files) in the license.txt file or contact permission@sei.cmu.edu for full terms.
+
+Created, in part, with funding and support from the United States Government. (see Acknowledgments file).
+
+DM22-1011
+ -->
+{% extends 'ptportal/base.html' %}
+{% load humanize %}
+
+{% block active %}#narrative{% endblock %}
+{% block content %}
+
+
+<h1>Delete Narrative</h1>
+<hr />
+
+<div class="mt-2 mb-4 grid grid-cols-2">
+	<div class="">
+		<h2>Narrative: {{ object.name }} {{ object.order }}</h2>
+		<p>Last modified on {{ object.updated_at | naturaltime }}</p>
+	</div>
+</div>
+
+<div class='row'>
+	<div class='col-md-6'>
+		<p>Are you sure you want to delete the narrative for <strong>{{ object.name }} {{ object.order }}</strong>?</p>
+	</div>
+</div>
+<br><br>
+<form action="" method="POST">
+  {% csrf_token %}
+  <sds-button type="submit" variant="danger">Delete</sds-button>
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+</script>
+{% endblock %}

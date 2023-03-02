@@ -14,7 +14,6 @@ from rest_framework import serializers
 
 from ptportal.models import (
     AssessmentScenarios,
-    AttackPath,
     ElectionInfrastructureQuestionnaire,
     EngagementMeta,
     FilesFindings,
@@ -34,12 +33,6 @@ from ptportal.models import (
     SignificantEventsFindings,
     SignificantEvents,
 )
-
-
-class AttackPathSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AttackPath
-        fields = '__all__'
 
 
 class EngagementSerializer(serializers.ModelSerializer):

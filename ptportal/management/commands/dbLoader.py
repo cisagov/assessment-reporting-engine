@@ -23,6 +23,8 @@ from ptportal.models import (
     NISTControl,
     NIST_CSF,
     CIS_CSC,
+    ATTACK,
+    Tools,
     Report,
     AssessmentScenarios,
     Severities,
@@ -143,6 +145,20 @@ class Command(BaseCommand):
         )
         Severities.objects.get_or_create(
             order=6, severity_name='TBD', severity_description=''
+        )
+
+    def add_narrative_types(self):
+        NarrativeType.objects.get_or_create(
+            name='External',
+            slug='external'
+        )
+        NarrativeType.objects.get_or_create(
+            name='Internal',
+            slug='internal'
+        )
+        NarrativeType.objects.get_or_create(
+            name='Phishing',
+            slug='phishing'
         )
 
     def add_acronyms(self):
@@ -281,6 +297,7 @@ class Command(BaseCommand):
 
         self.add_scenarios(report.report_type)
         self.add_severities()
+        self.add_narrative_types()
         self.add_acronyms()
 
         # CIS Control Catalog data frame
@@ -297,6 +314,35 @@ class Command(BaseCommand):
                     description=row['Description'],
                 )
             )
+
+        attack_matrix = pd.read_csv('assets/mitreATTaCK.csv')
+        attack_iter = attack_matrix.iterrows()
+
+        for index, row in attack_iter:
+            try:
+                ATTACK.objects.create(
+                    t_id=row['ID'],
+                    name=row['Name'],
+                    tactics=row['Tactics'],
+                    description=row['Description'],
+                    url=row['URL']
+                )
+            except Exception as e:
+                print(e)
+                continue
+
+        narrative_tools = pd.read_csv('assets/narrative-tools.csv')
+        tools_iter = narrative_tools.iterrows()
+
+        for index, row in tools_iter:
+            try:
+                Tools.objects.create(
+                    name=row['Tool Name'],
+                    url=row['URL']
+                )
+            except Exception as e:
+                print(e)
+                continue
 
         findings_df = pd.read_excel(
             'assets/Penetration Testing Findings Repository 1.0.xlsx',

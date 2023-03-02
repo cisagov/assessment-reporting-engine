@@ -31,7 +31,6 @@ allModels = [
     HVAData,
     HVATarget,
     ImageFinding,
-    AttackFramework,
     AssumptionsConstraints,
     AssessmentScenarios,
     AffectedSystems,
@@ -48,18 +47,19 @@ allModels = [
     PortMappingHost,
     ElectionInfrastructureQuestionnaire,
     ElectionSystems,
-    AttackPath,
     Campaign,
     Payload,
     NarrativeType,
     Narrative,
-    ToolScreenshot,
+    NarrativeStep,
     Acronym,
     KEV,
     KEVMetadata,
     DataExfil,
     Ransomware,
     RansomwareScenarios,
+    ATTACK,
+    Tools
 ]
 
 # registering list of models

@@ -136,17 +136,6 @@ def build_ptportal(report_type, migrations_file=None, su=True):
             web_container,
             'python',
             'manage.py',
-            'attack_framework',
-            'assets/attack-10.1.csv',
-        ]
-    )
-    subprocess.run(
-        [
-            'docker',
-            'exec',
-            web_container,
-            'python',
-            'manage.py',
             'collectstatic',
             '--no-input',
             '--verbosity',

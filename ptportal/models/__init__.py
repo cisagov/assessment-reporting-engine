@@ -17,7 +17,6 @@ from .frameworks import *
 from .phishing import *
 from .image_finding import *
 from .report import *
-from .attack_path import *
 from .engagement import *
 from .assessment_tracker import *
 from .questionnaire import *

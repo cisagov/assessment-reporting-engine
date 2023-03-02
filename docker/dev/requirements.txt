@@ -16,3 +16,4 @@ psycopg2-binary==2.8.2
 python-docx==0.8.10
 python-pptx==0.6.18
 pyzipper
+numpy==1.23.5
