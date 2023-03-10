@@ -162,12 +162,18 @@ DM22-1011
                     href: "{% url 'ei' %}",
                     iconUrl: "{% static 'icons/poll-h-solid.svg' %}"
                   },
+                  {
+                    id: 16,
+                    title: "KEV Catalog",
+                    href: "{% url 'kev_catalog' %}",
+                    iconUrl: "{% static 'icons/poll-h-solid.svg' %}"
+                  }
                 ]
               },
               //Side bar links for if the phishing findings are added to the engagement.
               phishingLinks: {
                 port: {
-                  id: 16,
+                  id: 17,
                   title: "Port Mapping",
                   href: "{% url 'port_mapping' %}",
                   iconUrl: "{% static 'icons/network-wired-solid.svg' %}"
@@ -177,12 +183,12 @@ DM22-1011
               narrativeLinks:
               {
                 phishing: {
-                  id: 17,
+                  id: 18,
                   title: "Phishing",
                   href: "{% url 'narratives' 'phishing' %}",
                 },
                 external: {
-                  id: 18,
+                  id: 19,
                   title: "External",
                   href: "{% url 'narratives' 'external' %}",
                 },

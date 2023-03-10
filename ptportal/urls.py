@@ -248,6 +248,10 @@ urlpatterns += [
     path('risk_score/', views.RiskScoring.as_view(), name='risk_score'),
 ]
 
+urlpatterns += [
+    path('kevs/', views.KEVs.as_view(), name='kev_catalog'),
+]
+
 # error handlers
 urlpatterns += [
     path('404/', views.custom_page_not_found, name='handler404'),

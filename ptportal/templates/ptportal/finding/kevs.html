@@ -1,0 +1,241 @@
+<!-- Risk & Vulnerability Assessment Reporting Engine
+
+Copyright 2022 The Risk & Vulnerability Reporting Engine Contributors, All Rights Reserved.
+(see Contributors.txt for a full list of Contributors)
+
+SPDX-License-Identifier: BSD-3-Clause
+
+Please see additional acknowledgments (including references to third party source code, object code, documentation and other files) in the license.txt file or contact permission@sei.cmu.edu for full terms.
+
+Created, in part, with funding and support from the United States Government. (see Acknowledgments file).
+
+DM22-1011
+ -->
+
+{% extends 'ptportal/base.html' %}
+{% load humanize %}
+
+{% block style %}
+<style>
+    .header{
+        padding: 10px;
+        background: white;
+        color: black;
+        font-size: 20px;
+        position: relative;
+        top: -15px;
+        margin-left: -18px;
+        margin-right: -20px;
+    }
+    .col-span-5{
+        border-top:1px solid black!important;
+        border-color:#1b1c1d!important;
+        margin-bottom: 50px !important;
+    }
+    .space{
+        padding: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% csrf_token %}
+<div class="header">
+    <h2>KEV Catalog</h2>
+</div>
+
+<div class="col-span-5">
+
+    <sds-section class="mb-4">
+      <template #title>
+        <p class="text-2xl font-bold">Nessus Results Upload</p>
+        <sds-file-uploader v-bind="fileUploadArgs" v-model="fileList" :filesize="20"></sds-file-uploader>
+      </template>
+      <div class="grid gap-2 grid-cols-2">
+        <div class="flex gap-2">
+          <sds-button variant="primary" @click="parseData">Upload</sds-button>
+        </div>
+      </div>
+    </sds-section>
+
+    <sds-section v-bind="kevArgs" class="mb-4">
+      <template #title>
+          <span class="font-bold">KNOWN EXPLOITED VULNERABILITIES</span>
+      </template>
+      Known Exploited Vulnerabilities (KEVs) can be derived from Nessus vulnerability scan results using the upload section above. However, assessors should manually de-select any known false positives and/or manually select any KEVs that were identified during testing and missed by Nessus. In order to be mapped to a finding, a KEV must first be selected in the catalog below.<br><br> 
+      <div class="grid place-items-center">
+        <sds-search-box class="w-1/2 place-self-center" :disableSearch="true" variant="primary" placeholder="Search Term" v-model="kevArgs.searchTerm" @update:model-value="filterKEVs(kevArgs.searchTerm)"></sds-search-box>
+        <br>
+        <div v-if="selected"><sds-button v-if="selected" @click="toggleSelected" style="color:#3C8ABB"><b>Show All</b></sds-button> | Show Selected ([[formData.kevs.length]])</div>
+        <div v-else>Show All | <sds-button v-else @click="toggleSelected" style="color:#3C8ABB"><b>Show Selected ([[formData.kevs.length]])</b></sds-button></div>
+        <br>
+        <sds-scroll-area class="px-4 pt-4 place-self-center h-96 w-11/12">
+        <div v-for="kev in kevArgs.kevSearchList" :key="kev.fields.cve_id" class="grid grid-cols-2 border-b border-slate-700 hover:bg-gray-700/[.1]">
+          <div class="py-2 px-4">
+            <div class="font-bold">
+              <input v-if="formData.kevs.includes(kev.fields.cve_id)" type="checkbox" :id="kev.fields.cve_id" name="kev" :value="kev.fields.cve_id" :checked="true" @click=checkKEV(kev.fields.cve_id)><input v-else type="checkbox" :id="kev.fields.cve_id" name="kev" :value="kev.fields.cve_id" @click=checkKEV(kev.fields.cve_id)>  [[kev.fields.cve_id]]</div>
+              <div>[[kev.fields.vulnerability_name]]</div>
+            </div>
+            <div class="py-2">
+              [[kev.fields.description]]
+            </div>
+          </div>
+        </sds-scroll-area>
+      </div>
+        
+      <div class="flex flex-row-reverse"></div>
+    </sds-section>
+    <div class="flex flex-row-reverse">
+      <sds-button variant="primary" @click="saveDetails">Save</sds-button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+
+  function pageData() {
+    let pageData = {
+      formData: {
+        kevs: [],
+      },
+      cves: [],
+      fileList: [],
+      selected: false,
+      kevArgs: {
+        type: "accented",
+        hideContent: false,
+        kevSearchList: [],
+        searchTerm: "",
+      },
+      kevData: function() {
+        var kev_list = [];
+        var kevs = {{ json_kevs | safe }};
+        for (i = 0; i < kevs.length; i++) {
+          const proxy = new Proxy(kevs[i], {});
+          kev_list.push(proxy);
+        }
+
+        return kev_list;
+      },
+      fileUploadArgs: {
+        helperText: "Upload one or more Nessus CSV files under 20 MB. Note that the CSV file must contain the CVE column, but all other columns can be removed in order to meet the file size constraints.",
+        accept: ".csv",
+        allowedFiletypes: ["text/csv"],
+        name: "nessusUpload",
+        multiple: true,
+      },
+    }
+
+    {% for i in all_kevs %}
+
+      pageData.cves.push("{{i.cve_id}}")
+
+    {% endfor %}
+
+    {% for k in found_kevs %}
+
+      pageData.formData.kevs.push("{{k.cve_id}}")
+
+    {% endfor %}
+
+    pageData.kevArgs.kevSearchList = pageData.kevData().filter(kev => kev)
+
+    return pageData
+  }
+
+  function pageMethods() {
+    pageFunctions = {
+      parseData: async function() {
+        if (document.getElementsByName('nessusUpload')[0].files.length == 0) {
+          return
+        }
+
+        numFiles = document.getElementsByName('nessusUpload')[0].files.length
+
+        for (var f = 0; f < numFiles; f++) {
+
+          const file = document.getElementsByName('nessusUpload')[0].files[f]
+          const fileName = document.getElementsByName('nessusUpload')[0].files[f]['name']
+
+          let nessusString = null
+          await file.text().then(text => {nessusString = text})
+
+          var lines = nessusString.split(/[\n\r]+/)
+          var length = lines.length
+          var headers = lines[0].split(',')
+          var index = headers.indexOf('CVE')
+
+          if (index >= 0) {
+            for (var i = 1; i < length; i++) {
+              values = lines[i].split(',')
+              if (String(values[index]).includes('CVE')) {
+                if (this.cves.includes(values[index]) && !this.formData.kevs.includes(values[index])) {
+                  this.formData.kevs.push(values[index])
+                }
+              }
+            }
+            this.displayNotification({title: "Data Successfully Parsed", text: "KEVs derived from " + fileName + " have been selected from the catalog. Be sure to save before leaving this page.", variant: "success"})
+          }
+
+          else {
+            this.displayNotification({title: "Error Parsing Data", text: "The following Nessus CSV file appears to be missing a valid 'CVE' column: " + fileName, variant: "danger"})
+          }
+
+        }
+        this.fileList = []
+      },
+      toggleSelected: function() {
+        if (this.selected) {
+          this.kevArgs.kevSearchList = this.kevData().filter(kev => kev)
+          this.selected = false
+        }
+
+        else {
+          this.kevArgs.kevSearchList = this.kevData().filter(kev => this.formData.kevs.includes(kev.fields.cve_id))
+          this.selected = true
+        }
+      },
+      checkKEV: function(kev) {
+        if (document.getElementById(kev).checked) {
+          this.formData.kevs.push(kev)
+        }
+                
+        else {
+          index = this.formData.kevs.indexOf(kev)
+          this.formData.kevs.splice(index, 1)
+        }
+      },
+      filterKEVs: function(searchTerm) {
+        this.selected = false
+        this.kevArgs.kevSearchList = this.kevData().filter(kev => kev.fields.vulnerability_name.toLowerCase().includes(searchTerm.toLowerCase()) || kev.fields.cve_id.toLowerCase().includes(searchTerm.toLowerCase()) || kev.fields.description.toLowerCase().includes(searchTerm.toLowerCase()) || kev.fields.vendor_project.toLowerCase().includes(searchTerm.toLowerCase()) || kev.fields.product.toLowerCase().includes(searchTerm.toLowerCase()))
+      },
+      saveDetails: function () {
+        const formData = new FormData()
+        formData.append('data', JSON.stringify(this.formData))
+                
+        fetch(window.location.href, {
+          method: "POST",
+          body: formData,
+          credentials: "same-origin",
+          headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
+        }).then(response => {
+          if(response.ok) {
+            this.displayNotification({title: "KEVs Saved", text: "KEV data has been saved successfully.", variant: "success"})
+          }
+          else {
+            this.displayNotification({title: "Error Saving Data", text: "Bad response received from server. Check for errors in form and try again.", variant: "danger"})
+          }
+        }).catch(error => {
+          this.displayNotification({title: "Error Saving Data", text: error, variant: "danger"})
+        })
+      },
+    }
+    return pageFunctions
+  }
+
+</script>
+
+{% endblock %}
