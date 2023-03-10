@@ -136,6 +136,9 @@ class KEVMetadata(models.Model):
     def __str__(self):
         return f"{self.title}, version: {self.catalog_version}"
 
+    class Meta:
+        verbose_name_plural = 'KEV Metadata'
+
 
 class KEV(models.Model):
     # CVE ID format: CVE-YYYY-ID where ID is up to 7? digits
@@ -149,7 +152,7 @@ class KEV(models.Model):
     action = models.TextField(blank=True)
     date_action_due = models.DateField(null=True)
     found = models.BooleanField(default=False, blank=True)
-    reported = models.BooleanField(default=False, blank=True)
+    # reported = models.BooleanField(default=False, blank=True)
     notes = models.TextField(blank=True)
     kev_metadata = models.ForeignKey(KEVMetadata, on_delete=models.CASCADE)
 

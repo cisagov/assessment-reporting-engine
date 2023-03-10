@@ -291,3 +291,42 @@ class UploadedFindingDelete(generic.edit.DeleteView):
             id_to_move += 1
 
         return redirect(self.success_url)
+
+
+class KEVs(generic.base.TemplateView):
+    model = KEV
+    template_name = 'ptportal/finding/kevs.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['json_kevs'] = serializers.serialize("json", KEV.objects.all().order_by('cve_id'))
+        context['all_kevs'] = KEV.objects.all().order_by('cve_id')
+        context['found_kevs'] = KEV.objects.filter(found=True)
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        postData = json.loads(request.POST['data'])
+        kevs = []
+
+        for i in postData['kevs']:
+            try:
+                obj = KEV.objects.get(cve_id=i)
+                obj.found = True
+                obj.save()
+                kevs.append(obj)
+            except Exception as e:
+                print(e)
+                continue
+
+        deletedKEVs = set(KEV.objects.filter(found=True)) - set(kevs)
+
+        for deleted in deletedKEVs:
+            try:
+                deleted.found = False
+                deleted.save()
+            except Exception as e:
+                print(e)
+                continue
+
+        return HttpResponse(status=200)
