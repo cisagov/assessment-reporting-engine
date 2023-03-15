@@ -141,7 +141,8 @@ urlpatterns += [
     ),
     path(
         'narrative/<slug:narrative_assessment_type>/create/',
-        views.NarrativeCreate.as_view(), name='narrative_create'
+        views.NarrativeCreate.as_view(), 
+        name='narrative_create',
     ),
     path(
         'ajax/ajax-get-narrative-screenshots/',
@@ -199,36 +200,6 @@ urlpatterns += [
         'uploaded-finding/<slug:slug>/delete/',
         views.UploadedFindingDelete.as_view(),
         name='finding_delete',
-    ),
-    path(
-        'ajax/ajax-get-payloads/',
-        views.ajax_get_payloads,
-        name='ajax_get_payloads',
-    ),
-]
-
-# Uploaded Finding Views to create, update, view, delete, and list
-urlpatterns += [
-    path('ajax/ajax-image-delete/', views.ajax_image_delete, name='ajax_image_delete'),
-    path(
-        'ajax/ajax-get-uploaded-finding-details/',
-        views.ajax_get_uploaded_finding_details,
-        name='ajax_get_uploaded_finding_details',
-    ),
-    path(
-        'ajax/ajax-get-uploaded-findings/',
-        views.ajax_get_uploaded_findings,
-        name='ajax_get_uploaded_findings',
-    ),
-    path(
-        'ajax/ajax-get-uploaded-finding-images/',
-        views.ajax_get_uploaded_findings_images,
-        name='ajax_get_uploaded_finding_images',
-    ),
-    path(
-        'ajax/ajax-create-affected-system/',
-        views.ajax_create_affected_system,
-        name='ajax_create_affected_system',
     ),
 ]
 

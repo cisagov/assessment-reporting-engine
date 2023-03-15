@@ -14,7 +14,7 @@
 
 # DM22-0744
 from django.http import JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.views import generic, View
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
@@ -47,104 +47,27 @@ import shutil
 import json
 
 
-def ip_check(system):
-    # TODO update this. See System model FormSetManager branch
-    try:
-        ip = ipaddress.ip_address(system)
-        return True
-    except ValueError:
-        print("Not an IP Address")
-        return False
-
-
-def ajax_create_affected_system(request):
-    # TODO: need to validate and clean this
-    system = request.POST["affected_system"]
-    if ip_check(system):
-        obj, created = AffectedSystems.objects.get_or_create(ip=system)
-    else:
-        obj, created = AffectedSystems.objects.get_or_create(name=system)
-    print("system: ", system)
-    print("obj: ", obj.pk)
-    print("created: ", created)
-    data = {}
-    data["pk"] = obj.pk
-    return JsonResponse(data)
-
-
-def ajax_get_uploaded_finding_details(request):
-    print("in ajax_get_uploaded_finding_details")
-    finding = Finding.objects.filter(cisa_id=request.GET.get("finding")).first()
-    data = {}
-    if request.GET.get("field"):
-        field = request.GET.get("field")
-        data[field] = getattr(finding, field)
-    else:
-        data["description"] = finding.description
-        data["recommendation"] = finding.remediation
-        data["severity"] = finding.severity
-        data["assessment_type"] = finding.assessment_type
-
-    return JsonResponse(data)
-
-
-def ajax_get_uploaded_findings(request):
-    uploaded_findings = UploadedFinding.objects.all().values()
-    uploaded_findings = list(uploaded_findings)
-    return JsonResponse(uploaded_findings, safe=False)
-
-
-def ajax_get_uploaded_findings_images(request):
-    finding = UploadedFinding.objects.filter(slug=request.GET.get("finding")).first()
-    images = ImageFinding.objects.filter(belongs_to_finding=finding).values()
-    data = {}
-    data["images"] = list(images)
-    return JsonResponse(data, safe=False)
-
-
-def redirect_finding_second_form(request, finding_slug, edit_finding=False):
-    print(finding_slug)
-    messages.get_messages(
-        request
-    )  # Clears the messages to eliminate duplicate alerts in template
-    if edit_finding:
-        messages.success(request, " Successfully Updated.")
-    else:
-        messages.success(request, " Successfully Created.")
-
-    return redirect(reverse("finding_create_image_form", kwargs={"slug": finding_slug}))
-
-
-def ajax_get_payloads(request):
-    paths = Payload.objects.all().values()
-    data = {}
-    data['paths'] = list(paths)
-    return JsonResponse(data=data)
-
-
 class UploadedFindingUpdateView(generic.edit.UpdateView):
     model = UploadedFinding
     form_class = EditUploadedFindingForm
-    template_name = "ptportal/finding/finding_form.html"
+    template_name = 'ptportal/finding/finding_form.html'
+
+    def get_object(self):
+        return get_object_or_404(
+            UploadedFinding,
+            slug=self.kwargs['slug'],
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        finding = self.get_object()
 
-        finding = self.object.finding
-        findings_count = Finding.objects.all().count()
-        first = (findings_count // 3) + 1
-        second = first * 2
-
-        context["first"] = first
-        context["second"] = second
-
-        context["default_description"] = finding.description.replace("\n", "")
-        context["default_remediation"] = finding.remediation.replace("\n", "")
-
-        severity_objects = Severities.objects.all()
-        context["severity_description"] = {
-            sev.severity_name: sev.severity_description for sev in severity_objects
-        }
+        context['findings'] = serializers.serialize("json", BaseFinding.objects.all())
+        context['severity'] = Severities.objects.all()
+        context['kevs'] = serializers.serialize("json", KEV.objects.filter(found=True).order_by('cve_id'))
+        context['selected_systems'] = serializers.serialize("json", finding.affected_systems.all())
+        context['screenshots'] = ImageFinding.objects.filter(finding=finding)
+        context['affected_systems'] = serializers.serialize("json", AffectedSystems.objects.all())
 
         engagement = EngagementMeta.object()
         context["engagement"] = engagement
@@ -153,142 +76,226 @@ class UploadedFindingUpdateView(generic.edit.UpdateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        uploaded_finding_slug = self.kwargs["slug"]
-        uploaded_finding = UploadedFinding.objects.filter(
-            slug=uploaded_finding_slug
-        ).first()
-        form = EditUploadedFindingForm(
-            request.POST or None,
-            instance=uploaded_finding,
-            initial={"finding": uploaded_finding.finding},
-        )
+        postData = json.loads(request.POST['data'])
+        finding = self.get_object()
 
-        if form.is_valid():
-            finding = form.save(commit=False)
-            if request.POST.get("customer_specific_finding"):
-                finding.uploaded_finding_name = form.clean_customer_specific_finding()
-            finding.save()
-            # Clear current affected systems, then add the ones saved.
-            if request.POST.get("affected_systems"):
-                finding.affected_systems.clear()
-                finding.affected_systems.add(*form.cleaned_data["affected_systems"])
-            finding_slug = finding.slug
-            return redirect_finding_second_form(request, finding_slug, True)
-        else:
-            # TODO: fix this.
-            print("form is not valid")
-            print("form.errors: ", form.errors)
-            context = super().get_context_data(**kwargs)
-            context["object"] = form
-            return render(request, self.template_name, context)
+        affected_systems = []
+        kevs = []
+        screenshots = []
+
+        severity = Severities.objects.filter(severity_name=postData['findingSeverity']).first()
+
+        finding.description = postData['findingDescription']
+        finding.remediation = postData['findingRemediation']
+        finding.severity = severity
+        finding.assessment_type = postData['assessmentType']
+        finding.mitigation = False if postData['findingMitigation'] == 'False' else True
+        finding.screenshot_description = postData['screenshotDescription']
+        finding.save()
+
+        for i in postData['affectedSystemList']:
+            if AffectedSystems.objects.filter(name=i['value']).exists():
+                affected_systems.append(AffectedSystems.objects.get(name=i['value']))
+
+            else:
+                try:
+                    system = AffectedSystems.objects.create(
+                        name = i['value']
+                    )
+                    affected_systems.append(system)
+                except Exception as e:
+                    print(e)
+                    continue
+
+        affected_system_backup = finding.affected_systems
+
+        try:
+            finding.affected_systems.clear()
+            finding.affected_systems.add(*affected_systems)
+        except Exception as e:
+            print(e)
+            finding.affected_systems = affected_system_backup
+
+        for i in postData['kevs']:
+            try:
+                kevs.append(KEV.objects.get(cve_id=i))
+            except Exception as e:
+                print(e)
+                continue
+
+        kev_backup = finding.KEV
+
+        try:
+            finding.KEV.clear()
+            finding.KEV.add(*kevs)
+        except Exception as e:
+            print(e)
+            finding.KEV = kev_backup
+
+        for index, data in enumerate(postData['screenshots']):
+            if data['uuid'] is not None:
+                img = ImageFinding.objects.get(uuid=data['uuid'])
+                img.order = index + 1
+                img.caption = data['caption']
+                img.save()
+            else:
+                filename = "file" + str(data['imgOrder'])
+                file = request.FILES[filename]
+                try:
+                    img = ImageFinding.objects.create(
+                        order = index + 1,
+                        caption = data['caption'],
+                        file = file,
+                        finding = finding
+                    )
+                except Exception as e:
+                    print(e)
+            screenshots.append(img)
+
+        deletedScreenshots = set(ImageFinding.objects.filter(finding=finding)) - set(screenshots)
+
+        for deleted in deletedScreenshots:
+            deleted.delete()
+
+        return HttpResponse(status=200)
 
 
 class UploadedFindingCreateView(generic.edit.CreateView):
     model = UploadedFinding
     form_class = UploadedFindingForm
-    template_name = "ptportal/finding/finding_form.html"
+    template_name = 'ptportal/finding/finding_form.html'
+
+    def get_object(self):
+        return EngagementMeta.object()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context['findings'] = serializers.serialize("json", BaseFinding.objects.all())
+        uploaded_findings = [o.uploaded_finding_name for o in UploadedFinding.objects.all()]
 
-        context["severity"] = Severities.objects.all()
-        context['kevs'] = serializers.serialize("json", KEV.objects.all())
-        print("in get_context_data")
+        context['findings'] = serializers.serialize("json", BaseFinding.objects.exclude(name__in=uploaded_findings).order_by('name'))
+        context['severity'] = Severities.objects.all()
+        context['kevs'] = serializers.serialize("json", KEV.objects.filter(found=True).order_by('cve_id'))
+        context['affected_systems'] = serializers.serialize("json", AffectedSystems.objects.all())
 
         engagement = EngagementMeta.object()
         context["engagement"] = engagement
-        # Check to see if an engagement exists.
         context["engagement_exists"] = True if engagement else False
 
         return context
 
     def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
         postData = json.loads(request.POST['data'])
 
-        print(postData)
-        form = self.get_form()
+        affected_systems = []
+        kevs = []
 
-        if form.is_valid():
-            print("form is valid!")
-            finding = form.save(commit=False)
-            finding.NIST_800_53 = get_nist_controls(finding=finding.finding)
-            finding.NIST_CSF = get_nist_csf(finding=finding.finding)
-            finding.CIS_CSC = get_cis_csc(finding=finding.finding)
-            finding.timetable = get_timetable(finding=finding.finding)
+        for i in postData['affectedSystemList']:
+            if AffectedSystems.objects.filter(name=i['value']).exists():
+                affected_systems.append(AffectedSystems.objects.get(name=i['value']))
 
-            # Assign the ID to the last ID + 1
-            last_finding = UploadedFinding.objects.last()
-            if last_finding:
-                finding.uploaded_finding_id = last_finding.uploaded_finding_id + 1
+            else:
+                try:
+                    system = AffectedSystems.objects.create(
+                        name = i['value']
+                    )
+                    affected_systems.append(system)
+                except Exception as e:
+                    print(e)
+                    continue
 
-            finding.save()
+        for i in postData['kevs']:
+            try:
+                kevs.append(KEV.objects.get(cve_id=i))
+            except Exception as e:
+                print(e)
+                continue
 
-            # set many-to-many field (affected systems) after object creation
-            if request.POST.get("affected_systems"):
-                finding.affected_systems.add(*form.cleaned_data["affected_systems"])
-            finding_slug = finding.slug
-            return redirect_finding_second_form(request, finding_slug, False)
-        else:
-            print("form.errors", form.errors)
-            context = super().get_context_data(**kwargs)
-            context["form"] = form
-            return render(request, self.template_name, context)
+        base_finding = BaseFinding.objects.filter(pk=postData['selectedFinding']['pk']).first()
+        severity = Severities.objects.filter(severity_name=postData['findingSeverity']).first()
+
+        try:
+            finding = UploadedFinding.objects.create(
+                finding = base_finding,
+                uploaded_finding_name = postData['selectedFinding']['fields']['name'],
+                uploaded_finding_id = UploadedFinding.objects.all().count() + 1,
+                description = postData['findingDescription'],
+                remediation = postData['findingRemediation'],
+                severity = severity,
+                assessment_type = postData['assessmentType'],
+                mitigation = False if postData['findingMitigation'] == 'False' else True,
+                screenshot_description = postData['screenshotDescription']
+            )
+        except Exception as e:
+            print(e)
+            return HttpResponse(status=500)
+
+        try:
+            finding.affected_systems.add(*affected_systems)
+        except Exception as e:
+            print(e)
+        
+        try:
+            finding.KEV.add(*kevs)
+        except Exception as e:
+            print(e)
+
+        for index, data in enumerate(postData['screenshots']):
+            filename = "file" + str(data['imgOrder'])
+            file = request.FILES[filename]
+            try:
+                img = ImageFinding.objects.create(
+                    order = index + 1,
+                    caption = data['caption'],
+                    file = file,
+                    finding = finding
+                )
+            except Exception as e:
+                print(e)
+                continue
+
+        return HttpResponse(status=200)
 
 
 class UploadedFindingDetail(generic.DetailView):
     model = UploadedFinding
-    template_name = "ptportal/finding/finding_detail.html"
+    template_name = 'ptportal/finding/finding_detail.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        previous_url = self.request.META.get("HTTP_REFERER")
-        previous_url = previous_url.split("/")
-        if previous_url[-1]:
-            previous_url = previous_url[-1]
-        else:
-            previous_url = previous_url[-2]
-        context["previous_url"] = previous_url
-        context["uploaded_files"] = ImageFinding.objects.filter(
-            belongs_to_finding=self.object
-        )
+        finding = self.get_object()
+        context['screenshots'] = ImageFinding.objects.filter(finding=finding)
+
         return context
 
 
 class UploadedFindingDelete(generic.edit.DeleteView):
     model = UploadedFinding
-    template_name = "ptportal/finding/finding_confirm_delete.html"
-    success_url = reverse_lazy("index")
+    template_name = 'ptportal/finding/finding_confirm_delete.html'
+    success_url = reverse_lazy('index')
 
     def post(self, request, *args, **kwargs):
-        finding = UploadedFinding.objects.filter(slug=self.kwargs["slug"]).first()
+        finding = self.get_object()
+        finding_id = finding.uploaded_finding_id
 
-        # Delete all images associated with finding
-        ImageFinding.objects.filter(belongs_to_finding=finding).delete()
-
-        # Delete Finding Media Directory
         screenshot_dir_path = os.path.join("pentestportal", "media", "screenshots")
 
         try:
-            shutil.rmtree(os.path.join(screenshot_dir_path, finding.slug))
+            for file in os.listdir(screenshot_dir_path):
+                if file.startswith(finding.slug):
+                    os.remove(os.path.join(screenshot_dir_path, file))
         except:
-            print("Unable to delete finding media directory")
+            print("Unable to delete finding screenshots from media directory.")
 
-        id_to_move = finding.uploaded_finding_id
-        # Delete the Finding
         finding.delete()
 
-        # Reorder remaining uploaded finding ids
-        max_count = UploadedFinding.objects.all().count()
-        while id_to_move <= max_count:
-            next_finding = UploadedFinding.objects.get(
-                uploaded_finding_id=id_to_move + 1
-            )
-            next_finding.uploaded_finding_id = id_to_move
-            next_finding.save()
-            id_to_move += 1
+        for i in UploadedFinding.objects.all():
+            if finding_id < i.uploaded_finding_id:
+                try:
+                    i.uploaded_finding_id -= 1
+                    i.save()
+                except:
+                    continue
 
         return redirect(self.success_url)
 

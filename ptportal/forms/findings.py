@@ -23,7 +23,6 @@ from . import BaseModelForm
 
 
 class UploadedFindingForm(BaseModelForm):
-    customer_specific_finding = forms.CharField(required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -34,17 +33,17 @@ class UploadedFindingForm(BaseModelForm):
         self.fields['remediation'].widget.attrs.update(
             {'class': 'form-control', 'rows': 5, 'required': True, 'tabIndex': '-1'}
         )
-        self.fields['affected_systems'].widget.attrs.update(
-            {'class': 'form-control wh-100', 'multiple': True, 'required': True}
+        self.fields['severity'].widget.attrs.update(
+            {'class': 'form-control', 'required': True}
         )
-        self.fields['customer_specific_finding'].widget.attrs.update(
-            {
-                'class': 'form-control',
-                'rows': 1,
-                'required': False,
-                'style': 'resize: none;',
-                'disabled': 'disabled',
-            }
+        self.fields['assessment_type'].widget.attrs.update(
+            {'class': 'form-control', 'required': True}
+        )
+        self.fields['mitigation'].widget.attrs.update(
+            {'class': 'form-control', 'required': True}
+        )
+        self.fields['screenshot_description'].widget.attrs.update(
+            {'class': 'form-control', 'rows': 5, 'required': False, 'tabIndex': '-1'}
         )
 
     class Meta:
@@ -52,16 +51,14 @@ class UploadedFindingForm(BaseModelForm):
         exclude = (
             'uploaded_finding_name',
             'uploaded_finding_id',
-            'business_description',
-            'NIST_800_53',
-            'NIST_CSF',
+            'timetable',
+            'KEV',
+            'magnitude',
+            'probability',
+            'risk_score',
             'slug',
             'created_at',
             'updated_at',
-            'screenshot_description',
-            'campaign_description',
-            'payload_description',
-            'data_exfil_description',
         )
         widgets = {
             'finding': forms.RadioSelect(
@@ -73,9 +70,6 @@ class UploadedFindingForm(BaseModelForm):
             'assessment_type': forms.RadioSelect(
                 {'class': 'form-check-input', 'required': True}
             ),
-            'discovery': forms.RadioSelect(
-                {'class': 'form-check-input', 'required': True}
-            ),
             'mitigation': forms.RadioSelect(
                 {'class': 'form-check-input', 'required': True}
             ),
@@ -83,9 +77,6 @@ class UploadedFindingForm(BaseModelForm):
 
 
 class EditUploadedFindingForm(BaseModelForm):
-    customer_specific_finding = forms.CharField(
-        required=False, label='Custom Finding', help_text='Update Custom Finding Label'
-    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -96,43 +87,24 @@ class EditUploadedFindingForm(BaseModelForm):
         self.fields['remediation'].widget.attrs.update(
             {'class': 'form-control', 'rows': 5, 'required': True, 'tabIndex': '-1'}
         )
-        self.fields['affected_systems'].widget.attrs.update(
-            {'class': 'form-control wh-100', 'multiple': True, 'required': True}
+        self.fields['severity'].widget.attrs.update(
+            {'class': 'form-control', 'required': True}
         )
-        self.fields['customer_specific_finding'].widget.attrs.update(
-            {
-                'class': 'form-control',
-                'rows': 1,
-                'required': False,
-                'style': 'resize: none;',
-            }
+        self.fields['assessment_type'].widget.attrs.update(
+            {'class': 'form-control', 'required': True}
+        )
+        self.fields['mitigation'].widget.attrs.update(
+            {'class': 'form-control', 'required': True}
         )
 
     class Meta:
         model = UploadedFinding
-        exclude = (
-            'finding',
-            'uploaded_finding_name',
-            'uploaded_finding_id',
-            'business_description',
-            'NIST_800_53',
-            'NIST_CSF',
-            'slug',
-            'created_at',
-            'updated_at',
-            'screenshot_description',
-            'campaign_description',
-            'payload_description',
-            'data_exfil_description',
-        )
+        fields = '__all__'
         widgets = {
             'severity': forms.RadioSelect(
                 {'class': 'form-check-input', 'required': True}
             ),
             'assessment_type': forms.RadioSelect(
-                {'class': 'form-check-input', 'required': True}
-            ),
-            'discovery': forms.RadioSelect(
                 {'class': 'form-check-input', 'required': True}
             ),
             'mitigation': forms.RadioSelect(

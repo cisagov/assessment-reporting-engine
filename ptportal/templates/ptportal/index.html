@@ -16,6 +16,18 @@ DM22-1011
 {% load humanize %}
 {% block active %}#dashboard{% endblock %}
 
+{% block style %}
+
+<style>
+
+  .table-prose tbody tr:hover {
+    background-color: #DDDDDD;
+  }
+
+</style>
+
+{% endblock %}
+
 {% block content %}
 <div id="vueApp">
 	<h1 class='text-4xl'><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
@@ -56,17 +68,28 @@ DM22-1011
 		</div>
 		<div class="text-right">
 			<sds-button v-if="'{{engagement_present}}' == 'True'" variant="primary" @click="redirectLink('{% url "finding_create" %}')">Add Finding</sds-button>
-			<sds-button v-else variant="danger" @click="redirectLink('{% url "engagement_create" %}')">Add Engagement</sds-button>
+			<sds-button v-else variant="danger" @click="redirectLink('{% url "engagement_create" %}')">Add Assessment Details</sds-button>
 		</div>
 	</div>
 
-	<div>
-		{% verbatim  %}
-		<sds-table v-bind="dashboardTableArgs" class="table-prose">
-			<!-- Come back to this once the table slot issue is fixed. -->
-		</sds-table>
-		{% endverbatim  %}
-	</div>
+	<sds-table :fields="fields" :items="items" class="table-prose" v-bind="dashboardTableArgs">
+		<template #cell(finding_name)="{item}">
+			<sds-button v-model="item.finding_name" type="button" @click="redirectLink([[item.url]])">[[item.finding_name]]</sds-button>
+		</template>
+		<template #cell(assessment_type)="{item}">
+			<sds-button v-model="item.assessment_type" type="button" @click="redirectLink([[item.url]])">[[item.assessment_type]]</sds-button>
+		</template>
+		<template #cell(severity)="{item}">
+			<sds-button v-model="item.severity" type="button" @click="redirectLink([[item.url]])">[[item.severity]]</sds-button>
+		</template>
+		<template #cell(created)="{item}">
+			<sds-button v-model="item.created" type="button" @click="redirectLink([[item.url]])">[[item.created]]</sds-button>
+		</template>
+		<template #cell(updated)="{item}">
+			<sds-button v-model="item.updated" type="button" @click="redirectLink([[item.url]])">[[item.updated]]</sds-button>
+		</template>
+	</sds-table>
+	
 </div>
 {% endblock %}
 
@@ -74,75 +97,49 @@ DM22-1011
 
 <script>
 	function pageData() {
-		//Formatting the data for the table to insert into the component.
-		findingsList = []
-		{% for i in object_list %}
-		finding = {
-			"FindingName": "{{i.uploaded_finding_name}}",
-			"AssessmentType": "{{i.assessment_type}}",
-			"Severity": "{{i.severity}}",
-			"Created": "{{i.created_at | naturaltime}}",
-			"Update": "{{i.updated_at | naturaltime}}",
-			"Link": "{% url 'finding_detail' i.slug %}"
-		}
-
-		affectedSystems = ""
-		{% for system in i.affected_systems.all %}
-		{% if forloop.last %}
-		affectedSystems += "{{system}}"
-		{% else %}
-		affectedSystems += "{{system}}, "
-		{% endif %}
-		{% endfor %}
-		finding["AffectedSystem"] = affectedSystems
-		findingsList.push(finding)
-		{% endfor %}
-
-		//Data added to the data of the Vue app.
 		pageData = {
 			dashboardTableArgs: {
 				fields: [
 					{
-						key: "FindingName",
+						key: "finding_name",
 						label: "Finding Name",
 						sortable: true
 					},
 					{
-						key: "AssessmentType",
+						key: "assessment_type",
 						label: "Assessment Type",
-						sortable: true,
-						hidden: ("{{report_type}}" == "RPT") ? false : true
-					},
-					{
-						key: "AffectedSystem",
-						label: "Affected System(s)",
 						sortable: true
 					},
 					{
-						key: "Severity",
+						key: "severity",
 						label: "Severity",
 						sortable: true
 					},
 					{
-						key: "Created",
+						key: "created",
 						label: "Created",
 						sortable: true
 					},
 					{
-						key: "Update",
+						key: "updated",
 						label: "Updated",
 						sortable: true
-					}
+					},
 				],
-				items: findingsList,
-				sortBy: "Update"
+				items: [],
+				sortBy: "finding_name"
 			}
 		}
+
+		{% for i in object_list %}
+
+			pageData.dashboardTableArgs.items.push({finding_name: "{{i.uploaded_finding_name}}", assessment_type: "{{i.assessment_type}}", severity: "{{i.severity}}", created: "{{i.created_at | naturaltime}}", updated: "{{i.updated_at | naturaltime}}", url: "{% url 'finding_detail' i.slug %}"})
+
+		{% endfor %}
 
 		return pageData
 	}
 
-	//Functions passed to the Vue app.
 	function pageMethods() {
 		return {
 			redirectLink: function (link) {

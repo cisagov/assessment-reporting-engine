@@ -14,27 +14,28 @@ DM22-1011
 
 {% extends 'ptportal/base.html' %}
 {% load humanize %}
-{% load widget_tweaks %}
-{% load bootstrap4 %}
 
 {% block content %}
 
-<div id="page-content-wrapper">
-	<div class="container-fluid">
-		<h1>Delete Finding</h1>
-		<hr />
+<h1>Delete Finding</h1>
 
-
-		<p>Are you sure you want to delete the finding: <strong>{{ object.finding.finding_ID }}: {{ object }}</strong>?</p>
-
-		<form action="" method="POST">
-		  {% csrf_token %}
-
-		  <button type="submit" action="" class="btn btn-primary">Yes, delete</button>
-
-		</form>
-
+<div class="mt-2 mb-4 grid grid-cols-2">
+	<div class="">
+		<h2>Finding: {{ object }}</h2>
+		<p>Last modified: {{ object.updated_at | naturaltime }}</p>
 	</div>
 </div>
+
+<div class='row'>
+	<div class='col-md-6'>
+		<p>Are you sure you want to delete the finding: <strong> {{ object }}</strong> and all of its screenshots?</p>
+	</div>
+</div>
+<br><br>
+<form action="" method="POST">
+  {% csrf_token %}
+  <sds-button type="submit" variant="danger">Delete</sds-button>
+</form>
+
 
 {% endblock %}

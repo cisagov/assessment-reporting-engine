@@ -18,9 +18,52 @@ DM22-1011
 {% load widget_tweaks %}
 {% load utils %}
 
+{% block style %}
+
+<style>
+
+  .delete:hover {
+    color: #AB2317;
+  }
+
+  .over {
+    opacity: .5;
+    outline: 1px dashed #BBBBBB;
+    outline-offset: -1px;
+  }
+
+  .image-upload {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .image-upload div {
+    flex-basis: 300px;
+  }
+
+  .image-upload div img {
+    object-fit: cover;
+    width: 300px;
+    height: 200px;
+    overflow: hidden;
+    vertial-align: middle;
+    border-radius: 5px;
+  }
+
+  .image-upload::after {
+    flex-basis: 300px;
+  }
+
+</style>
+
+{% endblock %}
+
 {% block content %}
 {% csrf_token %}
 <div class="mt-2 px-2">
+  {% if not object %}
   <sds-section v-bind="findingSectionArgs" class="mb-4">
     <template #title>
       <span class="font-bold">SELECT FINDING</span>
@@ -35,7 +78,7 @@ DM22-1011
     </template>
     <div class="grid place-items-center">
       <sds-search-box class="w-1/2 place-self-center" :disableSearch="true" variant="primary" placeholder="Search Term" v-model="findingSectionArgs.searchTerm" @update:model-value="filterFindings(findingSectionArgs.searchTerm)"></sds-search-box>
-      <sds-scroll-area class="px-4 pt-4 place-self-center h-80 w-11/12">
+      <sds-scroll-area class="px-4 pt-4 place-self-center h-96 w-11/12">
         <div v-for="finding in findingSectionArgs.findingsSearchList" :key="finding.fields.name" :id="finding.fields.name" class="grid grid-cols-2 border-b border-slate-700 hover:bg-gray-700/[.1]"  @click="selectFinding(finding)" >
           <div class="py-2 px-4">
             <div v-if="finding.fields.finding_type == 'specific'">
@@ -57,9 +100,10 @@ DM22-1011
 
     </div>
   </sds-section>
+  {% endif %}
   <sds-section v-bind="findingDetailSectionArgs" class="mb-4">
     <template #title>
-      <span class="font-bold">ADD DETAIL</span>
+      <span class="font-bold">DETAILS</span>
     </template>
     <template #nav>
 
@@ -81,77 +125,94 @@ DM22-1011
             <div>
               <h2 class="after:content-['*required'] after:ml-0.5 after:text-red-500 after:font-normal font-bold">Severity</h2>
               <span class="font-light text-gray-700">How severe is this finding?</span>
-              <sds-radio-group :required="true" :options="findingDetailSectionArgs.severityOptions" :stacked="true" v-model="formData.findingSeverity"></sds-radio-group>
+              <div v-for="item in findingDetailSectionArgs.severityOptions">
+                <input type="radio" v-model="formData.findingSeverity" :id="item.value" :value="item.value">
+                <label :for="item.value" style="padding:0px 0px 0px 5px">[[item.text]]</label>
+              </div>
             </div>
             <div>
               <h2 class="after:content-['*required'] after:ml-0.5 after:text-red-500 after:font-normal font-bold">Assessment Type</h2>
               <span class="font-light text-gray-700">What kind of assessment is this?</span>
-              <sds-radio-group :required="true" :options="findingDetailSectionArgs.assessmentTypeOptions" :stacked="true" v-model="formData.assessmentType"></sds-radio-group>
-            </div>
-            <div>
-              <h2 class="after:content-['*required'] after:ml-0.5 after:text-red-500 after:font-normal font-bold">Discovery</h2>
-              <span class="font-light text-gray-700">How was this finding discovered?</span>
-              <sds-radio-group :required="true" :options="findingDetailSectionArgs.discoveryOptions" :stacked="true" v-model="formData.discoveryType"></sds-radio-group>
+              <div v-for="item in findingDetailSectionArgs.assessmentTypeOptions">
+                <input type="radio" v-model="formData.assessmentType" :id="item.value" :value="item.value">
+                <label :for="item.value" style="padding:0px 0px 0px 5px">[[item.text]]</label>
+              </div>
             </div>
             <div>
               <h2 class="after:content-['*required'] after:ml-0.5 after:text-red-500 after:font-normal font-bold">Mitigation</h2>
               <span class="font-light text-gray-700">Was this finding mitigated within the assessment timeframe?</span>
-              <sds-radio-group :required="true" :options="findingDetailSectionArgs.mitigationOptions" :stacked="true" v-model="formData.findingMitigation"></sds-radio-group>
+              <div v-for="item in findingDetailSectionArgs.mitigationOptions">
+                <input type="radio" v-model="formData.findingMitigation" :id="item.value" :value="item.value">
+                <label :for="item.value" style="padding:0px 0px 0px 5px">[[item.text]]</label>
+              </div>
             </div>
           </div>
           <div>
-            <h2 class="after:content-['*required'] after:ml-0.5 after:text-red-500 after:font-normal font-bold">Affected Systems</h2>
+            <h2 class="font-bold">Affected Systems</h2>
             <span class="font-light text-gray-700">What affected system(s) does this finding relate to?</span>
-            <sds-multiselect class="w-3/5" :required="true" v-bind="findingDetailSectionArgs.affectedSystemArgs" v-model="findingDetailSectionArgs.affectedSystemArgs.affectedSystem" @update-selected="updateAffectedSystems" @update:model-value="performSearch"></sds-multiselect>
+            <sds-multiselect class="w-3/5" v-bind="findingDetailSectionArgs.affectedSystemArgs" v-model="findingDetailSectionArgs.affectedSystemArgs.affectedSystem" @update-selected="updateAffectedSystems" @update:model-value="performSearch"></sds-multiselect>
           </div>
         </div>
 
       </div>
     </form>
   </sds-section>
+
+  <sds-modal size="lg" v-model="screenshotPreview">
+  <template #title>
+    <p>Screenshot Preview</p>
+  </template>
+    <p class="mb-2"><img :src="[[screenshotURL]]"></p>
+  </sds-modal>
+
   <sds-section v-bind="findingImageSectionArgs" class="mb-4">
     <template #title>
-      <span class="font-bold">ADD SCREENSHOT</span>
+      <span class="font-bold">SCREENSHOTS</span>
     </template>
-    <template #nav>
-
-    </template>
-    <div class="grid place-items-center gap-2">
-      <sds-file-uploader class="place-self-center w-full" v-bind="findingImageSectionArgs.fileUploaderArgs" @add=addFile></sds-file-uploader>
-      <div class="flex flex-row-reverse gap-2 place-self-end">
-
-
+    <div class="grid">
+      <div class="mb-4">
+        <h2 class="after:font-normal font-bold">Screenshot Description</h2>
+        <span class="font-light text-gray-700">Describe the relevance of the screenshots to this finding and to one another (if applicable).</span>
+        <sds-textarea v-model="formData.screenshotDescription" :required="false" :rows="3" placeholder="These screenshots show..."></sds-textarea>
       </div>
+      <br>
+      <sds-file-uploader class="place-self-center w-full" v-bind="findingImageSectionArgs.fileUploaderArgs" @add=addFile>
+      </sds-file-uploader>
+      <br>
+      <ul class="image-upload">
+        <div v-for="(screenshot, i) in formData.screenshots" :key="screenshot" class="screenshot" draggable="true" @dragover="(e) => onDragOver(screenshot, i, e)" @dragend="(e) => finishDrag(screenshot, i, e)" @dragstart="(e) => startDrag(screenshot, i, e)" :class="{over: (screenshot === over.screenshot && screenshot !== dragFrom), [over.dir]: (screenshot === over.screenshot && screenshot !== dragFrom) }">
+          <sds-button @click="screenshotModal(screenshot)"><img :src="[[screenshot.imgURL]]"></sds-button>
+          <div style="float:left; padding:19px 15px 0px 10px; cursor:pointer"><div style="width:15px; height:2px; background-color:gray; margin:2px 0;"></div><div style="width:15px; height:2px; background-color:gray; margin:2px 0;"></div></div><div class="delete" style="float:right; padding:0px 8px 0px 0px; font-size:20pt"><sds-button @click="deleteFile(screenshot)">&#10799;</sds-button></div>
+          <br>
+          <sds-textarea v-model="screenshot.caption" :rows="1" placeholder="Caption"></sds-textarea>
+        </div>
+      </ul>
     </div>
   </sds-section>
   <sds-section v-bind="kevSectionArgs" class="mb-16">
     <template #title>
-      <span class="font-bold">SELECT KNOWN EXPLOITED VULNERABILITIES (KEV)</span>
+      <span class="font-bold">KNOWN EXPLOITED VULNERABILITIES</span>
     </template>
-    <template #nav>
-
-    </template>
+    Select all Known Exploited Vulnerabilities (KEVs) that pertain to this finding (if any). In order to populate the list below, KEVs that have been discovered manually or through Nessus must be added via the <b>KEV Catalog</b> page.<br><br>
     <div class="grid place-items-center">
-      <sds-search-box class="w-1/2 place-self-center" :disableSearch="true" variant="primary" placeholder="Search Term" v-model="kevSectionArgs.searchTerm" @update:model-value="filterKevs(kevSectionArgs.searchTerm)"></sds-search-box>
-      <sds-scroll-area class="px-4 pt-4 place-self-center h-80 w-11/12">
-        <div v-for="kev in kevSectionArgs.kevSearchList" :key="kev.vulnerability" :id="kev.vulnerability" class="grid grid-cols-7 border-b border-slate-700">
-          <div class="py-2 px-4 place-self-center">
-            <sds-toggle-switch v-model="kev.include" @update:model-value="updateKevs"></sds-toggle-switch>
+      <sds-search-box class="w-1/2 place-self-center" :disableSearch="true" variant="primary" placeholder="Search Term" v-model="kevSectionArgs.searchTerm" @update:model-value="filterKEVs(kevSectionArgs.searchTerm)"></sds-search-box>
+      <sds-scroll-area class="px-4 pt-4 place-self-center h-96 w-11/12">
+        <div v-for="kev in kevSectionArgs.kevSearchList" :key="kev.fields.cve_id" class="grid grid-cols-2 border-b border-slate-700 hover:bg-gray-700/[.1]">
+          <div class="py-2 px-4">
+            <div class="font-bold">
+              <input v-if="formData.kevs.includes(kev.fields.cve_id)" type="checkbox" :id="kev.fields.cve_id" name="kev" :value="kev.fields.cve_id" :checked="true" @click=checkKEV(kev.fields.cve_id)><input v-else type="checkbox" :id="kev.fields.cve_id" name="kev" :value="kev.fields.cve_id" @click=checkKEV(kev.fields.cve_id)>  [[kev.fields.cve_id]]</div>
+              <div>[[kev.fields.vulnerability_name]]</div>
+            </div>
+            <div class="py-2">
+              [[kev.fields.description]]
+            </div>
           </div>
-          <div class="py-2 px-4 col-span-3">
-            <div class="font-bold">[[kev.vulnerability]]</div>
-            <div>[[kev.cve]]</div>
-          </div>
-          <div class="py-2 col-span-3">
-            [[kev.description]]
-          </div>
-        </div>
-      </sds-scroll-area>
+        </sds-scroll-area>
     </div>
   </sds-section>
 
   <div class="flex flex-row-reverse">
-    <sds-button variant="primary" @click="submitFinding">Save Finding</sds-button>
+    <sds-button variant="primary" @click="submitFinding">Save</sds-button>
   </div>
 </div>
 {% endblock %}
@@ -162,15 +223,19 @@ function pageData() {
   let pageData = {
     formData: {
       selectedFinding: null,
-      findingDescription: "",
-      findingRemediation: "",
-      findingSeverity: "",
-      assessmentType: "",
-      discoveryType: "",
-      findingMitigation: "",
+      findingDescription: "{{ object.description }}",
+      findingRemediation: "{{ object.remediation }}",
+      findingSeverity: "{{ object.severity.severity_name }}",
+      assessmentType: "{{ object.assessment_type }}",
+      findingMitigation: "{{ object.mitigation }}",
       affectedSystemList: "",
-      imageUploads: [],
+      screenshotDescription: "{{ object.screenshot_description }}",
+      kevs: [],
+      screenshots: [],
     },
+    screenshotPreview: false,
+    screenshotURL: null,
+    fileList: [],
     kevSectionArgs: {
       type: "accented",
       hideContent: false,
@@ -182,11 +247,15 @@ function pageData() {
       hideContent: false,
       fileUploaderArgs: {
         accept: ".jpg, .jpeg, .png",
-        allowedFiletypes: ["image/jpeg", "image/png", "image/jpg"],
-        helperText: "Use a JPG, JPEG, or PNG under 10MB.",
+        allowedFiletypes: ["image/jpg", "image/jpeg", "image/JPG", "image/JPEG", "image/png", "image/PNG"],
+        helperText: "Upload a JPG, JPEG, or PNG under 10MB.",
         multiple: true
       }
     },
+    over: {},
+    startLoc: 0,
+    dragging: false,
+    dragFrom: {},
     findingSectionArgs: {
       type: "accented",
       hideContent: false,
@@ -206,7 +275,6 @@ function pageData() {
         showClear: true,
         selected: [],
         options: [],
-        tempOptions: [],
         affectedSystem: "",
         hideSelectedOptions: true,
         openDirection: "bottom"
@@ -254,77 +322,108 @@ function pageData() {
           value: "Internal",
           text: "Internal"
         },
-        {
-          id: 4,
-          value: "Phishing",
-          text: "Phishing"
-        }
-      ],
-      discoveryOptions: [
-        {
-          id: 1,
-          value: "Manual",
-          text: "Manual"
-        },
-        {
-          id: 2,
-          value: "Tool",
-          text: "Tool"
-        }
       ],
       mitigationOptions: [
         {
           id: 1,
-          value: "Yes",
+          value: "True",
           text: "Yes"
         },
         {
           id: 2,
-          value: "No",
+          value: "False",
           text: "No"
         }
       ]
     },
-
     findingData: function() {
-        var finding_list =[];
-        var findings = {{findings | safe}};
-        for (i = 0; i< findings.length; i++){
-          const proxy = new Proxy(findings[i], {});
-          finding_list.push(proxy);
-        }
+      var finding_list =[];
+      var findings = {{ findings | safe }};
+      for (i = 0; i< findings.length; i++){
+        const proxy = new Proxy(findings[i], {});
+        finding_list.push(proxy);
+      }
 
-        return finding_list;
+      return finding_list;
     },
     kevData: function() {
-      //   var kev_list =[];
-      //   var kevList = {{kevs | safe}};
-      //   for (i = 0; i< kevList.length; i++){
-      //     const proxy = new Proxy(kevList[i], {});
-      //     kevList.push(proxy);
-      //   }
-      // console.log(kev_list);
-      //   return kev_list;
+      var kev_list = [];
+      var kevs = {{ kevs | safe }};
+      for (i = 0; i < kevs.length; i++) {
+        const proxy = new Proxy(kevs[i], {});
+        kev_list.push(proxy);
+      }
+
+      return kev_list;
+    },
+    affectedSystemsData: function() {
+      var as_list = [];
+      var systems = {{ affected_systems | safe }};
+      for (i = 0; i < systems.length; i++) {
+        const system = {
+          key: i,
+          value: systems[i].fields.name,
+          isNewTag: false,
+        }
+        const proxy = new Proxy(system, {});
+        as_list.push(proxy);
+      }
+
+      return as_list;
     },
   }
+
   pageData.findingSectionArgs.findingsSearchList = pageData.findingData().filter(finding => finding)
-  // pageData.kevSectionArgs.kevSearchList = pageData.kevData().filter(kev => kev)
+  pageData.kevSectionArgs.kevSearchList = pageData.kevData().filter(kev => kev)
+  pageData.findingDetailSectionArgs.affectedSystemArgs.options = pageData.affectedSystemsData().filter(system => system)
+
+  {% if object %}
+    pageData.formData.selectedFinding = "{{ object }}"
+    systems = []
+    index = pageData.findingDetailSectionArgs.affectedSystemArgs.options.length
+
+    {% for s in object.affected_systems.all %}
+      sys = {key: index, value: "{{s.name}}", isNewTag: false}
+      proxy = new Proxy(sys, {})
+      systems.push(proxy)
+      index++
+    {% endfor %}
+
+    pageData.findingDetailSectionArgs.affectedSystemArgs.selected = systems
+    pageData.formData.affectedSystemList = systems
+
+    {% for screenshot in screenshots %}
+      imgURL = window.location.origin + "/media/" + "{{screenshot.file}}"
+      caption = "{{screenshot.caption}}"
+      pageData.formData.screenshots.push({order: "{{screenshot.order}}", uuid: "{{screenshot.uuid}}", imgURL: imgURL, caption: caption})
+    {% endfor %}
+
+    {% for kev in object.KEV.all %}
+      pageData.formData.kevs.push("{{kev.cve_id}}")
+    {% endfor %}
+  {% endif %}
+
   return pageData
 }
 
 
 function pageCreated() {
-  this.baseData.layoutArgs.pageTitle = "Add Findings"
+  if ("{{ object }}") {
+    this.baseData.layoutArgs.pageTitle = "Edit Finding: {{ object.uploaded_finding_name }}"
+  }
+  else {
+    this.baseData.layoutArgs.pageTitle = "Add Finding"
+  }
 }
 
 function pageMethods() {
   pageFunctions = {
+    screenshotModal: function (screenshot) {
+      this.screenshotURL = screenshot['imgURL']
+      this.screenshotPreview = true
+    },
     selectFinding: function(finding){
-      //Three scenarios.
-      //1. Nothing selected.
-      //2. Clicking finding that is already selected.
-      //3. Clicking a finding when another is selected.
-      if(this.formData.selectedFinding == null){
+      if (this.formData.selectedFinding == null) {
         this.formData.selectedFinding = finding
         element = document.getElementById(finding.fields.name)
 
@@ -336,7 +435,7 @@ function pageMethods() {
         this.formData.findingRemediation = this.formData.selectedFinding.fields.remediation
         this.formData.findingSeverity = this.formData.selectedFinding.fields.severity
       }
-      else if(this.formData.selectedFinding == finding){
+      else if (this.formData.selectedFinding == finding) {
         this.formData.selectedFinding = null
         element = document.getElementById(finding.fields.name)
         element.classList.remove("bg-blue-300")
@@ -347,7 +446,7 @@ function pageMethods() {
         this.formData.findingRemediation = null
         this.formData.findingSeverity = null
       }
-      else{
+      else {
         oldElement = document.getElementById(this.formData.selectedFinding.fields.name)
         newElement = document.getElementById(finding.fields.name)
         this.formData.selectedFinding = finding
@@ -363,67 +462,115 @@ function pageMethods() {
         this.formData.findingSeverity = this.formData.selectedFinding.fields.severity
       }
     },
-        //Validation function for the finding details section.
-    validateDetails: function(){
-      const detailForm = document.getElementById("detailForm")
-      if(!detailForm.checkValidity()){
-        detailForm.reportValidity()
-      }
-    },
     addFile: function (event) {
       const files = Array.from(event.files)
-      newFiles = files.filter(file => !this.formData.imageUploads.includes(file))
-      Array.prototype.push.apply(this.formData.imageUploads, newFiles)
-      // for(let file in newFiles) {
-      //   //Make uuid null.
-      //   console.log(this.formData);
-      //   // this.formData.push({file: newFiles[file], imgURL: URL.createObjectURL(newFiles[file]), description: "", uuid: null})
-      // }
-      this.displayNotification({'title': 'Images added', text: 'File added to list! Make sure to save the new images.', variant:"info"})
+      newFiles = files.filter(file => !this.fileList.includes(file))
+      imgOrder = this.fileList.length
+      Array.prototype.push.apply(this.fileList, newFiles)
+      for(let file in newFiles) {
+        this.formData.screenshots.push({order: this.formData.screenshots.length + 1, imgOrder: imgOrder, uuid: null, imgURL: URL.createObjectURL(newFiles[file]), caption: ""})
+        imgOrder++
+      }
+      this.displayNotification({'title': 'Images Added', text: 'Files added to list! Make sure to save the new images.', variant:"info"})
     },
-    deleteFile: function (file) {
-      //Skip if negative one in certain cases. Avoid deleting end one.
-      index = this.imageUploads.indexOf(file.file)
+    deleteFile: function (screenshot) {
+      index = this.formData.screenshots.indexOf(screenshot.file)
       if(index != -1){
-        this.imageUploads.splice(index,1)
-        URL.revokeObjectURL(this.formData.imgURL)
+        this.formData.screenshots.splice(index, 1)
+        URL.revokeObjectURL(this.formData.screenshots.imgURL)
       }
-      //Have to get index in other array. Can ignore previous entries inside of imageUploads then.
-      index = this.formData.indexOf(file)
-      this.formData.splice(index, 1)
-    },
-    submitFinding: function () {
-      this.validateDetails();
-      const formData = new FormData()
-      formData.append('data', JSON.stringify(this.formData))
-      let num = 0
-      for(const file in this.imageUploads) {
-        formData.append('file' + num.toString(), this.imageUploads[file])
-        num += 1
-      }
-      fetch(window.location.href, {
-        method: "POST",
-        body: formData,
-        credentials: "same-origin",
-        headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
-      }).then(response => {
-        if (response.ok) {
-          this.displayNotification({'title': 'Finding Saved', text: 'Finding saved successfully.', variant:'success'})
-        }
-      }).catch(error => {
-        this.displayNotification({'title': 'Save Error', text: 'There was an error saving the finding. Please wait and try again.', variant:'danger'})
+      
+      index = this.formData.screenshots.indexOf(screenshot)
+      this.formData.screenshots.splice(index, 1)
+
+      this.formData.screenshots.forEach((screenshot, index) => {
+        screenshot.order = index + 1
       })
     },
-    //Seach box function for the findings list.
-    filterFindings: function(searchTerm){
-      this.findingSectionArgs.findingsSearchList = this.findingData().filter(finding => finding.fields.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                                                    finding.fields.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                                                    // finding.fields.gen_finding.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                                                    finding.fields.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    startDrag(screenshot, i, e) {
+      this.startLoc = e.clientY
+      this.dragging = true
+      this.dragFrom = screenshot
+    },
+    finishDrag(screenshot, pos) {
+      this.formData.screenshots.splice(pos, 1)
+      this.formData.screenshots.splice(this.over.pos, 0, screenshot)
+      this.over = {}
 
+      this.formData.screenshots.forEach((s, index) => {
+        s.order = index + 1
+      })
+    },
+    onDragOver(screenshot, pos, e) {
+      const dir = (this.startLoc < e.clientY) ? 'down': 'up';
+      setTimeout(() => {
+        this.over = { screenshot, pos, dir };
+      }, 50)
+    },
+    submitFinding: function () {
 
-      //Set a small timeout to prevent the function for search for the DOM before it renders.
-      //May have to test times to see if this is too short for a slow computer.
+      if (this.formData.selectedFinding == null) {
+        this.displayNotification({'title': 'Save Error', text: 'A valid finding must be selected from the list before saving.', variant:'danger'})
+      }
+
+      else if (this.formData.findingDescription == null || this.formData.findingDescription == "") {
+        this.displayNotification({'title': 'Save Error', text: 'A finding description must be entered before saving.', variant:'danger'})
+      }
+
+      else if (this.formData.findingRemediation == null || this.formData.findingRemediation == "") {
+        this.displayNotification({'title': 'Save Error', text: 'A remediation description must be entered before saving.', variant:'danger'})
+      }
+
+      else if (this.formData.findingSeverity == null || this.formData.findingSeverity == "") {
+        this.displayNotification({'title': 'Save Error', text: 'A valid finding severity must be selected before saving.', variant:'danger'})
+      }
+
+      else if (this.formData.assessmentType == null || this.formData.assessmentType == "") {
+        this.displayNotification({'title': 'Save Error', text: 'A valid assessment type must be selected before saving.', variant:'danger'})
+      }
+
+      else if (this.formData.findingMitigation == null || this.formData.findingMitigation == "") {
+        this.displayNotification({'title': 'Save Error', text: 'A valid mitigation status must be selected before saving.', variant:'danger'})
+      }
+
+      else {
+        const formData = new FormData()
+        formData.append('data', JSON.stringify(this.formData))
+
+        let num = 0
+        
+        for(const file in this.fileList) {
+          formData.append('file' + num.toString(), this.fileList[file])
+          num += 1
+        }
+
+        fetch(window.location.href, {
+          method: "POST",
+          body: formData,
+          credentials: "same-origin",
+          headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
+        }).then(response => {
+          if (response.ok) {
+            this.displayNotification({'title': 'Finding Saved', text: 'Finding saved successfully.', variant:'success'})
+            if ("{{object}}") {
+              location.reload()
+            }
+            else {
+              base = String(window.location.origin)
+              window.location.href=base.concat("/ptportal/")
+            }
+          }
+          else {
+            this.displayNotification({title: "Error Saving Data", text: "Bad response received from server. Check for errors in form and try again.", variant: "danger"})
+          }
+        }).catch(error => {
+          this.displayNotification({'title': 'Save Error', text: 'There was an error saving the finding. Please wait and try again.', variant:'danger'})
+        })
+      }
+    },
+    filterFindings: function(searchTerm) {
+      this.findingSectionArgs.findingsSearchList = this.findingData().filter(finding => finding.fields.name.toLowerCase().includes(searchTerm.toLowerCase()) || finding.fields.name.toLowerCase().includes(searchTerm.toLowerCase()) || finding.fields.gen_finding.toLowerCase().includes(searchTerm.toLowerCase()) || finding.fields.description.toLowerCase().includes(searchTerm.toLowerCase()))
+
       setTimeout(() => {
         if(this.formData.selectedFinding != null){
           element = document.getElementById(this.formData.selectedFinding.fields.name)
@@ -436,24 +583,25 @@ function pageMethods() {
       }, "50")
 
     },
-    //Search box function for the kev list.
-    filterKevs: function(searchTerm){
-      this.kevSectionArgs.kevSearchList = this.kevData().filter(kev => kev.vulnerability.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                                                      kev.cve.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                                                      kev.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    checkKEV: function(kev) {
+      if (document.getElementById(kev).checked) {
+        this.formData.kevs.push(kev)
+      }
+                
+      else {
+        index = this.formData.kevs.indexOf(kev)
+        this.formData.kevs.splice(index, 1)
+      }
     },
-    //Updates the formData kev list for later submission.
-    updateKevs: function(){
-      this.baseData.kevList = this.kevData().filter(kev => kev.include)
+    filterKEVs: function(searchTerm) {
+      this.kevSectionArgs.kevSearchList = this.kevData().filter(kev => kev.fields.vulnerability_name.toLowerCase().includes(searchTerm.toLowerCase()) || kev.fields.cve_id.toLowerCase().includes(searchTerm.toLowerCase()) || kev.fields.description.toLowerCase().includes(searchTerm.toLowerCase()) || kev.fields.vendor_project.toLowerCase().includes(searchTerm.toLowerCase()) || kev.fields.product.toLowerCase().includes(searchTerm.toLowerCase()))
     },
-    //Allows updating and deleting the mutli select.
     updateAffectedSystems: function(selections) {
       this.findingDetailSectionArgs.affectedSystemArgs.selected = selections
       this.formData.affectedSystemList = selections
     },
-    //For the new tag creation for the multiselect in the details section.
     performSearch: function(value){
-      this.findingDetailSectionArgs.affectedSystemArgs.options = this.findingDetailSectionArgs.affectedSystemArgs.tempOptions.filter((i) => i.value.toLowerCase().includes(i.value.toLowerCase()))
+      this.findingDetailSectionArgs.affectedSystemArgs.options = this.affectedSystemsData().filter(sys => sys.value.toLowerCase().includes(value.toLowerCase()))
     }
   }
   return pageFunctions
