@@ -92,7 +92,7 @@ class Severities(models.Model):
 
 class InternalAndExternalAssessmentManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().filter(assessment_type='Internal/External')
+        return super().get_queryset().filter(assessment_type='External/Internal')
 
 
 class ExternalAssessmentManager(models.Manager):
@@ -115,7 +115,7 @@ class UploadedFindingsOrderManager(models.Manager):
         uploaded_findings = UploadedFinding.objects.all()
         order = uploaded_findings.annotate(
             custom_order=models.Case(
-                models.When(assessment_type="Internal/External", then=models.Value(0)),
+                models.When(assessment_type="External/Internal", then=models.Value(0)),
                 models.When(assessment_type="External", then=models.Value(1)),
                 models.When(assessment_type="Internal", then=models.Value(2)),
                 models.When(assessment_type="Phishing", then=models.Value(3)),
@@ -129,7 +129,6 @@ class UploadedFindingsOrderManager(models.Manager):
 class KEVMetadata(models.Model):
     title = models.TextField(blank=True)
     catalog_version = models.TextField(blank=True, unique=True)
-    # format YYYY-MM-DDTHH:mm:ss.sssZ
     date_released = models.DateTimeField(null=True)
     count = models.IntegerField(null=True)
 
@@ -141,10 +140,8 @@ class KEVMetadata(models.Model):
 
 
 class KEV(models.Model):
-    # CVE ID format: CVE-YYYY-ID where ID is up to 7? digits
     cve_id = models.CharField(max_length=20, unique=True)
     vulnerability_name = models.TextField()
-    # 1:M or M:M relationship in UploadedFindings
     vendor_project = models.TextField(blank=True)
     product = models.TextField(blank=True)
     date_added = models.DateField(null=True)
@@ -152,7 +149,6 @@ class KEV(models.Model):
     action = models.TextField(blank=True)
     date_action_due = models.DateField(null=True)
     found = models.BooleanField(default=False, blank=True)
-    # reported = models.BooleanField(default=False, blank=True)
     notes = models.TextField(blank=True)
     kev_metadata = models.ForeignKey(KEVMetadata, on_delete=models.CASCADE)
 
@@ -203,10 +199,9 @@ class BaseFinding(abstract_models.TimeStampedModel):
     severity = models.CharField(max_length=14, default='TBD')
     assessment_type = models.TextField(
         max_length=20, default='TBD'
-    )  # this is technically a multiselect field
+    )
     timetable = models.TextField(verbose_name="Recommendation Timetable", blank=True)
 
-    # TODO: update these nist fields to many to many foreign keys?
     NIST_800_53 = models.TextField(blank=True)
     NIST_CSF = models.TextField(blank=True)
     CIS_CSC = models.TextField(blank=True)
@@ -283,13 +278,10 @@ class SpecificFinding(BaseFinding):
 class UploadedFinding(abstract_models.TimeStampedModel):
 
     ASSESSMENT_TYPE_CHOICES = (
-        ('Internal/External', 'Internal/External'),
+        ('External/Internal', 'External/Internal'),
         ('External', 'External'),
         ('Internal', 'Internal'),
-        ('Phishing', 'Phishing'),
     )
-
-    DISCOVERY_CHOICES = (('Manual', 'Manual'), ('Tool', 'Tool'))
 
     MITIGATION_CHOICES = ((True, 'Yes'), (False, 'No'))
 
@@ -301,6 +293,7 @@ class UploadedFinding(abstract_models.TimeStampedModel):
         default='Unspecified',
         help_text='What is the name of this Finding?',
     )
+
     uploaded_finding_name = models.CharField(max_length=50000)
     uploaded_finding_id = models.IntegerField(default=0)
 
@@ -333,6 +326,7 @@ class UploadedFinding(abstract_models.TimeStampedModel):
         + 'default for this finding type, \n'
         + 'select below',
     )
+
     assessment_type = models.CharField(
         max_length=17,
         choices=ASSESSMENT_TYPE_CHOICES,
@@ -341,19 +335,11 @@ class UploadedFinding(abstract_models.TimeStampedModel):
         verbose_name='Assessment Type',
         help_text='What kind of assessment is this?',
     )
-    discovery = models.CharField(
-        max_length=8,
-        choices=DISCOVERY_CHOICES,
-        verbose_name='Discovery',
-        default='Unspecified',
-        help_text='How was this finding discovered?',
-    )
 
     mitigation = models.BooleanField(
         choices=MITIGATION_CHOICES,
         verbose_name='Mitigation',
         default=False,
-        # null=True,
         help_text='Was this finding mitigated within the assessment timeframe?',
     )
 
@@ -368,15 +354,11 @@ class UploadedFinding(abstract_models.TimeStampedModel):
         blank=True, verbose_name='Screenshot Description'
     )
 
-    # if Uploaded Finding:KEVs is M:M, then
-    # KEV = models.ManyToManyField(KEV, ...)
-    KEV = models.ForeignKey(
+    KEV = models.ManyToManyField(
         KEV,
-        on_delete=models.CASCADE,
         verbose_name='Known Exploited Vulnerability',
-        help_text='What is the name of this KEV?',
-        blank=True,
-        null=True,
+        help_text='What KEV(s) pertain to this finding?',
+        blank=True
     )
 
     magnitude = models.IntegerField(
