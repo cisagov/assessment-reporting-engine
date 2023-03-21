@@ -25,17 +25,13 @@ from django.views import generic
 from django.forms.models import modelformset_factory
 
 from ptportal.forms import (
-    EngagementScenariosForm,
     EngagementForm,
     HVATargetForm,
     HVATargetFormSet0,
     HVATargetFormSet1,
-    ScenarioFormSet,
 )
 
 from ptportal.models import (
-    AssessmentScenarios,
-    AssumptionsConstraints,
     EngagementMeta,
     HVAData,
     HVATarget,
@@ -68,6 +64,7 @@ class EngagementCreate(generic.edit.CreateView):
         return context
 
     def post(self, request, *args, **kwargs):
+
         postData = json.loads(request.body)
         report = Report.object()
 
@@ -91,7 +88,6 @@ class EngagementCreate(generic.edit.CreateView):
         engageForm = EngagementForm(postData)
 
         if engageForm.is_valid():
-            print("Saving form")
             engageForm.save()
         else:
             return HttpResponse(status=400, reason=engageForm.errors)
@@ -163,7 +159,6 @@ class EngagementUpdate(generic.edit.UpdateView):
 
         engageForm = EngagementForm(postData, instance=EngagementMeta.objects.get(id=1))
         if engageForm.is_valid():
-            print("Saving form")
             engageForm.save()
         else:
             print(engageForm.errors)

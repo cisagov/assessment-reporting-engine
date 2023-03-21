@@ -1,0 +1,102 @@
+﻿Acronym,Definition
+ADCS,Active Directory Certificate Services
+AES,Advanced Encryption Standard
+ARP,Address Resolution Protocol
+ATT&CK,"Adversarial Tactics, Techniques, and Common Knowledge"
+AV,Anti-Virus
+C2,Command-and-Control
+CA,Certificate Authority
+CIFS,Common Internet File System
+CIS,Center for Internet Security
+CISA,Cybersecurity and Infrastructure Security Agency
+CLI,Command Line Interface
+CMS,Content Management System
+CPL,Control Panel (File Format)
+CSF,Cybersecurity Framework
+DA,Domain Administrator
+DC,Domain Controller
+DCC2,Domain Cached Credentials Version 2
+DHCP,Dynamic Host Configuration Protocol
+DHS,Department of Homeland Security
+DLL,Dynamic-Link Library (File Format)
+DLP,Data Loss Prevention
+DNS,Domain Name System
+DoS,Denial of Service
+EDR,Endpoint Detection and Response
+EOL,End-of-Life
+EWS,Exchange Web Services
+EXE,Executable (File Format)
+FCRM,Financial Crime Risk Management
+FTP,File Transfer Protocol
+FTPS,File Transfer Protocol Secure
+GPO,Group Policy Object
+HTA,Hypertext Markup Language Application (File Format)
+HTML,Hypertext Markup Language
+HTTP,Hypertext Transfer Protocol
+HTTPS,Hyper Text Transfer Protocol Secure
+iDRAC,Integrated Dell Remote Access Controller
+IIS,Internet Information Services
+IP,Internet Protocol
+IPMI,Intelligent Platform Management Interface
+ISCSI,Internet Small Computer Systems Interface
+JS,JScript (Microsoft File Format)
+LDAP,Lightweight Directory Access Protocol
+LDAPS,Secure Lightweight Directory Access Protocol
+LFI,Local File Inclusion
+LLMNR,Link-Local Multicast Name Resolution
+LSA,Local Security Authority
+LSASS,Local Security Authority Subsystem Service
+MAQ,Machine Account Quota
+mDNS,Multicast Domain Name System
+MFA,Multi-Factor Authentication
+MitM,Machine-in-the-Middle
+MS-EFSRPC,Microsoft Encrypting File System Remote Protocol
+NBT-NS,NetBIOS Name Service
+NIST,National Institute of Standards and Technology
+NTLM,New Technology Local Area Network Manager
+OS,Operating System
+OTP,One Time Password
+OWA,Outlook Web Access
+PACE,Post-Assessment Closure Evaluation
+PDF,Portable Document Format
+PHI,Protected Health Information
+PHP,Hypertext Preprocessor
+PIF,Program Information File
+PII,Personally Identifiable Information
+POC,Point of Contact
+PSK,Pre-Shared Key
+PTH,Pass-the-Hash
+RADIUS,Remote Authentication Dial-In User Service
+RC4,Rivest Cipher 4
+RDP,Remote Desktop Protocol
+RVA,Risk and Vulnerability Assessment
+SAM,Security Account Manager
+SAN,Subject Alternate Name
+SDK,Software Development Kit
+SDLC,System Development Lifecycle
+SFTP,Secure Shell File Transfer Protocol
+SMB,Server Message Block
+SNMP,Simple Network Management Protocol
+SOCKS,Socket Secure
+SP,Special Publication
+SPN,Service Principal Name
+SQL,Structured Query Language
+SSH,Secure Shell
+SSL,Secure Sockets Layer
+SSN,Social Security Number
+TCP,Transmission Control Protocol
+TGS,Ticket Granting Service
+TGT,Ticket Granting Ticket
+TLS,Transport Layer Security
+UDP,User Datagram Protocol
+UPnP,Universal Plug and Play
+UPS,Uninterruptible Power Supply
+VBA,Visual Basic for Applications
+VPN,Virtual Private Network
+Wi-Fi,Wireless Fidelity
+WMI,Windows Management Instrumentation
+WPA,Wireless Fidelity Protected Access
+XDR,Extended Detection and Response
+XLL,Excel Add-In (File Format)
+XML,Extensible Markup Language
+XSS,Cross-Site Scripting

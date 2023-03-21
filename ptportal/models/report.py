@@ -20,52 +20,20 @@ from . import abstract_models
 from . import engagement, findings
 from hashlib import sha256
 
-REPORT_TYPE_CHOICES = (('RVA', 'RVA'), ('RPT', 'RPT'), ('HVA', 'HVA'))
+REPORT_TYPE_CHOICES = (('RVA', 'RVA'), ('RPT', 'RPT'), ('FAST', 'FAST'), ('HVA', 'HVA'))
 
 
 class Report(abstract_models.TimeStampedModel):
-    report_type = models.CharField(max_length=3, choices=REPORT_TYPE_CHOICES)
-    cisa_results = models.TextField(blank=True)
-    cisa_recommendations = models.TextField(blank=True)
-    scanned_scope_ext = models.TextField(blank=True, validators=[scope_validator])
-    scanned_scope_int = models.TextField(blank=True, validators=[scope_validator])
-    scope_phishing = models.TextField(blank=True)
-    IP_scanned_ext = models.CharField(max_length=10, blank=True)
-    IP_scanned_int = models.CharField(max_length=10, blank=True)
-    users_attempted_phishing = models.CharField(max_length=10, blank=True)
-    hosts_IDd_ext = models.CharField(max_length=10, blank=True)
-    hosts_IDd_int = models.CharField(max_length=10, blank=True)
-    users_phished = models.CharField(max_length=10, blank=True)
-    password_analysis = models.TextField(
-        blank=True, help_text='Use Code View to edit the password analysis content.'
-    )
-
-    # payload_description = models.TextField(
-    #     blank=True, verbose_name='Payload Description'
-    # )
-
-    # For HVA Figure 5
-    HVA_external_scenario = models.TextField(blank=True)
-    HVA_phishing_scenario = models.TextField(blank=True)
-    HVA_web_application_scenario = models.TextField(blank=True)
-    HVA_internal_scenario = models.TextField(blank=True)
-    HVA_ITE_scenario = models.TextField(blank=True)
-    HVA_data_exfiltration_scenario = models.TextField(blank=True)
-
-    internal_business_scope = models.TextField(blank=True)
-    external_business_scope = models.TextField(blank=True)
-    external_results_business_desc = models.TextField(blank=True)
-    internal_results_business_desc = models.TextField(blank=True)
-    phishing_results_business_desc = models.TextField(blank=True)
-    phishing_results_susceptibility = models.TextField(blank=True)
-    noted_system_strengths = models.TextField(blank=True)
-
-    # for RPT app B:
-    emails_identified = models.IntegerField(default=0000, blank=True)
-    emails_breached = models.IntegerField(default=0000, blank=True)
-    credentials_identified = models.IntegerField(default=0000, blank=True)
-    credentials_validated = models.IntegerField(default=0000, blank=True)
-    email_percentage = models.TextField(default="0%", blank=True)
+    report_type = models.CharField(max_length=4, choices=REPORT_TYPE_CHOICES)
+    significant_findings = models.TextField(blank=True)
+    recommendations = models.TextField(blank=True)
+    observed_strengths = models.TextField(blank=True)
+    users_targeted = models.IntegerField(blank=True, null=True)
+    external_scanned = models.IntegerField(blank=True, null=True)
+    external_discovered = models.IntegerField(blank=True, null=True)
+    internal_scanned = models.IntegerField(blank=True, null=True)
+    internal_discovered = models.IntegerField(blank=True, null=True)
+    password_analysis = models.TextField(blank=True)
 
     class Meta:
         verbose_name_plural = 'Report'
@@ -107,39 +75,6 @@ class RPTBreachedEmails(models.Model):
 
     def __str__(self):
         return str(self.breached_email)
-
-
-class AssessmentScenarios(models.Model):  # For figure 2
-    order = models.IntegerField(default=0000, null=True, blank=True)
-    scenario = models.TextField(blank=True)
-    assessment_scenario_type = models.CharField(max_length=254, blank=True)
-    used = models.BooleanField(default=True)
-    belongs_to_report = models.ForeignKey(
-        Report, null=True, blank=True, on_delete=models.CASCADE
-    )
-    belongs_to_eng = models.ForeignKey(
-        engagement.EngagementMeta, null=True, blank=True, on_delete=models.CASCADE
-    )
-
-    class Meta:
-        verbose_name_plural = 'Report-Assessment Scenarios'
-
-    def __str__(self):
-        return "Report-Assessment Scenarios"
-
-
-class AssumptionsConstraints(models.Model):  # For figure 3
-    overview = models.TextField()
-    belongs_to_report = models.ForeignKey(Report, null=True, on_delete=models.CASCADE)
-    belongs_to_eng = models.ForeignKey(
-        engagement.EngagementMeta, null=True, on_delete=models.CASCADE
-    )
-
-    class Meta:
-        verbose_name_plural = 'Report-Assumptions & Constraints'
-
-    def __str__(self):
-        return "Report-Assumptions & Constraints"
 
 
 class Acronym(models.Model):

@@ -15,6 +15,7 @@
 # DM22-0744
 from django import template
 import inflect
+from django.template.defaultfilters import stringfilter
 
 register = template.Library()
 p = inflect.engine()
@@ -23,3 +24,12 @@ p = inflect.engine()
 @register.filter(name='num_to_word')
 def num_to_word(value):
     return p.number_to_words(value)
+
+@register.filter(name='split')
+@stringfilter
+def split(value, key):
+    return value.split(key)
+
+@register.filter
+def percentage(value):
+    return '{0:.2%}'.format(value)

@@ -22,28 +22,17 @@ from . import BaseModelForm
 class ReportForm(BaseModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['scanned_scope_ext'].widget.attrs.update({'rows': '1'})
-        self.fields['scanned_scope_int'].widget.attrs.update({'rows': '1'})
-        self.fields['IP_scanned_ext'].widget.attrs.update({'rows': '1'})
-        self.fields['IP_scanned_int'].widget.attrs.update({'rows': '1'})
-        self.fields['hosts_IDd_ext'].widget.attrs.update({'rows': '1'})
-        self.fields['hosts_IDd_int'].widget.attrs.update({'rows': '1'})
-        # For HVA Figure 5
-        self.fields['noted_system_strengths'].widget.attrs.update({'rows': '5'})
-        # for RPT app B:
-        self.fields['emails_identified'].widget.attrs.update({'class': ' form-control'})
-        self.fields['emails_breached'].widget.attrs.update({'class': ' form-control'})
-        self.fields['credentials_identified'].widget.attrs.update(
-            {'class': ' form-control'}
-        )
-        self.fields['credentials_validated'].widget.attrs.update(
-            {'class': ' form-control'}
-        )
-        self.fields['email_percentage'].widget.attrs.update(
-            {'class': ' form-control', 'rows': '1'}
-        )
+        self.fields['significant_findings'].widget.attrs.update({'rows': '3'})
+        self.fields['recommendations'].widget.attrs.update({'rows': '3'})
+        self.fields['observed_strengths'].widget.attrs.update({'rows': '3'})
+        self.fields['external_scanned'].widget.attrs.update({'rows': '1'})
+        self.fields['external_discovered'].widget.attrs.update({'rows': '1'})
+        self.fields['internal_scanned'].widget.attrs.update({'rows': '1'})
+        self.fields['internal_discovered'].widget.attrs.update({'rows': '1'})
+        self.fields['password_analysis'].widget.attrs.update({'rows': '3'})
 
     class Meta:
         model = Report
+        fields = '__all__'
         exclude = ('report_type',)
         widgets = {}

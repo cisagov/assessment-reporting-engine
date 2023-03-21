@@ -47,8 +47,8 @@ class CIS_CSC(models.Model):
     CIS_ID = models.IntegerField(default=0000, null=True, blank=True)
     name = models.TextField(blank=True)
     description = models.TextField(blank=True)
-    gen_findings = models.ManyToManyField(findings.GeneralFinding)
-    spec_findings = models.ManyToManyField(findings.SpecificFinding)
+    findings = models.ManyToManyField(findings.BaseFinding)
+    finding_ids = models.TextField(blank=True)
 
     def __str__(self):
         return str(self.CIS_ID)

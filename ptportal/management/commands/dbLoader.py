@@ -26,7 +26,6 @@ from ptportal.models import (
     ATTACK,
     Tools,
     Report,
-    AssessmentScenarios,
     Severities,
     NarrativeType,
     Narrative,
@@ -41,69 +40,6 @@ from ptportal.models import (
 
 
 class Command(BaseCommand):
-    # For figure 2
-    # TODO Hard coded for now, consider future implications
-    def add_scenarios(self, report_type):
-
-        # HVA
-        if report_type == 'HVA':
-            AssessmentScenarios.objects.get_or_create(
-                order=1,
-                assessment_scenario_type='External Assessment',
-                scenario="Determine what vulnerabilities exist in {{eng_meta.customer_initials}} web presence and publicly available hosts that an unauthorized, Internet-based attacker could discover and exploit.",
-            )
-            AssessmentScenarios.objects.get_or_create(
-                order=2,
-                assessment_scenario_type='Phishing Assessment',
-                scenario="Determine how effective a phishing campaign would be against {{eng_meta.customer_initials}} employees by using enticing emails to convince users to click malicious links.",
-            )
-            AssessmentScenarios.objects.get_or_create(
-                order=3,
-                assessment_scenario_type='Web Application Assessment',
-                scenario="Determine the accessibility of sensitive information through the web application by evaluating how the application processes, protects, and stores data submitted by application users.",
-            )
-            AssessmentScenarios.objects.get_or_create(
-                order=4,
-                assessment_scenario_type='Internal Assessment',
-                scenario="Determine what vulnerabilities exist within the {{eng_meta.customer_initials}} internal network that an attacker with physical access to the {Stakeholder Initials} network could discover and exploit.",
-            )
-            AssessmentScenarios.objects.get_or_create(
-                order=5,
-                assessment_scenario_type='Internal Threat Emulation',
-                scenario="Determine how an attacker with assumed internal access, through phishing and other means, could navigate the {{eng_meta.customer_initials}} network to gain access to core servers, applications, and other sensitive information.",
-            )
-            AssessmentScenarios.objects.get_or_create(
-                order=6,
-                assessment_scenario_type='Data Exfiltration',
-                scenario="Determine how a malicious insider could gather sensitive information and transfer the data outside of the {{eng_meta.customer_initials}} network.",
-            )
-        elif report_type == 'RVA':
-            AssessmentScenarios.objects.get_or_create(
-                order=1,
-                assessment_scenario_type='External Assessment',
-                scenario="Determine what exploitable vulnerabilities exist within the POC-provided external IP address ranges that an uncredentialed, Internet-based user can exploit.",
-            )
-            AssessmentScenarios.objects.get_or_create(
-                order=2,
-                assessment_scenario_type='Phishing Assessment',
-                scenario="Determine the susceptibility of staff and infrastructure to phishing attacks, and determine what impact a phished user workstation could have on the internal network.",
-            )
-            AssessmentScenarios.objects.get_or_create(
-                order=3,
-                assessment_scenario_type='Internal Assessment',
-                scenario="Determine what impact an internal attacker or disgruntled employee could have with access to the internal network.",
-            )
-        elif report_type == 'RPT':
-            AssessmentScenarios.objects.get_or_create(
-                order=1,
-                assessment_scenario_type='External Assessment',
-                scenario="Determine what exploitable vulnerabilities exist within the POC-provided external IP address ranges that an uncredentialed, Internet-based user can exploit.",
-            )
-            AssessmentScenarios.objects.get_or_create(
-                order=2,
-                assessment_scenario_type='Phishing Assessment',
-                scenario="Determine the susceptibility of staff and infrastructure to phishing attacks.",
-            )
 
     def add_severities(self):
         Severities.objects.get_or_create(
@@ -161,144 +97,11 @@ class Command(BaseCommand):
             slug='phishing'
         )
 
-    def add_acronyms(self):
-
-        acronyms = [
-            ("ADCS", "Active Directory Certificate Services"),
-            ("AES", "Advanced Encryption Standard"),
-            ("ARP", "Address Resolution Protocol"),
-            ("ATT&CK", "Adversarial Tactic, Techniques, and Common Knowledge"),
-            ("AV", "Anti-Virus"),
-            ("C2", "Command-and-Control"),
-            ("CA", "Certificate Authority"),
-            ("CIFS", "Common Internet File System"),
-            ("CIS", "Critical Infrastructure Security"),
-            ("CISA", "Cybersecurity Infrastructure Security Agency"),
-            ("CLI", "Command Line Interface"),
-            ("CMS", "Content Management System"),
-            ("CPL", "Control Panel (File Format)"),
-            ("CSF", "Cybersecurity Framework"),
-            ("DA", "Domain Administrator"),
-            ("DC", "Domain Controller"),
-            ("DCC2", "Domain Cached Credentials Version 2"),
-            ("DHCP", "Dynamic Host Configuration Protocol"),
-            ("DHS", "Department of Homeland Security"),
-            ("DLL", "Dynamic-Link Library (File Format)"),
-            ("DLP", "Data Loss Prevention"),
-            ("DNS", "Domain Name System"),
-            ("DoS", "Denial of Service"),
-            ("EDR", "Endpoint Detection and Response"),
-            ("EWS", "Exchange Web Services"),
-            ("EXE", "Executable (File Format)"),
-            ("FCRM", "Financial Crime Risk Management"),
-            ("FTP", "File Transfer Protocol"),
-            ("FTPS", "File Transfer Protocol Secure"),
-            ("GPO", "Group Policy Object"),
-            ("HTA", "Hyptertext Markup Language Application (File Format)"),
-            ("HTML", "Hypertext Markup Language"),
-            ("HTTP", "Hypertext Transfer Protocol"),
-            ("HTTPS", "Hyper Text Transfer Protocol Secure"),
-            ("iDRAC", "Integrated Dell Remote Access Controller"),
-            ("IIS", "Internet Information Services"),
-            ("IP", "Internet Protocol"),
-            ("IPMI", "Intelligent Platform Management Interface"),
-            ("ISCSI", "Internet Small Computer Systems Interface"),
-            ("JS", "JScript (Microsoft File Format)"),
-            ("LDAP", "Lightweight Directory Access Protocol"),
-            ("LDAPS", "Secure Lightweight Directory Access Protocol"),
-            ("LFI", "Local File Inclusion"),
-            ("LLMNR", "Link-Local Multicast Name Resolution"),
-            ("LSA", "Local Security Authority"),
-            ("LSASS", "Local Security Authority Subsystem Service"),
-            ("MAQ", "Machine Account Quota"),
-            ("mDNS", "Multicast Domain Name System"),
-            ("MitM", "Machine in the Middle"),
-            ("MS-EFSRPC", "Microsoft Encrypting File System Remote Protocol"),
-            ("NBT-NS", "NetBIOS Name Service"),
-            ("NIST", "National Institute of Standards and Technology"),
-            ("NTLM", "New Technology Local Area Network Manager"),
-            ("OS", "Operating System"),
-            ("OTP", "One Time Password"),
-            ("OWA", "Outlook Web Access"),
-            ("PHI", "Protected Health Information"),
-            ("PHP", "Hypertext Preprocessor"),
-            ("PII", "Personally Identifiable Information"),
-            ("POC", "Point of Contact"),
-            ("PSK", "Pre-Shared Key"),
-            ("PTH", "Pass-the-Hash"),
-            ("RADIUS", "Remote Authentication Dial-In User Service"),
-            ("RC4", "Rivest Cipher 4"),
-            ("RDP", "Remote Desktop Protocol"),
-            ("RVA", "Risk and Vulnerability Assessment"),
-            ("SAM", "Security Account Manager"),
-            ("SAN", "Subject Alternate Name"),
-            ("SDK", "Software Development Kit"),
-            ("SDLC", "System Development Lifecycle"),
-            ("SFTP", "Secure Shell File Transfer Protocol"),
-            ("SMB", "Server Message Block"),
-            ("SNMP", "Simple Network Management Protocol"),
-            ("SOCKS", "Socket Secure"),
-            ("SP", "Special Publication"),
-            ("SPN", "Service Principal Name"),
-            ("SQL", "Structured Query Language"),
-            ("SSH", "Secure Shell"),
-            ("SSL", "Secure Sockets Layer"),
-            ("SSN", "Social Security Number"),
-            ("TCP", "Transmission Control Protocol"),
-            ("TGS", "Ticket Granting Server"),
-            ("TGT", "Ticket Granting Ticket"),
-            ("TLS", "Transport Layer Security"),
-            ("UDP", "User Datagram Protocol"),
-            ("UPnP", "Universal Plug and Play"),
-            ("UPS", "Uninterruptible Power Supply"),
-            ("VBA", "Visual Basic for Applications"),
-            ("VPN", "Virtual Private Network"),
-            ("Wi-Fi", "Wireless Fidelity"),
-            ("WMI", "Windows Management Instrumentation"),
-            ("WPA", "Wireless Fidelity Protected Access"),
-            ("XDR", "Extended Detection and Response"),
-            ("XLL", "Excell Add-In (File Format)"),
-            ("XML", "Extensible Markup Language"),
-            ("XSS", "Cross-Site Scripting"),
-        ]
-
-        for a in acronyms:
-            Acronym.objects.get_or_create(
-                acronym=a[0],
-                definition=a[1],
-                context="Standard acronym included in the application.",
-                auto_found='M',
-                belongs_to_report=Report.object(),
-                include=True,
-            )
-
     def handle(self, *args, **options):
         report = Report.object()
-        if report:
-            if report.report_type == 'RPT':
-                report.external_business_scope = (
-                    "Testing the general IT security of the external networks"
-                )
-            else:
-                report.external_business_scope = (
-                    "Publicly available customer endpoints discover during scan"
-                )
-            report.test_location_ext = "DHS Lab, Arlington, VA"
-            report.save()
-        else:
-            report = Report(
-                report_type='RVA',
-                external_business_scope=(
-                    "Publicly available customer endpoints discover during scan"
-                ),
-                test_location_ext="DHS Lab, Arlington, VA",
-            )
-            report.save()
 
-        self.add_scenarios(report.report_type)
         self.add_severities()
         self.add_narrative_types()
-        self.add_acronyms()
 
         # CIS Control Catalog data frame
         cis_csc_df = pd.read_csv('assets/CIS_CSC_v8.csv')
@@ -326,6 +129,19 @@ class Command(BaseCommand):
                     tactics=row['Tactics'],
                     description=row['Description'],
                     url=row['URL']
+                )
+            except Exception as e:
+                print(e)
+                continue
+
+        acronyms = pd.read_csv('assets/acronyms.csv')
+        acronym_iter = acronyms.iterrows()
+
+        for index, row in acronym_iter:
+            try:
+                Acronym.objects.create(
+                    acronym=row['Acronym'],
+                    definition=row['Definition']
                 )
             except Exception as e:
                 print(e)
@@ -471,9 +287,12 @@ class Command(BaseCommand):
                     gen_unique_cis_controls.add(y.strip())
 
         for control in gen_unique_cis_controls:
+            #cis_csc_obj, __ = CIS_CSC.objects.get_or_create(CIS_ID=control)
+            #gen_findings = GeneralFinding.objects.filter(CIS_CSC__contains=control)
+            #cis_csc_obj.gen_findings.add(*gen_findings)
             cis_csc_obj, __ = CIS_CSC.objects.get_or_create(CIS_ID=control)
-            gen_findings = GeneralFinding.objects.filter(CIS_CSC__contains=control)
-            cis_csc_obj.gen_findings.add(*gen_findings)
+            findings = BaseFinding.objects.filter(CIS_CSC__contains=control)
+            cis_csc_obj.findings.add(*findings)
 
         # ---Specific Findings---
 
@@ -575,10 +394,10 @@ class Command(BaseCommand):
                 if y != '':
                     spec_unique_cis_controls.add(y.strip())
 
-        for control in spec_unique_cis_controls:
-            cis_csc_obj, __ = CIS_CSC.objects.get_or_create(CIS_ID=control)
-            spec_findings = SpecificFinding.objects.filter(CIS_CSC__contains=control)
-            cis_csc_obj.spec_findings.add(*spec_findings)
+        #for control in spec_unique_cis_controls:
+            #cis_csc_obj, __ = CIS_CSC.objects.get_or_create(CIS_ID=control)
+            #spec_findings = SpecificFinding.objects.filter(CIS_CSC__contains=control)
+            #cis_csc_obj.spec_findings.add(*spec_findings)
 
         # --- Known Exploited Vulnerabilities ---
 
