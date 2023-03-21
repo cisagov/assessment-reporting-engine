@@ -37,7 +37,6 @@ from ...models import (
     DataExfil,
     Payload,
     Campaign,
-    PortMappingHost,
     NarrativeStep,
 )
 

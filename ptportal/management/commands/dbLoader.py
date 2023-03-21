@@ -287,9 +287,6 @@ class Command(BaseCommand):
                     gen_unique_cis_controls.add(y.strip())
 
         for control in gen_unique_cis_controls:
-            #cis_csc_obj, __ = CIS_CSC.objects.get_or_create(CIS_ID=control)
-            #gen_findings = GeneralFinding.objects.filter(CIS_CSC__contains=control)
-            #cis_csc_obj.gen_findings.add(*gen_findings)
             cis_csc_obj, __ = CIS_CSC.objects.get_or_create(CIS_ID=control)
             findings = BaseFinding.objects.filter(CIS_CSC__contains=control)
             cis_csc_obj.findings.add(*findings)
@@ -393,11 +390,6 @@ class Command(BaseCommand):
             for y in value_list:
                 if y != '':
                     spec_unique_cis_controls.add(y.strip())
-
-        #for control in spec_unique_cis_controls:
-            #cis_csc_obj, __ = CIS_CSC.objects.get_or_create(CIS_ID=control)
-            #spec_findings = SpecificFinding.objects.filter(CIS_CSC__contains=control)
-            #cis_csc_obj.spec_findings.add(*spec_findings)
 
         # --- Known Exploited Vulnerabilities ---
 
