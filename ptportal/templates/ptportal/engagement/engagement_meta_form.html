@@ -93,11 +93,11 @@ DM22-1011
 			<div class="grid grid-cols-6 gap-2 mb-8">
 				<div class="col-span-3">
 					<h4><b>{{ form.customer_long_name.label_tag }}</b></h4>
-					<sds-input v-model="formData.customer_long_name" placeholder="Oz Corp"></sds-input>
+					<sds-input v-model="formData.customer_long_name" placeholder="Organization Name"></sds-input>
 				</div>
 				<div class="col-span-3">
 					<h4><b>{{ form.customer_initials.label_tag }}</b></h4>
-					<sds-input v-model="formData.customer_initials" placeholder="OZC"></sds-input>
+					<sds-input v-model="formData.customer_initials" placeholder="ON"></sds-input>
 				</div>
 				<div class="col-span-3">
 					<h4><b>{{ form.customer_POC_name.label_tag }}</b></h4>
@@ -105,13 +105,17 @@ DM22-1011
 				</div>
 				<div class="col-span-3">
 					<h4><b>{{ form.customer_POC_email.label_tag }}</b></h4>
-					<sds-input v-model="formData.customer_POC_email" placeholder="John.Doe@company.com" type="email"></sds-input>
+					<sds-input v-model="formData.customer_POC_email" placeholder="John.Doe@organization.gov" type="email"></sds-input>
+				</div>
+				<div class="col-span-3">
+					<h4><b>{{ form.customer_location.label_tag }}</b></h4>
+					<sds-input v-model="formData.customer_location" placeholder="123 Main Street, Arlington, VA 12345"></sds-input>
 				</div>
 				<div class="col-span-1">
 					<h4><b>{{ form.customer_state.label_tag }}</b></h4>
       				<sds-select v-model="formData.customer_state" :options="state_options"/>
 				</div>
-				<div class="col-span-2">
+				<div class="col-span-1">
 					<h4><b>{{ form.customer_sector.label_tag }}</b></h4>
 					<sds-select v-model="formData.customer_sector" :options="sector_options"/>
 				</div>
@@ -122,7 +126,7 @@ DM22-1011
 			</div>
 
 			<div class="mt-2 mb-4 block">
-				<h1 class="text-xl">Testing Details</h1>
+				<h1 class="text-xl">Assessor Details</h1>
 			</div>
 			<div class="grid grid-cols-6 gap-2 mb-8">
 				<div class="col-span-3">
@@ -131,12 +135,12 @@ DM22-1011
 				</div>
 				<div class="col-span-3">
 					<h4><b>{{ form.team_lead_email.label_tag }}</b></h4>
-					<sds-input v-model="formData.team_lead_email" placeholder="Jane.Doe@cisa.dhs.gov.com" type="email"></sds-input>
+					<sds-input v-model="formData.team_lead_email" placeholder="Jane.Doe@cisa.dhs.gov" type="email"></sds-input>
 				</div>
-				<div class="col-span-full">
+				<!--<div class="col-span-full">
 					<h4><b>{{ form.business_goal.label_tag }}</b></h4>
 					<sds-textarea v-model="formData.business_goal" placeholder="Enter a brief description of the assessment business goal." v-bind:rows="3"></sds-textarea>
-				</div>
+				</div>-->
 			</div>
 
 			{% if report.report_type == 'HVA' %}
@@ -165,7 +169,21 @@ DM22-1011
 				</div>
 			{% endif %}
 
-			<!--Need to add some validation in here or some way to respond when the backend rejects bad IP formats.-->
+			<div class="mt-2 mb-4 block">
+				<h1 class="text-xl">Phishing Testing</h1>
+			</div>
+			<div class="grid grid-cols-6 gap-2 mb-8">
+				<div class="col-span-3">
+					<h4><b>
+						{{form.phishing_domains.label_tag}}
+					</b></h4>
+					<span class="text-sm text-gray-600">
+						{{form.phishing_domains.help_text}}
+					</span>
+					<sds-textarea v-model="formData.phishing_domains" placeholder="dhs.gov, cisa.gov"></sds-textarea>
+				</div>
+			</div>
+
 			<div class="mt-2 mb-4 block">
 				<h1 class="text-xl">External Testing</h1>
 			</div>
@@ -290,13 +308,14 @@ DM22-1011
 				customer_state: "{{ object.customer_state }}",
 				customer_sector: "{{ object.customer_sector }}",
 				customer_ci_type: "{{ object.customer_ci_type }}",
+				customer_location: "{{ object.customer_location }}",
 				team_lead_name: "{{ object.team_lead_name }}",
 				team_lead_email: "{{ object.team_lead_email }}",
 				technical_lead_name: "{{ object.technical_lead_name }}",
 				technical_lead_email: "{{ object.technical_lead_email }}",
-				business_goal: "{{ object.business_goal }}",
 				ext_date: {start: "{{object.ext_start_date}}" ? new Date("{{object.ext_start_date}}") : "", end: "{{object.ext_end_date}}" ? new Date("{{object.ext_end_date}}") : ""},
 				int_date: {start: "{{object.int_start_date}}" ? new Date("{{object.int_start_date}}") : "", end: "{{object.int_end_date}}" ? new Date("{{object.int_end_date}}") : ""},
+				phishing_domains: "{{ object.phishing_domains }}",
 				ext_scope: "{{ object.ext_scope }}",
 				ext_excluded_scope: "{{ object.ext_excluded_scope }}",
 				int_scope: "{{ object.int_scope }}",
@@ -525,8 +544,11 @@ DM22-1011
 					headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
 				}).then(response => {
 					if (response.ok) {
-						this.displayNotification({title: "Engagement Saved", variant:"success", text: "Engagement data saved! Redirecting to detail page."})
+						this.displayNotification({title: "Assessment Details Saved", variant:"success", text: "Assessment details saved successfully. Redirecting to detail page."})
 						this.redirectLink("{% url 'engagement_detail'%}")
+					}
+					else {
+						this.displayNotification({title: "Error Saving Assessment Details", variant: "danger", text: "Assessment details could not be saved. Please check the form for errors and try again."})
 					}
 				}).catch(error => {
 					this.displayNotification({text: error, title: "Error saving engagement", variant:"danger"})

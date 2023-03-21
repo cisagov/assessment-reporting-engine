@@ -14,48 +14,23 @@
 from django import forms
 from django.forms.models import modelformset_factory
 
-from ptportal.models import AssessmentScenarios, EngagementMeta, Report
+from ptportal.models import EngagementMeta, Report
 
 from . import BaseModelForm
-
-ScenarioFormSet = modelformset_factory(
-    model=AssessmentScenarios, fields='__all__', extra=0, can_delete=True
-)
-
-
-class EngagementScenariosForm(forms.ModelForm):
-    assessment_scenario_type = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 1, 'cols': 10}), label="scenario type"
-    )
-    scenario = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 2}), label="Scenario #"
-    )
-
-    class Meta:
-        model = AssessmentScenarios
-        exclude = ('belongs_to_report', 'belongs_to_eng', 'order')
 
 
 class EngagementForm(BaseModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields['business_goal'].widget.attrs.update({'rows': '2'})
-        report = Report.object()
-        if report.report_type == 'RPT':
-            self.fields[
-                'business_goal'
-            ].initial = "Testing of the general IT security of the external networks"
-        else:
-            self.fields[
-                'business_goal'
-            ].initial = "Testing of the general IT security of the external and internal networks"
         self.fields['ext_start_date'].widget.attrs.update(
             {'data-provide': 'datepicker', 'type': 'date'}
         )
         self.fields['ext_end_date'].widget.attrs.update(
             {'data-provide': 'datepicker', 'type': 'date'}
         )
+
+        self.fields['phishing_domains'].widget.attrs.update({'rows': '3'})
 
         self.fields['int_scope'].widget.attrs.update({'rows': '3'})
         self.fields['int_excluded_scope'].widget.attrs.update({'rows': '3'})

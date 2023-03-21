@@ -33,12 +33,13 @@ DM22-1011
 
 <sds-section type="simple" class="mb-4 w-1/2">
   <template #title>
-    <h4>Stakeholder Information</h4>
+    <h4><b>Stakeholder Information</b></h4>
   </template>
   <p>Customer Long Name: {{ object.customer_long_name }}</p>
   <p>Customer Initials: {{ object.customer_initials }}</p>
   <p>Point of Contact: {{ object.customer_POC_name }}</p>
   <p>POC Email: {{ object.customer_POC_email }}</p>
+  <p>On-Site Testing Location: {{ object.customer_location }}</p>
   <p>State: {{ object.customer_state }}</p>
   <p>Sector: {{ object.customer_sector }}</p>
   <p>Critical Infrastructure Type: {{ object.customer_ci_type }}</p>
@@ -46,13 +47,10 @@ DM22-1011
 
 <sds-section type="simple" class="mb-4 w-1/2">
   <template #title>
-    <h4>Testing Details</h4>
+    <h4><b>Assessor Details</b></h4>
   </template>
   <p>Team Lead: {{ object.team_lead_name }}</p>
   <p>Team Lead Email: {{ object.team_lead_email }}</p>
-  <p>Technical Lead: {{ object.technical_lead_name }}</p>
-  <p>Technical Lead Email: {{ object.technical_lead_email }}</p>
-  <p>Business Goal: {{ object.business_goal }}</p>
 </sds-section>
 
 {% if report_type == 'HVA' %}
@@ -66,7 +64,14 @@ DM22-1011
 
 <sds-section type="simple" class="mb-4 w-1/2">
   <template #title>
-    <h4>External Assessment</h4>
+    <h4><b>Phishing Testing</b></h4>
+  </template>
+  <p>Phishing Domains: {{ object.phishing_domains }}</p>
+</sds-section>
+
+<sds-section type="simple" class="mb-4 w-1/2">
+  <template #title>
+    <h4><b>External Testing</b></h4>
   </template>
   <p>External Start Date: {{ object.ext_start_date }}</p>
   <p>External End Date: {{ object.ext_end_date }}</p>
@@ -77,7 +82,7 @@ DM22-1011
 {% if report_type != 'RPT' %}
   <sds-section type="simple" class="mb-4 w-1/2">
     <template #title>
-      <h4>Internal Assessment</h4>
+      <h4><b>Internal Testing</b></h4>
     </template>
     <p>Internal Start Date: {{ object.int_start_date }}</p>
     <p>Internal End Date: {{ object.int_end_date }}</p>
@@ -88,10 +93,9 @@ DM22-1011
 
 <sds-section type="simple" class="mb-4 w-1/2">
   <template #title>
-    <h4>Additional Information</h4>
+    <h4><b>Additional Information</b></h4>
   </template>
   <p>Traffic Light Protocol: {{ object.traffic_light_protocol }}{% if object.traffic_light_protocol == 'Amber' %} <i class="fa fa-circle" style="color:orange"></i>{% elif object.traffic_light_protocol == 'Amber+Strict' %} <i class="fa fa-circle" style="color:orange"></i>{% elif object.traffic_light_protocol == 'Red' %} <i class="fa fa-circle" style="color:red"></i>{% endif %}</p>
-  <p>Constraint: {{ object.assessment_constraint }}</p>
 </sds-section>
 {% endblock %}
 

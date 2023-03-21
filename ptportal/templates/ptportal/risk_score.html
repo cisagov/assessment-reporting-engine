@@ -127,7 +127,6 @@ DM22-1011
 			{% endif %}
 
 			total_risk += parseInt("{{finding.risk_score}}")
-			console.log("{{finding.mitigation}}")
 			{% if finding.mitigation != True %}
 				mitigated_risk += parseInt("{{finding.risk_score}}")
 			{% endif %}

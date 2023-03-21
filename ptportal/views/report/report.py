@@ -16,23 +16,28 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import redirect
 from django.views import generic
 from django.urls import reverse
+from django.core import serializers
 
 from ptportal.models.findings import BaseFinding
 from ...forms import *
 
 from ...models import (
-    AssessmentScenarios,
     CIS_CSC,
     ImageFinding,
     UploadedFinding,
     Report,
-    RPTIdentifiedNetworks,
-    RPTBreachedEmails,
     Severities,
     PortMappingHost,
     Narrative,
     Acronym,
     BaseFinding,
+    KEV,
+    Ransomware,
+    RansomwareScenarios,
+    DataExfil,
+    Payload,
+    Campaign,
+    NarrativeStep,
 )
 
 from django.http import HttpResponse, JsonResponse
@@ -315,12 +320,11 @@ class ReportUpdate(generic.edit.UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        report_data = Report.object()
-        context['report'] = report_data
+        report = Report.object()
+        context['report'] = report
 
-        # Avoid showing last modified when the object is first created
-        if report_data.updated_at > report_data.created_at + timedelta(seconds=10):
-            context['previously_saved'] = report_data.updated_at
+        if report.updated_at > report.created_at + timedelta(seconds=10):
+            context['previously_saved'] = report.updated_at
 
         engagement = EngagementMeta.object()
         if engagement:
@@ -338,21 +342,29 @@ class ReportUpdate(generic.edit.UpdateView):
             engagement_dates = f"{start_date.strftime('%B %d, %Y')} to {end_date.strftime('%B %d, %Y')}"
             context['eng_dates'] = engagement_dates
 
-        context['scenarios'] = AssessmentScenarios.objects.all().order_by('order')
-        uploaded_list = UploadedFinding.preferred_order.get_preferred_order()
-        context['uploaded_critical'] = UploadedFinding.critical.all()
-        context['uploaded_list'] = uploaded_list
+        uploaded_list = UploadedFinding.objects.all().order_by('assessment_type', 'severity', 'uploaded_finding_name')
+        context['findings'] = uploaded_list
+        context['screenshots'] = ImageFinding.objects.all().order_by('finding', 'order')
+        context['kevs'] = KEV.objects.filter(found=True).order_by('cve_id')
         context['findings_breakdown'] = report_findings_counts()
-        context['uploaded_screenshots'] = ImageFinding.objects.all()
-        context['rpt_identified_networks'] = RPTIdentifiedNetworks.objects.all()
-        context['rpt_email_breaches'] = RPTBreachedEmails.objects.all()
-        context['severities'] = Severities.objects.filter(~Q(severity_name='TBD'))
-
-        # recommendations and finding ids list
-        cis_csc_objects = CIS_CSC.objects.all()
+        context['ransomware'] = Ransomware.objects.all()
+        context['ransomware_scenarios'] = RansomwareScenarios.objects.all()
+        context['data_exfil'] = DataExfil.objects.all()
+        context['payloads'] = Payload.objects.all()
+        context['campaigns'] = Campaign.objects.all()
+        context['narratives_phishing'] = Narrative.objects.all().filter(assessment_type__name__contains="Phishing").order_by('order')
+        context['narratives_external'] = Narrative.objects.all().filter(assessment_type__name__contains="External").order_by('order')
+        context['narratives_internal'] = Narrative.objects.all().filter(assessment_type__name__contains="Internal").order_by('order')
+        context['phishing_steps'] = NarrativeStep.objects.all().filter(narrative__assessment_type__name__contains="Phishing").order_by('narrative', 'order')
+        context['external_steps'] = NarrativeStep.objects.all().filter(narrative__assessment_type__name__contains="External").order_by('narrative', 'order')
+        context['internal_steps'] = NarrativeStep.objects.all().filter(narrative__assessment_type__name__contains="Internal").order_by('narrative', 'order')
+        context['port_mapping'] = PortMappingHost.objects.all().order_by('order')
+        
+        cis_csc_objects = CIS_CSC.objects.all().order_by('CIS_ID')
         context['cis_csc'] = cis_csc_objects
+        
         for c in cis_csc_objects:
-            ciscsc_findings = c.gen_findings.all()
+            ciscsc_findings = c.findings.all()
             finding_ids = []
             for count, u in enumerate(uploaded_list):
                 if u.finding in ciscsc_findings:
@@ -360,124 +372,125 @@ class ReportUpdate(generic.edit.UpdateView):
             c.finding_ids = ', '.join(str(e) for e in finding_ids)
             c.save()
 
-        # These have been moved from UploadedFindng to BaseFiding
         # NIST_800_53
-        context['nist_ac'] = BaseFinding.objects.filter(
-            NIST_800_53__icontains='AC'
+        context['nist_ac'] = UploadedFinding.objects.filter(
+            finding__NIST_800_53__icontains='AC'
         ).count()
-        context['nist_at'] = BaseFinding.objects.filter(
-            NIST_800_53__icontains='AT'
+        context['nist_at'] = UploadedFinding.objects.filter(
+            finding__NIST_800_53__icontains='AT'
         ).count()
-        context['nist_cm'] = BaseFinding.objects.filter(
-            NIST_800_53__icontains='CM'
+        context['nist_au'] = UploadedFinding.objects.filter(
+            finding__NIST_800_53__icontains='AU'
         ).count()
-        context['nist_ia'] = BaseFinding.objects.filter(
-            NIST_800_53__icontains='IA'
+        context['nist_ca'] = UploadedFinding.objects.filter(
+            finding__NIST_800_53__icontains='CA'
         ).count()
-        context['nist_ra'] = BaseFinding.objects.filter(
-            NIST_800_53__icontains='RA'
+        context['nist_cm'] = UploadedFinding.objects.filter(
+            finding__NIST_800_53__icontains='CM'
         ).count()
-        context['nist_sc'] = BaseFinding.objects.filter(
-            NIST_800_53__icontains='SC'
+        context['nist_cp'] = UploadedFinding.objects.filter(
+            finding__NIST_800_53__icontains='CP'
         ).count()
-        context['nist_si'] = BaseFinding.objects.filter(
-            NIST_800_53__icontains='SI'
+        context['nist_ia'] = UploadedFinding.objects.filter(
+            finding__NIST_800_53__icontains='IA'
+        ).count()
+        context['nist_ir'] = UploadedFinding.objects.filter(
+            finding__NIST_800_53__icontains='IR'
+        ).count()
+        context['nist_ma'] = UploadedFinding.objects.filter(
+            finding__NIST_800_53__icontains='MA'
+        ).count()
+        context['nist_mp'] = UploadedFinding.objects.filter(
+            finding__NIST_800_53__icontains='MP'
+        ).count()
+        context['nist_pe'] = UploadedFinding.objects.filter(
+            finding__NIST_800_53__icontains='PE'
+        ).count()
+        context['nist_pl'] = UploadedFinding.objects.filter(
+            finding__NIST_800_53__icontains='PL'
+        ).count()
+        context['nist_pm'] = UploadedFinding.objects.filter(
+            finding__NIST_800_53__icontains='PM'
+        ).count()
+        context['nist_ps'] = UploadedFinding.objects.filter(
+            finding__NIST_800_53__icontains='PS'
+        ).count()
+        context['nist_ra'] = UploadedFinding.objects.filter(
+            finding__NIST_800_53__icontains='RA'
+        ).count()
+        context['nist_sa'] = UploadedFinding.objects.filter(
+            finding__NIST_800_53__icontains='SA'
+        ).count()
+        context['nist_sc'] = UploadedFinding.objects.filter(
+            finding__NIST_800_53__icontains='SC'
+        ).count()
+        context['nist_si'] = UploadedFinding.objects.filter(
+            finding__NIST_800_53__icontains='SI'
+        ).count()
+        context['nist_sr'] = UploadedFinding.objects.filter(
+            finding__NIST_800_53__icontains='SR'
         ).count()
 
         # NIST_CSF
-        context['nist_iam'] = BaseFinding.objects.filter(
-            NIST_CSF__icontains='ID.AM'
+        context['nist_iam'] = UploadedFinding.objects.filter(
+            finding__NIST_CSF__icontains='ID.AM'
         ).count()
-        context['nist_ig'] = BaseFinding.objects.filter(
-            NIST_CSF__icontains='ID.GV'
+        context['nist_ig'] = UploadedFinding.objects.filter(
+            finding__NIST_CSF__icontains='ID.GV'
         ).count()
-        context['nist_ira'] = BaseFinding.objects.filter(
-            NIST_CSF__icontains='ID.RA'
+        context['nist_ira'] = UploadedFinding.objects.filter(
+            finding__NIST_CSF__icontains='ID.RA'
         ).count()
-        context['nist_pac'] = BaseFinding.objects.filter(
-            NIST_CSF__icontains='PR.AC'
+        context['nist_isc'] = UploadedFinding.objects.filter(
+            finding__NIST_CSF__icontains='ID.SC'
         ).count()
-        context['nist_pat'] = BaseFinding.objects.filter(
-            NIST_CSF__icontains='PR.AT'
+        context['nist_pac'] = UploadedFinding.objects.filter(
+            finding__NIST_CSF__icontains='PR.AC'
         ).count()
-        context['nist_pds'] = BaseFinding.objects.filter(
-            NIST_CSF__icontains='PR.DS'
+        context['nist_pat'] = UploadedFinding.objects.filter(
+            finding__NIST_CSF__icontains='PR.AT'
         ).count()
-        context['nist_pip'] = BaseFinding.objects.filter(
-            NIST_CSF__icontains='PR.IP'
+        context['nist_pds'] = UploadedFinding.objects.filter(
+            finding__NIST_CSF__icontains='PR.DS'
         ).count()
-        context['nist_ppt'] = BaseFinding.objects.filter(
-            NIST_CSF__icontains='PR.PT'
+        context['nist_pip'] = UploadedFinding.objects.filter(
+            finding__NIST_CSF__icontains='PR.IP'
         ).count()
-
-        context['port_mapping'] = PortMappingHost.objects.all()
-
-        context['hvas'] = HVATarget.objects.all()
+        context['nist_pma'] = UploadedFinding.objects.filter(
+            finding__NIST_CSF__icontains='PR.MA'
+        ).count()
+        context['nist_ppt'] = UploadedFinding.objects.filter(
+            finding__NIST_CSF__icontains='PR.PT'
+        ).count()
+        context['nist_dae'] = UploadedFinding.objects.filter(
+            finding__NIST_CSF__icontains='DE.AE'
+        ).count()
+        context['nist_dcm'] = UploadedFinding.objects.filter(
+            finding__NIST_CSF__icontains='DE.CM'
+        ).count()
+        context['nist_rmi'] = UploadedFinding.objects.filter(
+            finding__NIST_CSF__icontains='RS.MI'
+        ).count()
 
         # Used in the template to maintain the figure count
         context['figure_count'] = FigureCounter()
-
-        # Findings: Exclude NIST_800_53, NIST_CSF CIS_CSC, CMMC
-        # Report: All game
-        # Narrative:
-        collect_acronyms()
-
-        acronyms = Acronym.objects.filter(belongs_to_report=report_data).order_by(
-            'acronym'
-        )
-        context['acronyms'] = acronyms
+        context['table_count'] = FigureCounter()
 
         return context
 
-    def post(
-        self, request, *args, **kwargs
-    ):  # IN PROGRESS- add validation  grab form, dump form errors
+    def post(self, request, *args, **kwargs):
         messages.get_messages(
             request
-        )  # Clears the messages to eliminate duplicates alerts in template
+        )
         report = Report.object()
 
-        postData = json.loads(request.body)
+        postData = json.loads(request.POST['data'])
 
-        reportForm = ReportForm(postData, instance=report)
+        reportForm = ReportForm(postData, instance=Report.objects.get(id=1))
         if reportForm.is_valid():
             reportForm.save()
         else:
+            print(reportForm.errors)
             return HttpResponse(status=400, reason=reportForm.errors)
-
-        RPTIdentifiedNetworks.objects.all().delete()
-        for network in postData['networks']:
-            RPTIdentifiedNetworks.objects.create(
-                ip_address=network['network'],
-                domain=network['domain'],
-                registrant=network['registrant'],
-                belongs_to_report=report,
-            )
-
-        RPTBreachedEmails.objects.all().delete()
-        for email in postData['emails']:
-            RPTBreachedEmails.objects.create(
-                breached_email=email['email'],
-                breach_info=email['breach'],
-                belongs_to_report=report,
-            )
-
-        for acronym in postData['acronyms']:
-            if acronym['hash']:
-                acronymObject = Acronym.objects.get(original_hash=acronym['hash'])
-                acronymObject.acronym = acronym['acronym']
-                acronymObject.definition = acronym['definition']
-                acronymObject.context = acronym['context']
-                acronymObject.auto_found = acronym['auto_found']
-                acronymObject.include = acronym['include']
-                acronymObject.save()
-            else:
-                Acronym.objects.create(
-                    acronym=acronym['acronym'],
-                    definition=acronym['definition'],
-                    context=acronym['context'],
-                    auto_found=acronym['auto'],
-                    include=acronym['include'],
-                )
 
         return HttpResponse(status=200)

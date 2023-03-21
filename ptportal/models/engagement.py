@@ -259,6 +259,12 @@ class EngagementMeta(abstract_models.TimeStampedModel):
         default="",
         verbose_name="Critical Infrastructure Type"
     )
+    customer_location = models.CharField(
+        max_length=200,
+        blank=True,
+        default="",
+        verbose_name="On-Site Testing Address"
+    )
 
     # Test Details
     team_lead_name = models.CharField(
@@ -299,14 +305,12 @@ class EngagementMeta(abstract_models.TimeStampedModel):
     ext_scope = models.TextField(
         blank=True,
         verbose_name="In Scope IP Addresses/Domain Names",
-        validators=[scope_validator],
         help_text="Enter as a list of commas, space, and/or new line separated IPs, Ranges, and CIDRs",
         null=True,
     )
     ext_excluded_scope = models.TextField(
         blank=True,
         verbose_name="Out of Scope IP Addresses/Domain Names",
-        validators=[scope_validator],
         help_text="Enter as a list of commas, space, and/or new line separated IPs, Ranges, and CIDRs",
         null=True,
     )
@@ -329,15 +333,20 @@ class EngagementMeta(abstract_models.TimeStampedModel):
     int_scope = models.TextField(
         blank=True,
         verbose_name="In Scope IP Addresses/Domain Names",
-        validators=[scope_validator],
         help_text="Enter as a list of commas, space, and/or new line separated IPs, Ranges, and CIDRs",
         null=True,
     )
     int_excluded_scope = models.TextField(
         blank=True,
         verbose_name="Out of Scope IP Addresses/Domain Names",
-        validators=[scope_validator],
         help_text="Enter as a list of commas, space, and/or new line separated IPs, Ranges, and CIDRs",
+        null=True,
+    )
+
+    phishing_domains = models.TextField(
+        blank=True,
+        verbose_name="In Scope Mail Domains for Phishing",
+        help_text="Enter a list of comma, space, and/or new line separated mail domains associated with in-scope phishing targets",
         null=True,
     )
 
@@ -553,24 +562,16 @@ def post_save_engagement(sender, instance, **kwargs):
     if HVATarget.objects.exists():
         hva_obj.target.add(*HVATarget.objects.all())
 
-    if instance.customer_initials:
-        scenarios = report.AssessmentScenarios.objects.all()
-        for i in scenarios:
-            i.scenario = i.scenario.replace(
-                "{{eng_meta.customer_initials}}", instance.customer_initials
-            )
-            i.save()
 
-
-@receiver(signals.pre_delete, sender=EngagementMeta)
-def pre_delete_engagement(sender, instance, **kwargs):
-    if instance.customer_initials:
-        scenarios = report.AssessmentScenarios.objects.all()
-        for i in scenarios:
-            i.scenario = i.scenario.replace(
-                instance.customer_initials, "{{eng_meta.customer_initials}}"
-            )
-            i.save()
+#@receiver(signals.pre_delete, sender=EngagementMeta)
+#def pre_delete_engagement(sender, instance, **kwargs):
+#    if instance.customer_initials:
+#        scenarios = report.AssessmentScenarios.objects.all()
+#        for i in scenarios:
+#            i.scenario = i.scenario.replace(
+#                instance.customer_initials, "{{eng_meta.customer_initials}}"
+#            )
+#            i.save()
 
 
 @receiver(signals.post_delete, sender=EngagementMeta)

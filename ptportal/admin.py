@@ -31,8 +31,6 @@ allModels = [
     HVAData,
     HVATarget,
     ImageFinding,
-    AssumptionsConstraints,
-    AssessmentScenarios,
     AffectedSystems,
     InfraTSFindings,
     InfraWSFindings,

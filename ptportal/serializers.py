@@ -13,7 +13,6 @@
 from rest_framework import serializers
 
 from ptportal.models import (
-    AssessmentScenarios,
     ElectionInfrastructureQuestionnaire,
     EngagementMeta,
     FilesFindings,
@@ -242,14 +241,6 @@ class HVATargetSerializer(serializers.ModelSerializer):
     class Meta:
         model = HVATarget
         # exclude = ['id']
-
-
-class ScenarioSerializer(serializers.ModelSerializer):
-    status = serializers.CharField()
-
-    class Meta:
-        model = AssessmentScenarios
-        exclude = ['id']
 
 
 class HVASerializer(serializers.ModelSerializer):
