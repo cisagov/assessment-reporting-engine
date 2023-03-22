@@ -17,22 +17,22 @@ from django.core.exceptions import ValidationError
 from django.views import generic
 from django.http import HttpResponse
 import json
-
 from ..models import PortMappingHost
 
 
 class PortMapping(generic.base.TemplateView):
-    template_name = 'ptportal/external_port_mapping.html'
+    template_name = "ptportal/external_port_mapping.html"
 
     def get_context_data(self, **kwargs):
         context = {}
-        context['hosts'] = PortMappingHost.objects.all()
+        context['hosts'] = PortMappingHost.objects.all().order_by('order')
         return context
 
     def post(self, request, *args, **kwargs):
         postData = json.loads(request.body)
 
-        PortMappingHost.objects.all().delete()
+        submittedIPs = []
+
         for order, mapping in enumerate(postData):
             if (
                 mapping['ip']
@@ -42,14 +42,33 @@ class PortMapping(generic.base.TemplateView):
                 == ""
             ):
                 continue
-            try:
-                PortMappingHost.objects.create(
-                    order=order,
-                    ip=mapping['ip'],
-                    hostname=mapping['hostname'],
-                    ports=mapping['ports'],
-                    services=mapping['services'],
-                )
-            except (KeyError, ValidationError) as e:
-                return HttpResponse(status=400, reason=e)
+
+            if PortMappingHost.objects.filter(ip=mapping['ip']).exists():
+                host = PortMappingHost.objects.filter(ip=mapping['ip']).first()
+                host.order = order + 1
+                host.hostname = mapping['hostname']
+                host.ports = mapping['ports']
+                host.services = mapping['services']
+                host.save()
+
+            else:
+                try:
+                    host = PortMappingHost.objects.create(
+                        order = order + 1,
+                        ip = mapping['ip'],
+                        hostname = mapping['hostname'],
+                        ports = mapping['ports'],
+                        services = mapping['services'],
+                    )
+                except Exception as e:
+                    print(e)
+                    continue
+
+            submittedIPs.append(host)
+
+        deletedIPs = set(PortMappingHost.objects.all()) - set(submittedIPs)
+
+        for deleted in deletedIPs:
+            deleted.delete()
+
         return HttpResponse(status=200)
