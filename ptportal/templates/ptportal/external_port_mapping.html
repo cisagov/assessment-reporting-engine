@@ -17,51 +17,61 @@ DM22-1011
 
 
 {% block content %}
-{% csrf_token %}
-<h1 class="">External Port Mapping</h1>
-<sds-modal size="sm" v-model="overwriteWarning">
-	<template #title>
-		<p>Warning</p>
-	</template>
-	<p class="mb-2">Are you sure you want to overwrite? All current data will be lost.</p>
-	<div class="flex gap-2">
-		<sds-button variant="primary" @click="this.overwriteWarning=false;parseNmap(true)">Confirm</sds-button>
-		<sds-button variant="danger" @click="this.overwriteWarning = false">Cancel</sds-button>
-	</div>
-</sds-modal>
-<sds-section class="mb-4">
-	<template #title>
-		<p class="text-2xl font-bold">Nmap Port Mapping upload</p>
-		<sds-file-uploader class="" v-bind="fileUploadArgs">
-
-		</sds-file-uploader>
-	</template>
-	<div class="grid gap-2 grid-cols-2">
+<div class="col-span-5">
+	{% csrf_token %}
+	<sds-modal size="sm" v-model="overwriteWarning">
+		<template #title>
+			<p>Warning</p>
+		</template>
+		<p class="mb-2">Are you sure you want to overwrite? All current data will be lost.</p>
 		<div class="flex gap-2">
-			<sds-button variant="primary" @click="parseNmap(false)"><i class="fas fa-plus-circle"></i> Append</sds-button>
-			<sds-button variant="primary" @click="this.overwriteWarning = true"><i class="fas fa-times-circle"></i> Overwrite</sds-button>
+			<sds-button variant="primary" @click="this.overwriteWarning=false;parseNmap(true)">Confirm</sds-button>
+			<sds-button variant="danger" @click="this.overwriteWarning = false">Cancel</sds-button>
 		</div>
-	</div>
-</sds-section>
-<sds-table class="table-prose mb-2" v-bind="mapTableArgs">
-	<template #cell(ip)="{item}">
-		<sds-input v-model="item.ip" placeholder="127.0.0.1"></sds-input>
-	</template>
-	<template #cell(hostname)="{item}">
-		<sds-input v-model="item.hostname" placeholder="My Server"></sds-input>
-	</template>
-	<template #cell(ports)="{item}">
-		<sds-input v-model="item.ports" placeholder="21, 22, 25"></sds-input>
-	</template>
-	<template #cell(services)="{item}">
-		<sds-input v-model="item.services" placeholder="FTP, SSH, SMTP"></sds-input>
-	</template>
-	<template #cell(action)="{item}">
-		<sds-button variant="danger" type="button" @click="deleteMapping(item)"><i class="fas fa-trash-alt"></i></sds-input>
-	</template>
-</sds-table>
-<sds-button variant="primary" size='sm' class="block mb-2" @click="addMapping" type="button"><i class="fas fa-plus"></i> Add Row</sds-button>
-<sds-button variant="primary" class="float-right" @click="submitMappings"><i class="fas fa-save"></i> Save</sds-button>
+	</sds-modal>
+	<sds-section class="mb-4">
+		<template #title>
+			<p class="text-2xl font-bold">Nmap Data Upload</p>
+			<sds-file-uploader class="" v-bind="fileUploadArgs"></sds-file-uploader>
+		</template>
+		<div class="grid gap-2 grid-cols-2">
+			<div class="flex gap-2">
+				<sds-button variant="primary" @click="parseNmap(false)"><img class="w-8 h-8" src="/static/icons/circle-plus-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Append</sds-button>
+				<sds-button variant="primary" @click="this.overwriteWarning = true"><img class="w-8 h-8" src="/static/icons/file-circle-xmark-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Overwrite</sds-button>
+			</div>
+		</div>
+	</sds-section>
+
+	<sds-section class="col-span-5" type="accented">
+		<span class="border-top border-dark"></span>
+		<template #title><b>EXTERNAL NMAP RESULTS</b></template>
+		<!-- Nmap Table -->
+		<sds-section>
+			<div class="mb-8">
+				<sds-table :fields="fields" :items="items" class="table-prose" v-bind="NmapTableArgs">
+					<template #cell(ip)="{item}">
+						<sds-textarea v-model="item.ip" rows="1" placeholder="127.0.0.1"></sds-textarea>
+					</template>
+					<template #cell(hostname)="{item}">
+						<sds-textarea v-model="item.hostname" rows="1" placeholder="test.server"></sds-textarea>
+					</template>
+					<template #cell(ports)="{item}">
+						<sds-textarea v-model="item.ports" rows="3" placeholder="22/tcp, 80/tcp, 443/tcp"></sds-textarea>
+					</template>
+					<template #cell(services)="{item}">
+						<sds-textarea v-model="item.services" rows="3" placeholder="ssh, http, http"></sds-textarea>
+					</template>
+					<template #cell(delete)="{item}">
+						<sds-button type="button" @click="deleteMapping(item)"><img class="w-8 h-8" src="/static/icons/trash-solid.svg"></sds-input>
+					</template>
+				</sds-table>
+				<sds-button type="button" @click="addMapping"><img class="w-8 h-8" src="/static/icons/plus-solid.svg"></sds-button>
+			</div>
+		</sds-section>
+		<sds-button variant="primary" class="float-right" @click="submitMappings"><img class="w-8 h-8" src="/static/icons/floppy-disk-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Save</sds-button>
+		<br><br>
+	</sds-section>
+</div>
 {% endblock %}
 
 
@@ -69,8 +79,11 @@ DM22-1011
 <script>
 	function pageData() {
 		data = {
+			fileList: [],
+			formData: [],
 			overwriteWarning: false,
-			mapTableArgs: {
+			notify: null,
+			NmapTableArgs: {
 				fields: [
 					{
 						key: "ip",
@@ -84,91 +97,116 @@ DM22-1011
 					},
 					{
 						key: "ports",
-						label: "Ports",
-						sortable: true
+						label: "Port(s)",
+						sortable: false
 					},
 					{
 						key: "services",
-						label: "Services",
-						sortable: true
+						label: "Service(s)",
+						sortable: false
 					},
 					{
-						key: "action",
-						label: "Action"
+						key: "delete",
 					}
 				],
 				items: []
 			},
 			fileUploadArgs: {
+				helperText: "Upload an XML file (obtained via Nmap using either -oX for XML format or -oA for all formats).\nSelect the Append button to add to the existing data in the table below or Overwrite to overwrite all previous port mapping data.",
 				accept: ".xml",
 				allowedFiletypes: ["text/xml"],
-				multiple: false,
-				helperText: "The expected format is an XML file (obtained using either -oX for XML format or -oA for all formats in Nmap). \nSelect the Append button if you want to add to the existing data below or Overwrite if you would like to overwrite all previous port mapping data.",
-				name: "nmapUpload"
+				name: "nmapUpload",
+				multiple: false
 			}
 		}
 
 		{% for host in hosts %}
-			data.mapTableArgs.items.push({ip: "{{host.ip}}", hostname: "{{host.hostname}}", ports: "{{host.ports}}", services: "{{host.services}}"})
+			data.NmapTableArgs.items.push({ip: "{{host.ip}}", hostname: "{{host.hostname}}", ports: "{{host.ports}}", services: "{{host.services}}"})
 		{% endfor %}
 
 		return data
 	}
 
+	function pageCreated() {
+    	this.baseData.layoutArgs.pageTitle = "External Port Mapping"
+  	}
+
 	function pageMethods() {
 		pageFunctions = {
 			submitMappings: function() {
-				formattedData = JSON.parse(JSON.stringify(this.mapTableArgs.items))
-				fetch(window.location.href, {
-					method: "POST",
-					body: JSON.stringify(formattedData),
-					credentials: "same-origin",
-					headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
-				}).then(response => {
-					if(response.ok) {
-						this.displayNotification({title: "Mappings Saved", variant:"success", text: "Port mapping data saved successfully."})
-					}
-					else {
-						this.displayNotification({text: "Bad response received from server. Check for errors in forms and try again.", title: "Error saving data", variant:"danger"})
-					}
-				}).catch(error => {
-					this.displayNotification({text: error, title: "Error saving data", variant:"danger"})
-				})
-			},
-			addMapping: function() {
-				this.mapTableArgs.items.push({ip: '', hostname: '', ports: '', services: ''})
-			},
-			deleteMapping: function(mapping) {
-				this.mapTableArgs.items.splice(this.mapTableArgs.items.indexOf(mapping), 1)
-			},
-			parseNmap: async function(overwrite) {
-				//May change this to disable button instead of a check.
-				if (document.getElementsByName('nmapUpload')[0].files.length == 0) {
-					return
+				let ips = []
+				let findDuplicates = arr => arr.filter((item, index) => arr.indexOf(item) !== index)
+
+				for (var key in this.NmapTableArgs.items) {
+					ips.push(this.NmapTableArgs.items[key]['ip'])
 				}
 
-				//Get file name and read it in as a xml string.
+				let duplicates = findDuplicates(ips)
+
+				if (duplicates.length > 0) {
+					this.displayNotification({title: "Duplicate IPs Detected", text: "The following duplicate IP address entries were found and must be removed before saving: " + duplicates.join(", "), variant:"danger", autoHideDelay:10000})
+				}
+
+				else {
+					formattedData = JSON.parse(JSON.stringify(this.NmapTableArgs.items))
+					fetch(window.location.href, {
+						method: "POST",
+						body: JSON.stringify(formattedData),
+						credentials: "same-origin",
+						headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
+					}).then(response => {
+						if(response.ok) {
+							this.displayNotification({title: "Nmap Data Saved", text: "Port mapping data saved successfully. Please wait while the page refreshes...", variant: "success"})
+							setTimeout(() => {this.redirectLink("{% url 'port_mapping' %}")}, 2000)
+						}
+						else {
+							this.displayNotification({title: "Error Saving Data", text: "Bad response received from server. Check for errors in forms and try again.", variant: "danger"})
+						}
+					}).catch(error => {
+						this.displayNotification({text: error, title: "Error Saving Data", variant: "danger"})
+					})
+				}
+			},
+
+			addMapping: function() {
+				this.NmapTableArgs.items.push({id: this.NmapTableArgs.items.length + 1, ip: "", hostname: "", ports: "", services: ""})
+			},
+
+			deleteMapping: function(item) {
+				this.NmapTableArgs.items.splice(this.NmapTableArgs.items.indexOf(item), 1)
+
+				this.NmapTableArgs.items.forEach((element, index) => {
+					element.id = index + 1
+				})
+			},
+
+			parseNmap: async function(overwrite) {
+
 				const fileName = document.getElementsByName('nmapUpload')[0].files[0]
 				let nmapString = null
 				await fileName.text().then(text => {nmapString = text})
-
 				const parser = new DOMParser()
 				const parsedXML = parser.parseFromString(nmapString, "text/xml")
 
-				//Check for a specific nmap tag to verify it should be a legitimate xml.
-				if(parsedXML.getElementsByTagName('nmaprun').length == 0){
-					this.displayNotification({text: "The file does not seem to contain normal nmap tags. Verify the xml file or rerun nmap to generate a proper file.", title: "Bad XML file.", variant:"warning"})
+				if (parsedXML.getElementsByTagName('nmaprun').length == 0) {
+					this.displayNotification({title: "Bad XML File", text: "The file does not appear to contain normal Nmap tags. Verify the contents of the file or re-run Nmap to generate a valid file.", variant: "warning"})
 					return
 				}
 
 				let newData = []
 				for (let host of parsedXML.getElementsByTagName('host')) {
-					//Skip hosts that aren't up.
-					if(host.getElementsByTagName('status')[0].getAttribute('state') != "up") {continue}
+					if (host.getElementsByTagName('status')[0].getAttribute('state') != 'up') {
+						continue
+					}
 					let hostData = {ip: '', hostname: '', ports: [], services:[]}
-					hostData['ip'] = host.getElementsByTagName('address')[0].getAttribute('addr')
 
-					//Possibility that the host may not have a hostname. So if the tag comes to an erorr than just set blank hostname.
+					try {
+						hostData['ip'] = host.getElementsByTagName('address')[0].getAttribute('addr')
+					}
+					catch {
+						hostData['ip'] = ''
+					}
+
 					try {
 						hostData['hostname'] = host.getElementsByTagName('hostnames')[0].getElementsByTagName('hostname')[0].getAttribute('name')
 					}
@@ -178,20 +216,56 @@ DM22-1011
 
 					let ports = host.getElementsByTagName('ports')[0]
 					for (let port of ports.getElementsByTagName('port')) {
-						//Skip ports that aren't open.
-						if(ports.getElementsByTagName('state')[0].getAttribute('state') != "open") {continue}
-						hostData['ports'].push(port.getAttribute('portid'))
-						hostData['services'].push(port.getElementsByTagName('service')[0].getAttribute('name'))
+						if (port.getElementsByTagName('state')[0].getAttribute('state') != 'open') {
+							continue
+						}
+						try {
+							portid = port.getAttribute('portid')
+						}
+						catch {
+							portid = ''
+							hostData['ports'].push('unknown')
+						}
+						try {
+							proto = '/' + port.getAttribute('protocol')
+						}
+						catch {
+							proto = ''
+						}
+
+						hostData['ports'].push(portid + proto)
+
+						try {
+							hostData['services'].push(port.getElementsByTagName('service')[0].getAttribute('name'))
+						}
+						catch {
+							hostData['services'].push('unknown')
+						}
 					}
 					newData.push(hostData)
 				}
 
-				//Deletes data if overwriting.
-				if(overwrite) {this.mapTableArgs.items = []}
-				for (let mapping in newData) {
-					this.mapTableArgs.items.push({ip: newData[mapping]['ip'], hostname: newData[mapping]['hostname'], ports: newData[mapping]['ports'].join(", "), services: newData[mapping]['services'].join(', ')})
+				if (overwrite) {
+					this.NmapTableArgs.items = []
 				}
-				this.displayNotification({text: "Nmap xml file has been parsed and added to the page successfully. Remember to save the page and remove the file in the uploader if more files are to be added.", title: "Nmap data parsed successfully", variant:"info", autoHideDelay:10000})
+
+				for (let mapping in newData) {
+					this.NmapTableArgs.items.push({ip: newData[mapping]['ip'], hostname: newData[mapping]['hostname'], ports: newData[mapping]['ports'].join(", "), services: newData[mapping]['services'].join(', ')})
+				}
+				this.displayNotification({title: "Data Successfully Parsed", text: "The Nmap XML data has been parsed and added to the table successfully. Be sure to save before leaving this page.", variant:"info", autoHideDelay:10000})
+
+				let ips = []
+				let findDuplicates = arr => arr.filter((item, index) => arr.indexOf(item) !== index)
+
+				for (var key in this.NmapTableArgs.items) {
+					ips.push(this.NmapTableArgs.items[key]['ip'])
+				}
+
+				let duplicates = findDuplicates(ips)
+
+				if (duplicates.length > 0) {
+					this.displayNotification({title: "Duplicate IPs Detected", text: "The following duplicate IP address entries were found and must be removed before saving: " + duplicates.join(", "), variant:"danger", autoHideDelay:10000})
+				}
 			}
 		}
 		return pageFunctions
