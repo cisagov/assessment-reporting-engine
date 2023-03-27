@@ -30,11 +30,6 @@ class PayloadResults(generic.base.TemplateView):
 
     def post(self, request, *args, **kwargs):
         postData = json.loads(request.body)
-        #diff = Payload.objects.all().count() - len(postData)
-
-        #if diff > 0:
-        #    for i in range(diff):
-        #        Payload.objects.order_by('-order')[0].delete()
 
         payloads = []
 
@@ -102,7 +97,7 @@ class PayloadResults(generic.base.TemplateView):
 
         for deleted in deletedItems:
             deleted.delete()
-            
+
         return HttpResponse(status=200)
 
 
