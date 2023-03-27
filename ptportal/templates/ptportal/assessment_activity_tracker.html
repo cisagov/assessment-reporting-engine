@@ -19,1485 +19,1114 @@ DM22-1011
 <style>
 
 .tab {
-  overflow: hidden;
-  border: 0;
-  background-color: #fff;
-  padding-bottom: 10px;
-}
-
-.tab button {
-  background-color: #fff;
-  color: #999;
-  float: left;
-  outline: none;
-  cursor: pointer;
-  padding: 14px 16px;
-  transition: 0.3s;
-  font-size: 17px;
-  border-radius: 15px 15px 0px 0px;
-  border-top: 0;
-  border-left: 0;
-  border-right: 0;
-  border-bottom: 1px solid #ddd;
-}
-
-.tab button:hover {
-  background-color: #ddd;
-}
-
-.tab button.active {
-  color: #000;
-  border-top: 1px solid #ddd;
-  border-left: 1px solid #ddd;
-  border-right: 1px solid #ddd;
-  border-bottom: 0;
-  border-radius: 15px 15px 0px 0px;
-  background-color:#fff;
-}
-
-.table thead th {
-	background-color: #38383a;
-	text-align: center;
-	color: #fff;
-	font-size: 14px;
-	vertical-align: middle;
-}
-
-.table tbody tr td {
-	padding: 0;
-	vertical-align: middle;
-	font-size: 14px;
-	text-align: center;
-}
-
-.order {
-	background: #ddd;
-	vertical-align: middle;
-	font-size: 14px;
-	text-align: center;
-}
-
-.form-control {
-	border-color: transparent;
-	padding: 6px;
 	width: 100%;
-	font-size: 14px;
-	overflow: hidden;
-	background: transparent;
 }
 
-.form-control:focus {
-	outline: none !important;
-	border: 1px solid #38383a;
-	box-shadow: 0 0 10px #38383a;
+.tab div {
+	width: 14%;
 }
 
-.empty input:invalid {
-	border-color: #900;
-	background-color: #FDD;
+.tab div button {
+	background-color: #444;
+	color: #ddd;
+	border: 1px solid #ddd;
+	outline: none;
+	cursor: pointer;
+	padding: 16px 16px;
+	transition: 0.3s;
+	width: 100%;
 }
 
-.empty textarea:invalid {
-	border-color: #900;
-  	background-color: #FDD;
+.tab div button:hover {
+	background-color: #555;
+	color: #ddd;
+	border: 1px solid #ccc;
+	outline: none;
+	cursor: pointer;
+	padding: 16px 16px;
+	transition: 0.3s;
 }
 
-.activity-errors {
-    color: #F00;
+.tab div.active button {
+	background-color: #fff;
+	color: #444;
+	border-bottom: 2px solid #444;
 }
 
-.sort {
-	background: transparent;
-	border: none;
-	font-size: 10px;
-	padding: 0;
-	color: #fff;
-	opacity: 0.5;
+.help {
+	color: #555;
+	font-size:10pt;
 }
 
-.sort:focus {
-	outline: none !important;
-	border: none;
-	box-shadow: 0;
+h2 {
+	font-size:13pt;
+	font-weight:bold;
+	color:#333333;
+	padding:0px 0px 10px 0px;
+}
+
+h3 {
+	font-size:12pt;
+	font-weight:bold;
+	font-style:italic;
+	color:#555555;
+	padding:0px 0px 10px 0px;
 }
 
 </style>
 {% endblock %}
 
 {% block content %}
-<div id="page-content-wrapper">
-<div class="container-fluid">
-
-<div class="row">
-	<div class="col-lg-12">
- 		<h1 class="page-header">Assessment Activity Tracker</h1>
- 		<hr/>
-	</div>
-</div>
-
-<div class="row"><!-- Checkbox to enable the existing form validation -->
-<span class="col-lg-9"><!-- empty span as an easy spacing solution --></span>
-<span>
-	<input type="checkbox" class="form-check-input" id="include_validation"/>
-	<label for="include_validation">Enable Form Validation</label>
-</span>
-</div>
-
-<!-- code snippet based on https://www.w3schools.com/w3css/w3css_tabulators.asp -->
-<div class="tab">
-	<button class="tablinks" onclick="openTab(event, 'Infrastructure')" id="infra_button">Infrastructure <span class="badge badge-danger infra-warn" style="display:none">!</span></button>
-	<button class="tablinks" onclick="openTab(event, 'LateralMovement')">Lateral Movement <span class="badge badge-danger lat-warn" style="display:none">!</span></button></button>
-	<button class="tablinks" onclick="openTab(event, 'Persistence')">Persistence <span class="badge badge-danger persist-warn" style="display:none">!</span></button></button>
-	<button class="tablinks" onclick="openTab(event, 'Files')">Files <span class="badge badge-danger files-warn" style="display:none">!</span></button></button>
-	<button class="tablinks" onclick="openTab(event, 'InteractiveLogons')">Interactive Logons <span class="badge badge-danger int-warn" style="display:none">!</span></button></button>
-	<button class="tablinks" onclick="openTab(event, 'SignificantEvents')">Significant Events <span class="badge badge-danger sig-warn" style="display:none">!</span></button></button>
-	<button class="tablinks" onclick="openTab(event, 'ArtifactTracking')">Artifact Tracking <span class="badge badge-danger sig-warn" style="display:none">!</span></button></button>
-</div>
-<!-- end code snippet -->
-
-<form class="needs-validation" id="tracker-form" method="POST">
-	{% csrf_token %}
-
-	<div id="Infrastructure" class="tabcontent" style="display:none">
-	<table class="table table-hover table-bordered" style="width:100%" id="infrats">
-	   <thead>
-	       <tr>
-	       	<th style="border-right: none; width:0.5em;"></th>
-			<th style="border-left: none;">Teamserver IP<br><button type="button" class="sort" data-sort="sort" onclick="sortIP(1, 'infrats', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortIP(1, 'infrats', this.dataset.sort)">&#11015;</button></th>
-			<th>Linked Domain<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(2, 'infrats', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(2, 'infrats', this.dataset.sort)">&#11015;</button></th>
-			<th>Beacon Kill Date<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(3, 'infrats', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(3, 'infrats', this.dataset.sort)">&#11015;</button></th>
-			<th>Created By<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(3, 'infrats', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(3, 'infrats', this.dataset.sort)">&#11015;</button></th>
-			<th>Last Modified By<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(4, 'infrats', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(4, 'infrats', this.dataset.sort)">&#11015;</button></th>
-			<th style="width:50px; white-space:nowrap;">Action<!--<button type="button" class="btn btn-info" onclick="new_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-plus fa-xs"></i></button>--></th>
-		</tr>
-	   </thead>
-	   <tbody>
-		{% for i in infra_ts %}
-			<tr id="{{i.id}}">
-				<td class="order">{{i.order}}</td>
-				<td><textarea class="form-control" name="teamserver_ip" onchange="check_ip_format(this)" rows="1">{{i.teamserver_ip}}</textarea></td>
-				<td><textarea class="form-control" name="linked_domain" rows="1">{{i.linked_domain}}</textarea></td>
-				<td><input class="form-control" name="beacon_kill_date" type="date" value="{{i.beacon_kill_date}}"></td>
-				<td><input class="form-control" name="created_by" type="text" value="{{i.created_by.username}}" readonly></td>
-				<td><input class="form-control" name="modified_by" type="text" value="{{i.modified_by.username}}" readonly></td>
-				<td style="width:50px; white-space:nowrap; text-align:center"><button type="button" class="btn btn-danger" onclick="delete_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-trash-alt fa-xs fa-xs"></i></button><!--<button type="button" class="btn btn-info" onclick="new_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-plus fa-xs fa-xs"></i></button>--></td>
-			</tr>
-		{% endfor %}
-	   </tbody>
-	</table>
-
-	<div id="infrats_ip-errors" class="activity-errors" style="display:none;"></div>
-	<div id="infrats_text-errors" class="activity-errors" style="display:none;"></div>
-
-	<button type="button" class="btn btn-info" id="1" onclick="new_row(0, this.id)"><i class="fa fa-plus"></i> Add Row</button>
-
-	<br><br><br><br>
-
-	<h3>DHS Workstations</h3>
-
-	<table class="table table-hover table-bordered" style="width:100%" id="infraws">
-	   <thead>
-	       <tr>
-	       	<th style="border-right: none; width:0.5em;"></th>
-			<th style="border-left: none;">Hostname<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(1, 'infraws', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(1, 'infraws', this.dataset.sort)">&#11015;</button></th>
-			<th>OS<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(2, 'infraws', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(2, 'infraws', this.dataset.sort)">&#11015;</button></th>
-			<th>IP Address<br><button type="button" class="sort" data-sort="sort" onclick="sortIP(3, 'infraws', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortIP(3, 'infraws', this.dataset.sort)">&#11015;</button></th>
-			<th>Assigned To<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(4, 'infraws', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(4, 'infraws', this.dataset.sort)">&#11015;</button></th>
-			<th>Created By<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(3, 'infrats', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(3, 'infrats', this.dataset.sort)">&#11015;</button></th>
-            <th>Last Modified By<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(4, 'infrats', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(4, 'infrats', this.dataset.sort)">&#11015;</button></th>
-			<th style="width:50px; white-space:nowrap;">Action<!--<button type="button" class="btn btn-info" onclick="new_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-plus fa-xs"></i></button>--></th>
-		</tr>
-	   </thead>
-	   <tbody>
-		{% for i in infra_ws %}
-			<tr id="{{i.id}}">
-				<td class="order">{{i.order}}</td>
-				<td><textarea class="form-control" name="hostname" rows="1">{{i.hostname}}</textarea></td>
-				<td><input class="form-control osdropdown" name="os" list="osopts" value="{{i.os}}"><datalist id="osopts"><option value="Kali"><option value="Mac"><option value="Windows"></datalist></td>
-				<td><textarea class="form-control" name="ip_address" onchange="check_ip_format(this)" rows="1">{{i.ip_address}}</textarea></td>
-				<td><textarea class="form-control" name="assigned_to" rows="1">{{i.assigned_to}}</textarea></td>
-				<td><input class="form-control" name="created_by" type="text" value="{{i.created_by}}" readonly></td>
-				<td><input class="form-control" name="last_modified_by" type="text" value="{{i.modified_by}}" readonly></td>
-				<td style="width:50px; white-space:nowrap; text-align:center"><button type="button" class="btn btn-danger" onclick="delete_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-trash-alt fa-xs"></i></button><!--<button type="button" class="btn btn-info" onclick="new_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-plus fa-xs"></i></button>--></td>
-			</tr>
-		{% endfor %}
-	   </tbody>
-	</table>
-
-	<div id="infraws_ip-errors" class="activity-errors" style="display:none;"></div>
-	<div id="infraws_text-errors" class="activity-errors" style="display:none;"></div>
-
-	<button type="button" class="btn btn-info" id="12" onclick="new_row(0, this.id)"><i class="fa fa-plus"></i> Add Row</button>
-
-	</div><!-- end Infrastructure -->
-
-
-	<div id="LateralMovement" class="tabcontent" style="display:none">
-	<table class="table table-hover table-bordered" style="width:100%" id="latmov">
-	  <thead>
-	       <tr>
-	       	<th style="border-right: none; width:0.5em;"></th>
-			<th style="border-left: none;">Initial Beacon<br><button type="button" class="sort" data-sort="sort" onclick="sortDateTime(1, 'latmov', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortDateTime(1, 'latmov', this.dataset.sort)">&#11015;</button></th>
-			<th>IP Address<br><button type="button" class="sort" data-sort="sort" onclick="sortIP(2, 'latmov', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortIP(2, 'latmov', this.dataset.sort)">&#11015;</button></th>
-			<th>Hostname<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(3, 'latmov', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(3, 'latmov', this.dataset.sort)">&#11015;</button></th>
-			<th>Account Used<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(4, 'latmov', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(4, 'latmov', this.dataset.sort)">&#11015;</button></th>
-			<th>Host Moved From<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(5, 'latmov', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(5, 'latmov', this.dataset.sort)">&#11015;</button></th>
-			<th>Movement Method<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(6, 'latmov', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(6, 'latmov', this.dataset.sort)">&#11015;</button></th>
-			<th>Callback Server<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(7, 'latmov', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(7, 'latmov', this.dataset.sort)">&#11015;</button></th>
-			<th>Notes<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(8, 'latmov', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(8, 'latmov', this.dataset.sort)">&#11015;</button></th>
-			<th>Created By<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(9, 'latmov', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(9, 'latmov', this.dataset.sort)">&#11015;</button></th>
-            <th>Last Modified By<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(10, 'latmov', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(10, 'latmov', this.dataset.sort)">&#11015;</button></th>
-			<th style="width:50px; white-space:nowrap;">Action<!--<button type="button" class="btn btn-info" onclick="new_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-plus fa-xs"></i></button>--></th>
-		</tr>
-	  </thead>
-	  <tbody>
-		{% for i in lat_mov %}
-			<tr id="{{i.id}}">
-				<td class="order">{{i.order}}</td>
-				<td><input class="form-control" name="initial_beacon_date_time" type="date" value="{{i.initial_beacon|slice:":10"}}"><input class="form-control" name="initt" type="time" step="1" value="{{i.initial_beacon|slice:"11:"}}"></td>
-				<td><textarea class="form-control" name="ip_address" onchange="check_ip_format(this)" rows="2">{{i.ip_address}}</textarea></td>
-				<td><textarea class="form-control" name="hostname" rows="2">{{i.hostname}}</textarea></td>
-				<td><textarea class="form-control" name="account_used" rows="2">{{i.account_used}}</textarea></td>
-				<td><textarea class="form-control" name="host_moved_from" rows="2">{{i.host_moved_from}}</textarea></td>
-				<td><textarea class="form-control" name="movement_method" rows="2">{{i.movement_method}}</textarea></td>
-				<td><textarea class="form-control" name="callback_server" rows="2">{{i.callback_server}}</textarea></td>
-				<td><textarea class="form-control" name="notes" rows="2">{{i.notes}}</textarea></td>
-				<td><input class="form-control" name="created_by" type="text" value="{{i.created_by}}" readonly></td>
-                <td><input class="form-control" name="modified_by" type="text" value="{{i.modified_by}}" readonly></td>
-				<td style="width:50px; white-space:nowrap; text-align:center"><button type="button" class="btn btn-danger" onclick="delete_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-trash-alt fa-xs"></i></button><!--<button type="button" class="btn btn-info" onclick="new_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-plus fa-xs"></i></button>--></td>
-			</tr>
-		{% endfor %}
-	  </tbody>
-	</table>
-
-	<div id="latmov_ip-errors" class="activity-errors" style="display:none;"></div>
-	<div id="latmov_text-errors" class="activity-errors" style="display:none;"></div>
-
-	<button type="button" class="btn btn-info" id="2" onclick="new_row(0, this.id)"><i class="fa fa-plus"></i> Add Row</button>
-
-	</div><!-- end Lateral Movement -->
-
-
-	<div id="Persistence" class="tabcontent" style="display:none">
-	<table class="table table-hover table-bordered" style="width:100%" id="persist">
-		<thead>
-		  <tr>
-		  	<th style="border-right: none; width:0.5em;"></th>
-		    <th style="border-left: none;">Installation Time<br><button type="button" class="sort" data-sort="sort" onclick="sortDateTime(1, 'persist', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortDateTime(1, 'persist', this.dataset.sort)">&#11015;</button></th>
-			<th>Machine IP<br><button type="button" class="sort" data-sort="sort" onclick="sortIP(2, 'persist', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortIP(2, 'persist', this.dataset.sort)">&#11015;</button></th>
-			<th>Machine Hostname<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(3, 'persist', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(3, 'persist', this.dataset.sort)">&#11015;</button></th>
-			<th>Description<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(4, 'persist', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(4, 'persist', this.dataset.sort)">&#11015;</button></th>
-			<th>Persistence Method<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(5, 'persist', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(5, 'persist', this.dataset.sort)">&#11015;</button></th>
-			<th>Persistence Info<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(6, 'persist', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(6, 'persist', this.dataset.sort)">&#11015;</button></th>
-			<th>Callback Server<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(7, 'persist', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(7, 'persist', this.dataset.sort)">&#11015;</button></th>
-			<th>Removal Time<br><button type="button" class="sort" data-sort="sort" onclick="sortDateTime(8, 'persist', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortDateTime(8, 'persist', this.dataset.sort)">&#11015;</button></th>
-			<th>Created By<br><button type="button" class="sort" data-sort="sort" onclick="sortDateTime(9, 'persist', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortDateTime(9, 'persist', this.dataset.sort)">&#11015;</button></th>
-			<th>Last Modified By<br><button type="button" class="sort" data-sort="sort" onclick="sortDateTime(10, 'persist', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortDateTime(10, 'persist', this.dataset.sort)">&#11015;</button></th>
-			<th style="width:50px; white-space:nowrap;">Action<!--<button type="button" class="btn btn-info" onclick="new_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-plus fa-xs"></i></button>--></th>
-		  </tr>
-		 </thead>
-	     <tbody>
-			{% for i in persist %}
-				<tr id="{{i.id}}">
-					<td class="order">{{i.order}}</td>
-					<td><input class="form-control" name="installation_time" type="date" value="{{i.installation_time|slice:":10"}}"><input class="form-control" name="instt" type="time" step="1" value="{{i.installation_time|slice:"11:"}}"></td>
-					<td><textarea class="form-control" name="machine_ip" onchange="check_ip_format(this)" rows="2">{{i.machine_ip}}</textarea></td>
-					<td><textarea class="form-control" name="machine_hostname" rows="2">{{i.machine_hostname}}</textarea></td>
-					<td><textarea class="form-control" name="desdcription" rows="2">{{i.description}}</textarea></td>
-					<td><textarea class="form-control" name="persistence_method" rows="2">{{i.persistence_method}}</textarea></td>
-					<td><textarea class="form-control" name="persistence_info" rows="2">{{i.persistence_info}}</textarea></td>
-					<td><textarea class="form-control" name="callback_server" rows="2">{{i.callback_server}}</textarea></td>
-					<td><input class="form-control" name="removal_date_time" type="date" value="{{i.removal_time|slice:":10"}}"><input class="form-control" name="rmtt" type="time" step="1" value="{{i.removal_time|slice:"11:"}}"></td>
-					<td><input class="form-control" name="created_by" type="text" value="{{i.created_by}}" readonly></td>
-                    <td><input class="form-control" name="modified_by" type="text" value="{{i.modified_by}}" readonly></td>
-				    <td style="width:50px; white-space:nowrap; text-align:center"><button type="button" class="btn btn-danger" onclick="delete_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-trash-alt fa-xs"></i></button><!--<button type="button" class="btn btn-info" onclick="new_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-plus fa-xs"></i></button>--></td>
-				</tr>
-			{% endfor %}
-	     </tbody>
-	</table>
-
-	<div id="persist_ip-errors" class="activity-errors" style="display:none;"></div>
-	<div id="persist_text-errors" class="activity-errors" style="display:none;"></div>
-
-	<button type="button" class="btn btn-info" id="3" onclick="new_row(0, this.id)"><i class="fa fa-plus"></i> Add Row</button>
-
-	</div><!--  end Persistence -->
-
-
-	<div id="Files" class="tabcontent" style="display:none">
-	  <table class="table table-hover table-bordered" style="width:100%" id="files">
-		<thead>
-	        <tr>
-	        	<th style="border-right: none; width:0.5em;"></th>
-				<th style="border-left: none;">Host<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(1, 'files', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(1, 'files', this.dataset.sort)">&#11015;</button></th>
-				<th>IP<br><button type="button" class="sort" data-sort="sort" onclick="sortIP(2, 'files', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortIP(2, 'files', this.dataset.sort)">&#11015;</button></th>
-				<th>Location<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(3, 'files', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(3, 'files', this.dataset.sort)">&#11015;</button></th>
-				<th>Filename<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(4, 'files', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(4, 'files', this.dataset.sort)">&#11015;</button></th>
-				<th>Deleted<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(5, 'files', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(5, 'files', this.dataset.sort)">&#11015;</button></th>
-				<th>Date<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(6, 'files', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(6, 'files', this.dataset.sort)">&#11015;</button></th>
-				<th>Time Dropped to Disk<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(7, 'files', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(7, 'files', this.dataset.sort)">&#11015;</button></th>
-				<th>Time Deleted<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(8, 'files', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(8, 'files', this.dataset.sort)">&#11015;</button></th>
-	            <th>Created By<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(9, 'files', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(9, 'files', this.dataset.sort)">&#11015;</button></th>
-                <th>Last Modified By<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(10, 'files', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(10, 'files', this.dataset.sort)">&#11015;</button></th>
-				<th style="width:50px; white-space:nowrap;">Action<!--<button type="button" class="btn btn-info" onclick="new_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-plus fa-xs"></i></button>--></th>
-			</tr>
-		</thead>
-		<tbody>
-		{% for i in files %}
-			<tr id="{{i.id}}">
-				<td class="order">{{i.order}}</td>
-				<td><textarea class="form-control" name="host" rows="1">{{i.host}}</textarea></td>
-				<td><textarea class="form-control" name="ip" onchange="check_ip_format(this)" rows="1">{{i.ip}}</textarea></td>
-				<td><textarea class="form-control" name="location" rows="1">{{i.location}}</textarea></td>
-				<td><textarea class="form-control" name="filename" rows="1">{{i.filename}}</textarea></td>
-				<td><select name="file_deleted" class="form-control"><option value="Y" {% ifequal i.deleted 'Y'%}selected{%endifequal%}>Yes</option><option value="N" {% ifequal i.deleted 'N'%}selected{%endifequal%}>No</option></select></td>
-				<td><input class="form-control" name="file_date" type="date" value="{{i.date}}"></td>
-				<td><input class="form-control" name="file_time" type="time" step="1" value="{{i.time_dropped_to_disk}}"></td>
-				<td><input class="form-control" name="file_time_deleted" type="time" step="1" value="{{i.time_deleted}}"></td>
-				<td><input class="form-control" name="created_by" type="text" value="{{i.created_by}}" readonly></td>
-                <td><input class="form-control" name="modified_by" type="text" value="{{i.modified_by}}" readonly></td>
-				<td style="width:50px; white-space:nowrap; text-align:center"><button type="button" class="btn btn-danger" onclick="delete_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-trash-alt fa-xs"></i></button><!--<button type="button" class="btn btn-info" onclick="new_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-plus fa-xs"></i></button>--></td>
-			</tr>
-		{% endfor %}
-		</tbody>
-	  </table>
-
-	<div id="files_ip-errors" class="activity-errors" style="display:none;"></div>
-	<div id="files_text-errors" class="activity-errors" style="display:none;"></div>
-
-	<button type="button" class="btn btn-info" id="4" onclick="new_row(0, this.id)"><i class="fa fa-plus"></i> Add Row</button>
-
-	</div><!-- end Files -->
-
-
-	<div id="InteractiveLogons" class="tabcontent" style="display:none">
-	<table class="table table-hover table-bordered" style="width:100%" id="intlog">
-		<thead>
-	        <tr>
-	        	<th style="border-right: none; width:0.5em;"></th>
-				<th style="border-left: none;">Date/Time<br><button type="button" class="sort" data-sort="sort" onclick="sortDateTime(1, 'intlog', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortDateTime(1, 'intlog', this.dataset.sort)">&#11015;</button></th>
-				<th>Operator<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(2, 'intlog', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(2, 'intlog', this.dataset.sort)">&#11015;</button></th>
-				<th>Host<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(3, 'intlog', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(3, 'intlog', this.dataset.sort)">&#11015;</button></th>
-				<th>Username<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(4, 'intlog', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(4, 'intlog', this.dataset.sort)">&#11015;</button></th>
-				<th>Password<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(5, 'intlog', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(5, 'intlog', this.dataset.sort)">&#11015;</button></th>
-				<th>Type<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(6, 'intlog', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(6, 'intlog', this.dataset.sort)">&#11015;</button></th>
-				<th>Access Ended<br><button type="button" class="sort" data-sort="sort" onclick="sortDateTime(7, 'intlog', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortDateTime(7, 'intlog', this.dataset.sort)">&#11015;</button></th>
-				<th style="padding-left:30px; padding-right: 30px">Notes<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(8, 'intlog', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(8, 'intlog', this.dataset.sort)">&#11015;</button></th>
-	            <th>Created By<br><button type="button" class="sort" data-sort="sort" onclick="sortDateTime(9, 'intlog', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortDateTime(9, 'intlog', this.dataset.sort)">&#11015;</button></th></th>
-                <th>Last Modified By<br><button type="button" class="sort" data-sort="sort" onclick="sortDateTime(10, 'intlog', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortDateTime(10, 'intlog', this.dataset.sort)">&#11015;</button></th></th>
-				<th style="width:50px; white-space:nowrap;">Action<!--<button type="button" class="btn btn-info" onclick="new_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-plus fa-xs"></i></button>--></th>
-			</tr>
-		</thead>
-		<tbody>
-		  {% for i in int_log %}
-			<tr id="{{i.id}}">
-				<td class="order">{{i.order}}</td>
-				<td><input class="form-control" name="date_time" type="date" value="{{i.datetime|slice:":10"}}"><input class="form-control" name="ilt" type="time" step="1" value="{{i.datetime|slice:"11:"}}"></td>
-				<td><textarea class="form-control" name="operator" rows="2">{{i.operator}}</textarea></td>
-				<td><textarea class="form-control" name="host" rows="2">{{i.host}}</textarea></td>
-				<td><textarea class="form-control" name="username" rows="2">{{i.username}}</textarea></td>
-				<td><textarea class="form-control" name="password" rows="2">{{i.password}}</textarea></td>
-				<td><textarea class="form-control" name="type" rows="2">{{i.type}}</textarea></td>
-				<td><input class="form-control" name="access_ended" type="date" value="{{i.access_ended|slice:":10"}}"><input class="form-control" name="ilaet" type="time" step="1" value="{{i.access_ended|slice:"11:"}}"></td>
-				<td><textarea class="form-control" name="notes" rows="2">{{i.notes}}</textarea></td>
-				<td><input class="form-control" name="created_by" type="text" value="{{i.created_by}}" readonly></td>
-                <td><input class="form-control" name="modified_by" type="text" value="{{i.modified_by}}" readonly></td>
-				<td style="width:50px; white-space:nowrap; text-align:center"><button type="button" class="btn btn-danger" onclick="delete_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-trash-alt fa-xs"></i></button><!--<button type="button" class="btn btn-info" onclick="new_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-plus fa-xs"></i></button>--></td>
-			</tr>
-		  {% endfor %}
-		</tbody>
-	</table>
-
-	<div id="intlog_ip-errors" class="activity-errors" style="display:none;"></div>
-	<div id="intlog_text-errors" class="activity-errors" style="display:none;"></div>
-
-	<button type="button" class="btn btn-info" id="5" onclick="new_row(0, this.id)"><i class="fa fa-plus"></i> Add Row</button>
-
-	</div><!-- end InteractiveLogons -->
-
-
-	<div id="SignificantEvents" class="tabcontent" style="display:none">
-	<table class="table table-hover table-bordered" style="width:100%" id="sigeve">
-		<thead>
-	        <tr>
-	        	<th style="border-right: none; width:0.5em;"></th>
-				<th style="border-left: none;">Event<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(1, 'sigeve', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(1, 'sigeve', this.dataset.sort)">&#11015;</button></th>
-				<th>Notes<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(2, 'sigeve', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(2, 'sigeve', this.dataset.sort)">&#11015;</button></th>
-				<th>Date/Time<br><button type="button" class="sort" data-sort="sort" onclick="sortDateTime(3, 'sigeve', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortDateTime(3, 'sigeve', this.dataset.sort)">&#11015;</button></th>
-	            <th>Created By<br><button type="button" class="sort" data-sort="sort" onclick="sortDateTime(4, 'sigeve', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortDateTime(4, 'sigeve', this.dataset.sort)">&#11015;</button></th>
-                <th>Last Modified By<br><button type="button" class="sort" data-sort="sort" onclick="sortDateTime(5, 'sigeve', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortDateTime(5, 'sigeve', this.dataset.sort)">&#11015;</button></th>
-				<th style="width:50px; white-space:nowrap;">Action<!--<button type="button" class="btn btn-info" onclick="new_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-plus fa-xs"></i></button>--></th>
-			</tr>
-		</thead>
-		<tbody>
-		  {% for i in sig_eve %}
-			<tr id="{{i.id}}">
-				<td class="order">{{i.order}}</td>
-				<td><textarea class="form-control" name="event" rows="2">{{i.event}}</textarea></td>
-				<td><textarea class="form-control" name="notes" rows="2">{{i.notes}}</textarea></td>
-				<td><input class="form-control" name="date_time" type="date" value="{{i.datetime|slice:":10"}}"><input class="form-control" name="set" type="time" step="1" value="{{i.datetime|slice:"11:"}}"></td>
-				<td><input class="form-control" name="created_by" type="text" value="{{i.created_by}}" readonly></td>
-                <td><input class="form-control" name="modified_by" type="text" value="{{i.modified_by}}" readonly></td>
-				<td style="width:50px; white-space:nowrap; text-align:center"><button type="button" class="btn btn-danger" onclick="delete_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-trash-alt fa-xs"></i></button><!--<button type="button" class="btn btn-info" onclick="new_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-plus fa-xs"></i></button>--></td>
-			</tr>
-		  {% endfor %}
-		</tbody>
-	</table>
-
-	<div id="sigeve_ip-errors" class="activity-errors" style="display:none;"></div>
-	<div id="sigeve_text-errors" class="activity-errors" style="display:none;"></div>
-
-	<button type="button" class="btn btn-info" id="6" onclick="new_row(0, this.id)"><i class="fa fa-plus"></i> Add Row</button>
-
-	</div><!-- end SignificantEvents -->
-
-	<!--Start of the artifact tracking table.-->
-	<div id="ArtifactTracking" class="tabcontent" style="display:none">
-	<table class="table table-hover table-bordered" style="width:100%" id="arttrack">
-		<thead>
-	        <tr>
-	        	<th style="border-right: none; width:0.5em;"></th>
-				<th style="border-left: none;">File<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(1, 'arttrack', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(1, 'arttrack', this.dataset.sort)">&#11015;</button></th>
-				<th>MD5<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(2, 'arttrack', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(2, 'arttrack', this.dataset.sort)">&#11015;</button></th>
-				<th>SHA1<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(3, 'arttrack', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(3, 'arttrack', this.dataset.sort)">&#11015;</button></th>
-	            <th>SHA256<br><button type="button" class="sort" data-sort="sort" onclick="sortTable(4, 'arttrack', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortTable(4, 'arttrack', this.dataset.sort)">&#11015;</button></th>
-                <th>Created By<br><button type="button" class="sort" data-sort="sort" onclick="sortDateTime(5, 'arttrack', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortDateTime(5, 'arttrack', this.dataset.sort)">&#11015;</button></th>
-				<th>Last Modified By<br><button type="button" class="sort" data-sort="sort" onclick="sortDateTime(6, 'arttrack', this.dataset.sort)">&#11014;</button> <button type="button" class="sort" data-sort="rev" onclick="sortDateTime(6, 'arttrack', this.dataset.sort)">&#11015;</button></th>
-				<th style="width:50px; white-space:nowrap;">Action<!--<button type="button" class="btn btn-info" onclick="new_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-plus fa-xs"></i></button>--></th>
-			</tr>
-		</thead>
-		<tbody>
-		  {% for i in arttrack %}
-			<tr id="{{i.id}}">
-				<td class="order">{{i.order}}</td>
-				<td readonly>{{i.file_name}}</td>
-				<td readonly><textarea class="form-control" name="md5" rows="2" readonly>{{i.md5}}</textarea></td>
-				<td readonly><textarea class="form-control" name="sha1" rows="2" readonly>{{i.sha1}}</textarea></td>
-				<td readonly><textarea class="form-control" name="sha256" rows="2" readonly>{{i.sha256}}</textarea></td>
-				<td><input class="form-control" name="created_by" type="text" value="{{i.created_by}}" readonly></td>
-                <td><input class="form-control" name="modified_by" type="text" value="{{i.modified_by}}" readonly></td>
-				<td style="width:50px; white-space:nowrap; text-align:center"><button type="button" class="btn btn-danger" onclick="delete_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-trash-alt fa-xs"></i></button></td>
-			</tr>
-		  {% endfor %}
-		</tbody>
-	</table>
-
-	<div id="arttrack_ip-errors" class="activity-errors" style="display:none;"></div>
-	<div id="arttrack_text-errors" class="activity-errors" style="display:none;"></div>
-
-	<input type="file" class="form-control-file" id="artifact" name="artifact" multiple></input>
-	<label for="artifact" id="artifact_label">Click the button above and select the artifacts that are to be uploaded.</label>
-
-	</div><!-- end ArtifactTracking -->
-
-
-	<input name="Submit" class="btn btn-primary" hidden type="submit" id="Submit"/>
-	<label for="Submit" class="btn btn-primary" style="float:right" id="Save_Label"><i class="fa fa-save"></i> Save</label>
-	<br><br>
-	<!--<div class="success" style="display:none; float:right; color:green"><b>Saved <span id="datetime"></span></b></div>-->
-	<div class="failure" style="display:none; float:right; color:red"><b>All fields must be filled out before saving.</b></div>
-</form>
-
-</div><!-- end container -->
-</div><!-- end wrapper -->
-
+{% csrf_token %}
+<sds-section class="mb-4">
+    
+    <div class="tab" align="center">
+    	<div :class="{ active: tabs.infrastructure }"><sds-button @click="openTab('infrastructure')">Infrastructure</sds-button></div>
+    	<div :class="{ active: tabs.lateral_movement }"><sds-button @click="openTab('lateral_movement')">Lateral Movement</sds-button></div>
+    	<div :class="{ active: tabs.files }"><sds-button @click="openTab('files')">Files</sds-button></div>
+    	<div :class="{ active: tabs.interactive_logons }"><sds-button @click="openTab('interactive_logons')">Interactive Logons</sds-button></div>
+    	<div :class="{ active: tabs.scans }"><sds-button @click="openTab('scans')">High Impact Scans</sds-button></div>
+    	<div :class="{ active: tabs.significant_events }"><sds-button @click="openTab('significant_events')">Significant Events</sds-button></div>
+    	<div :class="{ active: tabs.artifacts }"><sds-button @click="openTab('artifacts')">Artifacts</sds-button></div>
+    </div>
+    <!-- INFRASTRUCTURE -->
+    <div v-show="tabs.infrastructure" id="inf">
+    	<br>
+    	<h2>EXTERNAL</h2>
+    	<h3>Teamservers</h3>
+    	<div class="grid grid-cols-9 gap-2 mb-8">
+				<sds-table :fields="fields" :items="items" class="table-prose" v-bind="ExtTeamserverTableArgs">
+					<template #cell(hostname)="{item}">
+						<sds-textarea v-model="item.hostname" rows="1" placeholder="teamserver0" :maxlength="100"></sds-textarea>
+					</template>
+					<template #cell(ip)="{item}">
+						<sds-textarea v-model="item.ip" rows="1" placeholder="127.0.0.1" :maxlength="15"></sds-textarea>
+					</template>
+					<template #cell(domain)="{item}">
+						<sds-textarea v-model="item.domain" rows="1" placeholder="dhs-test.com" :maxlength="100"></sds-textarea>
+					</template>
+					<template #cell(killdate)="{item}">
+						<sds-datepicker v-model="item.killdate" :min="calendar.min" :max="calendar.max" mode="date" :size="calendar.size"/>
+					</template>
+					<template #cell(delete)="{item}">
+						<sds-button type="button" @click="deleteRow(ExtTeamserverTableArgs, item)"><img class="w-8 h-8" src="/static/icons/trash-solid.svg"></sds-input>
+					</template>
+				</sds-table>
+				<sds-button type="button" @click="addRow(ExtTeamserverTableArgs)"><img class="w-8 h-8" src="/static/icons/plus-solid.svg"></sds-button>
+			</div><br><br>
+    	<h3>Phishing</h3>
+    	<div class="mb-8">
+				<sds-table :fields="fields" :items="items" class="table-prose" v-bind="PhishingTableArgs">
+					<template #cell(hostname)="{item}">
+						<sds-textarea v-model="item.hostname" rows="1" placeholder="mail" :maxlength="100"></sds-textarea>
+					</template>
+					<template #cell(ip)="{item}">
+						<sds-textarea v-model="item.ip" rows="1" placeholder="127.0.0.1" :maxlength="15"></sds-textarea>
+					</template>
+					<template #cell(domain)="{item}">
+						<sds-textarea v-model="item.domain" rows="1" placeholder="mail.dhs-test.com" :maxlength="100"></sds-textarea>
+					</template>
+					<template #cell(delete)="{item}">
+						<sds-button type="button" @click="deleteRow(PhishingTableArgs, item)"><img class="w-8 h-8" src="/static/icons/trash-solid.svg"></sds-input>
+					</template>
+				</sds-table>
+				<sds-button type="button" @click="addRow(PhishingTableArgs)"><img class="w-8 h-8" src="/static/icons/plus-solid.svg"></sds-button>
+			</div><br><br>
+    	<h3>Redirectors</h3>
+    	<div class="mb-8">
+				<sds-table :fields="fields" :items="items" class="table-prose" v-bind="RedirectorTableArgs">
+					<template #cell(url)="{item}">
+						<sds-textarea v-model="item.url" rows="1" placeholder="https://d123456abcdef.cloudfront.net" :maxlength="200"></sds-textarea>
+					</template>
+					<template #cell(delete)="{item}">
+						<sds-button type="button" @click="deleteRow(RedirectorTableArgs, item)"><img class="w-8 h-8" src="/static/icons/trash-solid.svg"></sds-input>
+					</template>
+				</sds-table>
+				<sds-button type="button" @click="addRow(RedirectorTableArgs)"><img class="w-8 h-8" src="/static/icons/plus-solid.svg"></sds-button>
+			</div><br><br>
+    	<h3>Workstations</h3>
+    	<div class="mb-8">
+				<sds-table :fields="fields" :items="items" class="table-prose" v-bind="ExtWorkstationTableArgs">
+					<template #cell(hostname)="{item}">
+						<sds-textarea v-model="item.hostname" rows="1" placeholder="kali0" :maxlength="100"></sds-textarea>
+					</template>
+					<template #cell(ip)="{item}">
+						<sds-textarea v-model="item.ip" rows="1" placeholder="127.0.0.1" :maxlength="15"></sds-textarea>
+					</template>
+					<template #cell(os)="{item}">
+						<sds-select v-model="item.os" :options="osOptions"/>
+					</template>
+					<template #cell(operator)="{item}">
+						<sds-textarea v-model="item.operator" rows="1" placeholder="Jane Doe" :maxlength="50"></sds-textarea>
+					</template>
+					<template #cell(delete)="{item}">
+						<sds-button type="button" @click="deleteRow(ExtWorkstationTableArgs, item)"><img class="w-8 h-8" src="/static/icons/trash-solid.svg"></sds-input>
+					</template>
+				</sds-table>
+				<sds-button type="button" @click="addRow(ExtWorkstationTableArgs)"><img class="w-8 h-8" src="/static/icons/plus-solid.svg"></sds-button>
+			</div><br><br>
+			<h2>INTERNAL</h2>
+    	<h3>Teamservers</h3>
+    	<div class="mb-8">
+				<sds-table :fields="fields" :items="items" class="table-prose" v-bind="IntTeamserverTableArgs">
+					<template #cell(hostname)="{item}">
+						<sds-textarea v-model="item.hostname" rows="1" placeholder="TeamServer" :maxlength="100"></sds-textarea>
+					</template>
+					<template #cell(ip)="{item}">
+						<sds-textarea v-model="item.ip" rows="1" placeholder="127.0.0.1" :maxlength="15"></sds-textarea>
+					</template>
+					<template #cell(domain)="{item}">
+						<sds-textarea v-model="item.domain" rows="1" placeholder="dhs-test.com" :maxlength="100"></sds-textarea>
+					</template>
+					<template #cell(killdate)="{item}">
+						<sds-datepicker v-model="item.killdate" :min="calendar.min" :max="calendar.max" mode="date" :size="calendar.size"/>
+					</template>
+					<template #cell(delete)="{item}">
+						<sds-button type="button" @click="deleteRow(IntTeamserverTableArgs, item)"><img class="w-8 h-8" src="/static/icons/trash-solid.svg"></sds-input>
+					</template>
+				</sds-table>
+				<sds-button type="button" @click="addRow(IntTeamserverTableArgs)"><img class="w-8 h-8" src="/static/icons/plus-solid.svg"></sds-button>
+			</div><br><br>
+			<h3>Workstations</h3>
+    	<div class="mb-8">
+				<sds-table :fields="fields" :items="items" class="table-prose" v-bind="IntWorkstationTableArgs">
+					<template #cell(hostname)="{item}">
+						<sds-textarea v-model="item.hostname" rows="1" placeholder="kali" :maxlength="100"></sds-textarea>
+					</template>
+					<template #cell(ip)="{item}">
+						<sds-textarea v-model="item.ip" rows="1" placeholder="127.0.0.1" :maxlength="15"></sds-textarea>
+					</template>
+					<template #cell(os)="{item}">
+						<sds-select v-model="item.os" :options="osOptions"/>
+					</template>
+					<template #cell(operator)="{item}">
+						<sds-textarea v-model="item.operator" rows="1" placeholder="John Doe" :maxlength="50"></sds-textarea>
+					</template>
+					<template #cell(delete)="{item}">
+						<sds-button type="button" @click="deleteRow(IntWorkstationTableArgs, item)"><img class="w-8 h-8" src="/static/icons/trash-solid.svg"></sds-input>
+					</template>
+				</sds-table>
+				<sds-button type="button" @click="addRow(IntWorkstationTableArgs)"><img class="w-8 h-8" src="/static/icons/plus-solid.svg"></sds-button>
+			</div><br><br>
+    </div>
+    <!-- LATERAL MOVEMENT -->
+    <div v-show="tabs.lateral_movement" id="lat">
+    	<br><br>
+    	<div class="mb-8">
+				<sds-table :fields="fields" :items="items" class="table-prose" v-bind="LatTableArgs">
+					<template #cell(beacon)="{item}">
+						<sds-datepicker v-model="item.beacon" :min="dateTime.min" :max="dateTime.max" mode="dateTime" :size="dateTime.size"/>
+					</template>
+					<template #cell(hostname)="{item}">
+						<sds-textarea v-model="item.hostname" rows="1" placeholder="workstation0" :maxlength="100"></sds-textarea>
+					</template>
+					<template #cell(ip)="{item}">
+						<sds-textarea v-model="item.ip" rows="1" placeholder="127.0.0.1" :maxlength="15"></sds-textarea>
+					</template>
+					<template #cell(account)="{item}">
+						<sds-textarea v-model="item.account" rows="1" placeholder="jdoe" :maxlength="100"></sds-textarea>
+					</template>
+					<template #cell(moved)="{item}">
+						<sds-textarea v-model="item.moved" rows="1" placeholder="workstation1" :maxlength="100"></sds-textarea>
+					</template>
+					<template #cell(method)="{item}">
+						<sds-textarea v-model="item.method" rows="1" placeholder="Password reuse" :maxlength="200"></sds-textarea>
+					</template>
+					<template #cell(callback)="{item}">
+						<sds-textarea v-model="item.callback" rows="1" placeholder="127.0.0.1" :maxlength="100"></sds-textarea>
+					</template>
+					<template #cell(notes)="{item}">
+						<sds-textarea v-model="item.notes" rows="1" :maxlength="500"></sds-textarea>
+					</template>
+					<template #cell(delete)="{item}">
+						<sds-button type="button" @click="deleteRow(LatTableArgs, item)"><img class="w-10 h-10" src="/static/icons/trash-solid.svg"></sds-input>
+					</template>
+				</sds-table>
+				<sds-button type="button" @click="addRow(LatTableArgs)"><img class="w-8 h-8" src="/static/icons/plus-solid.svg"></sds-button>
+			</div><br><br>
+    </div>
+    <!-- FILES -->
+    <div v-show="tabs.files" id="fil">
+    	<br><br>
+    	<div class="mb-8">
+    		<div class="help">Log all files that were dropped to disk during testing here, then use the Artifacts tab of this tracker to list its corresponding hashes.</div>
+    		<br>
+				<sds-table :fields="fields" :items="items" class="table-prose" v-bind="FileTableArgs">
+					<template #cell(hostname)="{item}">
+						<sds-textarea v-model="item.hostname" rows="1" placeholder="workstation0" :maxlength="100"></sds-textarea>
+					</template>
+					<template #cell(ip)="{item}">
+						<sds-textarea v-model="item.ip" rows="1" placeholder="127.0.0.1" :maxlength="15"></sds-textarea>
+					</template>
+					<template #cell(location)="{item}">
+						<sds-textarea v-model="item.location" rows="1" placeholder="C:\Windows\Temp" :maxlength="500"></sds-textarea>
+					</template>
+					<template #cell(filename)="{item}">
+						<sds-textarea v-model="item.filename" rows="1" placeholder="file.exe" :maxlength="200"></sds-textarea>
+					</template>
+					<template #cell(status)="{item}">
+						<sds-select v-model="item.status" :options="deleteOptions"/>
+					</template>
+					<template #cell(created)="{item}">
+						<sds-datepicker v-model="item.created" :min="dateTime.min" :max="dateTime.max" mode="dateTime" :size="dateTime.size"/>
+					</template>
+					<template #cell(deleted)="{item}">
+						<sds-datepicker v-model="item.deleted" :min="dateTime.min" :max="dateTime.max" mode="dateTime" :size="dateTime.size"/>
+					</template>
+					<template #cell(delete)="{item}">
+						<sds-button type="button" @click="deleteRow(FileTableArgs, item)"><img class="w-10 h-10" src="/static/icons/trash-solid.svg"></sds-input>
+					</template>
+				</sds-table>
+				<sds-button type="button" @click="addRow(FileTableArgs)"><img class="w-8 h-8" src="/static/icons/plus-solid.svg"></sds-button>
+			</div><br><br>
+    </div>
+    <!-- INTERACTIVE LOGONS -->
+    <div v-show="tabs.interactive_logons" id="int">
+    	<br><br>
+    	<div class="mb-8">
+				<sds-table :fields="fields" :items="items" class="table-prose" v-bind="IntLogonsTableArgs">
+					<template #cell(hostname)="{item}">
+						<sds-textarea v-model="item.hostname" rows="1" placeholder="workstation0" :maxlength="100"></sds-textarea>
+					</template>
+					<template #cell(ip)="{item}">
+						<sds-textarea v-model="item.ip" rows="1" placeholder="127.0.0.1" :maxlength="15"></sds-textarea>
+					</template>
+					<template #cell(account)="{item}">
+						<sds-textarea v-model="item.account" rows="1" placeholder="jdoe" :maxlength="100"></sds-textarea>
+					</template>
+					<template #cell(method)="{item}">
+						<sds-textarea v-model="item.method" rows="1" placeholder="WMIEXEC" :maxlength="200"></sds-textarea>
+					</template>
+					<template #cell(logon)="{item}">
+						<sds-datepicker v-model="item.logon" :min="dateTime.min" :max="dateTime.max" mode="dateTime" :size="dateTime.size"/>
+					</template>
+					<template #cell(logoff)="{item}">
+						<sds-datepicker v-model="item.logoff" :min="dateTime.min" :max="dateTime.max" mode="dateTime" :size="dateTime.size"/>
+					</template>
+					<template #cell(operator)="{item}">
+						<sds-textarea v-model="item.operator" rows="1" :maxlength="50"></sds-textarea>
+					</template>
+					<template #cell(notes)="{item}">
+						<sds-textarea v-model="item.notes" rows="1" :maxlength="500"></sds-textarea>
+					</template>
+					<template #cell(delete)="{item}">
+						<sds-button type="button" @click="deleteRow(IntLogonsTableArgs, item)"><img class="w-10 h-10" src="/static/icons/trash-solid.svg"></sds-input>
+					</template>
+				</sds-table>
+				<sds-button type="button" @click="addRow(IntLogonsTableArgs)"><img class="w-8 h-8" src="/static/icons/plus-solid.svg"></sds-button>
+			</div><br><br>
+    </div>
+    <!-- HIGH IMPACT SCANS -->
+    <div v-show="tabs.scans" id="sca">
+    	<br><br>
+    	<div class="mb-8">
+    		<div class="help">Use this tab to log all scanning activity that involved a significant number of targets (e.g., an entire domain or a large pool of hosts) and/or scanning activity that could be considered intrusive or disruptive. Fill in the IP range and/or Domain fields, if relevant. Otherwise, clarify what the scan entailed in the Notes field.</div>
+    		<br>
+				<sds-table :fields="fields" :items="items" class="table-prose" v-bind="ScanTableArgs">
+					<template #cell(type)="{item}">
+						<sds-textarea v-model="item.type" rows="1" placeholder="Host-based vulnerability scan" :maxlength="200"></sds-textarea>
+					</template>
+					<template #cell(tool)="{item}">
+						<sds-textarea v-model="item.tool" rows="1" placeholder="Nessus" :maxlength="100"></sds-textarea>
+					</template>
+					<template #cell(range)="{item}">
+						<sds-textarea v-model="item.range" rows="1" placeholder="192.168.1.0/24" :maxlength="1000"></sds-textarea>
+					</template>
+					<template #cell(domain)="{item}">
+						<sds-textarea v-model="item.domain" rows="1" placeholder="domain.local" :maxlength="500"></sds-textarea>
+					</template>
+					<template #cell(start)="{item}">
+						<sds-datepicker v-model="item.start" :min="dateTime.min" :max="dateTime.max" mode="dateTime" :size="dateTime.size"/>
+					</template>
+					<template #cell(end)="{item}">
+						<sds-datepicker v-model="item.end" :min="dateTime.min" :max="dateTime.max" mode="dateTime" :size="dateTime.size"/>
+					</template>
+					<template #cell(notes)="{item}">
+						<sds-textarea v-model="item.notes" rows="1" :maxlength="500"></sds-textarea>
+					</template>
+					<template #cell(delete)="{item}">
+						<sds-button type="button" @click="deleteRow(ScanTableArgs, item)"><img class="w-10 h-10" src="/static/icons/trash-solid.svg"></sds-input>
+					</template>
+				</sds-table>
+				<sds-button type="button" @click="addRow(ScanTableArgs)"><img class="w-8 h-8" src="/static/icons/plus-solid.svg"></sds-button>
+			</div><br><br>
+    </div>
+    <!-- SIGNIFICANT EVENTS -->
+    <div v-show="tabs.significant_events" id="sig">
+    	<br><br>
+    	<div class="mb-8">
+    		<div class="help">Use this tab to log any significant activity that is not encompassed by any of the other tabs. This may include incidents where resources were taken offline, exploitation activity that is worth noting, or anything else the entity being targeted may wish to have record of.</div>
+    		<br>
+    		<sds-table :fields="fields" :items="items" class="table-prose" v-bind="SigTableArgs">
+					<template #cell(event)="{item}">
+						<sds-textarea v-model="item.event" rows="1" placeholder="Unintentional DoS of some.server.com" :maxlength="500"></sds-textarea>
+					</template>
+					<template #cell(notes)="{item}">
+						<sds-textarea v-model="item.notes" rows="1" :maxlength="1000"></sds-textarea>
+					</template>
+					<template #cell(start)="{item}">
+						<sds-datepicker v-model="item.start" :min="dateTime.min" :max="dateTime.max" mode="dateTime" :size="dateTime.size"/>
+					</template>
+					<template #cell(end)="{item}">
+						<sds-datepicker v-model="item.end" :min="dateTime.min" :max="dateTime.max" mode="dateTime" :size="dateTime.size"/>
+					</template>
+					<template #cell(delete)="{item}">
+						<sds-button type="button" @click="deleteRow(SigTableArgs, item)"><img class="w-8 h-8" src="/static/icons/trash-solid.svg"></sds-input>
+					</template>
+				</sds-table>
+				<sds-button type="button" @click="addRow(SigTableArgs)"><img class="w-8 h-8" src="/static/icons/plus-solid.svg"></sds-button>
+			</div><br><br>
+    </div>
+    <!-- ARTIFACTS -->
+    <div v-show="tabs.artifacts" id="art">
+    	<br><br>
+    	<div class="mb-8">
+    		<div class="help">Use this form to upload any files that were dropped to disk during testing (e.g., payload testing, phishing campaign, spawning a beacon, etc.) and select 'Save' once the files are uploaded to automatically generate their hashes. Files can also be logged manually by adding new rows and inputting the corresponding hashes (e.g., for files that are too large to upload).</div>
+    		<br>
+			<sds-file-uploader v-bind="fileUploadArgs" @add="addFile"></sds-file-uploader>
+			<br><br>
+    		<sds-table :fields="fields" :items="items" class="table-prose" v-bind="ArtifactTableArgs">
+				<template #cell(name)="{item}">
+					<sds-textarea v-model="item.name" rows="1" placeholder="file.exe" :maxlength="200"></sds-textarea>
+				</template>
+				<template #cell(description)="{item}">
+					<sds-textarea v-model="item.description" rows="1" placeholder="phishing payload" :maxlength="500"></sds-textarea>
+				</template>
+				<template #cell(md5)="{item}">
+					<sds-textarea v-model="item.md5" rows="1" :maxlength="32"></sds-textarea>
+				</template>
+				<template #cell(sha1)="{item}">
+					<sds-textarea v-model="item.sha1" rows="1" :maxlength="40"></sds-textarea>
+				</template>
+				<template #cell(sha256)="{item}">
+					<sds-textarea v-model="item.sha256" rows="1" :maxlength="64"></sds-textarea>
+				</template>
+				<template #cell(delete)="{item}">
+					<sds-button type="button" @click="deleteRow(ArtifactTableArgs, item)"><img class="w-8 h-8" src="/static/icons/trash-solid.svg"></sds-input>
+				</template>
+			</sds-table>
+			<sds-button type="button" @click="addRow(ArtifactTableArgs)"><img class="w-8 h-8" src="/static/icons/plus-solid.svg"></sds-button>
+		</div><br><br>
+    </div>
+    <br>
+    <sds-button variant="primary" class="float-right" @click="submitTracker"><img class="w-8 h-8" src="/static/icons/floppy-disk-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Save</sds-button>
+    <br><br>
+</sds-section>
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ STATIC_URL }}/js/jquery.dataTables.min.js"></script>
 <script>
-	var delete_infrats = [];
-	var delete_infraws = [];
-	var delete_latmov = [];
-	var delete_persist = [];
-	var delete_files = [];
-	var delete_intlog = [];
-	var delete_sigeve = [];
-	var delete_arttrack = [];
-	var artifact_file_upload = [];
 
-	$(document).ready(function() {
-
-		//var i, tabcontent;
-  		//tabcontent = document.getElementsByClassName("tabcontent");
-  		//for (i = 0; i < tabcontent.length; i++) {
-    	//	tabcontent[i].style.display = "none";
-  		//}
-  		document.getElementById("infra_button").click();
-
-	    var warnMessage = "You have unsaved changes on this page.";
-
-	    /* code snippet based on https://stackoverflow.com/a/21061009 */
-	    $('#tracker-form').data('serialize', $('#tracker-form').serialize());
-
-		$(window).on('beforeunload', function(e){
-   			if ($('#tracker-form').serialize() != $('#tracker-form').data('serialize')) {
-   				return warnMessage;
-        	}
-   			else {
-   				e=null;
-   			}
-		});
-		/* end code snippet */
-
-		$('#artifact').change(function(){
-			//Disable save button until the files are loaded. Update text for button.
-			$('#Save_Label').prop('class', "btn btn-primary disabled");
-			$('#Submit').prop('disabled', true);
-			$('#artifact_label').text("Files are loading.");
-
-			artifact_file_upload = []
-
-			file_list = $('#artifact').get(0).files;
-			temp_promises = [];
-
-			//Create a promise for every file being loaded.
-			for(var i = 0; i < file_list.length; i++) {
-				let filePromise = new Promise(resolve => {
-					let reader = new FileReader();
-					let file_name = file_list[i].name;
-					reader.readAsDataURL(file_list[i]);
-					reader.onload = () => resolve([file_name, reader.result]);
-				});
-				temp_promises.push(filePromise);
-			}
-			Promise.all(temp_promises).then(content => {
-				for(let binary of content) {
-					var artifact_file = {
-						name: binary[0],
-						file: binary[1].replace(/^data:(.*,)?/,'')
-					};
-					artifact_file_upload.push(artifact_file);
-				}
-			});
-			//Reenable the button and change button text.
-			$('#Save_Label').prop('class', 'btn btn-primary');
-			$('#Submit').prop('disabled', false);
-			$('#artifact_label').text("Files have been loaded. Click the save button to upload them.");
-		});
-
-		// Check to see if the required fields are empty.
-		function check_empty_cells(table, i, more_cells, omit_col){
-			var counter = 0;
-
-            for (var j = 1; j < table.rows[i].cells.length - 3; j++) {
-                if (omit_col != -1){
-                	if (j != table.rows[i].cells.length - omit_col){
-                		if (table.rows[i].cells[j].children[0].value == "") {
-                            table.rows[i].cells[j].setAttribute('class', 'empty');
-                            counter++;
-                        }
-                	}
-                } else {
-					if (table.rows[i].cells[j].children[0].value == "") {
-					    table.rows[i].cells[j].setAttribute('class', 'empty');
-					    counter++;
-					}
-                }
-            }
-
-            if (more_cells.length > 0){ // Additional Fields to check
-                more_cells.forEach(function(value){
-                	if (table.rows[i].cells[value].children[1].value == "") {
-                        table.rows[i].cells[value].setAttribute('class', 'empty');
-                        counter++;
-                    }
-                });
-		    }
-
-            return counter;
-		} // End Check Empty Cells
-
-		// Method for formatting the form contents and additionally performing validation on the fields, if specified.
-		function format_form_contents(perform_validation){
-
-			if (perform_validation){
-	            if ($(".activity-errors").is(":visible")){ //make sure there are no formatting issues on the form
-	                alert("Please address all errors on this page before saving.");
-	                return false;
-	            }
-            }
-
-            var infrats = document.getElementById("infrats");
-            var infraws = document.getElementById("infraws");
-            var latmov = document.getElementById("latmov");
-            var persist = document.getElementById("persist");
-            var files = document.getElementById("files");
-            var intlog = document.getElementById("intlog");
-            var sigeve = document.getElementById("sigeve");
-
-            var infrats_findings = [];
-            var infraws_findings = [];
-            var latmov_findings = [];
-            var persist_findings = [];
-            var files_findings = [];
-            var intlog_findings = [];
-            var sigeve_findings = [];
-            var submit = 1;
-            var counter = 0;
-
-            for (var i = 1; i < infrats.rows.length; i++) {
-            	if (perform_validation){
-           		    counter += check_empty_cells(infrats, i, [], -1);
-            	}
-
-                /* code snippet based on https://stackoverflow.com/a/8231471 */
-                var infrats_finding = {
-                    id: infrats.rows[i].id,
-                    order: i,
-                    teamserver_ip: infrats.rows[i].cells[1].children[0].value,
-                    linked_domain: infrats.rows[i].cells[2].children[0].value,
-                    beacon_kill_date: infrats.rows[i].cells[3].children[0].value,
-                };
-                infrats_findings.push(infrats_finding);
-                /* end code snippet */
-
-            }
-
-            for (var i = 1; i < infraws.rows.length; i++) {
-            	if (perform_validation){
-            	    counter += check_empty_cells(infraws, i, [], -1);
-            	}
-
-                /* code snippet based on https://stackoverflow.com/a/8231471 */
-                var infraws_finding = {
-                    id: infraws.rows[i].id,
-                    order: i,
-                    hostname: infraws.rows[i].cells[1].children[0].value,
-                    os: infraws.rows[i].cells[2].children[0].value,
-                    ip_address: infraws.rows[i].cells[3].children[0].value,
-                    assigned_to: infraws.rows[i].cells[4].children[0].value
-                };
-                infraws_findings.push(infraws_finding);
-                /* end code snippet */
-            }
-
-            if (counter > 0) {
-                document.getElementsByClassName('infra-warn')[0].innerHTML=counter;
-                $('.infra-warn').show();
-                submit = 0;
-            }
-
-            counter = 0;
-
-            for (var i = 1; i < latmov.rows.length; i++) {
-            	if (perform_validation){
-            	    counter += check_empty_cells(latmov, i, [1], -1);
-            	}
-
-                var initb = latmov.rows[i].cells[1].children[0].value;
-                initb += " ";
-                initb += latmov.rows[i].cells[1].children[1].value;
-
-                /* code snippet based on https://stackoverflow.com/a/8231471 */
-                var latmov_finding = {
-                    id: latmov.rows[i].id,
-                    order: i,
-                    initial_beacon: initb,
-                    ip_address: latmov.rows[i].cells[2].children[0].value,
-                    hostname: latmov.rows[i].cells[3].children[0].value,
-                    account_used: latmov.rows[i].cells[4].children[0].value,
-                    host_moved_from: latmov.rows[i].cells[5].children[0].value,
-                    movement_method: latmov.rows[i].cells[6].children[0].value,
-                    callback_server: latmov.rows[i].cells[7].children[0].value,
-                    notes: latmov.rows[i].cells[8].children[0].value
-                };
-                latmov_findings.push(latmov_finding);
-                /* end code snippet */
-            }
-
-            if (counter > 0) {
-                document.getElementsByClassName('lat-warn')[0].innerHTML=counter;
-                $('.lat-warn').show();
-                submit = 0;
-            }
-
-            counter = 0;
-
-            for (var i = 1; i < persist.rows.length; i++) {
-            	if (perform_validation){
-            	    counter += check_empty_cells(persist, i, [1, 8], -1);
-            	}
-
-                var inst = persist.rows[i].cells[1].children[0].value;
-                inst += " ";
-                inst += persist.rows[i].cells[1].children[1].value;
-
-                var rmt = persist.rows[i].cells[8].children[0].value;
-                rmt += " ";
-                rmt += persist.rows[i].cells[8].children[1].value;
-
-
-                /* code snippet based on https://stackoverflow.com/a/8231471 */
-                var persist_finding = {
-                    id: persist.rows[i].id,
-                    order: i,
-                    installation_time: inst,
-                    machine_ip: persist.rows[i].cells[2].children[0].value,
-                    machine_hostname: persist.rows[i].cells[3].children[0].value,
-                    description: persist.rows[i].cells[4].children[0].value,
-                    persistence_method: persist.rows[i].cells[5].children[0].value,
-                    persistence_info: persist.rows[i].cells[6].children[0].value,
-                    callback_server: persist.rows[i].cells[7].children[0].value,
-                    removal_time: rmt
-                };
-                persist_findings.push(persist_finding);
-                /* end code snippet */
-            }
-
-            if (counter > 0) {
-                document.getElementsByClassName('persist-warn')[0].innerHTML=counter;
-                $('.persist-warn').show();
-                submit = 0;
-            }
-
-            counter = 0;
-
-            for (var i = 1; i < files.rows.length; i++) {
-            	if (perform_validation){
-            	    counter += check_empty_cells(files, i, [], 4);
-            	}
-
-                /* code snippet based on https://stackoverflow.com/a/8231471 */
-                var files_finding = {
-                    id: files.rows[i].id,
-                    order: i,
-                    host: files.rows[i].cells[1].children[0].value,
-                    ip: files.rows[i].cells[2].children[0].value,
-                    location: files.rows[i].cells[3].children[0].value,
-                    filename: files.rows[i].cells[4].children[0].value,
-                    deleted: files.rows[i].cells[5].children[0].value,
-                    date: files.rows[i].cells[6].children[0].value,
-                    time_dropped_to_disk: files.rows[i].cells[7].children[0].value,
-                    time_deleted: files.rows[i].cells[8].children[0].value
-                };
-                files_findings.push(files_finding);
-                /* end code snippet */
-            }
-
-            if (counter > 0) {
-                document.getElementsByClassName('files-warn')[0].innerHTML=counter;
-                $('.files-warn').show();
-                submit = 0;
-            }
-
-            counter = 0;
-
-            for (var i = 1; i < intlog.rows.length; i++) {
-            	if (perform_validation){
-            	    counter += check_empty_cells(intlog, i, [1, 7], -1);
-            	}
-
-                var il = intlog.rows[i].cells[1].children[0].value;
-                il += " ";
-                il += intlog.rows[i].cells[1].children[1].value;
-
-                var ilae = intlog.rows[i].cells[7].children[0].value;
-                ilae += " ";
-                ilae += intlog.rows[i].cells[7].children[1].value;
-
-                /* code snippet based on https://stackoverflow.com/a/8231471 */
-                var intlog_finding = {
-                    id: intlog.rows[i].id,
-                    order: i,
-                    datetime: il,
-                    operator: intlog.rows[i].cells[2].children[0].value,
-                    host: intlog.rows[i].cells[3].children[0].value,
-                    username: intlog.rows[i].cells[4].children[0].value,
-                    password: intlog.rows[i].cells[5].children[0].value,
-                    type: intlog.rows[i].cells[6].children[0].value,
-                    access_ended: ilae,
-                    notes: intlog.rows[i].cells[8].children[0].value
-                };
-                intlog_findings.push(intlog_finding);
-                /* end code snippet */
-            }
-
-            if (counter > 0) {
-                document.getElementsByClassName('int-warn')[0].innerHTML=counter;
-                $('.int-warn').show();
-                submit = 0;
-            }
-
-            counter = 0;
-
-            for (var i = 1; i < sigeve.rows.length; i++) {
-            	if (perform_validation){
-            	    counter += check_empty_cells(sigeve, i, [3], -1);
-            	}
-
-                var se = sigeve.rows[i].cells[3].children[0].value;
-                se += " ";
-                se += sigeve.rows[i].cells[3].children[1].value;
-
-                /* code snippet based on https://stackoverflow.com/a/8231471 */
-                var sigeve_finding = {
-                    id: sigeve.rows[i].id,
-                    order: i,
-                    event: sigeve.rows[i].cells[1].children[0].value,
-                    notes: sigeve.rows[i].cells[2].children[0].value,
-                    datetime: se
-                };
-                sigeve_findings.push(sigeve_finding);
-                /* end code snippet */
-            }
-
-            if (counter > 0) {
-                document.getElementsByClassName('sig-warn')[0].innerHTML=counter;
-                $('.sig-warn').show();
-                submit = 0;
-            }
-
-            var form_contents = { infrats_findings: infrats_findings,
-						            infraws_findings: infraws_findings,
-						            latmov_findings: latmov_findings,
-						            persist_findings: persist_findings,
-						            files_findings: files_findings,
-						            intlog_findings: intlog_findings,
-						            sigeve_findings: sigeve_findings,
-						            delete_infrats: delete_infrats,
-						            delete_infraws: delete_infraws,
-						            delete_latmov: delete_latmov,
-						            delete_persist: delete_persist,
-						            delete_files: delete_files,
-						            delete_intlog: delete_intlog,
-						            delete_sigeve: delete_sigeve,
-									delete_arttrack: delete_arttrack
-            }
-
-            return {submit, form_contents}
-		} // End perform validation
-
-		// Submit the Tracker Form
-		$('#tracker-form').submit(function(event) {
-
-			$('.success').hide();
-			$('.failure').hide();
-			$('.badge').hide();
-
-			// Determine if the form fields should also be validated to check for empty cells
-			var perform_validation = false;
-
-			if ($('#include_validation').is(":checked")){
-				perform_validation = true;
-			}
-
-			let {submit, form_contents} = format_form_contents(perform_validation);
-
-			if (submit) {
-				$('#tracker-form').data('serialize',$('#tracker-form').serialize());
-				//var dt = new Date();
-				//document.getElementById("datetime").innerHTML = dt.toLocaleString();
-
-				$.ajax({
-					type: "POST",
-					url : "{% url 'save_tracker' %}",
-					data: {
-						'infrats_findings': JSON.stringify(form_contents.infrats_findings),
-						'infraws_findings': JSON.stringify(form_contents.infraws_findings),
-						'latmov_findings': JSON.stringify(form_contents.latmov_findings),
-						'persist_findings': JSON.stringify(form_contents.persist_findings),
-						'files_findings': JSON.stringify(form_contents.files_findings),
-						'intlog_findings': JSON.stringify(form_contents.intlog_findings),
-						'sigeve_findings': JSON.stringify(form_contents.sigeve_findings),
-						'artifact_files': JSON.stringify(artifact_file_upload),
-						'delete_infrats': JSON.stringify(form_contents.delete_infrats),
-						'delete_infraws': JSON.stringify(form_contents.delete_infraws),
-						'delete_latmov': JSON.stringify(form_contents.delete_latmov),
-						'delete_persist': JSON.stringify(form_contents.delete_persist),
-						'delete_files': JSON.stringify(form_contents.delete_files),
-						'delete_intlog': JSON.stringify(form_contents.delete_intlog),
-						'delete_sigeve': JSON.stringify(form_contents.delete_sigeve),
-						'delete_arttrack': JSON.stringify(form_contents.delete_arttrack),
-						csrfmiddlewaretoken: "{{ csrf_token }}"
+	function pageData() {
+		let pageData = {
+			formData: [],
+			fileList: [],
+			fileUploadArgs: {
+				helperText: "Upload one or more files and select 'Save' to automatically generate their corresponding hashes. Each file should be less than 200 MB.",
+				accept: "",
+				name: "artifactUpload",
+				multiple: true,
+			},
+			tabs: {
+				infrastructure: true,
+				lateral_movement: false,
+				files: false,
+				interactive_logons: false,
+				scans: false,
+				significant_events: false,
+				artifacts: false
+			},
+			calendar: {
+				date: null,
+				max: null,
+				min: null,
+				mode: 'date',
+				size: 'md'
+			},
+			dateTime: {
+				date: null,
+				max: null,
+				min: null,
+				mode: 'dateTime',
+				size: 'md'
+			},
+			osOptions: [
+				{ id: 1, value: 'Kali', text: 'Kali'},
+				{ id: 2, value: 'macOS', text: 'macOS'},
+				{ id: 3, value: 'Windows', text: 'Windows'},
+				{ id: 4, value: 'Linux', text: 'Linux'},
+				{ id: 5, value: 'ESXi', text: 'ESXi'},
+				{ id: 6, value: 'Other', text: 'Other'},
+			],
+			deleteOptions: [
+				{ id: 1, value: 'D', text: 'Deleted'},
+				{ id: 2, value: 'N', text: 'Not Deleted'},
+			],
+			ExtTeamserverTableArgs: {
+				fields: [
+					{
+						key: "hostname",
+						label: "Hostname",
+						sortable: true
 					},
-					success: function (data) {
-						//$('.success').show();
-						window.location.reload();
+					{
+						key: "ip",
+						label: "IP Address",
+						sortable: true
 					},
-					error: function(request) {
-						if(request.responseText.indexOf("RequestDataTooBig") >= 0) {
-							alert("Data is too large to be uploaded. Try splitting up your data into multiple saves.");
-						}
+					{
+						key: "domain",
+						label: "Domain",
+						sortable: true
+					},
+					{
+						key: "killdate",
+						label: "Beacon Kill Date",
+						sortable: true
+					},
+					{
+						key: "delete",
 					}
-				});
-				return false;
-			}
-
-			else {
-				alert("FAILED")
-				$('.failure').show();
-				return false;
-			}
- 		});
-	});
-
-	function check_for_errors(table_id, error_tag){
-		table_elements = document.querySelectorAll("#" + table_id + " td>textarea");
-
-		switch(table_id){
-			case "infrats":
-				if (error_tag.includes("ip-errors")){
-	                for (i = 0; i < table_elements.length; i+=2){
-	                	if (table_elements[i].style.border == "2px solid rgb(228, 16, 14)"){
-	                        return false;
-	                    }
-	                }
-	            }else if (error_tag.includes("text-errors")){
-	                for (i = 1; i < table_elements.length; i+=2){
-	                	if (table_elements[i].style.border == "2px solid rgb(228, 16, 14)"){
-	                        return false;
-	                    }
-	                }
-	            }
-				break;
-			case "infraws":
-				if (error_tag.includes("text-errors")){
-                    for (i = 0; i < table_elements.length; i++){
-                    	if (i % 3 !== 1){
-	                        if (table_elements[i].style.border == "2px solid rgb(228, 16, 14)"){
-	                            return false;
-	                        }
-                        }
-                    }
-                }else if (error_tag.includes("ip-errors")){
-                    for (i = 1; i < table_elements.length; i+=3){
-                        if (table_elements[i].style.border == "2px solid rgb(228, 16, 14)"){
-                            return false;
-                        }
-                    }
-                }
-                break;
-            case "latmov":
-            	if (error_tag.includes("text-errors")){
-                    for (i = 1; i < table_elements.length; i++){
-                        if (i % 7 !== 0){
-                            if (table_elements[i].style.border == "2px solid rgb(228, 16, 14)"){
-                                return false;
-                            }
-                        }
-                    }
-                }else if (error_tag.includes("ip-errors")){
-                    for (i = 0; i < table_elements.length; i+=7){
-                        if (table_elements[i].style.border == "2px solid rgb(228, 16, 14)"){
-                            return false;
-                        }
-                    }
-                }
-                break;
-            case "persist":
-            	if (error_tag.includes("text-errors")){
-                    for (i = 1; i < table_elements.length; i++){
-                        if (i % 6 !== 0){
-                            if (table_elements[i].style.border == "2px solid rgb(228, 16, 14)"){
-                                return false;
-                            }
-                        }
-                    }
-                }else if (error_tag.includes("ip-errors")){
-                    for (i = 0; i < table_elements.length; i+=6){
-                        if (table_elements[i].style.border == "2px solid rgb(228, 16, 14)"){
-                            return false;
-                        }
-                    }
-                }
-                break;
-            case "files":
-            	if (error_tag.includes("text-errors")){
-                    for (i = 0; i < table_elements.length; i++){
-                        if (i % 5 !== 1){
-                            if (table_elements[i].style.border == "2px solid rgb(228, 16, 14)"){
-                                return false;
-                            }
-                        }
-                    }
-                }else if (error_tag.includes("ip-errors")){
-                    for (i = 1; i < table_elements.length; i+=5){
-                        if (table_elements[i].style.border == "2px solid rgb(228, 16, 14)"){
-                            return false;
-                        }
-                    }
-                }
-                break;
-            case "intlog":
-            	if (error_tag.includes("text-errors")){
-                    for (i = 0; i < table_elements.length; i++){
-	                    if (table_elements[i].style.border == "2px solid rgb(228, 16, 14)"){
-	                        return false;
-	                    }
-                    }
-                } //intlog has no ip address fields
-                break;
-            case "sigeve":
-            	if (error_tag.includes("text-errors")){
-                    for (i = 0; i < table_elements.length; i++){
-	                    if (table_elements[i].style.border == "2px solid rgb(228, 16, 14)"){
-	                        return false;
-	                    }
-                    }
-                } //sigeve has no ip address fields
-                break;
-		}
-
-		// No errors left in the table
-        $(error_tag).html("");
-        $(error_tag).css('display', 'none');
-
-	}
-
-    /* begin data validation for form fields */
-    function check_text_format(this_element){
-        if (!$('#include_validation').is(":checked")){
-            return; // Don't perform text validation on the fields
-        }
-
-    	var parent = this_element; //get the parent table id to show the appropriate error message
-
-        while(parent.tagName.toUpperCase() !== "TABLE"){ parent = parent.parentNode; }
-
-        var error_message_id = "#" + parent.id + "_text-errors";
-
-    	var begin_with_char__or_num = "^[\\sa-zA-Z\\d]";
-
-   		if (!this_element.value.match(begin_with_char__or_num) && this_element.value !=""){
-               $(error_message_id).html("<i class=\"fas fa-exclamation-triangle fa-md\"></i>&nbsp;Ensure the highlighted text field begins with a letter (a-z) or number (0-9)");
-               $(error_message_id).css('display', 'block');
-               this_element.style.border = '2px solid #E4100E';
-        }else{
-	         this_element.style.border = '';
-	         check_for_errors(parent.id, error_message_id); //check for errors, if none exist remove the error messages
-
-        }
-    }
-
-    function check_ip_format(this_element){
-    	if (!$('#include_validation').is(":checked")){
-    		return; //  Don't perform IP validation on the fields
-        }
-
-	    var parent = this_element; //get the parent table id to show the appropriate error message
-
-	    while(parent.tagName.toUpperCase() !== "TABLE"){ parent = parent.parentNode;}
-
-	    var error_message_id = "#" + parent.id + "_ip-errors";
-
-	    // regular expression for IPv4 and IPv6 (IPv6 may not work entirely)
-	    // from https://nbviewer.jupyter.org/github/rasbt/python_reference/blob/master/tutorials/useful_regex.ipynb#Checking-for-IP-addresses
-	    var ipv4_reg_exp =  "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
-
-	    var ipv6_reg_exp = "^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}| \
-	  	                      ((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5} \
-	                            (((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))| \
-	                            (([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d) \
-	                            (\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})| \
-	                            ((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))| \
-	                            (([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d) \
-	                            (\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})| \
-	                            ((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))| \
-	                            (:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d) \
-	                            (\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$";
-
-	    if (!this_element.value.match(ipv4_reg_exp) && !this_element.value.match(ipv6_reg_exp) && this_element.value !=""){
-	  	    $(error_message_id).html("<i class=\"fas fa-exclamation-triangle fa-md\"></i>&nbsp;Ensure the IP Address fields are in the right format (IPv4 or IPv6)");
-	          $(error_message_id).css('display', 'block');
-	          this_element.style.border = '2px solid #E4100E';
-		} else {
-		    this_element.style.border = '';
-		    check_for_errors(parent.id, error_message_id); //check for errors, if none exist remove the error messages
-		}
-    }
-    /* end data validation */
-
-	function new_row(row, id) {
-		var table;
-
-		if (id == '1') {
-			table = 'infrats';
-			var r = document.getElementById('infrats').insertRow();
-			var n = 5;
-		}
-
-		/*if (id == 'infrats') {
-			table = id;
-			id = 1;
-			var i = row.parentNode.parentNode.rowIndex;
-			var r = document.getElementById('infrats').insertRow(i+1);
-			var n = 5;
-		}*/
-
-		if (id == '12') {
-			table = 'infraws';
-			var r = document.getElementById('infraws').insertRow();
-			var n = 6;
-		}
-
-		/*if (id == 'infraws') {
-			table = id;
-			id = 12;
-			var i = row.parentNode.parentNode.rowIndex;
-			var r = document.getElementById('infraws').insertRow(i+1);
-			var n = 6;
-		}*/
-
-		if (id == '2') {
-			table = 'latmov';
-			var r = document.getElementById('latmov').insertRow();
-			var n = 10;
-		}
-
-		/*if (id == 'latmov') {
-			table = id;
-			id = 2;
-			var i = row.parentNode.parentNode.rowIndex;
-			var r = document.getElementById('latmov').insertRow(i+1);
-			var n = 10;
-		}*/
-
-		if (id == '3') {
-			table = 'persist';
-			var r = document.getElementById('persist').insertRow();
-			var n = 10;
-		}
-
-		/*if (id == 'persist') {
-			table = id;
-			id = 3;
-			var i = row.parentNode.parentNode.rowIndex;
-			var r = document.getElementById('persist').insertRow(i+1);
-			var n = 10;
-		}*/
-
-		if (id == '4') {
-			table = 'files';
-			var r = document.getElementById('files').insertRow();
-			var n = 10;
-		}
-
-		/*if (id == 'files') {
-			table = id;
-			id = 4;
-			var i = row.parentNode.parentNode.rowIndex;
-			var r = document.getElementById('files').insertRow(i+1);
-			var n = 10;
-		}*/
-
-		if (id == '5') {
-			table = 'intlog';
-			var r = document.getElementById('intlog').insertRow();
-			var n = 10;
-		}
-
-		/*if (id == 'intlog') {
-			table = id;
-			id = 5;
-			var i = row.parentNode.parentNode.rowIndex;
-			var r = document.getElementById('intlog').insertRow(i+1);
-			var n = 10;
-		}*/
-
-		if (id == '6') {
-			table = 'sigeve';
-			var r = document.getElementById('sigeve').insertRow();
-			var n = 5;
-		}
-
-		/*if (id == 'sigeve') {
-			table = id;
-			id = 6;
-			var i = row.parentNode.parentNode.rowIndex;
-			var r = document.getElementById('sigeve').insertRow(i+1);
-			var n = 5;
-		}*/
-
-		for (i=0; i < n-1; i++) {
-			var a = r.insertCell(i);
-			a.setAttribute('style', 'padding:0; vertical-align:middle');
-			// Fields with multiple inputs contained the required attribute on all inputs
-
-			if (i == 0) {
-				a.setAttribute('class', 'order');
-			}
-			else if (id == '1' && i == 3) {
-				a.innerHTML = '<input class="form-control" name="beacon_kill_date" type="date">';
-			}
-			else if (id == '1' && i == 1){
-				a.innerHTML = '<textarea class="form-control" name="teamserver_ip" onchange="check_ip_format(this)" rows="1"></textarea>';
-			}
-			else if (id == '12' && i == 2) {
-				a.innerHTML = '<input class="form-control osdropdown" name="os" list="osopts"><datalist id="osopts"><option value="Kali"><option value="Mac"><option value="Windows"></datalist>'
-			}
-			else if (id == '12' && i == 3) {
-				a.innerHTML = '<textarea class="form-control" name="ip_address" onchange="check_ip_format(this)" rows="1"></textarea>';
-            }
-			else if (id == '2' && i == 1) {
-				a.innerHTML = '<input class="form-control" name="initial_beacon_date_time" type="date"><input class="form-control" name="initt" type="time" step="1">';
-			}
-			else if (id == '2' && i == 2) {
-                a.innerHTML = a.innerHTML = '<textarea class="form-control" name="ip_address" onchange="check_ip_format(this)" rows="2"></textarea>';
-            }
-			else if (id == '3' && i == 1) {
-				a.innerHTML = '<input class="form-control" name="installation_time" type="date"><input class="form-control" name="instt" type="time" step="1">';
-			}
-			else if (id == '3' && i == 2) {
-				a.innerHTML = '<textarea class="form-control"  name="machine_ip" onchange="check_ip_format(this)" rows="2"></textarea>';
-            }
-			else if (id == '3' && i == 8) {
-				a.innerHTML = '<input class="form-control" name="removal_date_time" type="date"><input class="form-control" name="rmtt" type="time" step="1">';
-			}
-			else if (id == '4' && i == 2) {
-				a.innerHTML = '<textarea class="form-control" name="ip" onchange="check_ip_format(this)" rows="1"></textarea>';
-            }
-			else if (id == '4' && i == 5){
-				a.innerHTML = '<select name="file_deleted" class="form-control"><option value="Y">Yes</option><option value="N" selected>No</option></select>'
-            }
-			else if (id == '4' && i == 6) {
-				a.innerHTML = '<input class="form-control" name="file_date" type="date">';
-			}
-			else if (id == '4' && i == 7) {
-				a.innerHTML = '<input class="form-control" name="file_time" type="time" step="1">';
-			}
-			else if (id == '4' && i == 8) {
-				// Previously NOT required. All other fields were required.
-				a.innerHTML = '<input class="form-control" name="file_time_deleted" type="time" step="1">';
-			}
-			else if (id == '5' && i == 1) {
-				a.innerHTML = '<input class="form-control" name="date_time" type="date"><input class="form-control" name="ilt" type="time" step="1">';
-			}
-			else if (id == '5' && i == 7) {
-				a.innerHTML = '<input class="form-control" name="access_ended" type="date"><input class="form-control" name="ilaet" type="time" step="1">';
-			}
-			else if (id == '6' && i == 3) {
-				a.innerHTML = '<input class="form-control" name="date_time" type="date"><input class="form-control" name="set" type="time" step="1">';
-			}
-			else if (id == '1' || id == '12' || id == '4') {
-				a.innerHTML = '<textarea class="form-control" rows="1" onchange="check_text_format(this)"></textarea>';
-			}
-			else {
-				a.innerHTML = '<textarea class="form-control" rows="2" onchange="check_text_format(this)"></textarea>';
-			}
-		}
-
-        // Add created_by and last_modified_by fields
-        var c = r.insertCell(n-1);
-        c.setAttribute('style', 'padding:0; vertical-align:middle');
-        c.innerHTML = '<input class="form-control" name="created_by" type="text" value="{{i.created_by.username}}" readonly />';
-
-
-        var m = r.insertCell(n);
-        m.setAttribute('style', 'padding:0; vertical-align:middle');
-        m.innerHTML = '<input class="form-control" name="modified_by" type="text" readonly />';
-
-        // Include the Delete Button
-		var a = r.insertCell(n + 1);
-        a.innerHTML = '<button type="button" class="btn btn-danger" onclick="delete_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-trash-alt fa-xs"></i></button>';
-        //<button type="button" class="btn btn-info" onclick="new_row(this, this.parentNode.parentNode.parentNode.parentNode.id)"><i class="fas fa-plus fa-xs"></i></button>';
-        a.setAttribute('style', 'width:50px; white-space:nowrap; text-align:center; padding:0; vertical-align:middle');
-
-
-		row_order(table);
-	}
-
-	function delete_row(row, id) {
-		var i = row.parentNode.parentNode.rowIndex;
-		var table = document.getElementById(id);
-		if (table.rows[i].id != "" && id == 'infrats') {
-			delete_infrats.push(table.rows[i].id);
-		}
-		else if (table.rows[i].id != "" && id == 'infraws') {
-			delete_infraws.push(table.rows[i].id);
-		}
-		else if (table.rows[i].id != "" && id == 'latmov') {
-			delete_latmov.push(table.rows[i].id);
-		}
-		else if (table.rows[i].id != "" && id == 'persist') {
-			delete_persist.push(table.rows[i].id);
-		}
-		else if (table.rows[i].id != "" && id == 'files') {
-			delete_files.push(table.rows[i].id);
-		}
-		else if (table.rows[i].id != "" && id == 'intlog') {
-			delete_intlog.push(table.rows[i].id);
-		}
-		else if (table.rows[i].id != "" && id == 'sigeve') {
-			delete_sigeve.push(table.rows[i].id);
-		}
-		else if (table.rows[i].id != "" && id == 'arttrack') {
-			delete_arttrack.push(table.rows[i].id);
-		}
-		table.deleteRow(i);
-        row_order(id);
-
-		if ($("#" + id + " tr").length == 1){ //if the table is empty remove the error messages
-			$("#" + id + "_ip-errors").html("");
-            $("#" + id + "_ip-errors").css('display', 'none');
-            $("#" + id + "_text-errors").html("");
-            $("#" + id + "_text-errors").css('display', 'none');
-		}
-
-
-	}
-
-	function row_order(id) {
-		var table = document.getElementById(id);
-		for (var i = 1; i < table.rows.length; i++) {
-			table.rows[i].cells[0].innerHTML = table.rows[i].rowIndex;
-		}
-	}
-
-	/* code snippet from https://www.w3schools.com/w3css/w3css_tabulators.asp */
-	function openTab(evt, name) {
-  		var i, tabcontent, tablinks;
-  		tabcontent = document.getElementsByClassName("tabcontent");
-  		for (i = 0; i < tabcontent.length; i++) {
-    		tabcontent[i].style.display = "none";
-  		}
-  		tablinks = document.getElementsByClassName("tablinks");
-  		for (i = 0; i < tablinks.length; i++) {
-    		tablinks[i].className = tablinks[i].className.replace(" active", "");
-  		}
-  		document.getElementById(name).style.display = "block";
-  		evt.currentTarget.className += " active";
-	}
-	/* end code snippet */
-
-    $('.osdropdown').focusin(function() {
-    	$(this).val('');
-    });
-
-    /* code snippet based on https://www.w3schools.com/howto/howto_js_sort_table.asp */
-    /* sortIP code snippet also based on https://datatables.net/plug-ins/sorting/ip-address */
-    function sortTable(index, tableid, sort) {
-    	var table, rows, switching, i, x, y, shouldSwitch;
-		table = document.getElementById(tableid);
-		switching = true;
-
-		while (switching) {
-			switching = false;
-			rows = table.rows;
-	    	for (i = 1; i < (rows.length - 1); i++) {
-	    		shouldSwitch = false;
-	    		x = rows[i].getElementsByTagName("td")[index];
-	    		y = rows[i + 1].getElementsByTagName("td")[index];
-	    		if (sort == 'sort' && x.children[0].value.toLowerCase() > y.children[0].value.toLowerCase()) {
-	    			shouldSwitch = true;
-	    			break;
-	    		}
-	    		if (sort == 'rev' && x.children[0].value.toLowerCase() < y.children[0].value.toLowerCase()) {
-	    			shouldSwitch = true;
-	    			break;
-	    		}
-	    	}
-    		if (shouldSwitch) {
-    			rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-    			switching = true;
-    		}
-    	}
-    	row_order(tableid);
-    }
-
-    function sortDateTime(index, tableid, sort) {
-    	var table, rows, switching, i, x, y, dtx, dty, shouldSwitch;
-		table = document.getElementById(tableid);
-		switching = true;
-
-		while (switching) {
-			switching = false;
-			rows = table.rows;
-	    	for (i = 1; i < (rows.length - 1); i++) {
-	    		shouldSwitch = false;
-	    		x = rows[i].getElementsByTagName("td")[index];
-	    		y = rows[i + 1].getElementsByTagName("td")[index];
-
-	    		dtx = x.children[0].value + " " + x.children[1].value;
-	    		dty = y.children[0].value + " " + y.children[1].value;
-
-	    		if (sort == 'sort' && dtx > dty) {
-	    			shouldSwitch = true;
-	    			break;
-	    		}
-	    		if (sort == 'rev' && dtx < dty) {
-	    			shouldSwitch = true;
-	    			break;
-	    		}
-	    	}
-    		if (shouldSwitch) {
-    			rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-    			switching = true;
-    		}
-    	}
-    	row_order(tableid);
-    }
-
-    function sortIP(index, tableid, sort) {
-    	var table, rows, switching;
-    	var shouldSwitch;
-		table = document.getElementById(tableid);
-		switching = true;
-
-		while (switching) {
-			switching = false;
-			rows = table.rows;
-	    	for (var i = 1; i < (rows.length - 1); i++) {
-	    		shouldSwitch = false;
-	    		var x = rows[i].getElementsByTagName("td")[index];
-	    		var y = rows[i + 1].getElementsByTagName("td")[index];
-
-	    		var ipx = x.children[0].value.split(".");
-	    		var ipy = y.children[0].value.split(".");
-	    		var newx = "";
-	    		var newy = "";
-
-				for (var j = 0; j < ipx.length; j++) {
-					var item = ipx[j];
-
-					if (item.length == 1) {
-						newx += "00" + item;
+				],
+				name: "ext-ts",
+				items: []
+			},
+			PhishingTableArgs: {
+				fields: [
+					{
+						key: "hostname",
+						label: "Hostname",
+						sortable: true
+					},
+					{
+						key: "ip",
+						label: "IP Address",
+						sortable: true
+					},
+					{
+						key: "domain",
+						label: "Domain",
+						sortable: true
+					},
+					{
+						key: "delete",
 					}
-					else if (item.length == 2) {
-						newx += "0" + item;
+				],
+				name: "phi",
+				items: []
+			},
+			RedirectorTableArgs: {
+				fields: [
+					{
+						key: "url",
+						label: "URL",
+						sortable: true
+					},
+					{
+						key: "delete",
+					}
+				],
+				name: "red",
+				items: []
+			},
+			ExtWorkstationTableArgs: {
+				fields: [
+					{
+						key: "hostname",
+						label: "Hostname",
+						sortable: true
+					},
+					{
+						key: "ip",
+						label: "IP Address",
+						sortable: true
+					},
+					{
+						key: "os",
+						label: "Operating System",
+						sortable: true
+					},
+					{
+						key: "operator",
+						label: "Operator",
+						sortable: true
+					},
+					{
+						key: "delete",
+					}
+				],
+				name: "ext-ws",
+				items: []
+			},
+			IntTeamserverTableArgs: {
+				fields: [
+					{
+						key: "hostname",
+						label: "Hostname",
+						sortable: true
+					},
+					{
+						key: "ip",
+						label: "IP Address",
+						sortable: true
+					},
+					{
+						key: "domain",
+						label: "Domain",
+						sortable: true
+					},
+					{
+						key: "killdate",
+						label: "Beacon Kill Date",
+						sortable: true
+					},
+					{
+						key: "delete",
+					}
+				],
+				name: "int-ts",
+				items: []
+			},
+			IntWorkstationTableArgs: {
+				fields: [
+					{
+						key: "hostname",
+						label: "Hostname",
+						sortable: true
+					},
+					{
+						key: "ip",
+						label: "IP Address",
+						sortable: true
+					},
+					{
+						key: "os",
+						label: "Operating System",
+						sortable: true
+					},
+					{
+						key: "operator",
+						label: "Operator",
+						sortable: true
+					},
+					{
+						key: "delete",
+					}
+				],
+				name: "int-ws",
+				items: []
+			},
+			LatTableArgs: {
+				fields: [
+					{
+						key: "beacon",
+						label: "Initial Beacon",
+						sortable: true
+					},
+					{
+						key: "hostname",
+						label: "Hostname",
+						sortable: true
+					},
+					{
+						key: "ip",
+						label: "IP Address",
+						sortable: true
+					},
+					{
+						key: "account",
+						label: "Account Used",
+						sortable: true,
+					},
+					{
+						key: "moved",
+						label: "Host Moved From",
+						sortable: true,
+					},
+					{
+						key: "method",
+						label: "Movement Method",
+						sortable: true,
+					},
+					{
+						key: "callback",
+						label: "Callback Server",
+						sortable: true,
+					},
+					{
+						key: "notes",
+						label: "Notes",
+						sortable: true,
+					},
+					{
+						key: "delete",
+					}
+				],
+				name: "lat",
+				items: []
+			},
+			FileTableArgs: {
+				fields: [
+					{
+						key: "hostname",
+						label: "Hostname",
+						sortable: true
+					},
+					{
+						key: "ip",
+						label: "IP Address",
+						sortable: true
+					},
+					{
+						key: "location",
+						label: "File Location",
+						sortable: true
+					},
+					{
+						key: "filename",
+						label: "File Name",
+						sortable: true,
+					},
+					{
+						key: "status",
+						label: "Status",
+						sortable: true,
+					},
+					{
+						key: "created",
+						label: "Date/Time Created",
+						sortable: true,
+					},
+					{
+						key: "deleted",
+						label: "Date/Time Deleted",
+						sortable: true,
+					},
+					{
+						key: "delete",
+					}
+				],
+				name: "fil",
+				items: []
+			},
+			IntLogonsTableArgs: {
+				fields: [
+					{
+						key: "hostname",
+						label: "Hostname",
+						sortable: true
+					},
+					{
+						key: "ip",
+						label: "IP Address",
+						sortable: true
+					},
+					{
+						key: "account",
+						label: "Account",
+						sortable: true
+					},
+					{
+						key: "method",
+						label: "Method",
+						sortable: true,
+					},
+					{
+						key: "logon",
+						label: "Logon Date/Time",
+						sortable: true
+					},
+					{
+						key: "logoff",
+						label: "Logoff Date/Time",
+						sortable: true
+					},
+					{
+						key: "operator",
+						label: "Operator",
+						sortable: true
+					},
+					{
+						key: "notes",
+						label: "Notes",
+						sortable: true,
+					},
+					{
+						key: "delete",
+					}
+				],
+				name: "int",
+				items: []
+			},
+			ScanTableArgs: {
+				fields: [
+					{
+						key: "type",
+						label: "Scan Type",
+						sortable: true
+					},
+					{
+						key: "tool",
+						label: "Tool Used",
+						sortable: true
+					},
+					{
+						key: "range",
+						label: "IP Range(s) Targeted",
+						sortable: true
+					},
+					{
+						key: "domain",
+						label: "Domain(s) Targeted",
+						sortable: true,
+					},
+					{
+						key: "start",
+						label: "Scan Start",
+						sortable: true
+					},
+					{
+						key: "end",
+						label: "Scan End",
+						sortable: true
+					},
+					{
+						key: "notes",
+						label: "Notes",
+						sortable: true,
+					},
+					{
+						key: "delete",
+					}
+				],
+				name: "sca",
+				items: []
+			},
+			SigTableArgs: {
+				fields: [
+					{
+						key: "event",
+						label: "Event",
+						sortable: true
+					},
+					{
+						key: "notes",
+						label: "Notes",
+						sortable: true
+					},
+					{
+						key: "start",
+						label: "Start Time",
+						sortable: true
+					},
+					{
+						key: "end",
+						label: "End Time",
+						sortable: true
+					},
+					{
+						key: "delete",
+					}
+				],
+				name: "sig",
+				items: []
+			},
+			ArtifactTableArgs: {
+				fields: [
+					{
+						key: "name",
+						label: "File Name",
+						sortable: true
+					},
+					{
+						key: "description",
+						label: "Description",
+						sortable: true
+					},
+					{
+						key: "md5",
+						label: "MD5",
+						sortable: true
+					},
+					{
+						key: "sha1",
+						label: "SHA-1",
+						sortable: true
+					},
+					{
+						key: "sha256",
+						label: "SHA-256",
+						sortable: true
+					},
+					{
+						key: "delete",
+					}
+				],
+				name: "art",
+				items: []
+			},
+		}
+
+		{% for i in infra_ext_ts %}
+			{% if i.kill_date != null %}
+				date = "{{i.kill_date | date:"m/d/Y"}}"
+				killdate = new Date (date.replace(/\./g, ''))
+			{% else %}
+				killdate = null
+			{% endif %}
+
+			pageData.ExtTeamserverTableArgs.items.push({order: parseInt("{{i.order}}"), hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip|escapejs}}", domain: "{{i.domain|escapejs}}", killdate: killdate})
+		{% endfor %}
+
+		{% for i in infra_int_ts %}
+			{% if i.kill_date != null %}
+				date = "{{i.kill_date | date:"m/d/Y"}}"
+				killdate = new Date (date.replace(/\./g, ''))
+			{% else %}
+				killdate = null
+			{% endif %}
+
+			pageData.IntTeamserverTableArgs.items.push({order: parseInt("{{i.order}}"), hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip|escapejs}}", domain: "{{i.domain|escapejs}}", killdate: killdate})
+		{% endfor %}
+
+		{% for i in infra_phi %}
+			pageData.PhishingTableArgs.items.push({order: parseInt("{{i.order}}"), hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip|escapejs}}", domain: "{{i.domain|escapejs}}"})
+		{% endfor %}
+
+		{% for i in infra_red %}
+			pageData.RedirectorTableArgs.items.push({order: parseInt("{{i.order}}"), url: "{{i.url|escapejs}}"})
+		{% endfor %}
+
+		{% for i in infra_ext_ws %}
+			pageData.ExtWorkstationTableArgs.items.push({order: parseInt("{{i.order}}"), hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip|escapejs}}", os: "{{i.os|escapejs}}", operator: "{{i.operator|escapejs}}"})
+		{% endfor %}
+
+		{% for i in infra_int_ws %}
+			pageData.IntWorkstationTableArgs.items.push({order: parseInt("{{i.order}}"), hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip|escapejs}}", os: "{{i.os|escapejs}}", operator: "{{i.operator|escapejs}}"})
+		{% endfor %}
+
+		{% for i in lat_mov %}
+			{% if i.initial_beacon != null %}
+				date = "{{i.initial_beacon | date:"m/d/Y h:i a"}}"
+				beacon = new Date (date.replace(/\./g, ''))
+			{% else %}
+				beacon = null
+			{% endif %}
+
+			pageData.LatTableArgs.items.push({order: parseInt("{{i.order}}"), beacon: beacon, hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip|escapejs}}", account: "{{i.account|escapejs}}", moved: "{{i.host_moved_from|escapejs}}", method: "{{i.method|escapejs}}", callback: "{{i.callback_server|escapejs}}", notes: "{{i.notes|escapejs}}"})
+		{% endfor %}
+
+		{% for i in files %}
+			{% if i.created != null %}
+				date = "{{i.created | date:"m/d/Y h:i a"}}"
+				created = new Date (date.replace(/\./g, ''))
+			{% else %}
+				created = null
+			{% endif %}
+
+			{% if i.deleted != null %}
+				date = "{{i.deleted | date:"m/d/Y h:i a"}}"
+				deleted = new Date (date.replace(/\./g, ''))
+			{% else %}
+				deleted = null
+			{% endif %}
+
+			pageData.FileTableArgs.items.push({order: parseInt("{{i.order}}"), hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip|escapejs}}", location: "{{i.location|escapejs}}", filename: "{{i.filename|escapejs}}", status: "{{i.status|escapejs}}", created: created, deleted: deleted})
+		{% endfor %}
+
+		{% for i in int_log %}
+			{% if i.logon != null %}
+				date = "{{i.logon | date:"m/d/Y h:i a"}}"
+				logon = new Date (date.replace(/\./g, ''))
+			{% else %}
+				logon = null
+			{% endif %}
+
+			{% if i.logoff != null %}
+				date = "{{i.logoff | date:"m/d/Y h:i a"}}"
+				logoff = new Date (date.replace(/\./g, ''))
+			{% else %}
+				logoff = null
+			{% endif %}
+
+			pageData.IntLogonsTableArgs.items.push({order: parseInt("{{i.order}}"), hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip|escapejs}}", account: "{{i.account|escapejs}}", method: "{{i.method|escapejs}}", logon: logon, logoff: logoff, operator: "{{i.operator|escapejs}}", notes: "{{i.notes|escapejs}}"})
+		{% endfor %}
+
+		{% for i in scans %}
+			{% if i.start != null %}
+				date = "{{i.start | date:"m/d/Y h:i a"}}"
+				start = new Date (date.replace(/\./g, ''))
+			{% else %}
+				start = null
+			{% endif %}
+
+			{% if i.end != null %}
+				date = "{{i.end | date:"m/d/Y h:i a"}}"
+				end = new Date (date.replace(/\./g, ''))
+			{% else %}
+				end = null
+			{% endif %}
+
+			pageData.ScanTableArgs.items.push({order: parseInt("{{i.order}}"), type: "{{i.scan_type|escapejs}}", tool: "{{i.tool|escapejs}}", range: "{{i.ranges|escapejs}}", domain: "{{i.domains|escapejs}}", start: start, end: end, notes: "{{i.notes|escapejs}}"})
+		{% endfor %}
+
+		{% for i in sig_eve %}
+			{% if i.start != null %}
+				date = "{{i.start | date:"m/d/Y h:i a"}}"
+				start = new Date (date.replace(/\./g, ''))
+			{% else %}
+				start = null
+			{% endif %}
+
+			{% if i.end != null %}
+				date = "{{i.end | date:"m/d/Y h:i a"}}"
+				end = new Date (date.replace(/\./g, ''))
+			{% else %}
+				end = null
+			{% endif %}
+
+			pageData.SigTableArgs.items.push({order: "{{i.order}}", event: "{{i.event|escapejs}}", notes: "{{i.notes|escapejs}}", start: start, end: end})
+		{% endfor %}
+
+		{% for i in art %}
+			pageData.ArtifactTableArgs.items.push({order: "{{i.order}}", name: "{{i.file_name|escapejs}}", description: "{{i.description|escapejs}}", md5: "{{i.md5|escapejs}}", sha1: "{{i.sha1|escapejs}}", sha256: "{{i.sha256|escapejs}}", fileOrder: null})
+		{% endfor %}
+		
+		return pageData
+	}
+
+	function pageCreated() {
+    this.baseData.layoutArgs.pageTitle = "Activity Tracker"
+  }
+
+  function pageMethods() {
+		pageFunctions = {
+
+			openTab: function (tab) {
+				for (var item in this.tabs) {
+					if (item != tab) {
+						this.tabs[item] = false
 					}
 					else {
-						newx += item;
+						this.tabs[item] = true
 					}
 				}
+			},
 
-				for (var j = 0; j < ipy.length; j++) {
-					var item = ipy[j];
+			addRow: function(table) {
 
-					if (item.length == 1) {
-						newy += "00" + item;
-					}
-					else if (item.length == 2) {
-						newy += "0" + item;
+				if (table.name == "ext-ts") {
+					table.items.push({order: table.items.length + 1, hostname: "", ip: "", domain: "", killdate: null})
+				}
+
+				else if (table.name == "phi") {
+					table.items.push({order: table.items.length + 1, hostname: "", ip: "", domain: ""})
+				}
+
+				else if (table.name == "red") {
+					table.items.push({order: table.items.length + 1, url: ""})
+				}
+
+				else if (table.name == "ext-ws") {
+					table.items.push({order: table.items.length + 1, hostname: "", ip: "", os: "", operator: ""})
+				}
+
+				else if (table.name == "int-ts") {
+					table.items.push({order: table.items.length + 1, hostname: "", ip: "", domain: "", killdate: null})
+				}
+
+				else if (table.name == "int-ws") {
+					table.items.push({order: table.items.length + 1, hostname: "", ip: "", os: "", operator: ""})
+				}
+
+				else if (table.name == "lat") {
+					table.items.push({order: table.items.length + 1, beacon: null, hostname: "", ip: "", account: "", moved: "", method: "", callback: "", notes: ""})
+				}
+
+				else if (table.name == "fil") {
+					table.items.push({order: table.items.length + 1, hostname: "", ip: "", location: "", filename: "", hash: "", status: "", created: null, deleted: null})
+				}
+
+				else if (table.name == "int") {
+					table.items.push({order: table.items.length + 1, hostname: "", ip: "", account: "", method: "", logon: null, logoff: null, operator: "", notes: ""})
+				}
+
+				else if (table.name == "sca") {
+					table.items.push({order: table.items.length + 1, type: "", tool: "", range: "", domain: "", start: null, end: null, notes: ""})
+				}
+
+				else if (table.name == "sig") {
+					table.items.push({order: table.items.length + 1, event: "", notes: "", start: null, end: null})
+				}
+
+				else if (table.name == "art") {
+					table.items.push({order: table.items.length + 1, name: "", description: "", md5: "", sha1: "", sha256: "", fileOrder: null})
+				}
+
+			},
+
+			deleteRow: function(table, row) {
+				table.items.splice(table.items.indexOf(row), 1)
+			},
+
+			addFile: function (event) {
+				const files = Array.from(event.files)
+				newFiles = files.filter(file => !this.fileList.includes(file))
+				fileOrder = this.fileList.length
+				Array.prototype.push.apply(this.fileList, newFiles)
+				for (let file in newFiles) {
+					this.ArtifactTableArgs.items.push({order: this.ArtifactTableArgs.items.length + 1, name: String(newFiles[file]['name']), description: "", md5: "", sha1: "", sha256: "", fileOrder: fileOrder})
+					fileOrder++
+				}
+				this.displayNotification({'title': 'Files Added', text: 'Files have been added to the tracker. Saving this screen will populate the calculated hashes.', variant:"info"})
+			},
+
+			submitTracker: function () {
+
+				this.formData.push({ext_ts: this.ExtTeamserverTableArgs.items})
+				this.formData.push({ext_ph: this.PhishingTableArgs.items})
+				this.formData.push({ext_rd: this.RedirectorTableArgs.items})
+				this.formData.push({ext_ws: this.ExtWorkstationTableArgs.items})
+				this.formData.push({int_ts: this.IntTeamserverTableArgs.items})
+				this.formData.push({int_ws: this.IntWorkstationTableArgs.items})
+				this.formData.push({lat_mov: this.LatTableArgs.items})
+				this.formData.push({file: this.FileTableArgs.items})
+				this.formData.push({int_log: this.IntLogonsTableArgs.items})
+				this.formData.push({scan: this.ScanTableArgs.items})
+				this.formData.push({sig_eve: this.SigTableArgs.items})
+				this.formData.push({art: this.ArtifactTableArgs.items})
+
+				const formData = new FormData()
+				formData.append('data', JSON.stringify(this.formData))
+
+				let num = 0
+
+				for(const file in this.fileList) {
+					formData.append('file' + num.toString(), this.fileList[file])
+					num += 1
+				}
+
+				fetch(window.location.href, {
+					method: "POST",
+					body: formData,
+					credentials: "same-origin",
+					headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
+				}).then(response => {
+					if (response.ok) {
+						this.displayNotification({title: "Activity Tracker Saved", text: "Activity Tracker data saved successfully. Please wait while the page refreshes...", variant: "success"})
+							setTimeout(() => {this.redirectLink("{% url 'activity_tracker' %}")}, 2000)
 					}
 					else {
-						newy += item;
+						this.displayNotification({title: "Error Saving Data", text: "Bad response received from server. Check for errors in forms and try again.", variant: "danger"})
 					}
-				}
+				}).catch(error => {
+					this.displayNotification({title: "Error Saving Data", variant: "danger"})
+				})
+			},
 
-				if (sort == 'sort' && (newx > newy)) {
-	    			shouldSwitch = true;
-	    			break;
-	    		}
-	    		if (sort == 'rev' && (newx < newy)) {
-	    			shouldSwitch = true;
-	    			break;
-	    		}
-	    	}
-    		if (shouldSwitch) {
-    			rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-    			switching = true;
-    		}
-    	}
-    	row_order(tableid);
-    }
-    /* end code snippet */
-
-    $('.sort').click(function(){
-    	var table = this.parentNode.parentNode.parentNode.parentNode.id;
-    	$('#' + table + ' .sort').css('opacity', '0.5');
-    	$(this).css('opacity', '1');
-	});
+		}
+		return pageFunctions
+	}
 
 </script>
 {% endblock %}

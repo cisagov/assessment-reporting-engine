@@ -84,7 +84,6 @@ urlpatterns += [
 # Assessment Activity Tracker
 urlpatterns += [
     path('activity_tracker/', views.ActivityTracker.as_view(), name='activity_tracker'),
-    path('activity_tracker/save', views.save_tracker, name='save_tracker'),
 ]
 
 # External Port Mapping

@@ -23,31 +23,653 @@ from django.http import HttpResponse
 import json, base64, hashlib
 
 from ..models import (
-    InfraTSFindings,
-    InfraWSFindings,
-    LateralMovementFindings,
-    PersistenceFindings,
-    FilesFindings,
-    InteractiveLogonsFindings,
-    SignificantEventsFindings,
-    ArtifactFindings,
+    InfraTS,
+    InfraWS,
+    InfraPhishing,
+    InfraRedirectors,
+    LateralMovement,
+    Files,
+    InteractiveLogons,
+    HighImpactScans,
+    SignificantEvents,
+    Artifact
 )
 
 
 class ActivityTracker(generic.base.TemplateView):
-    template_name = 'ptportal/assessment_activity_tracker.html'
+    template_name = "ptportal/assessment_activity_tracker.html"
 
     def get_context_data(self, **kwargs):
         context = {}
-        context['infra_ts'] = InfraTSFindings.objects.all()
-        context['infra_ws'] = InfraWSFindings.objects.all()
-        context['lat_mov'] = LateralMovementFindings.objects.all()
-        context['persist'] = PersistenceFindings.objects.all()
-        context['files'] = FilesFindings.objects.all()
-        context['int_log'] = InteractiveLogonsFindings.objects.all()
-        context['sig_eve'] = SignificantEventsFindings.objects.all()
-        context['arttrack'] = ArtifactFindings.objects.all()
+        context['infra_ext_ts'] = InfraTS.objects.filter(assessment_type='External').order_by('order')
+        context['infra_int_ts'] = InfraTS.objects.filter(assessment_type='Internal').order_by('order')
+        context['infra_phi'] = InfraPhishing.objects.all().order_by('order')
+        context['infra_red'] = InfraRedirectors.objects.all().order_by('order')
+        context['infra_ext_ws'] = InfraWS.objects.filter(assessment_type='External').order_by('order')
+        context['infra_int_ws'] = InfraWS.objects.filter(assessment_type='Internal').order_by('order')
+        context['lat_mov'] = LateralMovement.objects.all().order_by('order')
+        context['files'] = Files.objects.all().order_by('order')
+        context['int_log'] = InteractiveLogons.objects.all().order_by('order')
+        context['scans'] = HighImpactScans.objects.all().order_by('order')
+        context['sig_eve'] = SignificantEvents.objects.all().order_by('order')
+        context['art'] = Artifact.objects.all().order_by('order')
         return context
+
+    def post(self, request, *args, **kwargs):
+        postData = json.loads(request.POST['data'])
+
+        items = {}
+
+        for i in postData:
+            items.update(i)
+
+        newItems = []
+
+        for order, data in enumerate(items['ext_ts']):
+
+            if data['killdate'] == None:
+                killdate = ""
+            else:
+                killdate = data['killdate']
+
+            if (
+                data['hostname']
+                == data['ip']
+                == data['domain']
+                == killdate
+                == ""
+            ):
+                continue
+
+            if InfraTS.objects.filter(order=order + 1, assessment_type="External").exists():
+                obj = InfraTS.objects.filter(order=order + 1, assessment_type="External").first()
+                obj.hostname = data['hostname']
+                obj.ip = data['ip']
+                obj.domain = data['domain']
+                obj.kill_date = None if data['killdate'] == None else data['killdate'][0:10]
+                obj.save()
+            else:
+                try:
+                    obj = InfraTS.objects.create(
+                        order = order + 1,
+                        assessment_type = "External",
+                        hostname = data['hostname'],
+                        ip = data['ip'],
+                        domain = data['domain'],
+                        kill_date = None if data['killdate'] == None else data['killdate'][0:10]
+                    )
+                except Exception as e:
+                    print(e)
+                    continue
+
+            newItems.append(obj)
+
+        deletedItems = set(InfraTS.objects.filter(assessment_type="External")) - set(newItems)
+
+        for deleted in deletedItems:
+            deleted.delete()
+
+        newItems = []
+
+        for order, data in enumerate(items['ext_ph']):
+
+            if (
+                data['hostname']
+                == data['ip']
+                == data['domain']
+                == ""
+            ):
+                continue
+
+            if InfraPhishing.objects.filter(order=order + 1).exists():
+                obj = InfraPhishing.objects.filter(order=order + 1).first()
+                obj.hostname = data['hostname']
+                obj.ip = data['ip']
+                obj.domain = data['domain']
+                obj.save()
+            else:
+                try:
+                    obj = InfraPhishing.objects.create(
+                        order = order + 1,
+                        hostname = data['hostname'],
+                        ip = data['ip'],
+                        domain = data['domain'],
+                    )
+                except Exception as e:
+                    print(e)
+                    continue
+
+            newItems.append(obj)
+
+        deletedItems = set(InfraPhishing.objects.all()) - set(newItems)
+
+        for deleted in deletedItems:
+            deleted.delete()
+
+        newItems = []
+
+        for order, data in enumerate(items['ext_rd']):
+
+            if (
+                data['url']
+                == ""
+            ):
+                continue
+
+            if InfraRedirectors.objects.filter(order=order + 1).exists():
+                obj = InfraRedirectors.objects.filter(order=order + 1).first()
+                obj.url = data['url']
+                obj.save()
+            else:
+                try:
+                    obj = InfraRedirectors.objects.create(
+                        order = order + 1,
+                        url = data['url']
+                    )
+                except Exception as e:
+                    print(e)
+                    continue
+
+            newItems.append(obj)
+
+        deletedItems = set(InfraRedirectors.objects.all()) - set(newItems)
+
+        for deleted in deletedItems:
+            deleted.delete()
+
+        newItems = []
+
+        for order, data in enumerate(items['ext_ws']):
+
+            if (
+                data['hostname']
+                == data['ip']
+                == data['os']
+                == data['operator']
+                == ""
+            ):
+                continue
+
+            if InfraWS.objects.filter(order=order + 1, assessment_type="External").exists():
+                obj = InfraWS.objects.filter(order=order + 1, assessment_type="External").first()
+                obj.hostname = data['hostname']
+                obj.ip = data['ip']
+                obj.os = data['os']
+                obj.operator = data['operator']
+                obj.save()
+            else:
+                try:
+                    obj = InfraWS.objects.create(
+                        order = order + 1,
+                        assessment_type = "External",
+                        hostname = data['hostname'],
+                        ip = data['ip'],
+                        os = data['os'],
+                        operator = data['operator']
+                    )
+                except Exception as e:
+                    print(e)
+                    continue
+
+            newItems.append(obj)
+
+        deletedItems = set(InfraWS.objects.filter(assessment_type="External")) - set(newItems)
+
+        for deleted in deletedItems:
+            deleted.delete()
+
+        newItems = []
+
+        for order, data in enumerate(items['int_ts']):
+
+            if data['killdate'] == None:
+                killdate = ""
+            else:
+                killdate = data['killdate']
+
+            if (
+                data['hostname']
+                == data['ip']
+                == data['domain']
+                == killdate
+                == ""
+            ):
+                continue
+
+            if InfraTS.objects.filter(order=order + 1, assessment_type="Internal").exists():
+                obj = InfraTS.objects.filter(order=order + 1, assessment_type="Internal").first()
+                obj.hostname = data['hostname']
+                obj.ip = data['ip']
+                obj.domain = data['domain']
+                obj.kill_date = None if data['killdate'] == None else data['killdate'][0:10]
+                obj.save()
+            else:
+                try:
+                    obj = InfraTS.objects.create(
+                        order = order + 1,
+                        assessment_type = "Internal",
+                        hostname = data['hostname'],
+                        ip = data['ip'],
+                        domain = data['domain'],
+                        kill_date = None if data['killdate'] == None else data['killdate'][0:10]
+                    )
+                except Exception as e:
+                    print(e)
+                    continue
+
+            newItems.append(obj)
+
+        deletedItems = set(InfraTS.objects.filter(assessment_type="Internal")) - set(newItems)
+
+        for deleted in deletedItems:
+            deleted.delete()
+
+        newItems = []
+
+        for order, data in enumerate(items['int_ws']):
+
+            if (
+                data['hostname']
+                == data['ip']
+                == data['os']
+                == data['operator']
+                == ""
+            ):
+                continue
+
+            if InfraWS.objects.filter(order=order + 1, assessment_type="Internal").exists():
+                obj = InfraWS.objects.filter(order=order + 1, assessment_type="Internal").first()
+                obj.hostname = data['hostname']
+                obj.ip = data['ip']
+                obj.os = data['os']
+                obj.operator = data['operator']
+                obj.save()
+            else:
+                try:
+                    obj = InfraWS.objects.create(
+                        order = order + 1,
+                        assessment_type = "Internal",
+                        hostname = data['hostname'],
+                        ip = data['ip'],
+                        os = data['os'],
+                        operator = data['operator']
+                    )
+                except Exception as e:
+                    print(e)
+                    continue
+
+            newItems.append(obj)
+
+        deletedItems = set(InfraWS.objects.filter(assessment_type="Internal")) - set(newItems)
+
+        for deleted in deletedItems:
+            deleted.delete()
+
+        newItems = []
+
+        for order, data in enumerate(items['lat_mov']):
+
+            if data['beacon'] == None:
+                beacon = ""
+            else:
+                beacon = data['beacon']
+
+            if (
+                beacon
+                == data['hostname']
+                == data['ip']
+                == data['account']
+                == data['moved']
+                == data['method']
+                == data['callback']
+                == data['notes']
+                == ""
+            ):
+                continue
+
+            if LateralMovement.objects.filter(order=order + 1).exists():
+                obj = LateralMovement.objects.filter(order=order + 1).first()
+                obj.initial_beacon = data['beacon']
+                obj.hostname = data['hostname']
+                obj.ip = data['ip']
+                obj.account = data['account']
+                obj.host_moved_from = data['moved']
+                obj.method = data['method']
+                obj.callback_server = data['callback']
+                obj.notes = data['notes']
+                obj.save()
+            else:
+                try:
+                    obj = LateralMovement.objects.create(
+                        order = order + 1,
+                        initial_beacon = data['beacon'],
+                        hostname = data['hostname'],
+                        ip = data['ip'],
+                        account = data['account'],
+                        host_moved_from = data['moved'],
+                        method = data['method'],
+                        callback_server = data['callback'],
+                        notes = data['notes']
+                    )
+                except Exception as e:
+                    print(e)
+                    continue
+
+            newItems.append(obj)
+
+        deletedItems = set(LateralMovement.objects.all()) - set(newItems)
+
+        for deleted in deletedItems:
+            deleted.delete()
+
+        newItems = []
+
+        for order, data in enumerate(items['file']):
+
+            if data['created'] == None:
+                created = ""
+            else:
+                created = data['created']
+
+            if data['deleted'] == None:
+                deleted = ""
+            else:
+                deleted = data['deleted']
+
+            if (
+                data['hostname']
+                == data['ip']
+                == data['location']
+                == data['filename']
+                == data['status']
+                == created
+                == deleted
+                == ""
+            ):
+                continue
+
+            if Files.objects.filter(order=order + 1).exists():
+                obj = Files.objects.filter(order=order + 1).first()
+                obj.hostname = data['hostname']
+                obj.ip = data['ip']
+                obj.location = data['location']
+                obj.filename = data['filename']
+                obj.status = data['status']
+                obj.created = data['created']
+                obj.deleted = data['deleted']
+                obj.save()
+            else:
+                try:
+                    obj = Files.objects.create(
+                        order = order + 1,
+                        hostname = data['hostname'],
+                        ip = data['ip'],
+                        location = data['location'],
+                        filename = data['filename'],
+                        status = data['status'],
+                        created = data['created'],
+                        deleted = data['deleted']
+                    )
+                except Exception as e:
+                    print(e)
+                    continue
+
+            newItems.append(obj)
+
+        deletedItems = set(Files.objects.all()) - set(newItems)
+
+        for deleted in deletedItems:
+            deleted.delete()
+
+        newItems = []
+
+        for order, data in enumerate(items['int_log']):
+
+            if data['logon'] == None:
+                logon = ""
+            else:
+                logon = data['logon']
+
+            if data['logoff'] == None:
+                logoff = ""
+            else:
+                logoff = data['logoff']
+
+            if (
+                data['hostname']
+                == data['ip']
+                == data['account']
+                == data['method']
+                == logon
+                == logoff
+                == data['operator']
+                == data['notes']
+                == ""
+            ):
+                continue
+
+            if InteractiveLogons.objects.filter(order=order + 1).exists():
+                obj = InteractiveLogons.objects.filter(order=order + 1).first()
+                obj.hostname = data['hostname']
+                obj.ip = data['ip']
+                obj.account = data['account']
+                obj.method = data['method']
+                obj.logon = data['logon']
+                obj.logoff = data['logoff']
+                obj.operator = data['operator']
+                obj.notes = data['notes']
+                obj.save()
+            else:
+                try:
+                    obj = InteractiveLogons.objects.create(
+                        order = order + 1,
+                        hostname = data['hostname'],
+                        ip = data['ip'],
+                        account = data['account'],
+                        method = data['method'],
+                        logon = data['logon'],
+                        logoff = data['logoff'],
+                        operator = data['operator'],
+                        notes = data['notes']
+                    )
+                except Exception as e:
+                    print(e)
+                    continue
+
+            newItems.append(obj)
+
+        deletedItems = set(InteractiveLogons.objects.all()) - set(newItems)
+
+        for deleted in deletedItems:
+            deleted.delete()
+
+        newItems = []
+
+        for order, data in enumerate(items['scan']):
+
+            if data['start'] == None:
+                start = ""
+            else:
+                start = data['start']
+
+            if data['end'] == None:
+                end = ""
+            else:
+                end = data['end']
+
+            if (
+                data['type']
+                == data['tool']
+                == data['range']
+                == data['domain']
+                == start
+                == end
+                == data['notes']
+                == ""
+            ):
+                continue
+
+            if HighImpactScans.objects.filter(order=order + 1).exists():
+                obj = HighImpactScans.objects.filter(order=order + 1).first()
+                obj.scan_type = data['type']
+                obj.tool = data['tool']
+                obj.ranges = data['range']
+                obj.domains = data['domain']
+                obj.start = data['start']
+                obj.end = data['end']
+                obj.notes = data['notes']
+                obj.save()
+            else:
+                try:
+                    obj = HighImpactScans.objects.create(
+                        order = order + 1,
+                        scan_type = data['type'],
+                        tool = data['tool'],
+                        ranges = data['range'],
+                        domains = data['domain'],
+                        start = data['start'],
+                        end = data['end'],
+                        notes = data['notes']
+                    )
+                except Exception as e:
+                    print(e)
+                    continue
+
+            newItems.append(obj)
+
+        deletedItems = set(HighImpactScans.objects.all()) - set(newItems)
+
+        for deleted in deletedItems:
+            deleted.delete()
+        
+        newItems = []
+
+        for order, data in enumerate(items['sig_eve']):
+
+            if data['start'] == None:
+                start = ""
+            else:
+                start = data['start']
+
+            if data['end'] == None:
+                end = ""
+            else:
+                end = data['end']
+
+            if (
+                data['event']
+                == data['notes']
+                == start
+                == end
+                == ""
+            ):
+                continue
+
+            if SignificantEvents.objects.filter(order=order + 1).exists():
+                obj = SignificantEvents.objects.filter(order=order + 1).first()
+                obj.event = data['event']
+                obj.notes = data['notes']
+                obj.start = data['start']
+                obj.end = data['end']
+                obj.save()
+            else:
+                try:
+                    obj = SignificantEvents.objects.create(
+                        order = order + 1,
+                        event = data['event'],
+                        notes = data['notes'],
+                        start = data['start'],
+                        end = data['end']
+                    )
+                except Exception as e:
+                    print(e)
+                    continue
+
+            newItems.append(obj)
+
+        deletedItems = set(SignificantEvents.objects.all()) - set(newItems)
+
+        for deleted in deletedItems:
+            deleted.delete()
+
+        newItems = []
+
+        for order, data in enumerate(items['art']):
+
+            if (
+                data['name']
+                == data['description']
+                == data['md5']
+                == data['sha1']
+                == data['sha256']
+                == ""
+            ):
+                continue
+
+            if Artifact.objects.filter(order=order + 1).exists():
+                if data['fileOrder'] == None:
+                    obj = Artifact.objects.filter(order=order + 1).first()
+                    obj.file_name = data['name']
+                    obj.description = data['description']
+                    obj.md5 = data['md5']
+                    obj.sha1 = data['sha1']
+                    obj.sha256 = data['sha256']
+                    obj.save()
+                else:
+                    filename = "file" + str(data['fileOrder'])
+                    file = request.FILES[filename]
+                    try:
+                        hashes = generate_file_hashes(file.read())
+                        obj = Artifact.objects.filter(order=order + 1).first()
+                        obj.file_name = data['name']
+                        obj.description = data['description']
+                        obj.md5 = hashes[0]
+                        obj.sha1 = hashes[1]
+                        obj.sha256 = hashes[2]
+                        obj.save()   
+                    except Exception as e:
+                        print(e)  
+                        continue
+                    
+            else:
+                if data['fileOrder'] == None:
+                    try:
+                        obj = Artifact.objects.create(
+                            order = order + 1,
+                            file_name = data['name'],
+                            description = data['description'],
+                            md5 = data['md5'],
+                            sha1 = data['sha1'],
+                            sha256 = data['sha256']
+                        )
+                    except Exception as e:
+                        print(e)
+                        continue
+                else:
+                    filename = "file" + str(data['fileOrder'])
+                    file = request.FILES[filename]
+                    try:
+                        hashes = generate_file_hashes(file.read())
+                        obj = Artifact.objects.create(
+                            order = order + 1,
+                            file_name = data['name'],
+                            description = data['description'],
+                            md5 = hashes[0],
+                            sha1 = hashes[1],
+                            sha256 = hashes[2]
+                        ) 
+                    except Exception as e:
+                        print(e)
+                        continue
+
+            newItems.append(obj)
+
+        deletedItems = set(Artifact.objects.all()) - set(newItems)
+
+        for deleted in deletedItems:
+            deleted.delete()
+
+        return HttpResponse(status=200)
 
 
 def generate_file_hashes(filedata):
@@ -61,287 +683,3 @@ def generate_file_hashes(filedata):
 
     return (md5.hexdigest(), sha1.hexdigest(), sha256.hexdigest())
 
-
-def save_tracker(request):
-
-    if request.method == 'POST':
-        infrats_data = request.POST['infrats_findings']
-        infraws_data = request.POST['infraws_findings']
-        latmov_data = request.POST['latmov_findings']
-        persist_data = request.POST['persist_findings']
-        files_data = request.POST['files_findings']
-        intlog_data = request.POST['intlog_findings']
-        sigeve_data = request.POST['sigeve_findings']
-        artifact_file_data = request.POST['artifact_files']
-
-        delete_infrats = request.POST['delete_infrats']
-        delete_infraws = request.POST['delete_infraws']
-        delete_latmov = request.POST['delete_latmov']
-        delete_persist = request.POST['delete_persist']
-        delete_files = request.POST['delete_files']
-        delete_intlog = request.POST['delete_intlog']
-        delete_sigeve = request.POST['delete_sigeve']
-        delete_arttrack = request.POST['delete_arttrack']
-
-        infrats = json.loads(infrats_data)
-        infraws = json.loads(infraws_data)
-        latmov = json.loads(latmov_data)
-        persist = json.loads(persist_data)
-        files = json.loads(files_data)
-        intlog = json.loads(intlog_data)
-        sigeve = json.loads(sigeve_data)
-        artifact_files = json.loads(artifact_file_data)
-
-        dinfrats = json.loads(delete_infrats)
-        dinfraws = json.loads(delete_infraws)
-        dlatmov = json.loads(delete_latmov)
-        dpersist = json.loads(delete_persist)
-        dfiles = json.loads(delete_files)
-        dintlog = json.loads(delete_intlog)
-        dsigeve = json.loads(delete_sigeve)
-        darttrack = json.loads(delete_arttrack)
-
-        if dinfrats:
-            for item in dinfrats:
-                obj = InfraTSFindings.objects.filter(pk=item)
-                obj.delete()
-
-        if infrats:
-            for item in infrats:
-                if item['id'] == "":
-                    InfraTSFindings.objects.create(
-                        order=item['order'],
-                        teamserver_ip=item['teamserver_ip'],
-                        linked_domain=item['linked_domain'],
-                        beacon_kill_date=item['beacon_kill_date'],
-                    )
-                else:
-                    obj = InfraTSFindings.objects.filter(pk=item['id'])
-                    obj.update(
-                        order=item['order'],
-                        teamserver_ip=item['teamserver_ip'],
-                        linked_domain=item['linked_domain'],
-                        beacon_kill_date=item['beacon_kill_date'],
-                    )
-                    # modified_by=request.user)
-
-        if dinfraws:
-            for item in dinfraws:
-                obj = InfraWSFindings.objects.filter(pk=item)
-                obj.delete()
-
-        if infraws:
-            for item in infraws:
-                if item['id'] == "":
-                    InfraWSFindings.objects.create(
-                        order=item['order'],
-                        hostname=item['hostname'],
-                        os=item['os'],
-                        ip_address=item['ip_address'],
-                        assigned_to=item['assigned_to'],
-                    )
-                else:
-                    obj = InfraWSFindings.objects.filter(pk=item['id'])
-                    obj.update(
-                        order=item['order'],
-                        hostname=item['hostname'],
-                        os=item['os'],
-                        ip_address=item['ip_address'],
-                        assigned_to=item['assigned_to'],
-                    )
-                    # modified_by=request.user)
-
-        if dlatmov:
-            for item in dlatmov:
-                obj = LateralMovementFindings.objects.filter(pk=item)
-                obj.delete()
-
-        if latmov:
-            for item in latmov:
-                if item['id'] == "":
-                    LateralMovementFindings.objects.create(
-                        order=item['order'],
-                        initial_beacon=item['initial_beacon'],
-                        ip_address=item['ip_address'],
-                        hostname=item['hostname'],
-                        account_used=item['account_used'],
-                        host_moved_from=item['host_moved_from'],
-                        movement_method=item['movement_method'],
-                        callback_server=item['callback_server'],
-                        notes=item['notes'],
-                    )
-                else:
-                    obj = LateralMovementFindings.objects.filter(pk=item['id'])
-                    obj.update(
-                        order=item['order'],
-                        initial_beacon=item['initial_beacon'],
-                        ip_address=item['ip_address'],
-                        hostname=item['hostname'],
-                        account_used=item['account_used'],
-                        host_moved_from=item['host_moved_from'],
-                        movement_method=item['movement_method'],
-                        callback_server=item['callback_server'],
-                        notes=item['notes'],
-                    )
-                    # modified_by=request.user)
-
-        if dpersist:
-            for item in dpersist:
-                obj = PersistenceFindings.objects.filter(pk=item)
-                obj.delete()
-
-        if persist:
-            for item in persist:
-                if item['id'] == "":
-                    PersistenceFindings.objects.create(
-                        order=item['order'],
-                        installation_time=item['installation_time'],
-                        machine_ip=item['machine_ip'],
-                        machine_hostname=item['machine_hostname'],
-                        description=item['description'],
-                        persistence_method=item['persistence_method'],
-                        persistence_info=item['persistence_info'],
-                        callback_server=item['callback_server'],
-                        removal_time=item['removal_time'],
-                    )
-                else:
-                    obj = PersistenceFindings.objects.filter(pk=item['id'])
-                    obj.update(
-                        order=item['order'],
-                        installation_time=item['installation_time'],
-                        machine_ip=item['machine_ip'],
-                        machine_hostname=item['machine_hostname'],
-                        description=item['description'],
-                        persistence_method=item['persistence_method'],
-                        persistence_info=item['persistence_info'],
-                        callback_server=item['callback_server'],
-                        removal_time=item['removal_time'],
-                    )
-                    # modified_by=request.user)
-
-        if dfiles:
-            for item in dfiles:
-                obj = FilesFindings.objects.filter(pk=item)
-                obj.delete()
-
-        if files:
-            for item in files:
-                if item['id'] == "":
-                    FilesFindings.objects.create(
-                        order=item['order'],
-                        host=item['host'],
-                        ip=item['ip'],
-                        location=item['location'],
-                        filename=item['filename'],
-                        deleted=item['deleted'],
-                        date=item['date'],
-                        time_dropped_to_disk=item['time_dropped_to_disk'],
-                        time_deleted=item['time_deleted'],
-                    )
-                else:
-                    obj = FilesFindings.objects.filter(pk=item['id'])
-                    obj.update(
-                        order=item['order'],
-                        host=item['host'],
-                        ip=item['ip'],
-                        location=item['location'],
-                        filename=item['filename'],
-                        deleted=item['deleted'],
-                        date=item['date'],
-                        time_dropped_to_disk=item['time_dropped_to_disk'],
-                        time_deleted=item['time_deleted'],
-                    )
-                    # modified_by=request.user)
-
-        if dintlog:
-            for item in dintlog:
-                obj = InteractiveLogonsFindings.objects.filter(pk=item)
-                obj.delete()
-
-        if intlog:
-            for item in intlog:
-                if item['id'] == "":
-                    InteractiveLogonsFindings.objects.create(
-                        order=item['order'],
-                        datetime=item['datetime'],
-                        operator=item['operator'],
-                        host=item['host'],
-                        username=item['username'],
-                        password=item['password'],
-                        type=item['type'],
-                        access_ended=item['access_ended'],
-                        notes=item['notes'],
-                    )
-                else:
-                    obj = InteractiveLogonsFindings.objects.filter(pk=item['id'])
-                    obj.update(
-                        order=item['order'],
-                        datetime=item['datetime'],
-                        operator=item['operator'],
-                        host=item['host'],
-                        username=item['username'],
-                        password=item['password'],
-                        type=item['type'],
-                        access_ended=item['access_ended'],
-                        notes=item['notes'],
-                    )
-                    # modified_by=request.user)
-
-        if dsigeve:
-            for item in dsigeve:
-                obj = SignificantEventsFindings.objects.filter(pk=item)
-                obj.delete()
-
-        if sigeve:
-            for item in sigeve:
-                if item['id'] == "":
-                    SignificantEventsFindings.objects.create(
-                        order=item['order'],
-                        event=item['event'],
-                        notes=item['notes'],
-                        datetime=item['datetime'],
-                    )
-                else:
-                    obj = SignificantEventsFindings.objects.filter(pk=item['id'])
-                    obj.update(
-                        order=item['order'],
-                        event=item['event'],
-                        notes=item['notes'],
-                        datetime=item['datetime'],
-                    )
-                    # modified_by=request.user)
-
-        # Loop through all of the artifacts to be deleted.
-        if darttrack:
-            for item in darttrack:
-                obj = ArtifactFindings.objects.filter(pk=item)
-                obj.delete()
-
-        # Since we don't post the original information from the table since they can't edit it we just update the order in the table.
-        current_artifacts = ArtifactFindings.objects.all()
-        for idx, artifact in enumerate(current_artifacts):
-            artifact.order = idx
-            artifact.save()
-
-        # Generate a file and hashes then save it to the back end.
-        current_order = ArtifactFindings.objects.all().count()
-        if artifact_files:
-            for artifact in artifact_files:
-                hashes = generate_file_hashes(base64.b64decode(artifact['file']))
-
-                obj = ArtifactFindings.objects.filter(sha256=hashes[2])
-                if obj:
-                    continue
-
-                ArtifactFindings.objects.create(
-                    order=current_order,
-                    file_name=artifact['name'],
-                    file_content=artifact['file'],
-                    md5=hashes[0],
-                    sha1=hashes[1],
-                    sha256=hashes[2],
-                )
-
-                current_order += 1
-
-        return HttpResponse("Saved")
