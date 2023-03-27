@@ -54,17 +54,19 @@ class PayloadResults(generic.base.TemplateView):
                 border = "B"
 
             attack_name = ""
+            filetype = ""
+            codetype = ""
+            techniques = ""
 
-            if data['locked']:
-                program = Program()
+            program = Program()
 
-                payload = {'payload_description': data['payload_description'], 'c2_protocol': data['c2_protocol'], 'filename': ''}
-                program.add_payload(payload)
-                program.parse()
-                attack_name = program.payloads[0].filename
-
-            else:
-                attack_name = data['attack_name']
+            payload = {'payload_description': data['payload_description'], 'c2_protocol': data['c2_protocol'], 'filename': ''}
+            program.add_payload(payload)
+            program.parse()
+            filetype = program.payloads[0].filetype
+            codetype = program.payloads[0].codetype
+            techniques = ', '.join(str(i) for i in program.payloads[0].techniques)
+            attack_name = program.payloads[0].filename
 
             if Payload.objects.filter(order=order + 1).exists():
                 obj = Payload.objects.filter(order=order + 1).first()
@@ -73,7 +75,9 @@ class PayloadResults(generic.base.TemplateView):
                 obj.c2_protocol=data['c2_protocol']
                 obj.host_protection=host
                 obj.border_protection=border
-                obj.locked=data['locked']
+                obj.file_types=filetype
+                obj.code_type=codetype
+                obj.techniques=techniques
                 obj.save()
 
             else:
@@ -85,7 +89,9 @@ class PayloadResults(generic.base.TemplateView):
                         c2_protocol=data['c2_protocol'],
                         host_protection=host,
                         border_protection=border,
-                        locked=data['locked']
+                        file_types=filetype,
+                        code_type=codetype,
+                        techniques=techniques
                     )
 
                 except (KeyError, ValidationError) as e:
