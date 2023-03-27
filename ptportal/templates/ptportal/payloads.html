@@ -48,10 +48,6 @@ DM22-1011
 {% endblock %}
 
 {% block content %}
-<div class="header">
-  <h2> Payload Testing Results</h2>
-</div>
-
 <div class="col-span-5">
 	{% csrf_token %}
 
@@ -85,13 +81,13 @@ DM22-1011
 				<div class="mb-8">
 					<sds-table :fields="fields" :items="items" class="table-prose" v-bind="PayloadTableArgs">
 							<template #cell(payload_description)="{item}">
-								<sds-textarea v-model="item.payload_description" rows="1" placeholder="Payload Description" :maxlength="200"></sds-textarea>
+								<sds-textarea v-model="item.payload_description" rows="2" placeholder="Payload Description" :maxlength="500"></sds-textarea>
 							</template>
 							<template #cell(attack_name)="{item}">
-								<sds-textarea v-model="item.attack_name" rows="1" placeholder="MITRE ATT&CK Format" :disabled="Boolean(item.locked)"></sds-textarea>
+								<sds-textarea v-model="item.attack_name" rows="2" placeholder="MITRE ATT&CK Format" :disabled=true :maxlength="500"></sds-textarea>
 							</template>
 							<template #cell(c2_protocol)="{item}">
-								<sds-input v-model="item.c2_protocol" placeholder="Protocol"></sds-input>
+								<sds-input v-model="item.c2_protocol" placeholder="Protocol" :maxlength="10"></sds-input>
 							</template>
 							<template #cell(host_protection)="{item}">
 								<div class="right-block">
@@ -116,54 +112,6 @@ DM22-1011
 								</div>
 							</template>
 
-								<template #cell(lock)="{item}">
-	                <div v-if="item.locked">
-	                	<sds-floating-ui
-							        popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
-							        placement="top"
-							        arrow-class="absolute bg-black w-2 h-2 rotate-45"
-							        placement-top-arrow-class="-bottom-1"
-							        placement-right-arrow-class="-left-1"
-							        placement-bottom-arrow-class="-top-1"
-							        placement-left-arrow-class="-right-1"
-							        :will-open="willOpen"
-							        :will-close="willClose"
-							      >
-							      <template #trigger="{ open, close }">
-	                  	<sds-button variant="primary" type="button" @click="item.locked = Boolean(0)" @mouseover="open" @mouseout="close">Unlock</sds-button>
-	                	</template>
-	                	<template #default>
-					          <div class="p-2">
-					            <p>Unlock to customize the MITRE ATT&CK Format. Keep in mind the MITRE ATT&CK Format will NOT automatically generate for any payload that is unlocked.</p>
-					          </div>
-					        	</template>
-					      		</sds-floating-ui>
-	                </div>
-
-	                <div v-if="!item.locked">
-	                	<sds-floating-ui
-							        popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
-							        placement="top"
-							        arrow-class="absolute bg-black w-2 h-2 rotate-45"
-							        placement-top-arrow-class="-bottom-1"
-							        placement-right-arrow-class="-left-1"
-							        placement-bottom-arrow-class="-top-1"
-							        placement-left-arrow-class="-right-1"
-							        :will-open="willOpen"
-							        :will-close="willClose"
-							      >
-							      <template #trigger="{ open, close }">
-	                  	<sds-button variant="primary" type="button" @click="item.locked = Boolean(1)" @mouseover="open" @mouseout="close">Lock</sds-button>
-	                	</template>
-	                	<template #default>
-					          <div class="p-2">
-					            <p>Lock to automatically generate the MITRE ATT&CK Format when the page is saved. Keep in mind any pre-existing ATT&CK contents will be overwritten by a new format based on the Payload Description for any payload that is locked.</p>
-					          </div>
-					        	</template>
-					      		</sds-floating-ui>
-	                </div>
-	              </template>
-
 							<template #cell(delete)="{item}">
 								<sds-button type="button" @click="deletePayload(item)" ><img class="w-8 h-8" src="/static/icons/trash-solid.svg"></sds-button>
 							</template>
@@ -184,9 +132,7 @@ function pageData() {
 		fileList: [],
 		formData: [],
 		overwriteWarning: false,
-		//to display pop up notification
 		notify: null,
-		// payload table columns
 		PayloadTableArgs: {
 				fields: [
 					{
@@ -212,9 +158,6 @@ function pageData() {
 					{
 						key: "border_protection",
 						label: "Border Protection",
-					},
-					{
-						key: "lock",
 					},
 					{
 						key: "delete",
@@ -245,11 +188,15 @@ function pageData() {
       border = true
     {% endif %}
 
-		data.PayloadTableArgs.items.push({id: "{{payload.order}}", payload_description: "{{payload.payload_description}}", attack_name: "{{payload.attack_name}}", c2_protocol: "{{payload.c2_protocol}}", host_protection: host, border_protection: border, locked: parseInt("{{payload.locked}}")})
+		data.PayloadTableArgs.items.push({id: "{{payload.order}}", payload_description: "{{payload.payload_description|escapejs}}", attack_name: "{{payload.attack_name|escapejs}}", c2_protocol: "{{payload.c2_protocol|escapejs}}", host_protection: host, border_protection: border})
 
 	{% endfor %}
 
 	return data
+}
+
+function pageCreated() {
+	this.baseData.layoutArgs.pageTitle = "Payload Testing Results"
 }
 
 function pageMethods() {
@@ -262,7 +209,6 @@ function pageMethods() {
 				}
 			})
 
-			// if description field is empty show pop up notification
 			if (this.notify) {
 				this.displayNotification({title: "Error Saving Data", text: "One or more Payloads are missing a description. Please enter a description for each payload before saving.", variant: "danger"})
 				this.notify = false
@@ -277,7 +223,8 @@ function pageMethods() {
 					headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
 				}).then(response => {
 				if(response.ok) {
-					this.displayNotification({title: "Payloads Saved", text: "Payload data saved successfully. Refresh page to see updated MITRE ATT&CK Formats.", variant: "success"})
+					this.displayNotification({title: "Payloads Saved", text: "Payload data saved successfully. Please wait while the page refreshes...", variant: "success"})
+					setTimeout(() => {this.redirectLink("{% url 'payloads' %}")}, 2000)
 				}
 				else {
 					this.displayNotification({title: "Error saving data", text: 'Bad response received from server. Check for errors in forms and try again.', variant: "danger"})
@@ -289,7 +236,7 @@ function pageMethods() {
 		},
 
 		addPayload: async function () {
-			this.PayloadTableArgs.items.push({id: this.PayloadTableArgs.items.length + 1, payload_description: "", attack_name: "", c2_protocol: "", host_protection: true, border_protection: false, locked: 1})
+			this.PayloadTableArgs.items.push({id: this.PayloadTableArgs.items.length + 1, payload_description: "", attack_name: "", c2_protocol: "", host_protection: true, border_protection: false})
 		},
 
 		deletePayload: function(item) {
@@ -301,7 +248,6 @@ function pageMethods() {
 		},
 
 		parseData: async function(overwrite) {
-			//May change this to disable button instead of a check.
 			if (document.getElementsByName('payloadUpload')[0].files.length == 0) {
 				return
 			}
@@ -309,8 +255,6 @@ function pageMethods() {
 			const fileName = document.getElementsByName('payloadUpload')[0].files[0]
 			let payloadString = null
 			await fileName.text().then(text => {payloadString = text})
-
-			// add error handling
 
 			if (overwrite) {
 				this.PayloadTableArgs.items = []
@@ -336,15 +280,10 @@ function pageMethods() {
 					b = true
 				}
 
-				if (values[1] == "") {
-					lock = true
-				}
-				else {
-					lock = false
-				}
-
-				this.PayloadTableArgs.items.push({id: this.PayloadTableArgs.items.length + 1, payload_description: values[0], attack_name: values[1], c2_protocol: values[2], host_protection: h, border_protection: b, locked: lock})
+				this.PayloadTableArgs.items.push({id: this.PayloadTableArgs.items.length + 1, payload_description: values[0], attack_name: values[1], c2_protocol: values[2], host_protection: h, border_protection: b})
 			}
+
+			this.displayNotification({'title': 'Payloads Added', text: 'Payloads have been added to the table below. Saving this screen will populate the MITRE ATT&CK formats accordingly.', variant:"info"})
 		}
     }
 

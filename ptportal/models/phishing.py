@@ -107,13 +107,13 @@ class Payload(abstract_models.TimeStampedModel):
     RESULT_CHOICES = (("B", "Blocked"), ("N", "Not Blocked"))
 
     payload_description = models.CharField(
-        max_length=200,
+        max_length=500,
         verbose_name="Payload Description"
     )
 
     attack_name = models.CharField(
         blank=True,
-        max_length=200,
+        max_length=500,
         verbose_name="MITRE ATT&CK Format"
     )
 
@@ -137,9 +137,28 @@ class Payload(abstract_models.TimeStampedModel):
         default="N",
     )
 
-    locked = models.IntegerField(
+    command = models.CharField(
         blank=True,
-        unique=False
+        null=True,
+        max_length=500,
+    )
+
+    code_type = models.CharField(
+        blank=True,
+        null=True,
+        max_length=500,
+    )
+
+    techniques = models.CharField(
+        blank=True,
+        null=True,
+        max_length=1000,
+    )
+
+    file_types = models.CharField(
+        blank=True,
+        null=True,
+        max_length=500,
     )
     
     order = models.PositiveIntegerField(
