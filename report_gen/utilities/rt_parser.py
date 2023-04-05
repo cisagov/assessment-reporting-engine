@@ -57,7 +57,7 @@ class RichTextParser(HTMLParser):
     resets numbering. trust me, you don't want to know"""
 
     style_eles = ["b", "i", "u"]
-    list_types = {"ul": "MemoBullet1", "ol": "ListBullet1"}
+    list_types = {"ul": "List Bullet 2", "ol": "List Number 2"}
 
     def __init__(self, paragraph, debug=False, text_style='Normal'):
         """Constructor for the rich text parser.

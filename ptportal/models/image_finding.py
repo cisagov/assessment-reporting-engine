@@ -19,7 +19,7 @@ from . import findings
 
 
 def define_uploadpath(instance, filename):
-    return f"screenshots/{instance.finding.slug}/{instance.slug+'.'+instance.ext}"
+    return f"screenshots/{instance.finding.slug+'.'+instance.ext}"
 
 
 class ImageFinding(models.Model):

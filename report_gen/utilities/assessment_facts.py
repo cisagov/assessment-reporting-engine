@@ -70,26 +70,20 @@ def get_db_info(rva_db, db_loc, key, allow_empty=False):
 
 # map tags in template to database locations
 tag_db_map = {
-    "{Stakeholder Long Name}": "engagementmeta.fields.customer_long_name",
+    "{Stakeholder Name}": "engagementmeta.fields.customer_long_name",
     "{Stakeholder Initials}": "engagementmeta.fields.customer_initials",
-    "{Customer Name}": "engagementmeta.fields.customer_POC_name",
-    "{Customer Email}": "engagementmeta.fields.customer_POC_email",
-    "{ASMT ID Number}": "engagementmeta.fields.asmt_id",
-    "{Fed lead Name}": "engagementmeta.fields.team_lead_name",
-    "{Fed lead Email}": "engagementmeta.fields.team_lead_email",
+    "{POC Name}": "engagementmeta.fields.customer_POC_name",
+    "{POC Email}": "engagementmeta.fields.customer_POC_email",
+    "{ASMT ID}": "engagementmeta.fields.asmt_id",
+    "{Team Lead Name}": "engagementmeta.fields.team_lead_name",
+    "{Team Lead Email}": "engagementmeta.fields.team_lead_email",
     "{External Start Date}": "engagementmeta.fields.ext_start_date",
     "{External End Date}": "engagementmeta.fields.ext_end_date",
+    "{Stakeholder Location}": "engagementmeta.fields.customer_location",
     "{Short business level external scope – tech scope is in appendix.}": "report.fields.scanned_scope_ext",
     "{Internal Start Date}": "engagementmeta.fields.int_start_date",
     "{Internal End Date}": "engagementmeta.fields.int_end_date",
-    "{Short business level internal scope – tech scope is in appendix.}": "report.fields.scanned_scope_int",
-    "{Internal Test Location}": "report.fields.test_location_int",
-    "{External Test Location}": "report.fields.test_location_ext",
-    "{Short business level internal scope – tech scope is in appendix.}": "report.fields.scanned_scope_int",
-    "{Number of External Addresses Scanned}": "report.fields.IP_scanned_ext",
-    "{Number of Internal Addresses Scanned}": "report.fields.IP_scanned_int",
-    "{Number of External Hosts Identified}": "report.fields.hosts_IDd_ext",
-    "{Number of Internal Hosts Identified}": "report.fields.hosts_IDd_int",
+    "{Traffic Light}": "engagementmeta.fields.traffic_light_protocol",
     "{total number of emails found}": "report.fields.emails_identified",
     "{total number of breached emails found}": "report.fields.emails_breached",
     "{number of credentials identified}": "report.fields.credentials_identified",
@@ -137,18 +131,29 @@ def set_title(db):
 
     # build the title
     emeta = get_db_info(db, "engagementmeta.fields", "keyNA", allow_empty=True)
-    rpt = get_db_info(db, "report.fields", "keyNA")
+    rep = get_db_info(db, "report.fields", "keyNA")
 
     if emeta != "":
         cust_name = emeta["customer_long_name"]
+        asmt_id = emeta["asmt_id"]
     else:
-        cust_name = "<not set: {Customer Name}>"
-    report_type = rpt["report_type"]
+        cust_name = "<not set: {CUSTOMER NAME}>"
+        asmt_id = "<not set: {ASMT ID}>"
 
-    title = report_type + " prepared for " + cust_name
+    report_type = rep["report_type"]
+
+    if report_type == "RVA":
+        title = "Risk and Vulnerability Assessment Report (Draft)"
+    else:
+        title = "Report (Draft)"
+
+    subtitle = "RV" + asmt_id + " - " + cust_name
+
+    #title = report_type + " prepared for " + cust_name
 
     # set the title
-    rpt["report_title"] = title
+    rep["report_title"] = title
+    rep["report_subtitle"] = subtitle
 
 
 def clean_nist_vals(lst, numchars):
@@ -185,7 +190,7 @@ def find_screenshots(ss_list, fkey):
     ss_fkey = []
     for ss in ss_list:
         ssf = ss['fields']
-        if ssf["belongs_to_finding"] == fkey:
+        if ssf["finding"] == fkey:
             ss_fkey.append(ss)
     return ss_fkey
 
@@ -215,14 +220,14 @@ def get_nist_control_data(ndf_data):
     for finding in model_gen(ndf_data, "ptportal.uploadedfinding"):
         ele = finding["fields"]
 
-        vals = clean_nist_vals(ele["NIST_800_53"], 2)
+        vals = clean_nist_vals(ele["finding__NIST_800_53"], 2)
         for v in vals:
             try:
                 nist80053[v] += 1
             except:
                 print("Untracked nist 800.53 key", v)
 
-        vals = clean_nist_vals(ele["NIST_CSF"], 5)
+        vals = clean_nist_vals(ele["finding__NIST_CSF"], 5)
         for v in vals:
             csf_count += 1
             try:

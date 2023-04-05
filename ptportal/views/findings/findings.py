@@ -142,10 +142,15 @@ class UploadedFindingUpdateView(generic.edit.UpdateView):
                 filename = "file" + str(data['imgOrder'])
                 file = request.FILES[filename]
                 try:
+                    ext = str(file).split('.')[-1].lower()
+                except:
+                    ext = ""
+                try:
                     img = ImageFinding.objects.create(
                         order = index + 1,
                         caption = data['caption'],
                         file = file,
+                        ext = ext,
                         finding = finding
                     )
                 except Exception as e:
@@ -217,6 +222,9 @@ class UploadedFindingCreateView(generic.edit.CreateView):
         try:
             finding = UploadedFinding.objects.create(
                 finding = base_finding,
+                NIST_800_53 = base_finding.NIST_800_53,
+                NIST_CSF = base_finding.NIST_CSF,
+                CIS_CSC = base_finding.CIS_CSC,
                 uploaded_finding_name = postData['selectedFinding']['fields']['name'],
                 uploaded_finding_id = UploadedFinding.objects.all().count() + 1,
                 description = postData['findingDescription'],
@@ -244,10 +252,15 @@ class UploadedFindingCreateView(generic.edit.CreateView):
             filename = "file" + str(data['imgOrder'])
             file = request.FILES[filename]
             try:
+                ext = str(file).split('.')[-1].lower()
+            except:
+                ext = ""
+            try:
                 img = ImageFinding.objects.create(
                     order = index + 1,
                     caption = data['caption'],
                     file = file,
+                    ext = ext,
                     finding = finding
                 )
             except Exception as e:

@@ -25,6 +25,7 @@ from rest_framework import serializers
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.text import slugify
 from iptools import IpRange
+from cairosvg import svg2png
 
 from rest_framework.renderers import JSONRenderer
 
@@ -51,13 +52,6 @@ def handle_uploaded_file(source, dest):
     with open(dest, 'wb+') as destination:
         for chunk in source.chunks():
             destination.write(chunk)
-
-
-def generateHVA(filename):
-    serializer = HVASerializer(HVAData.objects.first())
-    json = JSONRenderer().render(serializer.data)
-    with open(filename, 'wb+') as f:
-        f.write(json)
 
 
 def get_nist_controls(all_findings=None, finding=None):
@@ -381,35 +375,42 @@ def gen_ptp_filename(
 
 def serializeJSON(filename=None):
     # Get uploaded findings in order of External -> Internal -> Phishing(Critical-Low)
-    uploaded_findings = UploadedFinding.preferred_order.get_preferred_order()
+    uploaded_findings = UploadedFinding.objects.all().order_by('assessment_type', 'severity', 'uploaded_finding_name')
     eng_meta_serializer = EngagementSerializer(EngagementMeta.objects.all(), many=True)
     eng_meta_model = str(EngagementMeta._meta)
-    all_data = (
-        list(CIS_CSC.objects.all())
-        + list(HVATarget.objects.all())
-        + list(uploaded_findings)
-        + list(ImageFinding.objects.all())
-        + list(AffectedSystems.objects.all())
-        + list(Report.objects.all())
-        + list(AssumptionsConstraints.objects.all())
-        + list(AssessmentScenarios.objects.filter(used=True))
-        + list(Campaign.objects.all())
-        + list(Payload.objects.all())
-        + list(RPTBreachedEmails.objects.all())
-        + list(RPTIdentifiedNetworks.objects.all())
-        + list(NarrativeType.objects.all())
-        + list(Narrative.objects.all())
-        + list(ToolScreenshot.objects.all())
-        + list(PortMappingHost.objects.all())
-        + list(ArtifactFindings.objects.all())
-        + list(
-            Acronym.objects.filter(
-                belongs_to_report=Report.object(), include=True
-            ).order_by('acronym')
-        )
-    )
+    all_data = list(CIS_CSC.objects.all().order_by('CIS_ID')) \
+        + list(NIST_CSF.objects.all()) \
+        + list(NISTControl.objects.all()) \
+        + list(uploaded_findings) \
+        + list(EngagementMeta.objects.all()) \
+        + list(ImageFinding.objects.all().order_by('finding', 'order')) \
+        + list(AffectedSystems.objects.all().order_by('name')) \
+        + list(KEV.objects.all()) \
+        + list(DataExfil.objects.all().order_by('order')) \
+        + list(Campaign.objects.all().order_by('order')) \
+        + list(Payload.objects.all().order_by('order')) \
+        + list(Ransomware.objects.all().order_by('order')) \
+        + list(RansomwareScenarios.objects.all()) \
+        + list(PortMappingHost.objects.all().order_by('order')) \
+        + list(ElectionSystems.objects.all()) \
+        + list(ElectionInfrastructureQuestionnaire.objects.all()) \
+        + list(NarrativeType.objects.all().order_by('name')) \
+        + list(Tools.objects.all().order_by('name')) \
+        + list(ATTACK.objects.all().order_by('t_id')) \
+        + list(Narrative.objects.all().order_by('assessment_type', 'order')) \
+        + list(NarrativeStep.objects.all().order_by('narrative', 'order')) \
+        + list(Report.objects.all()) \
+        + list(Acronym.objects.all().order_by('acronym'))
+
+    data = JSONserializers.serialize("json", all_data)
+    if not filename:
+        filename = gen_ptp_filename(ext="json")
+    data_aat = data[:-1] + data[-1:]
+
+    with open(filename, "wb+") as f:
+        f.write(data_aat.encode())
     
-    return True
+    return filename
 
 
 def save_chart(data, chart):
@@ -419,10 +420,8 @@ def save_chart(data, chart):
         os.makedirs("pentestportal/media/charts")
 
     if data:
-        imgdata = base64.b64decode(data)
         filename = 'pentestportal/media/charts/' + chart + '.png'
-        with open(filename, 'wb') as f:
-            f.write(imgdata)
+        svg2png(bytestring=data, write_to=filename)
 
     return True
 

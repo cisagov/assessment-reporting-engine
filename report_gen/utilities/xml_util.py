@@ -20,11 +20,13 @@ import sys
 import os.path
 import html
 import datetime
+import docx
 
 from docx.oxml.ns import qn
 from docx.oxml.xmlchemy import OxmlElement
 from docx.shared import Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.dml import MSO_THEME_COLOR_INDEX
 
 from lxml import etree
 from PIL import Image
@@ -129,42 +131,40 @@ def hex_to_rgb(hex):
     return tuple(int(hex_strip[i : i + 2], 16) for i in (0, 2, 4))
 
 
-def insert_caption(doc, text):
+def insert_caption(doc, fig, text):
     """Inserts caption text for figures inside of the word document. This supports auto updating of numbering when updating the fields. The correct numbering
     will not appear at first until the user runs the auto update of all fields in the document using the word process engine.
 
     Args:
         doc (docx object): The word document
+        fig (Boolean): True if caption belongs to a figure, False if caption belongs to a table
         text (String): The string that will be inserted under the image in the caption text.
 
     Returns:
         Docx Paragraph: The paragaph that the caption is inserted into.
     """
-    para = doc.add_paragraph('Figure ', style='RVA Caption')
+    if fig:
+        para = doc.add_paragraph('Figure ', style='Caption')
+    else:
+        para = doc.add_paragraph('Table ', style='Caption')
 
-    fldSimple = OxmlElement('w:fldSimple')
-    fldSimple.set(qn('w:instr'), ' SEQ Figure \\* ARABIC ')
-    para._p.append(fldSimple)
+    run = para.add_run()
+    r = run._r
 
-    temp = OxmlElement('w:r')
-    fldSimple.append(temp)
+    fldChar = OxmlElement('w:fldChar')
+    fldChar.set(qn('w:fldCharType'), 'begin')
+    r.append(fldChar)
+    instrText = OxmlElement('w:instrText')
+    instrText.text = ' SEQ TableMain \\* ARABIC \\s 1 '
 
-    spellCheck = OxmlElement('w:rPr')
-    temp.append(spellCheck)
+    r.append(instrText)
+    fldChar = OxmlElement('w:fldChar')
+    fldChar.set(qn('w:fldCharType'), 'end')
+    r.append(fldChar)
 
-    spellCheck.append(OxmlElement('w:noProof'))
-    temp.text = '4'
-
-    colon = OxmlElement('w:r')
-    para._p.append(colon)
-    colon.text = ': '
-
-    actualText = OxmlElement('w:r')
-    para._p.append(actualText)
-    actualText.text = text
-
+    para.add_run(text=": " + text)
+    
     return para
-
 
 def resize_image(oldWidth, oldHeight, maxWidth, maxHeight):
     """
@@ -209,7 +209,7 @@ def update_title(doc, db):
     """
 
     emeta = af.get_db_info(db, "engagementmeta.fields", "keyNA", allow_empty=True)
-    rpt = af.get_db_info(db, "report.fields", "keyNA")
+    rep = af.get_db_info(db, "report.fields", "keyNA")
 
     body = doc._body._element
     text_box_p_elements = etree.ElementBase.xpath(
@@ -224,18 +224,27 @@ def update_title(doc, db):
             if run is None:
                 continue
 
-            if '<STAKEHOLDER NAME>' in run.text:
+            #if '<STAKEHOLDER NAME>' in run.text:
+            #    run.text = run.text.replace(
+            #        '<STAKEHOLDER NAME>', emeta['customer_long_name']
+            #    )
+            if '{REPORT TITLE}' in run.text:
                 run.text = run.text.replace(
-                    '<STAKEHOLDER NAME>', emeta['customer_long_name']
+                    '{REPORT TITLE}', rep['report_title']
                 )
-            if '[Enter Assessment Title Here.]' in run.text:
+            if '{REPORT SUBTITLE}' in run.text:
                 run.text = run.text.replace(
-                    '[Enter Assessment Title Here.]', rpt['report_title']
+                    '{REPORT SUBTITLE}', rep['report_subtitle']
                 )
-            if '[Serial Number]' in run.text:
-                run.text = run.text.replace('[Serial Number]', emeta['asmt_id'])
-            if '[Date]' in run.text:
-                run.text = run.text.replace('[Date]', today.strftime("%B %d, %Y"))
+            #if '[Serial Number]' in run.text:
+            #    run.text = run.text.replace('[Serial Number]', emeta['asmt_id'])
+            #if '<ASMT ID>' in run.text:
+            #    run.text = run.text.replace(
+            #        '<ASMT ID>', emeta['asmt_id']
+            #    )
+            if '{ DATE }' in run.text:
+                run.text = run.text.replace(
+                    '{ DATE }', today.strftime("%B %d, %Y"))
 
 
 def update_charts(doc, media_path, p_tag, nist_file):
@@ -256,8 +265,8 @@ def update_charts(doc, media_path, p_tag, nist_file):
     p = p_tag._p  # starting point
 
     screen_p = doc.add_paragraph()
-    screen_p.style = 'Detailed Findings Normal'
-    screen_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    #screen_p.style = 'Detailed Findings Normal'
+    #screen_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     r = screen_p.add_run()
 
     sfile = media_path + 'charts/' + nist_file
@@ -334,3 +343,35 @@ def force_update_fields(doc):
         doc.settings.element, f"{namespace}updateFields"
     )
     element_updatefields.set(f"{namespace}val", "true")
+
+
+def add_link(paragraph, run, url, text):
+    """This function will return a hyperlink to place in the document.
+
+    Args:
+        paragraph: the paragaph that the hyperlink will be inserted into
+        run: the specific run that correlates with the hyperlink
+        url: the url that the hyperlink will lead to
+        text: the text that the hyperlink will be wrapped around
+    """
+
+    part = paragraph.part
+    r_id = part.relate_to(url, docx.opc.constants.RELATIONSHIP_TYPE.HYPERLINK, is_external=True)
+
+    hyperlink = docx.oxml.shared.OxmlElement('w:hyperlink')
+    hyperlink.set(docx.oxml.shared.qn('r:id'), r_id, )
+
+    new_run = docx.oxml.shared.OxmlElement('w:r')
+    rPr = docx.oxml.shared.OxmlElement('w:rPr')
+
+    new_run.append(rPr)
+    new_run.text = text
+    hyperlink.append(new_run)
+
+    r = paragraph.add_run()
+    r._r.append(hyperlink)
+
+    paragraph.runs[run].font.color.theme_color = MSO_THEME_COLOR_INDEX.HYPERLINK
+    paragraph.runs[run].font.underline = True
+
+    return hyperlink
