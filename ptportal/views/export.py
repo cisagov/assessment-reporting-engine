@@ -350,6 +350,13 @@ def generate_artifact(artifact_type, anon_report=False):
 
         generate_ptp_report(template_name, artifact_name, True, json_filename, settings.MEDIA_ROOT)
 
+    elif artifact_type == "Outbrief":
+        content_type = base_ctype + "presentationml.presentation"
+        template_name = template_name_base + '.pptx'
+        artifact_name = artifact_name_base + '.pptx'
+
+        generate_ptp_slides(template_name, artifact_name, True, json_filename, settings.MEDIA_ROOT)
+
     with contextlib.suppress(FileNotFoundError):
         os.remove(json_filename)
 
