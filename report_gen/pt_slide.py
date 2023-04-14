@@ -47,26 +47,12 @@ from pptx.dml.color import RGBColor
 tstamp = str(datetime.datetime.now().strftime("%Y%m%d_%H.%M.%S"))
 pr_tstamp = str(datetime.datetime.now().strftime("%B %d, %Y"))
 
-notice = (
-    "The information that follows in this presentation is "
-    "preliminary and is not fully validated or finalized. "
-    "Engineers and managers are still in the process of analyzing "
-    "this information and preparing findings.  It is presented in "
-    "its rough draft state and may be significantly modified "
-    "prior to the publication of the final report or an official "
-    "out-brief."
-    "\n\n"
-    "This {} is not an audit.  The services provided only "
-    "demonstrates what actions an adversary could accomplish "
-    "within the timeframe of the assessment."
-)
-
 red = RGBColor(255, 0, 0)
 green = RGBColor(70, 200, 0)  # pure green is hard to read
 blue = RGBColor(0, 82, 136)
 gray = RGBColor(90, 91, 92)
 white = RGBColor(255, 255, 255)
-blue = RGBColor(0, 82, 136)
+blue = RGBColor(3, 82, 136)
 crit = RGBColor(255, 116, 113)
 high = RGBColor(252, 191, 143)
 med = RGBColor(255, 222, 89)
@@ -74,9 +60,6 @@ low = RGBColor(131, 224, 142)
 info = RGBColor(79, 175, 227)
 LightStyle2Accent4 = "{17292A2E-F333-43FB-9621-5CBBE7FDCDCB}"
 MediumStyle4Accent4 = "{C4B1156A-380E-4F78-BDF5-A606A8083BF9}"
-
-# Master slide template numbers for corresponding report types.
-#report_type_opening = {"RVA": 10, "RPT": 12, "HVA": 13}
 
 
 def iter_cells(table):

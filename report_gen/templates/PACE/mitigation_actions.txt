@@ -1,0 +1,16 @@
+N/A
+Removed Affected System(s) or Service(s)
+Patched Affected System(s) or Service(s)
+Upgraded Affected System(s) or Service(s)
+Aligned Policy with Best Practices
+Conducted User Awareness Training
+Reconfigured Existing Security Feature or Policy
+Implemented New Security Feature or Policy
+Implemented Network Segmentation
+Implemented Multi-Factor Authentication
+Removed or Replaced Insecure Protocol
+Implemented Access Controls
+Reconfigured Object Permissions
+Removed Insecure Configuration
+Implemented Input Validation/Sanitization
+Other (Please Specify Below)

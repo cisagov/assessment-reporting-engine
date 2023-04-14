@@ -40,6 +40,7 @@ from report_gen.pt_report import generate_ptp_report
 from report_gen.pt_summary import generate_ptp_summary
 from report_gen.pt_slide import generate_ptp_slides
 from report_gen.pt_tracker import create_tracker
+from report_gen.pt_pace import generate_pace_document
 
 from ptportal.serializers import ElectionInfrastructureSerializer, HVASerializer
 
@@ -338,7 +339,9 @@ def generate_artifact(artifact_type, anon_report=False):
         + asmt_id
         + "-"
         + cust_initials
-        + "-Report_Draft-YYYYMMDD"
+        + "-"
+        + artifact_type
+        + "_Draft-YYYYMMDD"
     )
 
     template_name_base = "report_gen/templates/" + report_type_template + "-template"
@@ -350,12 +353,19 @@ def generate_artifact(artifact_type, anon_report=False):
 
         generate_ptp_report(template_name, artifact_name, True, json_filename, settings.MEDIA_ROOT)
 
-    elif artifact_type == "Outbrief":
+    elif artifact_type == "Out-Brief":
         content_type = base_ctype + "presentationml.presentation"
         template_name = template_name_base + '.pptx'
         artifact_name = artifact_name_base + '.pptx'
 
         generate_ptp_slides(template_name, artifact_name, True, json_filename, settings.MEDIA_ROOT)
+
+    elif artifact_type == "PACE":
+        content_type = base_ctype + "pdf"
+        assets = "report_gen/templates/PACE/"
+        artifact_name = report_type + "-" + asmt_id + "-" + cust_initials + "-PACE.pdf"
+
+        generate_pace_document(artifact_name, json_filename, assets)
 
     with contextlib.suppress(FileNotFoundError):
         os.remove(json_filename)
@@ -379,7 +389,7 @@ def generate_report(request):
 
 def generate_outbrief(request):
     print("Made it into generateOutbrief")
-    return generate_artifact("Outbrief")
+    return generate_artifact("Out-Brief")
 
 
 def generate_tracker(request):

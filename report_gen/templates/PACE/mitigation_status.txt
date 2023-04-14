@@ -1,0 +1,5 @@
+Fully Mitigated
+Partially Mitigated
+False Positive
+Accepted Risk
+No Action Taken

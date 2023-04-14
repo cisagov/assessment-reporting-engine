@@ -412,7 +412,7 @@ def insert_df_table(doc, db, df_tag, media_path):
 
         df_table.cell(2, 0).merge(df_table.cell(2, 4))
         df_table.cell(2, 0).text = "Affected Systems"
-        df_table.cell(2, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(0, 82, 136)
+        df_table.cell(2, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(3, 82, 136)
         df_table.cell(2, 0).paragraphs[0].runs[0].font.bold = True
         df_table.cell(2, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
         xu.set_cell_border(df_table.cell(2, 0), bottom={"sz": 8, "val": "single", "color": "#BFBFBF"})
@@ -422,7 +422,7 @@ def insert_df_table(doc, db, df_tag, media_path):
 
         df_table.cell(4, 0).merge(df_table.cell(4, 4))
         df_table.cell(4, 0).text = "Description"
-        df_table.cell(4, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(0, 82, 136)
+        df_table.cell(4, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(3, 82, 136)
         df_table.cell(4, 0).paragraphs[0].runs[0].font.bold = True
         df_table.cell(4, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
         xu.set_cell_border(df_table.cell(4, 0), bottom={"sz": 8, "val": "single", "color": "#BFBFBF"})
@@ -432,7 +432,7 @@ def insert_df_table(doc, db, df_tag, media_path):
 
         df_table.cell(6, 0).merge(df_table.cell(6, 4))
         df_table.cell(6, 0).text = "Recommended Mitigation"
-        df_table.cell(6, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(0, 82, 136)
+        df_table.cell(6, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(3, 82, 136)
         df_table.cell(6, 0).paragraphs[0].runs[0].font.bold = True
         df_table.cell(6, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
         xu.set_cell_border(df_table.cell(6, 0), bottom={"sz": 8, "val": "single", "color": "#BFBFBF"})
@@ -442,7 +442,7 @@ def insert_df_table(doc, db, df_tag, media_path):
 
         df_table.cell(8, 0).merge(df_table.cell(8, 4))
         df_table.cell(8, 0).text = xu.xsafe(ptp_df_screen_text)
-        df_table.cell(8, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(0, 82, 136)
+        df_table.cell(8, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(3, 82, 136)
         df_table.cell(8, 0).paragraphs[0].runs[0].font.bold = True
         df_table.cell(8, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
         xu.set_cell_border(df_table.cell(8, 0), bottom={"sz": 8, "val": "single", "color": "#BFBFBF"})
@@ -452,7 +452,7 @@ def insert_df_table(doc, db, df_tag, media_path):
 
         df_table.cell(10, 0).merge(df_table.cell(10, 4))
         df_table.cell(10, 0).text = "Security References"
-        df_table.cell(10, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(0, 82, 136)
+        df_table.cell(10, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(3, 82, 136)
         df_table.cell(10, 0).paragraphs[0].runs[0].font.bold = True
         df_table.cell(10, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
         xu.set_cell_border(df_table.cell(10, 0), bottom={"sz": 8, "val": "single", "color": "#BFBFBF"})
