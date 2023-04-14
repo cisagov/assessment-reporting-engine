@@ -898,10 +898,10 @@ def insert_findings_slides(prs, report_type, rva_info, ss_info, media_path):
         ele = kev['fields']
 
         if ele['found']:
-            found_kev = {"name": ele['vulnerability_name']}
+            found_kev = {"name": ele['vulnerability_name'], "cve": ele['cve_id']}
             kevs.append(found_kev)
 
-    kevs_list = sorted(kevs, key=lambda k: k['name'])
+    kevs_list = sorted(kevs, key=lambda k: k['cve'])
     kev_chunks = [kevs_list[x:x+10] for x in range(0, len(kevs_list), 10)]
 
     for cnt, chunk in enumerate(kev_chunks):
@@ -938,7 +938,7 @@ def insert_findings_slides(prs, report_type, rva_info, ss_info, media_path):
         for count, kev in enumerate(chunk):
             k_id = (cnt * 10) + (count + 1)
             cell_text(table, count + 1, 0, str(k_id), color=gray)
-            cell_text(table, count + 1, 1, kev['name'], color=gray)
+            cell_text(table, count + 1, 1, kev['cve'] + ": " + kev['name'], color=gray)
 
             table.cell(count + 1, 0).text_frame.paragraphs[0].runs[0].font.bold = True
 
