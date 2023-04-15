@@ -868,29 +868,29 @@ h3 {
 		}
 
 		{% for i in infra_ext_ts %}
-			{% if i.kill_date != null %}
-				date = "{{i.kill_date | date:"m/d/Y"}}"
+			{% if i.beacon_kill_date != null %}
+				date = "{{i.beacon_kill_date | date:"m/d/Y"}}"
 				killdate = new Date (date.replace(/\./g, ''))
 			{% else %}
 				killdate = null
 			{% endif %}
 
-			pageData.ExtTeamserverTableArgs.items.push({order: parseInt("{{i.order}}"), hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip|escapejs}}", domain: "{{i.domain|escapejs}}", killdate: killdate})
+			pageData.ExtTeamserverTableArgs.items.push({order: parseInt("{{i.order}}"), hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip_address|escapejs}}", domain: "{{i.domain|escapejs}}", killdate: killdate})
 		{% endfor %}
 
 		{% for i in infra_int_ts %}
-			{% if i.kill_date != null %}
-				date = "{{i.kill_date | date:"m/d/Y"}}"
+			{% if i.beacon_kill_date != null %}
+				date = "{{i.beacon_kill_date | date:"m/d/Y"}}"
 				killdate = new Date (date.replace(/\./g, ''))
 			{% else %}
 				killdate = null
 			{% endif %}
 
-			pageData.IntTeamserverTableArgs.items.push({order: parseInt("{{i.order}}"), hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip|escapejs}}", domain: "{{i.domain|escapejs}}", killdate: killdate})
+			pageData.IntTeamserverTableArgs.items.push({order: parseInt("{{i.order}}"), hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip_address|escapejs}}", domain: "{{i.domain|escapejs}}", killdate: killdate})
 		{% endfor %}
 
 		{% for i in infra_phi %}
-			pageData.PhishingTableArgs.items.push({order: parseInt("{{i.order}}"), hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip|escapejs}}", domain: "{{i.domain|escapejs}}"})
+			pageData.PhishingTableArgs.items.push({order: parseInt("{{i.order}}"), hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip_address|escapejs}}", domain: "{{i.domain|escapejs}}"})
 		{% endfor %}
 
 		{% for i in infra_red %}
@@ -898,11 +898,11 @@ h3 {
 		{% endfor %}
 
 		{% for i in infra_ext_ws %}
-			pageData.ExtWorkstationTableArgs.items.push({order: parseInt("{{i.order}}"), hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip|escapejs}}", os: "{{i.os|escapejs}}", operator: "{{i.operator|escapejs}}"})
+			pageData.ExtWorkstationTableArgs.items.push({order: parseInt("{{i.order}}"), hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip_address|escapejs}}", os: "{{i.operating_system|escapejs}}", operator: "{{i.operator|escapejs}}"})
 		{% endfor %}
 
 		{% for i in infra_int_ws %}
-			pageData.IntWorkstationTableArgs.items.push({order: parseInt("{{i.order}}"), hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip|escapejs}}", os: "{{i.os|escapejs}}", operator: "{{i.operator|escapejs}}"})
+			pageData.IntWorkstationTableArgs.items.push({order: parseInt("{{i.order}}"), hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip_address|escapejs}}", os: "{{i.operating_system|escapejs}}", operator: "{{i.operator|escapejs}}"})
 		{% endfor %}
 
 		{% for i in lat_mov %}
@@ -913,73 +913,73 @@ h3 {
 				beacon = null
 			{% endif %}
 
-			pageData.LatTableArgs.items.push({order: parseInt("{{i.order}}"), beacon: beacon, hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip|escapejs}}", account: "{{i.account|escapejs}}", moved: "{{i.host_moved_from|escapejs}}", method: "{{i.method|escapejs}}", callback: "{{i.callback_server|escapejs}}", notes: "{{i.notes|escapejs}}"})
+			pageData.LatTableArgs.items.push({order: parseInt("{{i.order}}"), beacon: beacon, hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip_address|escapejs}}", account: "{{i.account_used|escapejs}}", moved: "{{i.host_moved_from|escapejs}}", method: "{{i.movement_method|escapejs}}", callback: "{{i.callback_server|escapejs}}", notes: "{{i.notes|escapejs}}"})
 		{% endfor %}
 
 		{% for i in files %}
-			{% if i.created != null %}
-				date = "{{i.created | date:"m/d/Y h:i a"}}"
+			{% if i.datetime_created != null %}
+				date = "{{i.datetime_created | date:"m/d/Y h:i a"}}"
 				created = new Date (date.replace(/\./g, ''))
 			{% else %}
 				created = null
 			{% endif %}
 
-			{% if i.deleted != null %}
-				date = "{{i.deleted | date:"m/d/Y h:i a"}}"
+			{% if i.datetime_deleted != null %}
+				date = "{{i.datetime_deleted | date:"m/d/Y h:i a"}}"
 				deleted = new Date (date.replace(/\./g, ''))
 			{% else %}
 				deleted = null
 			{% endif %}
 
-			pageData.FileTableArgs.items.push({order: parseInt("{{i.order}}"), hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip|escapejs}}", location: "{{i.location|escapejs}}", filename: "{{i.filename|escapejs}}", status: "{{i.status|escapejs}}", created: created, deleted: deleted})
+			pageData.FileTableArgs.items.push({order: parseInt("{{i.order}}"), hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip_address|escapejs}}", location: "{{i.file_location|escapejs}}", filename: "{{i.file_name|escapejs}}", status: "{{i.status|escapejs}}", created: created, deleted: deleted})
 		{% endfor %}
 
 		{% for i in int_log %}
-			{% if i.logon != null %}
-				date = "{{i.logon | date:"m/d/Y h:i a"}}"
+			{% if i.logon_datetime != null %}
+				date = "{{i.logon_datetime | date:"m/d/Y h:i a"}}"
 				logon = new Date (date.replace(/\./g, ''))
 			{% else %}
 				logon = null
 			{% endif %}
 
-			{% if i.logoff != null %}
-				date = "{{i.logoff | date:"m/d/Y h:i a"}}"
+			{% if i.logoff_datetime != null %}
+				date = "{{i.logoff_datetime | date:"m/d/Y h:i a"}}"
 				logoff = new Date (date.replace(/\./g, ''))
 			{% else %}
 				logoff = null
 			{% endif %}
 
-			pageData.IntLogonsTableArgs.items.push({order: parseInt("{{i.order}}"), hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip|escapejs}}", account: "{{i.account|escapejs}}", method: "{{i.method|escapejs}}", logon: logon, logoff: logoff, operator: "{{i.operator|escapejs}}", notes: "{{i.notes|escapejs}}"})
+			pageData.IntLogonsTableArgs.items.push({order: parseInt("{{i.order}}"), hostname: "{{i.hostname|escapejs}}", ip: "{{i.ip_address|escapejs}}", account: "{{i.account|escapejs}}", method: "{{i.method|escapejs}}", logon: logon, logoff: logoff, operator: "{{i.operator|escapejs}}", notes: "{{i.notes|escapejs}}"})
 		{% endfor %}
 
 		{% for i in scans %}
-			{% if i.start != null %}
-				date = "{{i.start | date:"m/d/Y h:i a"}}"
+			{% if i.scan_start != null %}
+				date = "{{i.scan_start | date:"m/d/Y h:i a"}}"
 				start = new Date (date.replace(/\./g, ''))
 			{% else %}
 				start = null
 			{% endif %}
 
-			{% if i.end != null %}
-				date = "{{i.end | date:"m/d/Y h:i a"}}"
+			{% if i.scan_end != null %}
+				date = "{{i.scan_end | date:"m/d/Y h:i a"}}"
 				end = new Date (date.replace(/\./g, ''))
 			{% else %}
 				end = null
 			{% endif %}
 
-			pageData.ScanTableArgs.items.push({order: parseInt("{{i.order}}"), type: "{{i.scan_type|escapejs}}", tool: "{{i.tool|escapejs}}", range: "{{i.ranges|escapejs}}", domain: "{{i.domains|escapejs}}", start: start, end: end, notes: "{{i.notes|escapejs}}"})
+			pageData.ScanTableArgs.items.push({order: parseInt("{{i.order}}"), type: "{{i.scan_type|escapejs}}", tool: "{{i.tool_used|escapejs}}", range: "{{i.ip_ranges_targeted|escapejs}}", domain: "{{i.domains_targeted|escapejs}}", start: start, end: end, notes: "{{i.notes|escapejs}}"})
 		{% endfor %}
 
 		{% for i in sig_eve %}
-			{% if i.start != null %}
-				date = "{{i.start | date:"m/d/Y h:i a"}}"
+			{% if i.start_datetime != null %}
+				date = "{{i.start_datetime | date:"m/d/Y h:i a"}}"
 				start = new Date (date.replace(/\./g, ''))
 			{% else %}
 				start = null
 			{% endif %}
 
-			{% if i.end != null %}
-				date = "{{i.end | date:"m/d/Y h:i a"}}"
+			{% if i.end_datetime != null %}
+				date = "{{i.end_datetime | date:"m/d/Y h:i a"}}"
 				end = new Date (date.replace(/\./g, ''))
 			{% else %}
 				end = null

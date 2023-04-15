@@ -367,6 +367,12 @@ def generate_artifact(artifact_type, anon_report=False):
 
         generate_pace_document(artifact_name, json_filename, assets)
 
+    elif artifact_type == "Tracker":
+        content_type = base_ctype + "spreadsheetml.sheet"
+        artifact_name = report_type + "-" + asmt_id + "-" + cust_initials + "-ActivityTracker.xlsx"
+
+        create_tracker(artifact_name, json_filename)
+
     with contextlib.suppress(FileNotFoundError):
         os.remove(json_filename)
 

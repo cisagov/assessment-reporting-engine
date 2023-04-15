@@ -84,9 +84,9 @@ class ActivityTracker(generic.base.TemplateView):
             if InfraTS.objects.filter(order=order + 1, assessment_type="External").exists():
                 obj = InfraTS.objects.filter(order=order + 1, assessment_type="External").first()
                 obj.hostname = data['hostname']
-                obj.ip = data['ip']
+                obj.ip_address = data['ip']
                 obj.domain = data['domain']
-                obj.kill_date = None if data['killdate'] == None else data['killdate'][0:10]
+                obj.beacon_kill_date = None if data['killdate'] == None else data['killdate'][0:10]
                 obj.save()
             else:
                 try:
@@ -94,9 +94,9 @@ class ActivityTracker(generic.base.TemplateView):
                         order = order + 1,
                         assessment_type = "External",
                         hostname = data['hostname'],
-                        ip = data['ip'],
+                        ip_address = data['ip'],
                         domain = data['domain'],
-                        kill_date = None if data['killdate'] == None else data['killdate'][0:10]
+                        beacon_kill_date = None if data['killdate'] == None else data['killdate'][0:10]
                     )
                 except Exception as e:
                     print(e)
@@ -124,7 +124,7 @@ class ActivityTracker(generic.base.TemplateView):
             if InfraPhishing.objects.filter(order=order + 1).exists():
                 obj = InfraPhishing.objects.filter(order=order + 1).first()
                 obj.hostname = data['hostname']
-                obj.ip = data['ip']
+                obj.ip_address = data['ip']
                 obj.domain = data['domain']
                 obj.save()
             else:
@@ -132,7 +132,7 @@ class ActivityTracker(generic.base.TemplateView):
                     obj = InfraPhishing.objects.create(
                         order = order + 1,
                         hostname = data['hostname'],
-                        ip = data['ip'],
+                        ip_address = data['ip'],
                         domain = data['domain'],
                     )
                 except Exception as e:
@@ -193,8 +193,8 @@ class ActivityTracker(generic.base.TemplateView):
             if InfraWS.objects.filter(order=order + 1, assessment_type="External").exists():
                 obj = InfraWS.objects.filter(order=order + 1, assessment_type="External").first()
                 obj.hostname = data['hostname']
-                obj.ip = data['ip']
-                obj.os = data['os']
+                obj.ip_address = data['ip']
+                obj.operating_system = data['os']
                 obj.operator = data['operator']
                 obj.save()
             else:
@@ -203,8 +203,8 @@ class ActivityTracker(generic.base.TemplateView):
                         order = order + 1,
                         assessment_type = "External",
                         hostname = data['hostname'],
-                        ip = data['ip'],
-                        os = data['os'],
+                        ip_address = data['ip'],
+                        operating_system = data['os'],
                         operator = data['operator']
                     )
                 except Exception as e:
@@ -239,9 +239,9 @@ class ActivityTracker(generic.base.TemplateView):
             if InfraTS.objects.filter(order=order + 1, assessment_type="Internal").exists():
                 obj = InfraTS.objects.filter(order=order + 1, assessment_type="Internal").first()
                 obj.hostname = data['hostname']
-                obj.ip = data['ip']
+                obj.ip_address = data['ip']
                 obj.domain = data['domain']
-                obj.kill_date = None if data['killdate'] == None else data['killdate'][0:10]
+                obj.beacon_kill_date = None if data['killdate'] == None else data['killdate'][0:10]
                 obj.save()
             else:
                 try:
@@ -249,9 +249,9 @@ class ActivityTracker(generic.base.TemplateView):
                         order = order + 1,
                         assessment_type = "Internal",
                         hostname = data['hostname'],
-                        ip = data['ip'],
+                        ip_address = data['ip'],
                         domain = data['domain'],
-                        kill_date = None if data['killdate'] == None else data['killdate'][0:10]
+                        beacon_kill_date = None if data['killdate'] == None else data['killdate'][0:10]
                     )
                 except Exception as e:
                     print(e)
@@ -280,8 +280,8 @@ class ActivityTracker(generic.base.TemplateView):
             if InfraWS.objects.filter(order=order + 1, assessment_type="Internal").exists():
                 obj = InfraWS.objects.filter(order=order + 1, assessment_type="Internal").first()
                 obj.hostname = data['hostname']
-                obj.ip = data['ip']
-                obj.os = data['os']
+                obj.ip_address = data['ip']
+                obj.operating_system = data['os']
                 obj.operator = data['operator']
                 obj.save()
             else:
@@ -290,8 +290,8 @@ class ActivityTracker(generic.base.TemplateView):
                         order = order + 1,
                         assessment_type = "Internal",
                         hostname = data['hostname'],
-                        ip = data['ip'],
-                        os = data['os'],
+                        ip_address = data['ip'],
+                        operating_system = data['os'],
                         operator = data['operator']
                     )
                 except Exception as e:
@@ -331,10 +331,10 @@ class ActivityTracker(generic.base.TemplateView):
                 obj = LateralMovement.objects.filter(order=order + 1).first()
                 obj.initial_beacon = data['beacon']
                 obj.hostname = data['hostname']
-                obj.ip = data['ip']
-                obj.account = data['account']
+                obj.ip_address = data['ip']
+                obj.account_used = data['account']
                 obj.host_moved_from = data['moved']
-                obj.method = data['method']
+                obj.movement_method = data['method']
                 obj.callback_server = data['callback']
                 obj.notes = data['notes']
                 obj.save()
@@ -344,10 +344,10 @@ class ActivityTracker(generic.base.TemplateView):
                         order = order + 1,
                         initial_beacon = data['beacon'],
                         hostname = data['hostname'],
-                        ip = data['ip'],
-                        account = data['account'],
+                        ip_address = data['ip'],
+                        account_used = data['account'],
                         host_moved_from = data['moved'],
-                        method = data['method'],
+                        movement_method = data['method'],
                         callback_server = data['callback'],
                         notes = data['notes']
                     )
@@ -391,24 +391,24 @@ class ActivityTracker(generic.base.TemplateView):
             if Files.objects.filter(order=order + 1).exists():
                 obj = Files.objects.filter(order=order + 1).first()
                 obj.hostname = data['hostname']
-                obj.ip = data['ip']
-                obj.location = data['location']
-                obj.filename = data['filename']
+                obj.ip_address = data['ip']
+                obj.file_location = data['location']
+                obj.file_name = data['filename']
                 obj.status = data['status']
-                obj.created = data['created']
-                obj.deleted = data['deleted']
+                obj.datetime_created = data['created']
+                obj.datetime_deleted = data['deleted']
                 obj.save()
             else:
                 try:
                     obj = Files.objects.create(
                         order = order + 1,
                         hostname = data['hostname'],
-                        ip = data['ip'],
-                        location = data['location'],
-                        filename = data['filename'],
+                        ip_address = data['ip'],
+                        file_location = data['location'],
+                        file_name = data['filename'],
                         status = data['status'],
-                        created = data['created'],
-                        deleted = data['deleted']
+                        datetime_created = data['created'],
+                        datetime_deleted = data['deleted']
                     )
                 except Exception as e:
                     print(e)
@@ -451,11 +451,11 @@ class ActivityTracker(generic.base.TemplateView):
             if InteractiveLogons.objects.filter(order=order + 1).exists():
                 obj = InteractiveLogons.objects.filter(order=order + 1).first()
                 obj.hostname = data['hostname']
-                obj.ip = data['ip']
+                obj.ip_address = data['ip']
                 obj.account = data['account']
                 obj.method = data['method']
-                obj.logon = data['logon']
-                obj.logoff = data['logoff']
+                obj.logon_datetime = data['logon']
+                obj.logoff_datetime = data['logoff']
                 obj.operator = data['operator']
                 obj.notes = data['notes']
                 obj.save()
@@ -464,11 +464,11 @@ class ActivityTracker(generic.base.TemplateView):
                     obj = InteractiveLogons.objects.create(
                         order = order + 1,
                         hostname = data['hostname'],
-                        ip = data['ip'],
+                        ip_address = data['ip'],
                         account = data['account'],
                         method = data['method'],
-                        logon = data['logon'],
-                        logoff = data['logoff'],
+                        logon_datetime = data['logon'],
+                        logoff_datetime = data['logoff'],
                         operator = data['operator'],
                         notes = data['notes']
                     )
@@ -512,11 +512,11 @@ class ActivityTracker(generic.base.TemplateView):
             if HighImpactScans.objects.filter(order=order + 1).exists():
                 obj = HighImpactScans.objects.filter(order=order + 1).first()
                 obj.scan_type = data['type']
-                obj.tool = data['tool']
-                obj.ranges = data['range']
-                obj.domains = data['domain']
-                obj.start = data['start']
-                obj.end = data['end']
+                obj.tool_used = data['tool']
+                obj.ip_ranges_targeted = data['range']
+                obj.domains_targeted = data['domain']
+                obj.scan_start = data['start']
+                obj.scan_end = data['end']
                 obj.notes = data['notes']
                 obj.save()
             else:
@@ -524,11 +524,11 @@ class ActivityTracker(generic.base.TemplateView):
                     obj = HighImpactScans.objects.create(
                         order = order + 1,
                         scan_type = data['type'],
-                        tool = data['tool'],
-                        ranges = data['range'],
-                        domains = data['domain'],
-                        start = data['start'],
-                        end = data['end'],
+                        tool_used = data['tool'],
+                        ip_ranges_targeted = data['range'],
+                        domains_targeted = data['domain'],
+                        scan_start = data['start'],
+                        scan_end = data['end'],
                         notes = data['notes']
                     )
                 except Exception as e:
@@ -569,8 +569,8 @@ class ActivityTracker(generic.base.TemplateView):
                 obj = SignificantEvents.objects.filter(order=order + 1).first()
                 obj.event = data['event']
                 obj.notes = data['notes']
-                obj.start = data['start']
-                obj.end = data['end']
+                obj.start_datetime = data['start']
+                obj.end_datetime = data['end']
                 obj.save()
             else:
                 try:
@@ -578,8 +578,8 @@ class ActivityTracker(generic.base.TemplateView):
                         order = order + 1,
                         event = data['event'],
                         notes = data['notes'],
-                        start = data['start'],
-                        end = data['end']
+                        start_datetime = data['start'],
+                        end_datetime = data['end']
                     )
                 except Exception as e:
                     print(e)

@@ -400,7 +400,17 @@ def serializeJSON(filename=None):
         + list(Narrative.objects.all().order_by('assessment_type', 'order')) \
         + list(NarrativeStep.objects.all().order_by('narrative', 'order')) \
         + list(Report.objects.all()) \
-        + list(Acronym.objects.all().order_by('acronym'))
+        + list(Acronym.objects.all().order_by('acronym')) \
+        + list(InfraTS.objects.all().order_by('assessment_type', 'order')) \
+        + list(InfraPhishing.objects.all().order_by('order')) \
+        + list(InfraRedirectors.objects.all().order_by('order')) \
+        + list(InfraWS.objects.all().order_by('assessment_type', 'order')) \
+        + list(LateralMovement.objects.all().order_by('order')) \
+        + list(Files.objects.all().order_by('order')) \
+        + list(InteractiveLogons.objects.all().order_by('order')) \
+        + list(HighImpactScans.objects.all().order_by('order')) \
+        + list(SignificantEvents.objects.all().order_by('order')) \
+        + list(Artifact.objects.all().order_by('order'))
 
     data = JSONserializers.serialize("json", all_data)
     if not filename:
