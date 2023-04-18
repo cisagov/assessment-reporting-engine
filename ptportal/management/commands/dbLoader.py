@@ -125,10 +125,11 @@ class Command(BaseCommand):
             try:
                 ATTACK.objects.create(
                     t_id=row['ID'],
-                    name=row['Name'],
-                    tactics=row['Tactics'],
-                    description=row['Description'],
-                    url=row['URL']
+                    name=row['name'],
+                    tactics=row['tactics'],
+                    description=row['description'],
+                    url=row['url'],
+                    is_subtechnique=row['is sub-technique']
                 )
             except Exception as e:
                 print(e)

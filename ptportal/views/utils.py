@@ -14,6 +14,8 @@
 
 # DM22-0744
 import datetime
+from datetime import timezone
+from dateutil.relativedelta import relativedelta
 import json
 import math
 import os
@@ -228,145 +230,485 @@ def report_read_pwa(text_file):
 
 
 def generateEntryJson(filename):
+
     engagement = EngagementMeta.object()
     if not engagement:
         return ""
 
-    asmt_id = engagement.asmt_id
-    uploaded_findings = UploadedFinding.objects.all()
-    campaigns = Campaign.objects.all()
-    payloads = Payload.objects.all()
-    csc = CIS_CSC.objects.all()
-    data = []
+    report = Report.objects.first()
+    if not report:
+        return ""
 
-    # initialize finding_entries list
-    finding_entries = []
+    if report.report_type == "RVA":
+        report_type = "Risk and Vulnerability Assessment (RVA)"
+    elif report.report_type == "RPT":
+        report_type = "Remote Penetration Test (RPT)"
+    elif report.report_type == "FAST":
+        report_type = "Federal Attack Surface Testing (FAST)"
+    elif report.report_type == "HVA":
+        report_type = "High Value Asset (HVA) Assessment"
+    else:
+        report_type = report.report_type
 
-    # for each finding, add finding_entry to finding_entries list
-    for finding in uploaded_findings:
-        print('finding: ', finding)
-        std_modify = finding.finding.cisa_id == 1
-        finding_entry = {}
-        finding_entry['asmt_id'] = 'RV' + str(asmt_id)
-        finding_entry['fy'] = engagement.fy
-        finding_entry['NCATS ID'] = str(finding.finding.cisa_id)
-        finding_entry['severity'] = str(finding.severity)
-        finding_entry['man/tool'] = str(finding.discovery)
-        finding_entry['Assessment Type'] = str(finding.assessment_type)
-        if str(finding.mitigation) == "True":
-            finding_entry['Mitigated'] = "Yes"
+    asmt_id = "RV" + engagement.asmt_id
+    start_date = ""
+    end_date = ""
+
+    if engagement.ext_start_date < engagement.int_start_date:
+        start_date = engagement.ext_start_date
+        end_date = engagement.int_start_date
+    else:
+        start_date = engagement.int_start_date
+        end_date = engagement.ext_end_date
+
+    if end_date.month < 10:
+        fiscal_year = end_date.year
+    else:
+        fiscal_year = end_date.year + 1
+
+    asmt_data = {
+        'type': report_type,
+        'id': asmt_id,
+        'fiscal_year': fiscal_year,
+        'sector': engagement.customer_sector,
+        'critical_infrastructure_sector': engagement.customer_ci_type,
+        'testing_start_date': str(start_date),
+        'testing_completion_date': str(end_date),
+        'state': engagement.customer_state
+    }
+
+    findings = UploadedFinding.objects.all()
+    findings_list = []
+    total_risk_score = 0
+    mitigated_risk_score = 0
+
+    for finding in findings:
+        if finding.finding.finding_type == "specific":
+            general_finding_name = finding.finding.gen_finding
+            specific_finding_name = finding.finding.name
         else:
-            finding_entry['Mitigated'] = "No"
+            general_finding_name = finding.finding.name
+            specific_finding_name = "N/A"
 
-        finding_entry['Std Text Modify'] = std_modify
+        if len(finding.KEV.all()) > 0:
+            kev = True
+        else:
+            kev = False
 
-        finding_entry['NIST_800_53'] = str(finding.NIST_800_53)
-        finding_entry['NIST_CSF'] = str(finding.NIST_CSF)
-        finding_entry['CIS_CSC'] = str(finding.CIS_CSC)
+        total_risk_score += finding.risk_score
 
-        if std_modify:
-            finding_entry['custom_name'] = finding.uploaded_finding_name
-        finding_entry['Date Generated'] = finding.created_at.strftime('%m/%d/%y')
-        findings = {}
-        findings.update(finding_entry)
-        finding_entries.append(findings)
+        if not finding.mitigation:
+            mitigated_risk_score += finding.risk_score
+            mitigation_status = "No Action Taken"
+        else:
+            mitigation_status = "Fully Mitigated"
 
-    # concatenate data with the updated finding_entries list
-    data.extend(finding_entries)
+        findings_list.append({
+            'finding_category': str(finding.finding.category),
+            'general_finding_name': general_finding_name,
+            'specific_finding_name': specific_finding_name,
+            'severity': str(finding.severity.severity_name),
+            'location': finding.assessment_type,
+            'date_generated': str(finding.created_at.strftime('%Y-%m-%d')),
+            'kev': kev,
+            'mitigation_status': mitigation_status,
+            'date_of_mitigation': "",
+            'mitigation_action': "",
+            'mitigation_challenge': "",
+            'cis_csc': finding.CIS_CSC,
+            'cmmc': "",
+            'nist_800_53': finding.NIST_800_53,
+            'nist_csf': finding.NIST_CSF,
+            'finding_risk_score': str(finding.risk_score)
+        })
+
+    asmt_data['findings'] = {
+        'total_findings': len(findings_list),
+        'original_risk_score': total_risk_score,
+        'mitigated_risk_score': mitigated_risk_score,
+        'final_risk_score': "",
+        'individual_findings': findings_list
+    }
+
+    campaigns = Campaign.objects.all()
+    campaign_list = []
 
     for campaign in campaigns:
-        campaign_entry = {}
-        campaign_entry['asmt_id'] = 'RV' + str(asmt_id)
-        campaign_entry['Number of Email Targets'] = str(campaign.emails_sent)
-        campaign_entry['Number of Clicks'] = str(campaign.total_clicks)
-        campaign_entry['Number of Users Click'] = str(campaign.unique_clicks)
-        campaign_entry['Time to First Click'] = str(campaign.time_to_first_click)
-        campaign_entry['Payload'] = payloads.count() > 0
-        campaign_entry['Number of Users Exploited'] = str(campaign.number_exploited)
-        campaign_entry['Length of Campaign (Days)'] = str(campaign.length_of_campaign)
-        full_campaign = {}
-        full_campaign.update(campaign_entry)
-        data.append(full_campaign)
+        campaign_list.append({
+            'emails_sent': campaign.emails_sent,
+            'emails_delivered': campaign.emails_delivered,
+            'total_clicks': campaign.total_clicks,
+            'unique_clicks': campaign.unique_clicks,
+            'time_to_first_click': str(campaign.time_to_first_click),
+            'users_exploited': campaign.number_exploited,
+            'length_of_campaign': campaign.length_of_campaign,
+            'credentials_harvested': campaign.creds_harvested
+        })
 
-    # initialize payload_entries list
-    payload_entries = []
+    payloads = Payload.objects.all()
+    if Payload.objects.first():
+        payload_date = str(Payload.objects.first().created_at.strftime('%Y-%m-%d'))
+    else:
+        payload_date = ""
+    attack = ATTACK.objects.all()
+    payload_list = []
+    tactics_map = {'Reconnaissance': 'TA0043', 'Resource Development': 'TA0042', 'Initial Access': 'TA0001', 'Execution': 'TA0002', 'Persistence': 'TA0003', 'Privilege Escalation': 'TA0004', 'Defense Evasion': 'TA0005', 'Credential Access': 'TA0006', 'Discovery': 'TA0007', 'Lateral Movement': 'TA0008', 'Collection': 'TA0009', 'Command and Control': 'TA0011', 'Exfiltration': 'TA0010', 'Impact': 'TA0040'}
 
-    # for each payload, add payload_entry to payload_entries list
     for payload in payloads:
-        payload_entry = {}
-        payload_entry['asmt_id'] = 'RV' + str(asmt_id)
-        payload_entry['payload_description'] = str(payload.payload_description)
-        payload_entry['c2_protocol '] = str(payload.c2_protocol)
-        payload_entry['border_protection'] = str(payload.border_protection)
-        payload_entry['host_protection'] = str(payload.host_protection)
-        full_payload = {}
-        full_payload.update(payload_entry)
-        payload_entries.append(full_payload)
+        technique_list = {}
+        techniques = payload.techniques.split(", ")
 
-    # if there are payload_entries to map
-    if len(payload_entries) > 0:
-        # map mitre attack techniques to each payload_entry
-        parser = Parser(finding_entries, payload_entries)
-        mapped_payloads = parser.report.output["Payloads"]
+        for technique in techniques:
+            tactic_list = {}
+            technique_name = ""
+            if ATTACK.objects.filter(t_id="T"+technique).exists():
+                attack = ATTACK.objects.filter(t_id="T"+technique).first() 
+                technique_name = attack.name
+                tactics = attack.tactics.split(", ")
 
-        # concatenate data with the updated mapped_payloads list
-        data.extend(mapped_payloads)
-
-    if ransom:
-        ransom_entry = {}
-        ransom_entry['asmt_id'] = 'RV' + str(asmt_id)
-        ransom_entry['wormable_machines'] = str(ransom.wormable_machines)
-        ransom_entry['wormable_HVAs'] = str(ransom.wormable_HVAs)
-        ransom_entry['network_susc'] = str(ransom.network_susc)
-        full_rans = {}
-        full_rans.update(ransom_entry)
-        data.append(full_rans)
-
-    af_entry = {}
-    full_af = {}
-    af_entry['asmt_id'] = 'RV' + str(asmt_id)
-    af_entry['Initial Access'] = []
-    af_entry['Execution'] = []
-    af_entry['Persistence'] = []
-    af_entry['Privilege Escalation'] = []
-    af_entry['Defense Evasion'] = []
-    af_entry['Credential Access'] = []
-    af_entry['Discovery'] = []
-    af_entry['Lateral Movement'] = []
-    af_entry['Collection'] = []
-    af_entry['Exfiltration'] = []
-    af_entry['Command and Control'] = []
-
-    for item in af:
-        if item.used:
-            if ',' in item.tactics:
-                tactics = str(item.tactics).split(', ')
                 for tactic in tactics:
-                    af_entry[tactic].append(str(item))
-            else:
-                af_entry[item.tactics].append(str(item))
+                    if tactics_map[tactic]:
+                        tactic_id = tactics_map[tactic]
+                        tactic_list[tactic_id] = tactic
+                    else:
+                        continue
 
-    full_af.update(af_entry)
-    data.append(full_af)
+            technique_list[technique] = {
+                'name': technique_name,
+                'tactics': tactic_list
+            }
+
+        payload_list.append({
+            'payload_description': payload.payload_description,
+            'c2_protocol': payload.c2_protocol,
+            'border_protection': payload.border_protection,
+            'host_protection': payload.host_protection,
+            'command': payload.command,
+            'code_type': payload.code_type,
+            'techniques': technique_list,
+            'file_types': payload.file_types,
+            'filename': payload.attack_name
+        })
+
+    asmt_data['phishing_assessment'] = {
+        'date_generated': payload_date,
+        'phishing_assessment_date': str(engagement.ext_start_date),
+        'security_solutions': [],
+        'campaigns': campaign_list,
+        'payloads': payload_list
+    }
+
+    narratives = Narrative.objects.all()
+    narrative_list = []
+
+    for narrative in narratives:
+        attack_list = []
+        tool_list = []
+
+        for a in narrative.attack.all():
+            attack_list.append(a.t_id)
+        for t in narrative.tools.all():
+            tool_list.append(t.name)
+        
+        narrative_list.append({
+            'location': str(narrative.assessment_type),
+            'mitre_techniques': attack_list,
+            'tools_used': tool_list
+        })
+
+    asmt_data['attack_paths'] = {
+        'total_attack_paths': len(narrative_list),
+        'paths': narrative_list
+    }
+
+    kevs = KEV.objects.all()
+    kev_list = []
+
+    for kev in kevs:
+        if kev.found:
+            kev_list.append(kev.cve_id)
+
+    asmt_data['known_exploited_vulnerabilities'] = {
+        'total_kevs': len(kev_list),
+        'kevs': kev_list
+    }
+
+    ransomware = Ransomware.objects.all()
+    if RansomwareScenarios.objects.first():
+        vuln_ransomware_scenarios = RansomwareScenarios.objects.first().vuln
+    else:
+        vuln_ransomware_scenarios = "N/A"
+    security_solution_detection = "N/A"
+    time_to_solution_detection = "N/A"
+    security_solution_prevention = "N/A"
+    time_to_solution_prevention = "N/A"
+    security_personnel_detection = "N/A"
+    time_to_personnel_detection = "N/A"
+    end_user_detection = "N/A"
+    time_to_user_detection = "N/A"
+
+    for item in ransomware:
+        if "detected by security software" in item.description:
+            if not item.disabled:
+                if item.trigger == "Y":
+                    security_solution_detection = "Detected"
+                    if item.time_start and item.time_end:
+                        start = item.time_start.astimezone(timezone.utc)
+                        end = item.time_end.astimezone(timezone.utc)
+                        difference = relativedelta(end, start)
+
+                        if difference.days == 1:
+                            days = "1 day "
+                        else:
+                            days = str(difference.days) + " days "
+                        if difference.hours == 1:
+                            hours = "1 hour "
+                        else:
+                            hours = str(difference.hours) + " hours "
+                        if difference.minutes == 1:
+                            minutes = "and 1 minute"
+                        else:
+                            minutes = "and " + str(difference.minutes) + " minutes"
+                    else:
+                        days = "0 days "
+                        hours = "0 hours "
+                        minutes = "and 0 minutes"
+                    time_to_solution_detection = days + hours + minutes
+                else:
+                    security_solution_detection = "Not Detected"
+        elif "prevented by security software" in item.description:
+            if not item.disabled:
+                if item.trigger == "Y":
+                    security_solution_prevention = "Prevented"
+                    if item.time_start and item.time_end:
+                        start = item.time_start.astimezone(timezone.utc)
+                        end = item.time_end.astimezone(timezone.utc)
+                        difference = relativedelta(end, start)
+
+                        if difference.days == 1:
+                            days = "1 day "
+                        else:
+                            days = str(difference.days) + " days "
+                        if difference.hours == 1:
+                            hours = "1 hour "
+                        else:
+                            hours = str(difference.hours) + " hours "
+                        if difference.minutes == 1:
+                            minutes = "and 1 minute"
+                        else:
+                            minutes = "and " + str(difference.minutes) + " minutes"
+                    else:
+                        days = "0 days "
+                        hours = "0 hours "
+                        minutes = "and 0 minutes"
+                    time_to_solution_prevention = days + hours + minutes
+                else:
+                    security_solution_prevention = "Not Prevented"
+        elif "detected by security and/or IT personnel" in item.description:
+            if not item.disabled:
+                if item.trigger == "Y":
+                    security_personnel_detection = "Detected"
+                    if item.time_start and item.time_end:
+                        start = item.time_start.astimezone(timezone.utc)
+                        end = item.time_end.astimezone(timezone.utc)
+                        difference = relativedelta(end, start)
+
+                        if difference.days == 1:
+                            days = "1 day "
+                        else:
+                            days = str(difference.days) + " days "
+                        if difference.hours == 1:
+                            hours = "1 hour "
+                        else:
+                            hours = str(difference.hours) + " hours "
+                        if difference.minutes == 1:
+                            minutes = "and 1 minute"
+                        else:
+                            minutes = "and " + str(difference.minutes) + " minutes"
+                    else:
+                        days = "0 days "
+                        hours = "0 hours "
+                        minutes = "and 0 minutes"
+                    time_to_personnel_detection = days + hours + minutes
+                else:
+                    security_personnel_detection = "Not Detected"
+        elif "reported by end users" in item.description:
+            if not item.disabled:
+                if item.trigger == "Y":
+                    end_user_detection = "Detected"
+                    if item.time_start and item.time_end:
+                        start = item.time_start.astimezone(timezone.utc)
+                        end = item.time_end.astimezone(timezone.utc)
+                        difference = relativedelta(end, start)
+
+                        if difference.days == 1:
+                            days = "1 day "
+                        else:
+                            days = str(difference.days) + " days "
+                        if difference.hours == 1:
+                            hours = "1 hour "
+                        else:
+                            hours = str(difference.hours) + " hours "
+                        if difference.minutes == 1:
+                            minutes = "and 1 minute"
+                        else:
+                            minutes = "and " + str(difference.minutes) + " minutes"
+                    else:
+                        days = "0 days "
+                        hours = "0 hours "
+                        minutes = "and 0 minutes"
+                    time_to_user_detection = days + hours + minutes
+                else:
+                    end_user_detection = "Not Detected"
+        else:
+            continue
+
+    asmt_data['ransomware_susceptibility'] = {
+        'total_vulnerable_scenarios': vuln_ransomware_scenarios,
+        'security_solution_detection': security_solution_detection,
+        'time_to_solution_detection': time_to_solution_detection,
+        'security_solution_prevention': security_solution_prevention,
+        'time_to_solution_prevention': time_to_solution_prevention,
+        'security_personnel_detection': security_personnel_detection,
+        'time_to_personnel_detection': time_to_personnel_detection,
+        'end_user_detection': end_user_detection,
+        'time_to_user_detection': time_to_user_detection
+    }
+
+    data_exfil = DataExfil.objects.all()
+    data_exfil_list = []
+    data_exfil_count = 0
+
+    for item in data_exfil:
+        if item.detection == "N" and item.prevention == "N":
+            data_exfil_count+=1
+
+        if item.detection == "D":
+            detection = "Detected"
+        else:
+            detection = "Not Detected"
+
+        if item.prevention == "B":
+            prevention = "Blocked"
+        else:
+            prevention = "Not Blocked"
+
+        data_exfil_list.append({
+            'protocol': item.protocol,
+            'data_type': item.datatype,
+            'detection': detection,
+            'prevention': prevention
+        })
+
+    asmt_data['data_exfiltration'] = {
+        'total_vulnerable_protocols': data_exfil_count,
+        'results': data_exfil_list
+    }
+
+    port_mapping = PortMappingHost.objects.all()
+    port_mapping_list = []
+    total_open_ports = 0
+
+    for item in port_mapping:
+        ports = item.ports.split(", ")
+        for p in ports:
+            total_open_ports+=1
+            if p not in port_mapping_list:
+                port_mapping_list.append(p)
+
+    asmt_data['external_port_mapping'] = {
+        'total_open_ports': total_open_ports,
+        'open_ports': port_mapping_list
+    }
 
     with open(filename, "wb+") as f:
-        f.write(json.dumps(data).encode())
+        f.write(json.dumps(asmt_data).encode())
 
     return filename
 
 
+def generateElectionJson(filename):
+
+    engagement = EngagementMeta.object()
+    if not engagement:
+        return ""
+
+    report = Report.objects.first()
+    if not report:
+        return ""
+
+    if report.report_type == "RVA":
+        report_type = "Risk and Vulnerability Assessment (RVA)"
+    elif report.report_type == "RPT":
+        report_type = "Remote Penetration Test (RPT)"
+    elif report.report_type == "FAST":
+        report_type = "Federal Attack Surface Testing (FAST)"
+    elif report.report_type == "HVA":
+        report_type = "High Value Asset (HVA) Assessment"
+    else:
+        report_type = report.report_type
+
+    asmt_id = "RV" + engagement.asmt_id
+    start_date = ""
+    end_date = ""
+
+    if engagement.ext_start_date < engagement.int_start_date:
+        start_date = engagement.ext_start_date
+        end_date = engagement.int_start_date
+    else:
+        start_date = engagement.int_start_date
+        end_date = engagement.ext_end_date
+
+    if end_date.month < 10:
+        fiscal_year = end_date.year
+    else:
+        fiscal_year = end_date.year + 1
+
+    elec_data = {
+        'type': report_type,
+        'id': asmt_id,
+        'fiscal_year': fiscal_year,
+        'sector': engagement.customer_sector,
+        'critical_infrastructure_sector': engagement.customer_ci_type,
+        'testing_start_date': str(start_date),
+        'testing_completion_date': str(end_date),
+        'state': engagement.customer_state
+    }
+
+    systems = list(ElectionSystems.objects.all().values())
+
+    if len(systems) > 0:
+        for i in range(0, len(systems)):
+            systems[i].pop('id')
+            systems[i].pop('order')
+            systems[i].pop('created_at')
+            systems[i].pop('updated_at')
+            elec_data['systems'] = systems
+    else:
+        elec_data['systems'] = []
+
+    if ElectionInfrastructureQuestionnaire.objects.filter(pk=1).exists():
+        questionnaire = list(ElectionInfrastructureQuestionnaire.objects.filter(pk=1).values())
+        questionnaire[0].pop('id')
+        questionnaire[0].pop('created_at')
+        questionnaire[0].pop('updated_at')
+        elec_data['questionnaire'] = questionnaire[0]
+    else:
+        elec_data['questionnaire'] = {}
+
+    with open(filename, "wb+") as f:
+        f.write(json.dumps(elec_data).encode())
+
+    return filename
+
 def gen_ptp_filename(
     prefix="ptp-export", suffix=None, ext="dat"
-):  # extra param deleted: now=''
+):
     filename = []
     if prefix:
         filename.append(prefix)
     if suffix:
         filename.append(suffix)
-    # if now is not None:  ## temporarily commenting to confirm perminent delete
-    # if not now:
-    # now = str(datetime.datetime.now().strftime("%m%d%Y-%H.%M.%S"))
-    # filename.append(now)
     filename = ['-'.join(filename)]
     if ext:
         filename.append(ext)

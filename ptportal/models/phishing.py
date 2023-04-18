@@ -139,8 +139,8 @@ class Payload(abstract_models.TimeStampedModel):
 
     command = models.CharField(
         blank=True,
-        null=True,
         max_length=500,
+        default="Cobalt Strike"
     )
 
     code_type = models.CharField(

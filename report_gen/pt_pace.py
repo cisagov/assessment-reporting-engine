@@ -104,24 +104,51 @@ def generate_pace_document(output, json, assets):
     stakeholder_name = af.get_db_info(
         rva_info, "engagementmeta.fields.customer_long_name", "Stakeholder Long Name"
     )
+    if stakeholder_name == "<not set: Stakeholder Long Name>":
+        stakeholder_name = ""
+
     sector = af.get_db_info(
         rva_info, "engagementmeta.fields.customer_sector", "Stakeholder Sector"
     )
+
+    if sector == "<not set: Stakeholder Sector>":
+        sector = " "
+
     ci_type = af.get_db_info(
         rva_info, "engagementmeta.fields.customer_ci_type", "Stakeholder CI Type"
     )
+
+    if ci_type == "<not set: Stakeholder CI Type>":
+        ci_type = " "
+
     ext_start_date = af.get_db_info(
         rva_info, "engagementmeta.fields.ext_start_date", "Ext Start Date"
     )
+
+    if ext_start_date == "<not set: Ext Start Date>":
+        ext_start_date = ""
+
     ext_end_date = af.get_db_info(
         rva_info, "engagementmeta.fields.ext_end_date", "Ext End Date"
     )
+
+    if ext_end_date == "<not set: Ext End Date>":
+        ext_end_date = ""
+
     int_start_date = af.get_db_info(
         rva_info, "engagementmeta.fields.int_start_date", "Int Start Date"
     )
+
+    if int_start_date == "<not set: Int Start Date>":
+        int_start_date = ""
+
     int_end_date = af.get_db_info(
         rva_info, "engagementmeta.fields.int_end_date", "Int End Date"
     )
+
+    if int_end_date == "<not set: Int End Date>":
+        int_end_date = ""
+
     report_type_acronym = af.get_db_info(
         rva_info, "report.fields.report_type", "Report Type"
     )
@@ -133,18 +160,21 @@ def generate_pace_document(output, json, assets):
     else:
         report_type = ""
 
+    if ext_start_date and ext_end_date and int_start_date and int_end_date:
+        ext_start = datetime.datetime.strptime(ext_start_date, '%Y-%m-%d').date()
+        ext_end = datetime.datetime.strptime(ext_end_date, '%Y-%m-%d').date()
+        int_start = datetime.datetime.strptime(int_start_date, '%Y-%m-%d').date()
+        int_end = datetime.datetime.strptime(int_end_date, '%Y-%m-%d').date()
 
-    ext_start = datetime.datetime.strptime(ext_start_date, '%Y-%m-%d').date()
-    ext_end = datetime.datetime.strptime(ext_end_date, '%Y-%m-%d').date()
-    int_start = datetime.datetime.strptime(int_start_date, '%Y-%m-%d').date()
-    int_end = datetime.datetime.strptime(int_end_date, '%Y-%m-%d').date()
-
-    if ext_start < int_start:
-        start_date = str(ext_start)
-        end_date = str(int_end)
+        if ext_start < int_start:
+            start_date = str(ext_start)
+            end_date = str(int_end)
+        else:
+            start_date = str(int_start)
+            end_date = str(ext_end)
     else:
-        start_date = str(int_start)
-        end_date = str(ext_end)
+        start_date = ""
+        end_date = ""
 
     findings = []
     severity_count = {"Informational": 0, "Low": 0, "Medium": 0, "High": 0, "Critical": 0}

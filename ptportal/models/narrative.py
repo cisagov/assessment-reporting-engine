@@ -74,11 +74,12 @@ class Tools(models.Model):
 
 
 class ATTACK(models.Model):
-    t_id = models.CharField(verbose_name="MITRE ATT&CK Technique ID", max_length=8, unique=True)
+    t_id = models.CharField(verbose_name="MITRE ATT&CK Technique ID", max_length=20, unique=True)
     name = models.CharField(verbose_name="MITRE ATT&CK Technique Name", max_length=200, unique=True)
     tactics = models. CharField(verbose_name="MITRE ATT&CK Tactic(s)", max_length=200)
     description = models.TextField(verbose_name="MITRE ATT&CK Technique Description", max_length=4000, blank=True)
     url = models.CharField(verbose_name="MITRE ATT&CK Technique URL", max_length=100, blank=True)
+    is_subtechnique = models.BooleanField(default=False, blank=True)
 
     def __str__(self):
         return f"{self.t_id}: {self.name}"
