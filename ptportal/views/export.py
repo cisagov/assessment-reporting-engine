@@ -35,9 +35,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, JsonResponse
 from django.shortcuts import HttpResponse, render
 
-from report_gen.pt_remediation import generate_remediation
 from report_gen.pt_report import generate_ptp_report
-from report_gen.pt_summary import generate_ptp_summary
 from report_gen.pt_slide import generate_ptp_slides
 from report_gen.pt_tracker import create_tracker
 from report_gen.pt_pace import generate_pace_document
@@ -60,7 +58,7 @@ from ptportal.views.utils import (
     serializeJSON,
     report_read_csv,
     generateEntryJson,
-    #generateHVA,
+    generateElectionJson,
     save_chart,
     gen_ptp_filename,
 )
@@ -286,15 +284,30 @@ def export_json(
     zip_name=None,
     anon_report=False,
 ):
-    return HttpResponse(status=200)
+    engagement_obj = EngagementMeta.objects.all()[:1].get()
+    asmt_id = engagement_obj.asmt_id
+
+    if data == 'standard':
+        json_file = gen_ptp_filename(prefix=f'RV{asmt_id}-data', ext='json')
+        generateEntryJson(json_file)
+    elif data == 'election':
+        json_file = gen_ptp_filename(prefix=f'RV{asmt_id}-election', ext='json')
+        generateElectionJson(json_file)
+    with open(json_file, 'rb') as fh:
+        response = HttpResponse(fh.read(), content_type="application/json, application/octet-stream")
+        response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(json_file)
+
+    remove_unnecessary_files()
+        
+    return response
 
 
 def generate_EI_json(request):
-    return export_json(zip=False, data='election')
+    return export_json(data='election')
 
 
 def generate_json(request):
-    return export_json(data='dhs')
+    return export_json(data='standard')
 
 
 def download_backup(request):
@@ -311,7 +324,8 @@ def download_backup(request):
             response[
                 'Content-Disposition'
             ] = 'attachment; filename=' + os.path.basename(backup_file)
-            return response
+        remove_unnecessary_files()
+        return response
 
     return render(request, 'ptportal/export.html')
 
@@ -390,16 +404,13 @@ def generate_artifact(artifact_type, anon_report=False):
 
 
 def generate_report(request):
-    print("Made it into generateReport")
     return generate_artifact("Report")
 
 def generate_outbrief(request):
-    print("Made it into generateOutbrief")
     return generate_artifact("Out-Brief")
 
 
 def generate_tracker(request):
-    print("Made it into generateTracker")
     return generate_artifact("Tracker")
 
 
