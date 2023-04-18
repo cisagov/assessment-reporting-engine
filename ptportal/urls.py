@@ -11,7 +11,6 @@
 
 # DM22-1011
 
-from ptportal.views.tools import generateRemediationSheet
 from django.conf import settings
 from django.conf.urls import url
 from django.conf.urls import include
@@ -30,41 +29,14 @@ urlpatterns = [
 
 # Tools
 urlpatterns += [
-    path('tools/', views.tools, name='tools'),
-    path('generate-DHS-JSON/', views.generateDHSJSON, name='generate_dhs_json'),
-    path('generate-EI-JSON/', views.generateEIJSON, name='generateEIJSON'),
-    path('generateJSON/', views.generateJSON, name='generateJSON'),
-    path('generateReport/', views.generateReport, name='generateReport'),
-    path(
-        'generateReportSummary/',
-        views.generateReportSummary,
-        name='generateReportSummary',
-    ),
-    path(
-        'generateAnonymizedJSON/',
-        views.generateAnonymizedJSON,
-        name='generateAnonymizedJSON',
-    ),
-    path(
-        'generateAnonymizedReport/',
-        views.generateAnonymizedReport,
-        name='generateAnonymizedReport',
-    ),
-    path('generateOutbrief/', views.generateOutbrief, name='generateOutbrief'),
-    path('generateTracker/', views.generateTracker, name='generateTracker'),
-    path(
-        'generateRemediation/',
-        views.generateRemediationSheet,
-        name='generateRemediation',
-    ),
-    path('generate-HVA-JSON/', views.generateHVAJSON, name='generateHVA'),
-    path('generate-<str:ip_type>-ips/', views.generateIpList, name='generate-ips'),
-    path('download-backup/', views.downloadBackup, name='downloadBackup'),
-    path(
-        'ajax/ajax-check-ip-scope/',
-        views.ajax_check_ip_scope,
-        name='ajax_check_ip_scope',
-    ),
+    path('export/', views.Export.as_view(), name='export'),
+    path('generate-JSON/', views.generate_json, name='generate_json'),
+    path('generate-EI-JSON/', views.generate_EI_json, name='generate_EI_json'),
+    path('generate-report/', views.generate_report, name='generate_report'),
+    path('generate-outbrief/', views.generate_outbrief, name='generate_outbrief'),
+    path('generate-tracker/', views.generate_tracker, name='generate_tracker'),
+    path('generate-pace/', views.generate_pace, name='generate_pace'),
+    path('download-backup/', views.download_backup, name='download_backup'),
     path(
         'password_change/',
         auth_views.PasswordChangeView.as_view(),

@@ -125,10 +125,11 @@ class Command(BaseCommand):
             try:
                 ATTACK.objects.create(
                     t_id=row['ID'],
-                    name=row['Name'],
-                    tactics=row['Tactics'],
-                    description=row['Description'],
-                    url=row['URL']
+                    name=row['name'],
+                    tactics=row['tactics'],
+                    description=row['description'],
+                    url=row['url'],
+                    is_subtechnique=row['is sub-technique']
                 )
             except Exception as e:
                 print(e)
@@ -288,8 +289,8 @@ class Command(BaseCommand):
 
         for control in gen_unique_cis_controls:
             cis_csc_obj, __ = CIS_CSC.objects.get_or_create(CIS_ID=control)
-            findings = BaseFinding.objects.filter(CIS_CSC__contains=control)
-            cis_csc_obj.findings.add(*findings)
+            gen_findings_cis = GeneralFinding.objects.filter(CIS_CSC__contains=control)
+            cis_csc_obj.findings.add(*gen_findings_cis)
 
         # ---Specific Findings---
 
@@ -390,6 +391,11 @@ class Command(BaseCommand):
             for y in value_list:
                 if y != '':
                     spec_unique_cis_controls.add(y.strip())
+
+        for control in spec_unique_cis_controls:
+            cis_csc_obj, __ = CIS_CSC.objects.get_or_create(CIS_ID=control)
+            spec_findings_cis = SpecificFinding.objects.filter(CIS_CSC__contains=control)
+            cis_csc_obj.findings.add(*spec_findings_cis)
 
         # --- Known Exploited Vulnerabilities ---
 

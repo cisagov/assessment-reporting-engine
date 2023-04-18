@@ -76,6 +76,10 @@ DM22-1011
     <sds-section class="col-span-5" type="accented">
         <span class="border-top border-dark"></span>
             <template #title><b>PAYLOAD TESTING RESULTS</b></template>
+            <p style="float:left;padding:10px">During payload testing, a manual exception</p><sds-select v-model="formData.exception" :options="exceptionOptions" style="text-align:center;width:120px;float:left;"></sds-select><p style="float:left;padding:10px">necessary for the test email to reach the target inbox.</p>
+            <br><br><br><br>
+            <sds-input v-model="formData.browser" style="width:180px;float:left;padding:0px 10px" placeholder="Google Chrome" :maxlength="100"></sds-input><p style="float:left;padding:10px 0px">was used to download the payloads and was deemed a primary browser used by users.</p>
+            <br><br>
 			<!-- Payloads Table -->
 			<sds-section>
 				<div class="mb-8">
@@ -130,7 +134,14 @@ DM22-1011
 function pageData() {
 	data = {
 		fileList: [],
-		formData: [],
+		formData: {
+			exception: "{{ description.exception }}",
+			browser: "{{ description.browser }}",
+		},
+		exceptionOptions: [
+			{ id: 1, value: 'was', text: 'was' },
+			{ id: 2, value: 'was not', text: 'was not' },
+		],
 		overwriteWarning: false,
 		notify: null,
 		PayloadTableArgs: {
@@ -215,7 +226,13 @@ function pageMethods() {
 			}
 
 			else {
-				formattedData = JSON.parse(JSON.stringify(this.PayloadTableArgs.items))
+				formattedData = JSON.parse(JSON.stringify(this.formData))
+				formattedData['payloads'] = JSON.parse(JSON.stringify(this.PayloadTableArgs.items))
+
+				console.log(formattedData['payloads'])
+				console.log(this.formData.exception)
+				console.log(this.formData.browser)
+
 				fetch(window.location.href, {
 					method: "POST",
 					body: JSON.stringify(formattedData),

@@ -21,6 +21,7 @@ from . import engagement, findings
 from hashlib import sha256
 
 REPORT_TYPE_CHOICES = (('RVA', 'RVA'), ('RPT', 'RPT'), ('FAST', 'FAST'), ('HVA', 'HVA'))
+EXCEPTION_CHOICES = (("was", "was"), ("was not", "was not"))
 
 
 class Report(abstract_models.TimeStampedModel):
@@ -34,6 +35,17 @@ class Report(abstract_models.TimeStampedModel):
     internal_scanned = models.IntegerField(blank=True, null=True)
     internal_discovered = models.IntegerField(blank=True, null=True)
     password_analysis = models.TextField(blank=True)
+
+    exception = models.CharField(
+        blank=True,
+        max_length=7,
+        choices=EXCEPTION_CHOICES,
+    )
+
+    browser = models.CharField(
+        blank=True,
+        max_length=100,
+    )
 
     class Meta:
         verbose_name_plural = 'Report'

@@ -22,12 +22,12 @@ class InfraTS(abstract_models.TimeStampedModel):
     order = models.IntegerField(default=1, blank=True)
     assessment_type = models.CharField(max_length=8, choices=ASSESSMENT_CHOICES, default="External")
     hostname = models.CharField(max_length=100, blank=True)
-    ip = models.CharField(max_length=15, blank=True)
+    ip_address = models.CharField(max_length=15, blank=True)
     domain = models.CharField(max_length=100, blank=True)
-    kill_date = models.DateField(verbose_name="Beacon Kill Date", null=True, blank=True)
+    beacon_kill_date = models.DateField(verbose_name="Beacon Kill Date", null=True, blank=True)
 
     def __str__(self):
-        return str(self.ip) + ": " + str(self.hostname)
+        return str(self.ip_address) + ": " + str(self.hostname)
 
     class Meta:
         verbose_name_plural = 'Activity Tracker: Infrastructure (Teamservers)'
@@ -38,11 +38,11 @@ class InfraPhishing(abstract_models.TimeStampedModel):
 
     order = models.IntegerField(default=1, blank=True)
     hostname = models.CharField(max_length=100, blank=True)
-    ip = models.CharField(max_length=15, blank=True)
+    ip_address = models.CharField(max_length=15, blank=True)
     domain = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
-        return str(self.ip) + ": " + str(self.hostname)
+        return str(self.ip_address) + ": " + str(self.hostname)
 
     class Meta:
         verbose_name_plural = 'Activity Tracker: Infrastructure (Phishing)'
@@ -72,12 +72,12 @@ class InfraWS(abstract_models.TimeStampedModel):
     order = models.IntegerField(default=1, blank=True)
     assessment_type = models.CharField(max_length=8, choices=ASSESSMENT_CHOICES, default="External")
     hostname = models.CharField(max_length=100, blank=True)
-    ip = models.CharField(max_length=15, blank=True)
-    os = models.CharField(max_length=20, choices=OS_CHOICES, default="None", blank=True)
+    ip_address = models.CharField(max_length=15, blank=True)
+    operating_system = models.CharField(max_length=20, choices=OS_CHOICES, default="None", blank=True)
     operator = models.CharField(max_length=50, blank=True)
 
     def __str__(self):
-        return str(self.ip) + ": " + str(self.hostname)
+        return str(self.ip_address) + ": " + str(self.hostname)
 
     class Meta:
         verbose_name_plural = 'Activity Tracker: Infrastructure (Workstations)'
@@ -89,15 +89,15 @@ class LateralMovement(abstract_models.TimeStampedModel):
     order = models.IntegerField(default=1, blank=True)
     initial_beacon = models.DateTimeField(verbose_name="Initial Beacon", null=True, blank=True)
     hostname = models.CharField(max_length=100, blank=True)
-    ip = models.CharField(max_length=15, blank=True)
-    account = models.CharField(max_length=100, blank=True)
+    ip_address = models.CharField(max_length=15, blank=True)
+    account_used = models.CharField(max_length=100, blank=True)
     host_moved_from = models.CharField(max_length=100, blank=True)
-    method = models.CharField(max_length=200, blank=True)
+    movement_method = models.CharField(max_length=200, blank=True)
     callback_server = models.CharField(max_length=100, blank=True)
     notes = models.CharField(max_length=500, blank=True)
 
     def __str__(self):
-        return str(self.ip) + ": " + str(self.hostname)
+        return str(self.ip_address) + ": " + str(self.hostname)
 
     class Meta:
         verbose_name_plural = 'Activity Tracker: Lateral Movement'
@@ -110,15 +110,15 @@ class Files(abstract_models.TimeStampedModel):
 
     order = models.IntegerField(default=1, blank=True)
     hostname = models.CharField(max_length=100, blank=True)
-    ip = models.CharField(max_length=15, blank=True)
-    location = models.CharField(max_length=500, blank=True)
-    filename = models.CharField(max_length=200, blank=True)
+    ip_address = models.CharField(max_length=15, blank=True)
+    file_location = models.CharField(max_length=500, blank=True)
+    file_name = models.CharField(max_length=200, blank=True)
     status = models.CharField(max_length=12, choices=DELETED_CHOICES, blank=True)
-    created = models.DateTimeField(verbose_name="Date/Time Created", null=True, blank=True)
-    deleted = models.DateTimeField(verbose_name="Date/Time Deleted", null=True, blank=True)
+    datetime_created = models.DateTimeField(verbose_name="Date/Time Created", null=True, blank=True)
+    datetime_deleted = models.DateTimeField(verbose_name="Date/Time Deleted", null=True, blank=True)
 
     def __str__(self):
-        return str(self.ip) + ": " + str(self.filename)
+        return str(self.ip_address) + ": " + str(self.file_name)
 
     class Meta:
         verbose_name_plural = 'Activity Tracker: Files'
@@ -129,16 +129,16 @@ class InteractiveLogons(abstract_models.TimeStampedModel):
 
     order = models.IntegerField(default=1, blank=True)
     hostname = models.CharField(max_length=100, blank=True)
-    ip = models.CharField(max_length=15, blank=True)
+    ip_address = models.CharField(max_length=15, blank=True)
     account = models.CharField(max_length=100, blank=True)
     method = models.CharField(max_length=200, blank=True)
-    logon = models.DateTimeField(verbose_name="Logon Date/Time", null=True, blank=True)
-    logoff = models.DateTimeField(verbose_name="Logoff Date/Time", null=True, blank=True)
+    logon_datetime = models.DateTimeField(verbose_name="Logon Date/Time", null=True, blank=True)
+    logoff_datetime = models.DateTimeField(verbose_name="Logoff Date/Time", null=True, blank=True)
     operator = models.CharField(max_length=50, blank=True)
     notes = models.CharField(max_length=500, blank=True)
 
     def __str__(self):
-        return str(self.account) + "@" + str(self.ip) + ": " + str(self.logon)
+        return str(self.account) + "@" + str(self.ip_address) + ": " + str(self.logon_datetime)
 
     class Meta:
         verbose_name_plural = 'Activity Tracker: Interactive Logons'
@@ -149,15 +149,15 @@ class HighImpactScans(abstract_models.TimeStampedModel):
 
     order = models.IntegerField(default=1, blank=True)
     scan_type = models.CharField(max_length=200, blank=True)
-    tool = models.CharField(max_length=100, blank=True)
-    ranges = models.CharField(max_length=1000, blank=True)
-    domains = models.CharField(max_length=500, blank=True)
-    start = models.DateTimeField(verbose_name="Scan Start Time", null=True, blank=True)
-    end = models.DateTimeField(verbose_name="Scan End Time", null=True, blank=True)
+    tool_used = models.CharField(max_length=100, blank=True)
+    ip_ranges_targeted = models.CharField(max_length=1000, blank=True)
+    domains_targeted = models.CharField(max_length=500, blank=True)
+    scan_start = models.DateTimeField(verbose_name="Scan Start Time", null=True, blank=True)
+    scan_end = models.DateTimeField(verbose_name="Scan End Time", null=True, blank=True)
     notes = models.CharField(max_length=500, blank=True)
 
     def __str__(self):
-        return str(self.scan_type) + " w/ " + str(self.tool) + " @" + str(self.start)
+        return str(self.scan_type) + " w/ " + str(self.tool_used) + " @" + str(self.scan_start)
 
     class Meta:
         verbose_name_plural = 'Activity Tracker: High Impact Scans'
@@ -169,8 +169,8 @@ class SignificantEvents(abstract_models.TimeStampedModel):
     order = models.IntegerField(default=1, blank=True)
     event = models.CharField(max_length=500, blank=True)
     notes = models.CharField(max_length=1000, blank=True)
-    start = models.DateTimeField(verbose_name="Event Start Time", null=True, blank=True)
-    end = models.DateTimeField(verbose_name="Event End Time", null=True, blank=True)
+    start_datetime = models.DateTimeField(verbose_name="Event Start Time", null=True, blank=True)
+    end_datetime = models.DateTimeField(verbose_name="Event End Time", null=True, blank=True)
 
     def __str__(self):
         return str(self.event)

@@ -21,6 +21,8 @@ import sys
 import os.path
 import argparse
 import datetime
+from datetime import timezone
+from dateutil.relativedelta import relativedelta
 import report_gen.utilities.rt_parser as rt
 
 try:
@@ -37,35 +39,27 @@ import report_gen.utilities.assessment_facts as af
 import report_gen.utilities.img_util as iu
 from pptx.util import Inches, Pt
 
-from pptx.enum.text import PP_ALIGN, MSO_AUTO_SIZE
+from pptx.enum.text import PP_ALIGN, MSO_AUTO_SIZE, MSO_ANCHOR
+from pptx.enum.shapes import MSO_SHAPE
 from pptx.dml.color import RGBColor
 
 # Constants
 tstamp = str(datetime.datetime.now().strftime("%Y%m%d_%H.%M.%S"))
-pr_tstamp = str(datetime.datetime.now().strftime("%b %d, %Y"))
-
-notice = (
-    "The information that follows in this presentation is "
-    "preliminary and is not fully validated or finalized. "
-    "Engineers and managers are still in the process of analyzing "
-    "this information and preparing findings.  It is presented in "
-    "its rough draft state and may be significantly modified "
-    "prior to the publication of the final report or an official "
-    "out-brief."
-    "\n\n"
-    "This {} is not an audit.  The services provided only "
-    "demonstrates what actions an adversary could accomplish "
-    "within the timeframe of the assessment."
-)
+pr_tstamp = str(datetime.datetime.now().strftime("%B %d, %Y"))
 
 red = RGBColor(255, 0, 0)
 green = RGBColor(70, 200, 0)  # pure green is hard to read
 blue = RGBColor(0, 82, 136)
-tbl_text = RGBColor(90, 91, 93)
-LightStyle1Accent6 = "{68D230F3-CF80-4859-8CE7-A43EE81993B5}"
-
-# Master slide template numbers for corresponding report types.
-report_type_opening = {"RVA": 10, "RPT": 12, "HVA": 13}
+gray = RGBColor(90, 91, 92)
+white = RGBColor(255, 255, 255)
+blue = RGBColor(3, 82, 136)
+crit = RGBColor(255, 116, 113)
+high = RGBColor(252, 191, 143)
+med = RGBColor(255, 222, 89)
+low = RGBColor(131, 224, 142)
+info = RGBColor(79, 175, 227)
+LightStyle2Accent4 = "{17292A2E-F333-43FB-9621-5CBBE7FDCDCB}"
+MediumStyle4Accent4 = "{C4B1156A-380E-4F78-BDF5-A606A8083BF9}"
 
 
 def iter_cells(table):
@@ -163,28 +157,52 @@ def add_hyperlink(para, link_text, link_address):
     hlink.address = link_address
 
 
-"""
-def hva_attack_overview(prs, rva_info, rt_str, scenario_field, scenario):
-    ao_slide_layout = prs.slide_layouts[3]
-    slide = prs.slides.add_slide(ao_slide_layout)
-    content_hva_placeholder = slide.placeholders[1].text_frame
-    title = slide.shapes.title
-    title.text = "HVA Results"
+def add_tag(shapes, tag_type, label):
 
-    # ---- add content
-    paragraph = content_hva_placeholder.paragraphs[0]
-    paragraph.level = 1
-    run = paragraph.add_run()
-    run.text = rt_str
+    if tag_type == "severity":
+        tag = shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(1.64), Inches(6.69), Inches(1.83), Inches(0.42))
+        tag.fill.solid()
 
-    scenario = af.get_db_info(rva_info,
-                              scenario_field,
-                              scenario)
-    paragraph = content_hva_placeholder.add_paragraph()
-    paragraph.level = 2
-    run = paragraph.add_run()
-    run.text = scenario
-    """
+        if label == "Critical":
+            tag.fill.fore_color.rgb = crit
+            tag.line.color.rgb = crit
+        elif label == "High":
+            tag.fill.fore_color.rgb = high
+            tag.line.color.rgb = high
+        elif label == "Medium":
+            tag.fill.fore_color.rgb = med
+            tag.line.color.rgb = med
+        elif label == "Low":
+            tag.fill.fore_color.rgb = low
+            tag.line.color.rgb = low
+        else:
+            tag.fill.fore_color.rgb = info
+            tag.line.color.rgb = info
+
+    elif tag_type == "mitigation":
+        tag = shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(4.09), Inches(6.69), Inches(1.83), Inches(0.42))
+        tag.fill.solid()
+
+        if label == "Mitigated":
+            tag.fill.fore_color.rgb = low
+            tag.line.color.rgb = low
+        else:
+            tag.fill.fore_color.rgb = crit
+            tag.line.color.rgb = crit
+
+    else:
+        tag = shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(6.53), Inches(6.69), Inches(1.83), Inches(0.42))
+        tag.fill.solid()
+        tag.fill.fore_color.rgb = crit
+        tag.line.color.rgb = crit
+
+    shadow = tag.shadow
+    shadow.inherit = False
+    tag_text = tag.text_frame.paragraphs[0]
+    tag_text.text = label
+    tag_text.font.size = Pt(16)
+    tag_text.font.color.rgb = gray
+    tag_text.runs[0].font.bold = True
 
 
 def add_section_title(prs, title):
@@ -230,13 +248,11 @@ def insert_title_slide(prs, report_type, rva_info, draft):
         rva_info (List[Dict]): The Json data from the engagement.
         draft (bool): Boolean to mark if the presentation is a draft or not.
     """
-    open_slide_layout = prs.slide_layouts[report_type_opening[report_type]]
+    open_slide_layout = prs.slide_layouts[0]
     slide = prs.slides.add_slide(open_slide_layout)
 
-    body_info = slide.placeholders[13]
-    date_info = slide.placeholders[14]
-    draft_info = slide.placeholders[15]
-    fouo_info = slide.placeholders[16]
+    subtitle = slide.placeholders[10]
+    date = slide.placeholders[11]
 
     customer = af.get_db_info(
         rva_info, "engagementmeta.fields.customer_long_name", "Stakeholder Long Name"
@@ -245,13 +261,8 @@ def insert_title_slide(prs, report_type, rva_info, draft):
         rva_info, "engagementmeta.fields.customer_initials", "Stakeholder Initials"
     )
 
-    body_info.text = customer + "\n (" + customer_initials + ")"
-    date_info.text = pr_tstamp  # "7/3/2000"
-    draft_info.text = " "  # must be a space, otherwise it drops
-    fouo_info.text = "FOR OFFICIAL USE ONLY"
-
-    if draft:
-        draft_info.text = "— DRAFT —"
+    subtitle.text = customer + " (" + customer_initials + ")"
+    date.text = pr_tstamp
 
 
 def insert_notice_slide(prs, report_type):
@@ -261,14 +272,8 @@ def insert_notice_slide(prs, report_type):
         prs (pptx presentation): The Powerpoint presentation.
         report_type (str): The type of report being generated. I.e. RVA, RPT, or HVA.
     """
-    notice_slide_layout = prs.slide_layouts[3]
+    notice_slide_layout = prs.slide_layouts[1]
     slide = prs.slides.add_slide(notice_slide_layout)
-
-    title = slide.shapes.title
-    title.text = "NOTICE:"
-
-    notice_placeholder = slide.placeholders[1]
-    notice_placeholder.text = notice.format(report_type)
 
 
 def insert_agenda_slide(prs, report_type):
@@ -278,38 +283,11 @@ def insert_agenda_slide(prs, report_type):
         prs (pptx presentation): The Powerpoint presentation.
         report_type (str): The type of report being generated. I.e. RVA, RPT, or HVA.
     """
-    agenda_slide_layout = prs.slide_layouts[3]
+    agenda_slide_layout = prs.slide_layouts[10]
     slide = prs.slides.add_slide(agenda_slide_layout)
 
-    title = slide.shapes.title
-    title.text = "Agenda"
 
-    agenda_placeholder = slide.placeholders[1].text_frame
-    paragraph = agenda_placeholder.paragraphs[0]
-    paragraph.level = 1
-
-    run = paragraph.add_run()
-    run.text = (
-        "Assessment Timeframe & Team\nScope and Limitations\nTargets and Status\n"
-    )
-    run.text += "Goals\n"
-
-    if report_type == "RPT":
-        run.text += "Open Source Information Gathering\n"
-    else:
-        run.text += "Attack Path\n"
-
-    run.text += "Findings\n"
-
-    run.text += "Observations\n"
-
-    if report_type == "HVA":
-        run.text += "BOD 18-02 Requirements\n"
-
-    run.text += "Next Steps\nQuestions"
-
-
-def insert_timeframe(prs, report_type, rva_info):
+def insert_logistics(prs, report_type, rva_info):
     """Inserts the slide with details of the timeframe from the engagement.
 
     Args:
@@ -317,74 +295,92 @@ def insert_timeframe(prs, report_type, rva_info):
         report_type (str): The type of report being generated. I.e. RVA, RPT, or HVA.
         rva_info (List[Dict]): The Json data from the engagement.
     """
-    title_only = prs.slide_layouts[4]
+    title_only = prs.slide_layouts[5]
     slide = prs.slides.add_slide(title_only)
     shapes = slide.shapes
-    shapes.title.text = "Assessment Timeframe & Team"
+    shapes.title.text = "LOGISTICS"
 
     if report_type != "RPT":
         rows = 3
     else:
         rows = 2
 
-    # Date table
+    # date table
     cols = 2
-    left = Inches(1.60)
-    top = Inches(1.45)
-    width = Inches(7.9)
-    height = Inches(0.8)
+    left = Inches(0.65)
+    top = Inches(1.58)
+    width = Inches(8.71)
+    height = Inches(1.2)
     table = shapes.add_table(rows, cols, left, top, width, height).table
     tbl = table._graphic_frame._element.graphic.graphicData.tbl
-    tbl[0][-1].text = LightStyle1Accent6
+    tbl[0][-1].text = LightStyle2Accent4
 
     # set column widths
-    table.columns[0].width = Inches(3.2)
-    table.columns[1].width = Inches(4.7)
+    table.columns[0].width = Inches(4.06)
+    table.columns[1].width = Inches(4.65)
 
     # write body cells
-    start_date = af.get_db_info(
+    ext_start_date = af.get_db_info(
         rva_info, "engagementmeta.fields.ext_start_date", "External Start Date"
     )
-    end_date = af.get_db_info(
+    ext_start_formatted = datetime.datetime.strptime(ext_start_date, '%Y-%m-%d').strftime('%b %-d, %Y')
+
+    ext_end_date = af.get_db_info(
         rva_info, "engagementmeta.fields.ext_end_date", "External End Date"
     )
+    ext_end_formatted = datetime.datetime.strptime(ext_end_date, '%Y-%m-%d').strftime('%b %-d, %Y')
 
-    cell_text(table, 0, 0, "Date", "c", tbl_text)
-    cell_text(table, 0, 1, "Activity", "c", tbl_text)
+    cell_text(table, 0, 0, "Activity", "c", white)
+    cell_text(table, 0, 1, "Dates", "c", white)
 
-    cell_text(table, 1, 0, str(start_date) + " to " + str(end_date), color=tbl_text)
-    cell_text(table, 1, 1, "External Assessment", color=tbl_text)
+    cell_text(table, 1, 0, "External Testing", color=gray)
+    cell_text(table, 1, 1, str(ext_start_formatted) + " to " + str(ext_end_formatted), color=gray)
 
     if report_type != "RPT":
         int_start_date = af.get_db_info(
             rva_info, "engagementmeta.fields.int_start_date", "Internal Start Date"
         )
+        int_start_formatted = datetime.datetime.strptime(int_start_date, '%Y-%m-%d').strftime('%b %-d, %Y')
         int_end_date = af.get_db_info(
             rva_info, "engagementmeta.fields.int_end_date", "Internal End Date"
         )
-        cell_text(
-            table,
-            2,
-            0,
-            str(int_start_date) + " to " + str(int_end_date),
-            color=tbl_text,
-        )
-        cell_text(table, 2, 1, "Internal Assessment", color=tbl_text)
+        int_end_formatted = datetime.datetime.strptime(int_end_date, '%Y-%m-%d').strftime('%b %-d, %Y')
 
-    # - poc table
+        cell_text(table, 2, 0, "Internal Testing", color=gray)
+        cell_text(table, 2, 1, str(int_start_formatted) + " to " + str(int_end_formatted), color=gray)
+    
+    table.cell(0, 0).fill.solid()
+    table.cell(0, 0).fill.fore_color.rgb = blue
+    table.cell(0, 1).fill.solid()
+    table.cell(0, 1).fill.fore_color.rgb = blue
+    table.cell(1, 0).fill.solid()
+    table.cell(1, 0).fill.fore_color.rgb = white
+    table.cell(1, 1).fill.solid()
+    table.cell(1, 1).fill.fore_color.rgb = white
+    table.cell(2, 0).fill.solid()
+    table.cell(2, 0).fill.fore_color.rgb = white
+    table.cell(2, 1).fill.solid()
+    table.cell(2, 1).fill.fore_color.rgb = white
+
+    table.cell(1, 0).text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
+    table.cell(1, 1).text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
+    table.cell(2, 0).text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
+    table.cell(2, 1).text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
+
+    # poc table
     rows = 2
     cols = 2
-    left = Inches(1.60)
-    top = Inches(3.05)
-    width = Inches(7.9)
+    left = Inches(0.65)
+    top = Inches(3.12)
+    width = Inches(8.71)
     height = Inches(0.8)
     table = shapes.add_table(rows, cols, left, top, width, height).table
     tbl = table._graphic_frame._element.graphic.graphicData.tbl
-    tbl[0][-1].text = LightStyle1Accent6
+    tbl[0][-1].text = LightStyle2Accent4
 
     # set column widths
-    table.columns[0].width = Inches(3.2)
-    table.columns[1].width = Inches(4.7)
+    table.columns[0].width = Inches(4.06)
+    table.columns[1].width = Inches(4.65)
 
     # write body cells
     poc_name = af.get_db_info(
@@ -394,66 +390,68 @@ def insert_timeframe(prs, report_type, rva_info):
         rva_info, "engagementmeta.fields.customer_POC_email", "Customer Email"
     )
 
-    cell_text(table, 0, 0, "Customer Point of Contact (POC)", "c", color=tbl_text)
+    cell_text(table, 0, 0, "Point of Contact", "c", color=white)
     table.cell(0, 0).merge(table.cell(0, 1))
 
-    cell_text(table, 1, 0, poc_name, color=tbl_text)
-    cell_text(table, 1, 1, poc_email, color=tbl_text)
+    cell_text(table, 1, 0, poc_name, color=gray)
+    cell_text(table, 1, 1, poc_email, color=gray)
 
-    # - rva fed lead table
-    rows = 2
+    table.cell(0, 0).fill.solid()
+    table.cell(0, 0).fill.fore_color.rgb = blue
+    table.cell(1, 0).fill.solid()
+    table.cell(1, 0).fill.fore_color.rgb = white
+    table.cell(1, 1).fill.solid()
+    table.cell(1, 1).fill.fore_color.rgb = white
+
+    table.cell(1, 0).text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
+    table.cell(1, 1).text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
+
+    # rva team table
+    rows = 5
     cols = 2
-    left = Inches(1.60)
-    top = Inches(4.18)
-    width = Inches(7.9)
-    height = Inches(0.8)
+    left = Inches(0.65)
+    top = Inches(4.25)
+    width = Inches(8.71)
+    height = Inches(2)
     table = shapes.add_table(rows, cols, left, top, width, height).table
     tbl = table._graphic_frame._element.graphic.graphicData.tbl
-    tbl[0][-1].text = LightStyle1Accent6
+    tbl[0][-1].text = LightStyle2Accent4
 
     # set column widths
-    table.columns[0].width = Inches(3.2)
-    table.columns[1].width = Inches(4.7)
+    table.columns[0].width = Inches(4.06)
+    table.columns[1].width = Inches(4.65)
 
     # write body cells
     fed_name = af.get_db_info(
         rva_info, "engagementmeta.fields.team_lead_name", "Fed Lead Name"
     )
-    fed_email = af.get_db_info(
-        rva_info, "engagementmeta.fields.team_lead_email", "Fed Lead Email"
-    )
 
-    cell_text(table, 0, 0, "{} Fed Lead".format(report_type), "c", color=tbl_text)
+    cell_text(table, 0, 0, report_type + " Team", "c", color=white)
     table.cell(0, 0).merge(table.cell(0, 1))
 
-    cell_text(table, 1, 0, fed_name, color=tbl_text)
-    cell_text(table, 1, 1, fed_email, color=tbl_text)
+    cell_text(table, 1, 0, "Federal Lead", color=gray)
+    cell_text(table, 1, 1, fed_name, color=gray)
+    cell_text(table, 2, 0, "Technical Lead", color=gray)
+    cell_text(table, 2, 1, "<Tech Lead Name>", color=gray)
+    cell_text(table, 3, 0, "Operator", color=gray)
+    cell_text(table, 3, 1, "<Operator Name>", color=gray)
+    cell_text(table, 4, 0, "Operator", color=gray)
+    cell_text(table, 4, 1, "<Operator Name>", color=gray)
 
-    # - rva team table
-    rows = 3
-    cols = 2
-    left = Inches(1.60)
-    top = Inches(5.30)
-    width = Inches(7.9)
-    height = Inches(0.8)
-    table = shapes.add_table(rows, cols, left, top, width, height).table
-    tbl = table._graphic_frame._element.graphic.graphicData.tbl
-    tbl[0][-1].text = LightStyle1Accent6
+    table.cell(0, 0).fill.solid()
+    table.cell(0, 0).fill.fore_color.rgb = blue
 
-    # set column widths
-    table.columns[0].width = Inches(3.95)
-    table.columns[1].width = Inches(3.95)
+    for i in range(1, 5):
+        table.cell(i, 0).fill.solid()
+        table.cell(i, 0).fill.fore_color.rgb = white
+        table.cell(i, 1).fill.solid()
+        table.cell(i, 1).fill.fore_color.rgb = white
 
-    # write body cells
-    cell_text(table, 0, 0, "{} Team".format(report_type), "c", color=tbl_text)
-    table.cell(0, 0).merge(table.cell(0, 1))
-
-    cell_text(table, 1, 0, "SEI Person", color=tbl_text)
-    cell_text(table, 1, 1, "Sub-contractor 1", color=tbl_text)
-    cell_text(table, 2, 0, "Sub-contractor 2", color=tbl_text)
+        table.cell(i, 0).text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
+        table.cell(i, 1).text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
 
 
-def insert_scope_slide(prs, report_type, rva_info, ip_ext, ip_int):
+def insert_scope_slide(prs, report_type, rva_info, ip_ext_scan, ip_ext_disc, ip_int_scan, ip_int_disc):
     """Generates the slide containing the scope of the engagement.
 
     Args:
@@ -464,108 +462,63 @@ def insert_scope_slide(prs, report_type, rva_info, ip_ext, ip_int):
         ip_int (int): The number of internal IP addresses scanned.
     """
     # ---- add scope and limitations slide
-    scope_slide_layout = prs.slide_layouts[3]
+    scope_slide_layout = prs.slide_layouts[4]
     slide = prs.slides.add_slide(scope_slide_layout)
     scope_placeholder = slide.placeholders[1].text_frame
 
     title = slide.shapes.title
-    title.text = "Scope and Limitations"
+    title.text = "SCOPE"
 
     # external bullet
     paragraph = scope_placeholder.paragraphs[0]
-    paragraph.level = 1
+    paragraph.level = 0
     run = paragraph.add_run()
-    run.text = "External IP Ranges"
+    run.text = "External Scope"
+    paragraph.font.color.rgb = gray
 
     # external information
     paragraph = scope_placeholder.add_paragraph()
-    paragraph.level = 2
+    paragraph.level = 1
     run = paragraph.add_run()
-    run.text = "{} IP addresses across several subnets.".format(ip_ext)
+    run.text = str(ip_ext_disc) + " active hosts out of " + str(ip_ext_scan) + " scanned hosts"
+    paragraph.font.color.rgb = gray
 
     # internal bullet
     if report_type != "RPT":
         paragraph = scope_placeholder.add_paragraph()
-        paragraph.level = 1
+        paragraph.level = 0
         run = paragraph.add_run()
-        run.text = "Internal IP Ranges"
+        run.text = "Internal Scope"
+        paragraph.font.color.rgb = gray
 
         # internal information
         paragraph = scope_placeholder.add_paragraph()
-        paragraph.level = 2
+        paragraph.level = 1
         run = paragraph.add_run()
-        run.text = "{} IP addresses across several subnets.".format(ip_int)
+        run.text = str(ip_int_disc) + " active hosts out of " + str(ip_int_scan) + " scanned hosts"
+        paragraph.font.color.rgb = gray
 
     # testing limitations bullet
     paragraph = scope_placeholder.add_paragraph()
     paragraph.level = 0
     run = paragraph.add_run()
-    paragraph = scope_placeholder.add_paragraph()
-    paragraph.level = 1
-    run = paragraph.add_run()
     run.text = "Testing Limitations"
+    paragraph.font.color.rgb = gray
 
     # limitations
     paragraph = scope_placeholder.add_paragraph()
-    paragraph.level = 2
+    paragraph.level = 1
     run = paragraph.add_run()
     run.text = "Short timeframe - overcome by working with {} staff".format(
         af.get_db_info(rva_info, "engagementmeta.fields.customer_initials", "CI")
     )
+    paragraph.font.color.rgb = gray
 
     paragraph = scope_placeholder.add_paragraph()
-    paragraph.level = 2
+    paragraph.level = 1
     run = paragraph.add_run()
     run.text = "Testing assumes in-scope systems are a fair representation of all production systems"
-
-    """
-    #HVA Assessment Targets
-    if report_type == "HVA":
-        oo_layout = prs.slide_layouts[3]
-        slide = prs.slides.add_slide(oo_layout)
-        title = slide.shapes.title
-        oo_placeholder = slide.placeholders[1].text_frame
-        title.text = "Targets and Status"
-
-        # gather HVA Target Data
-        targets = []
-        for cnt, target in enumerate(af.model_gen(rva_info, "ptportal.hvatarget")):
-            ele = target['fields']
-            targets.append(ele)
-
-        # set the shape and create the table
-        rows = 1 + len(targets)
-        cols = 3
-        left = Inches(0.75)
-        top = Inches(2.0)
-        width = Inches(9)  # need additional room for padding, etc over cols
-        height = Inches(0)
-
-        shapes = slide.shapes
-        table = shapes.add_table(rows, cols, left,
-                                 top, width, height).table
-        tbl = table._graphic_frame._element.graphic.graphicData.tbl
-        tbl[0][-1].text = LightStyle1Accent6
-        table.columns[0].width = Inches(3)
-        table.columns[1].width = Inches(3)
-        table.columns[2].width = Inches(1.5)
-
-        # add the table header
-        cell_text(table, 0, 0, 'Target Name', 'c', tbl_text, Pt(14))
-        cell_text(table, 0, 1, 'Target Addresses', 'c', tbl_text, Pt(14))
-        cell_text(table, 0, 2, 'Status', 'c', tbl_text, Pt(14))
-
-        # output the table
-        i = 0
-        for item in targets:
-            name_str = item['name']
-            addr_str = item['address']
-            status_str = item['status']
-            cell_text(table, i + 1, 0, name_str, 'l', tbl_text, Pt(12))
-            cell_text(table, i + 1, 1, addr_str, 'l', tbl_text, Pt(12))
-            cell_text(table, i + 1, 2, status_str, 'l', tbl_text, Pt(12))
-            i += 1
-    """
+    paragraph.font.color.rgb = gray
 
 
 def insert_goals_slide(prs, report_type):
@@ -575,33 +528,12 @@ def insert_goals_slide(prs, report_type):
         prs (pptx presentation): The Powerpoint presentation.
         report_type (str): The type of report being generated. I.e. RVA, RPT, or HVA.
     """
-    add_section_title(prs, "Goals")
 
-    goals_slide_layout = prs.slide_layouts[3]
+    goals_slide_layout = prs.slide_layouts[2]
     slide = prs.slides.add_slide(goals_slide_layout)
-    goals_placeholder = slide.placeholders[1].text_frame
-
-    title = slide.shapes.title
-    title.text = "Goals"
-
-    paragraph = goals_placeholder.paragraphs[0]
-    paragraph.level = 1
-    run = paragraph.add_run()
-    if report_type != "RPT":
-        run.text = (
-            "Identify risks within the environment\nProvide an actionable report that will increase security"
-            " posture\nIdentify specific external and internal attack vectors that can be used to compromise assets"
-            "\nDetermine extent of possible compromise utilizing existing vulnerabilities"
-        )
-    else:
-        run.text = (
-            "Identify risks within the environment\nProvide an actionable report that will increase security"
-            " posture\nIdentify specific external attack vectors that can be used to compromise assets"
-            "\nDetermine extent of possible compromise utilizing existing vulnerabilities"
-        )
 
 
-def generate_narrative_data(db):
+#def generate_narrative_data(db):
     """
     Generates and returns all of the data needed to populate the narrative section of the report.
 
@@ -610,6 +542,7 @@ def generate_narrative_data(db):
 
     Returns:
         List: List with the needed narrative information.
+    """
     """
     narrative = af.model_gen(db, "ptportal.narrative")
     # Narrative is sorted by PK to get all of the sections sorted based on their main narrative.
@@ -623,9 +556,9 @@ def generate_narrative_data(db):
             n["Screenshots"] = []
         n["Screenshots"].append(s)
     return sorted_narrative
+    """
 
-
-def insert_narrative_slide(prs, report_type, rva_info, media_path):
+#def insert_narrative_slide(prs, report_type, rva_info, media_path):
     """Generates the narrative slides and inserts each step of the narrative.
 
     Args:
@@ -633,6 +566,7 @@ def insert_narrative_slide(prs, report_type, rva_info, media_path):
         report_type (str): The type of report being generated. I.e. RVA, RPT, or HVA.
         rva_info (List[Dict]): The Json data from the engagement.
         media_path (str): The media file path.
+    """
     """
     add_section_title(prs, "Narrative")
 
@@ -686,7 +620,7 @@ def insert_narrative_slide(prs, report_type, rva_info, media_path):
                     if hasattr(shape, "text"):
                         if shape.text == "":
                             shape.text = n["fields"]["tool_output_description"]
-
+    """
     """
     # ---- HVA attack overview results slides
     if report_type == "HVA":
@@ -798,469 +732,769 @@ def insert_findings_slides(prs, report_type, rva_info, ss_info, media_path):
         media_path (str): The media file location.
     """
 
-    # ---- append all the findings (screenshots) to the slide deck
-    add_section_title(prs, "Findings")
+    # ---- add Findings Section Slide
+    title_only = prs.slide_layouts[11]
+    slide = prs.slides.add_slide(title_only)
+    slide.placeholders[13].text = "FINDINGS"
 
     # ---- add Findings Severity Classification
-    title_only = prs.slide_layouts[16]
-    slide = prs.slides.add_slide(title_only)
+    severity_rating_layout = prs.slide_layouts[3]
+    slide = prs.slides.add_slide(severity_rating_layout)
 
-    # create findings overview slide based on existing layout
-    findings_overview_layout = prs.slide_layouts[3]
-    slide = prs.slides.add_slide(findings_overview_layout)
+    # add Risk Score slide
+    risk_score_layout = prs.slide_layouts[13]
+    slide = prs.slides.add_slide(risk_score_layout)
 
-    # set findings overview slide title
-    title = slide.shapes.title
-    title.text = "Findings Overview"
+    total_risk_score = 0
+    mitigated_risk_score = 0
 
-    # bold, center, underline PRELIMINARY text
-    slide_text = slide.placeholders[1].text_frame
-    slide_text.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
-    slide_text.paragraphs[0].alignment = PP_ALIGN.CENTER
-    run = slide_text.paragraphs[0].add_run()
-    run.text = "-- PRELIMINARY --"
-    run.font.bold = True
-    run.font.underline = True
+    findings = []
 
-    # create two paragraphs for each severity (one for header, one for contents)
-    critical_p = slide_text.add_paragraph()
-    critical_p_bullet = slide_text.add_paragraph()
-    critical_p_bullet.level = 1
-    critical_p_bullet.add_run()
-
-    high_p = slide_text.add_paragraph()
-    high_p_bullet = slide_text.add_paragraph()
-    high_p_bullet.level = 1
-    high_p_bullet.add_run()
-
-    medium_p = slide_text.add_paragraph()
-    medium_p_bullet = slide_text.add_paragraph()
-    medium_p_bullet.level = 1
-    medium_p_bullet.add_run()
-
-    low_p = slide_text.add_paragraph()
-    low_p_bullet = slide_text.add_paragraph()
-    low_p_bullet.level = 1
-    low_p_bullet.add_run()
-
-    info_p = slide_text.add_paragraph()
-    info_p_bullet = slide_text.add_paragraph()
-    info_p_bullet.level = 1
-    info_p_bullet.add_run()
-
-    # create and populate severity : findings dictionary
-    findings_overview = {}
-
-    for cnt, finding in enumerate(af.model_gen(rva_info, "ptportal.uploadedfinding")):
-        fname = finding['fields']
-        severity = fname['severity']
-        if severity in findings_overview:
-            findings_overview[severity].append(fname)
+    for cnt, finding in enumerate(af.model_gen(rva_info, 'ptportal.uploadedfinding')):
+        ele = finding['fields']
+        if ele['KEV']:
+            f_data = {"pk": finding['pk'], "name": ele['uploaded_finding_name'], "severity": ele['severity'], "mitigation": ele['mitigation'], "risk_score": ele['risk_score'], "kev": True}
         else:
-            findings_overview[severity] = [fname]
+            f_data = {"pk": finding['pk'], "name": ele['uploaded_finding_name'], "severity": ele['severity'], "mitigation": ele['mitigation'], "risk_score": ele['risk_score'], "kev": False}
 
-    for severity, findings in findings_overview.items():
-        findings_overview[severity] = sorted(
-            findings, key=lambda i: (i['assessment_type'], i['uploaded_finding_name'])
-        )
+        findings.append(f_data)
 
-    for severity, findings in findings_overview.items():
-        findings_overview[severity] = sorted(
-            findings, key=lambda i: (i["assessment_type"], i["uploaded_finding_name"])
-        )
+    for f in findings:
+        total_risk_score += f['risk_score']
+        if not f['mitigation']:
+            mitigated_risk_score += f['risk_score']
 
-    # create header for each existing severity level
-    for severity in findings_overview:
-        if severity == "Critical":
-            c_run = critical_p.add_run()
-            c_run.text = "Critical"
-            c_run.font.bold = True
-            c_run.font.underline = True
-        elif severity == "High":
-            h_run = high_p.add_run()
-            h_run.text = "High"
-            h_run.font.bold = True
-            h_run.font.underline = True
-        elif severity == "Medium":
-            m_run = medium_p.add_run()
-            m_run.text = "Medium"
-            m_run.font.bold = True
-            m_run.font.underline = True
-        elif severity == "Low":
-            l_run = low_p.add_run()
-            l_run.text = "Low"
-            l_run.font.bold = True
-            l_run.font.underline = True
-        elif severity == "Informational":
-            i_run = info_p.add_run()
-            i_run.text = "Informational"
-            i_run.font.bold = True
-            i_run.font.underline = True
+    slide.placeholders[11].text = str(total_risk_score)
+    slide.placeholders[12].text = str(mitigated_risk_score)
 
-    # create bullet for each finding that exists under each severity level
-    for severity, findings in findings_overview.items():
-        for finding in findings:
-            if severity == "Critical":
-                c_run = critical_p_bullet.add_run()
-                c_run.text = str(finding['uploaded_finding_name']) + "\n"
-            elif severity == 'High':
-                h_run = high_p_bullet.add_run()
-                h_run.text = str(finding['uploaded_finding_name']) + "\n"
-            elif severity == 'Medium':
-                m_run = medium_p_bullet.add_run()
-                m_run.text = str(finding['uploaded_finding_name']) + "\n"
-            elif severity == 'Low':
-                l_run = low_p_bullet.add_run()
-                l_run.text = str(finding['uploaded_finding_name']) + "\n"
-            elif severity == 'Informational':
-                i_run = info_p_bullet.add_run()
-                i_run.text = str(finding['uploaded_finding_name']) + "\n"
+    risk_chart = media_path + 'charts/riskchart.png'
 
-    # remove trailing newlines which turn into extra bullets (has to be a better way to do this entire process)
-    critical_p_bullet.runs[-1].text = critical_p_bullet.runs[-1].text.rstrip()
-    high_p_bullet.runs[-1].text = high_p_bullet.runs[-1].text.rstrip()
-    medium_p_bullet.runs[-1].text = medium_p_bullet.runs[-1].text.rstrip()
-    low_p_bullet.runs[-1].text = low_p_bullet.runs[-1].text.rstrip()
-    info_p_bullet.runs[-1].text = info_p_bullet.runs[-1].text.rstrip()
+    slide.placeholders[13].insert_picture(risk_chart)
 
-    # call auto_size helper method to ensure all findings fit on page
-    auto_size(slide_text)
+    order = {"Critical": 0, "High": 1, "Medium": 2, "Low": 3, "Informational": 4}
+    findings_list = sorted(findings, key=lambda s: order[s['severity']])
+    chunks = [findings_list[x:x+10] for x in range(0, len(findings_list), 10)]
 
-    sshot_slide_layout = prs.slide_layouts[9]
-
-    ordering = {'Critical': 0, 'High': 1, 'Medium': 2, 'Low': 3, 'Informational': 4}
-    sorted_findings = sorted(
-        af.model_gen(rva_info, "ptportal.uploadedfinding"),
-        key=lambda i: (
-            ordering[i['fields']['severity']],
-            i['fields']['assessment_type'],
-            i['fields']['uploaded_finding_name'],
-        ),
-    )
-    for cnt, finding in enumerate(sorted_findings):
-
-        fpk = finding["pk"]
-        finding_fields = finding["fields"]
-        fname = finding_fields["uploaded_finding_name"]
-
-        severity = finding_fields["severity"]
-        scrn_shots = af.find_screenshots(ss_info, fpk)
-
-        if fname.startswith("Spear Phishing Weaknesses"):
-            # find and record the payloads
-            spw_payloads = af.model_gen(rva_info, "ptportal.spearphishingweaknesses")
-            spw_row_info = []
-            for ele in spw_payloads:
-                spw_row_info.append(ele["fields"])
-
-            # determine number of slides needed
-            SPW_PER_SLIDE = 5
-
-            pages_needed = ((len(spw_row_info) - 1) // SPW_PER_SLIDE) + 1
-            rows_needed = len(spw_row_info)
-
-            for pg in range(pages_needed):
-                slide = prs.slides.add_slide(sshot_slide_layout)
-                title = slide.shapes.title
-                run = title.text_frame.paragraphs[0].add_run()
-                run.text = severity
-                run.font.size = Pt(40)
-                title.text_frame.add_paragraph()
-                run = title.text_frame.paragraphs[1].add_run()
-                run.text = fname
-                run.font.size = Pt(24)
-
-                # set the shape and create the table
-                # rows = 1 + len(spw_row_info)
-                if rows_needed > SPW_PER_SLIDE:
-                    rows = SPW_PER_SLIDE + 1
-                else:
-                    rows = rows_needed + 1
-                cols = 4
-                left = Inches(1.0)
-                top = Inches(2.0)
-                width = Inches(5.6)
-                height = Inches(0.8)
-
-                shapes = slide.shapes
-                table = shapes.add_table(rows, cols, left, top, width, height).table
-                tbl = table._graphic_frame._element.graphic.graphicData.tbl
-                tbl[0][-1].text = LightStyle1Accent6
-                # give the payload description a bit more room
-                table.columns[0].width = Inches(3.4)
-
-                # add the table header
-                cell_text(table, 0, 0, "Payload", "c", tbl_text, Pt(16))
-                cell_text(table, 0, 1, "C2 Protocol", "c", tbl_text, Pt(16))
-                cell_text(table, 0, 2, "Border Protection", "c", tbl_text, Pt(16))
-                cell_text(table, 0, 3, "Host Protection", "c", tbl_text, Pt(16))
-
-                # fill in the the rows
-                start_row = pg * SPW_PER_SLIDE
-                end_row = (pg + 1) * SPW_PER_SLIDE
-                rows_needed = rows_needed - SPW_PER_SLIDE
-                for i, r in enumerate(spw_row_info[start_row:end_row]):
-                    cell_text(
-                        table, i + 1, 0, r["payload_description"], "l", tbl_text, Pt(16)
-                    )
-                    cell_text(table, i + 1, 1, r["c2_protocol"], "c", tbl_text, Pt(16))
-                    b_txt, b_color = blocked(r["border_protection"])
-                    cell_text(table, i + 1, 2, b_txt, "c", b_color, Pt(16))
-                    h_txt, h_color = blocked(r["host_protection"])
-                    cell_text(table, i + 1, 3, h_txt, "c", h_color, Pt(16))
-
-        elif fname.startswith("Spear Phishing Susceptibility"):
-            slide = prs.slides.add_slide(sshot_slide_layout)
-            title = slide.shapes.title
-            run = title.text_frame.paragraphs[0].add_run()
-            run.text = severity
-            run.font.size = Pt(40)
-            title.text_frame.add_paragraph()
-            run = title.text_frame.paragraphs[1].add_run()
-            run.text = fname
-            run.font.size = Pt(24)
-
-            # find and record the payloads(campaigns)
-            sps_payloads = af.model_gen(
-                rva_info, "ptportal.spearphishingsusceptibility"
-            )
-
-            sps_row_info = []
-            for ele in sps_payloads:
-                sps_row_info.append(ele["fields"])
-
-            # set the shape and create the table
-            rows = 1 + len(sps_row_info)
-            cols = 9
-            left = Inches(1.0)
-            top = Inches(2.0)
-            width = Inches(8.3)
-            height = Inches(0.8)
-
-            shapes = slide.shapes
-            table = shapes.add_table(rows, cols, left, top, width, height).table
-            tbl = table._graphic_frame._element.graphic.graphicData.tbl
-            tbl[0][-1].text = LightStyle1Accent6
-
-            # add the table header
-            cell_text(table, 0, 0, 'Campaign', 'c', tbl_text)
-            cell_text(table, 0, 1, 'Emails Sent', 'c', tbl_text)
-            cell_text(table, 0, 2, 'Emails Delivered', 'c', tbl_text)
-            cell_text(table, 0, 3, 'Unique Clicks', 'c', tbl_text)
-            cell_text(table, 0, 4, 'Total Clicks', 'c', tbl_text)
-            cell_text(table, 0, 5, 'Click Rate', 'c', tbl_text)
-            cell_text(table, 0, 6, 'Time to fist click', 'c', tbl_text)
-            cell_text(table, 0, 7, 'Users Exploited', 'c', tbl_text)
-            cell_text(table, 0, 8, 'Length of campaign', 'c', tbl_text)
-
-            # fill in the the rows
-            for i, r in enumerate(sps_row_info):
-                cell_text(table, i + 1, 0, str(i + 1), 'j', tbl_text)
-                cell_text(table, i + 1, 1, str(r['emails_sent']), 'j', tbl_text)
-                cell_text(table, i + 1, 2, str(r['emails_delivered']), 'j', tbl_text)
-                cell_text(table, i + 1, 3, str(r['unique_clicks']), 'j', tbl_text)
-                cell_text(table, i + 1, 4, str(r['total_clicks']), 'j', tbl_text)
-                cell_text(
-                    table,
-                    i + 1,
-                    5,
-                    "{0:.2%}".format(float(r["click_rate"])),
-                    'j',
-                    tbl_text,
-                )
-                cell_text(table, i + 1, 6, str(r['time_to_first_click']), 'j', tbl_text)
-                cell_text(table, i + 1, 7, str(r['number_exploited']), 'j', tbl_text)
-                cell_text(table, i + 1, 8, str(r['length_of_campaign']), 'j', tbl_text)
-
-            # since table is wide, adjust the font size
-            table_adjust_fontsize(table, 10)
-
-        else:
-            if len(scrn_shots) == 0:
-                slide = prs.slides.add_slide(sshot_slide_layout)
-                title = slide.shapes.title
-                run = title.text_frame.paragraphs[0].add_run()
-                run.text = severity
-                run.font.size = Pt(40)
-                title.text_frame.add_paragraph()
-                run = title.text_frame.paragraphs[1].add_run()
-                run.text = fname
-                run.font.size = Pt(24)
-            else:
-                for sshot in scrn_shots:
-                    ssf = sshot["fields"]
-                    slide = prs.slides.add_slide(sshot_slide_layout)
-                    title = slide.shapes.title
-                    run = title.text_frame.paragraphs[0].add_run()
-                    run.text = severity
-                    run.font.size = Pt(40)
-                    title.text_frame.add_paragraph()
-                    run = title.text_frame.paragraphs[1].add_run()
-                    run.text = fname
-                    run.font.size = Pt(24)
-
-                    # insert the screenshot
-                    sfile = media_path + ssf["file"]
-                    (x, y, w, h) = iu.get_screenshot_dimensions(sfile)
-
-                    slide.shapes.add_picture(
-                        sfile, Inches(x), Inches(y), width=Inches(w), height=Inches(h)
-                    )
-
-                    notes_slide = slide.notes_slide
-                    text_frame = notes_slide.notes_text_frame
-                    text_frame.text = (
-                        "Image Caption\n"
-                        + ssf["caption"]
-                        + "\n\nScreenshot Description\n"
-                        + finding["fields"]["screenshot_description"]
-                    )
-
-
-def insert_observation_slide(prs):
-    """Generates the final observations slide.
-
-    Args:
-        prs (pptx presentation): The Powerpoint presentation.
-    """
-    add_section_title(prs, "Observations")
-
-    # ---- add overall observations slide
-    oo_layout = prs.slide_layouts[3]
-    slide = prs.slides.add_slide(oo_layout)
-    oo_placeholder = slide.placeholders[1].text_frame
-
-    title = slide.shapes.title
-    title.text = "Overall Observations"
-
-    # external bullet
-    paragraph = oo_placeholder.paragraphs[0]
-    paragraph.level = 1
-    run = paragraph.add_run()
-    run.text = "Observations"
-
-
-def insert_requirements_slide(prs, report_type, rva_info):
-    ####Better to put this in the master template than trying to create it from scratch. This will probably be removed.
-    if report_type == "HVA":
-        oo_layout = prs.slide_layouts[3]
-        slide = prs.slides.add_slide(oo_layout)
-        title = slide.shapes.title
-        oo_placeholder = slide.placeholders[1].text_frame
-        title.text = "BOD 18-02 Requirements"
-
-        findings = []
-
-        for cnt, finding in enumerate(
-            af.model_gen(rva_info, "ptportal.uploadedfinding")
-        ):
-            findings.append(finding["fields"])
-
-        # set the shape and create the table
-        rows = 1 + len(findings)
-        cols = 3
-        left = Inches(0.75)
-        top = Inches(2.0)
-        width = Inches(9)  # need additional room for padding, etc over cols
-        height = Inches(0)
-
+    for cnt, chunk in enumerate(chunks):
+        findings_summary_layout = prs.slide_layouts[5]
+        slide = prs.slides.add_slide(findings_summary_layout)
         shapes = slide.shapes
+        shapes.title.text = "FINDINGS SUMMARY"
+
+        # findings summary table
+        rows = len(chunk) + 1
+        cols = 3
+        left = Inches(0.65)
+        top = Inches(1.5)
+        width = Inches(8.71)
+        height = Inches(rows * 0.4)
         table = shapes.add_table(rows, cols, left, top, width, height).table
         tbl = table._graphic_frame._element.graphic.graphicData.tbl
-        tbl[0][-1].text = LightStyle1Accent6
-        table.columns[0].width = Inches(3)
-        table.columns[1].width = Inches(2.5)
-        table.columns[1].width = Inches(2.5)
+        tbl[0][-1].text = LightStyle2Accent4
 
-        # add the table header
-        cell_text(table, 0, 0, "Finding", "c", tbl_text, Pt(14))
-        cell_text(table, 0, 1, "RVA Recommendation Timetable", "c", tbl_text, Pt(14))
-        cell_text(table, 0, 2, "BOD 18-02 Requirements", "c", tbl_text, Pt(14))
+        # set column widths
+        table.columns[0].width = Inches(0.6)
+        table.columns[1].width = Inches(6.25)
+        table.columns[2].width = Inches(1.85)
 
-        # output the table
-        i = 0
-        for finding in findings:
-            print(finding)
-            fnd_str = (
-                finding["uploaded_finding_name"] + " (" + finding["severity"] + ")"
-            )
-            tt_str = finding["timetable"]
-            cell_text(table, i + 1, 0, fnd_str, "l", tbl_text, Pt(12))
-            cell_text(table, i + 1, 1, tt_str, "l", tbl_text, Pt(12))
-            cell_text(table, i + 1, 2, tt_str, "l", tbl_text, Pt(12))
-            i = i + 1
+        cell_text(table, 0, 0, "", "c", white)
+        cell_text(table, 0, 1, "Finding Name", "c", white)
+        cell_text(table, 0, 2, "Severity", "c", white)
 
-        left = Inches(3.75)
-        top = Inches(6.5)
-        width = Inches(5.8)
-        height = Inches(1)
-        txBox = slide.shapes.add_textbox(left, top, width, height)
-        tf = txBox.text_frame
-        tf.word_wrap = True
+        for i in range(0, 3):
+            table.cell(0, i).fill.solid()
+            table.cell(0, i).fill.fore_color.rgb = blue
+            table.cell(0, i).text_frame.paragraphs[0].font.size = Pt(11)
+            table.cell(0, i).vertical_anchor = MSO_ANCHOR.MIDDLE
 
-        p = tf.paragraphs[0]
-        p.text = "In accordance with BOD 18-02 requirements the time table must require agencies to remediate or submit a SAORM approved remediation plan within 30 days of receipt of the RVA and/or SAR report (BOD 18-02, page 3, Action Four). This requirement is the same for all types of recommendations in the HVA Report template."
+        for count, finding in enumerate(chunk):
+            f_id = (cnt * 10) + (count + 1)
+            cell_text(table, count + 1, 0, str(f_id), color=gray)
+            cell_text(table, count + 1, 1, finding['name'], color=gray)
+            sev_cell = table.cell(count + 1, 2).text_frame.paragraphs[0]
+            sev_color = sev_cell.add_run()
+            sev_color.text =  ("• ")
 
-        p.font.size = Pt(10)
-        p.font.color.rgb = tbl_text
+            if finding['severity'] == "Critical":
+                sev_color.font.color.rgb = crit
+            elif finding['severity'] == "High":
+                sev_color.font.color.rgb = high
+            elif finding['severity'] == "Medium":
+                sev_color.font.color.rgb = med
+            elif finding['severity'] == "Low":
+                sev_color.font.color.rgb = low
+            else:
+                sev_color.font.color.rgb = info
+
+            severity = sev_cell.add_run()
+            severity.text = finding['severity']
+            severity.font.color.rgb = gray
+            table.cell(count + 1, 0).text_frame.paragraphs[0].runs[0].font.bold = True
+            table.cell(count + 1, 2).text_frame.paragraphs[0].runs[0].font.bold = True
+            table.cell(count + 1, 2).text_frame.paragraphs[0].runs[1].font.bold = True
+            table.cell(count + 1, 2).text_frame.paragraphs[0].runs[1].font.size = Pt(11)
+
+            for i in range(0, 3):
+                table.cell(count + 1, i).text_frame.paragraphs[0].runs[0].font.size = Pt(11)
+                table.cell(count + 1, i).text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
+                table.cell(count + 1, i).vertical_anchor = MSO_ANCHOR.MIDDLE
 
 
-def insert_nextstep_slide(prs, report_type, rva_info):
-    """Generatest the slide containing the next steps of the engagement.
 
-    Args:
-        prs (pptx presentation): The Powerpoint presentation.
-        report_type (str): The type of report being generated. I.e. RVA, RPT, or HVA.
-        rva_info (List[Dict]): The Json data from the engagement.
-    """
-    ns_layout = prs.slide_layouts[3]
-    slide = prs.slides.add_slide(ns_layout)
+    for cnt, finding in enumerate(findings_list):
+
+        fpk = finding['pk']
+        name = finding['name']
+        severity = finding['severity']
+        mitigation = finding['mitigation']
+        kev = finding['kev']
+
+        screenshots = af.find_screenshots(ss_info, finding['pk'])
+
+        if len(screenshots) == 0:
+            findings_layout = prs.slide_layouts[14]
+            slide = prs.slides.add_slide(findings_layout)
+            shapes = slide.shapes
+            shapes.title.text = finding['name']
+
+            add_tag(shapes, "severity", severity)
+
+            if mitigation:
+                add_tag(shapes, "mitigation", "Mitigated")
+            else:
+                add_tag(shapes, "mitigation", "Not Mitigated")
+
+            if kev:
+                add_tag(shapes, "kev", "KEV")
+
+        else:
+            for screenshot in screenshots:
+                ssf = screenshot['fields']
+
+                findings_layout = prs.slide_layouts[14]
+                slide = prs.slides.add_slide(findings_layout)
+                shapes = slide.shapes
+                shapes.title.text = finding['name']
+
+                sfile = media_path + ssf['file']
+                (x, y, w, h) = iu.get_screenshot_dimensions(sfile, "finding")
+
+                shapes.add_picture(sfile, Inches(x), Inches(y), width=Inches(w), height=Inches(h))
+                slide.placeholders[12].text = ssf['caption']
+
+                add_tag(shapes, "severity", severity)
+
+                if mitigation:
+                    add_tag(shapes, "mitigation", "Mitigated")
+                else:
+                    add_tag(shapes, "mitigation", "Not Mitigated")
+
+                if kev:
+                    add_tag(shapes, "kev", "KEV")
+
+    kevs = []
+
+    for cnt, kev in enumerate(af.model_gen(rva_info, 'ptportal.kev')):
+        ele = kev['fields']
+
+        if ele['found']:
+            found_kev = {"name": ele['vulnerability_name'], "cve": ele['cve_id']}
+            kevs.append(found_kev)
+
+    kevs_list = sorted(kevs, key=lambda k: k['cve'])
+    kev_chunks = [kevs_list[x:x+10] for x in range(0, len(kevs_list), 10)]
+
+    for cnt, chunk in enumerate(kev_chunks):
+        kev_layout = prs.slide_layouts[5]
+        slide = prs.slides.add_slide(kev_layout)
+        shapes = slide.shapes
+        shapes.title.text = "KEV SUMMARY"
+
+        # kev summary table
+        rows = len(chunk) + 1
+        cols = 2
+        left = Inches(0.65)
+        top = Inches(1.5)
+        width = Inches(8.71)
+        height = Inches(rows * 0.4)
+        table = shapes.add_table(rows, cols, left, top, width, height).table
+        tbl = table._graphic_frame._element.graphic.graphicData.tbl
+        tbl[0][-1].text = LightStyle2Accent4
+
+        # set column widths
+        table.columns[0].width = Inches(0.6)
+        table.columns[1].width = Inches(8.1)
+
+        cell_text(table, 0, 0, "", "c", white)
+        cell_text(table, 0, 1, "Known Exploited Vulnerabilities (" + str(len(kevs_list)) + ")", "c", white)
+
+        for i in range(0, 2):
+            table.cell(0, i).fill.solid()
+            table.cell(0, i).fill.fore_color.rgb = blue
+            table.cell(0, i).text_frame.paragraphs[0].font.size = Pt(11)
+            table.cell(0, i).vertical_anchor = MSO_ANCHOR.MIDDLE
+
+
+        for count, kev in enumerate(chunk):
+            k_id = (cnt * 10) + (count + 1)
+            cell_text(table, count + 1, 0, str(k_id), color=gray)
+            cell_text(table, count + 1, 1, kev['cve'] + ": " + kev['name'], color=gray)
+
+            table.cell(count + 1, 0).text_frame.paragraphs[0].runs[0].font.bold = True
+
+            for i in range(0, 2):
+                table.cell(count + 1, i).text_frame.paragraphs[0].runs[0].font.size = Pt(11)
+                table.cell(count + 1, i).text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
+                table.cell(count + 1, i).vertical_anchor = MSO_ANCHOR.MIDDLE
+
+
+def insert_services_slides(prs, rva_info):
+
+    # insert ransomware slide
+    if af.get_db_info(rva_info, 'ransomwarescenarios', 'NA') is not None or af.get_db_info(rva_info, 'ransomware', 'NA') is not None:
+        ransomware_slide_layout = prs.slide_layouts[4]
+        slide = prs.slides.add_slide(ransomware_slide_layout)
+        ransomware_placeholder = slide.placeholders[1].text_frame
+
+        title = slide.shapes.title
+        title.text = "RANSOMWARE SUSCEPTIBILITY"
+
+        vuln = 0
+        total = 0
+        if af.get_db_info(rva_info, 'ransomwarescenarios.fields.vuln', 'NA') != '<not set: NA>':
+            vuln = int(af.get_db_info(rva_info, 'ransomwarescenarios.fields.vuln', 'NA'))
+        if af.get_db_info(rva_info, 'ransomwarescenarios.fields.total', 'NA') != '<not set: NA>':
+            total = int(af.get_db_info(rva_info, 'ransomwarescenarios.fields.total', 'NA'))
+
+        paragraph = ransomware_placeholder.paragraphs[0]
+        paragraph.level = 1
+        run = paragraph.add_run()
+        run.text = f"During ransomware simulation, the CISA team found that endpoints are vulnerable to {vuln} out of the {total} ransomware scenarios tested."
+        paragraph.font.color.rgb = gray
+
+        ransomware_results = []
+
+        for item in af.model_gen(rva_info, 'ptportal.ransomware'):
+            ele = item['fields']
+            if not ele['disabled']:
+                if "detected by security software" in ele['description']:
+                    if ele['trigger'] == "Y":
+                        if ele['time_start'] and ele['time_end']:
+                            start = datetime.datetime.fromisoformat(ele['time_start'][:-1]).astimezone(timezone.utc)
+                            end = datetime.datetime.fromisoformat(ele['time_end'][:-1]).astimezone(timezone.utc)
+                            difference = relativedelta(end, start)
+
+                            if difference.days == 1:
+                                days = "1 day "
+                            else:
+                                days = str(difference.days) + " days "
+                            if difference.hours == 1:
+                                hours = "1 hour "
+                            else:
+                                hours = str(difference.hours) + " hours "
+                            if difference.minutes == 1:
+                                minutes = "and 1 minute."
+                            else:
+                                minutes = "and " + str(difference.minutes) + " minutes."
+                        else:
+                            days = "0 days "
+                            hours = "0 hours "
+                            minutes = "and 0 minutes."
+                        ransomware_results.append("Ransomware activity was detected by security software within " + days + hours + minutes)
+                    else:
+                        ransomware_results.append("Ransomware activity was not detected by security software.")
+
+                if "prevented by security software" in ele['description']:
+                    if ele['trigger'] == "Y":
+                        if ele['time_start'] and ele['time_end']:
+                            start = datetime.datetime.fromisoformat(ele['time_start'][:-1]).astimezone(timezone.utc)
+                            end = datetime.datetime.fromisoformat(ele['time_end'][:-1]).astimezone(timezone.utc)
+                            difference = relativedelta(end, start)
+
+                            if difference.days == 1:
+                                days = "1 day "
+                            else:
+                                days = str(difference.days) + " days "
+                            if difference.hours == 1:
+                                hours = "1 hour "
+                            else:
+                                hours = str(difference.hours) + " hours "
+                            if difference.minutes == 1:
+                                minutes = "and 1 minute."
+                            else:
+                                minutes = "and " + str(difference.minutes) + " minutes."
+                        else:
+                            days = "0 days "
+                            hours = "0 hours "
+                            minutes = "and 0 minutes."
+                        ransomware_results.append("Ransomware activity was prevented by security software within " + days + hours + minutes)
+                    else:
+                        ransomware_results.append("Ransomware activity was not prevented by security software.")
+
+                if "detected by security and/or IT personnel" in ele['description']:
+                    if ele['trigger'] == "Y":
+                        if ele['time_start'] and ele['time_end']:
+                            start = datetime.datetime.fromisoformat(ele['time_start'][:-1]).astimezone(timezone.utc)
+                            end = datetime.datetime.fromisoformat(ele['time_end'][:-1]).astimezone(timezone.utc)
+                            difference = relativedelta(end, start)
+
+                            if difference.days == 1:
+                                days = "1 day "
+                            else:
+                                days = str(difference.days) + " days "
+                            if difference.hours == 1:
+                                hours = "1 hour "
+                            else:
+                                hours = str(difference.hours) + " hours "
+                            if difference.minutes == 1:
+                                minutes = "and 1 minute."
+                            else:
+                                minutes = "and " + str(difference.minutes) + " minutes."
+                        else:
+                            days = "0 days "
+                            hours = "0 hours "
+                            minutes = "and 0 minutes."
+                        ransomware_results.append("Ransomware activity was detected by security and/or IT personnel within " + days + hours + minutes)
+                    else:
+                        ransomware_results.append("Ransomware activity was not detected by security and/or IT personnel.")
+
+                if "reported by end users" in ele['description']:
+                    if ele['trigger'] == "Y":
+                        if ele['time_start'] and ele['time_end']:
+                            start = datetime.datetime.fromisoformat(ele['time_start'][:-1]).astimezone(timezone.utc)
+                            end = datetime.datetime.fromisoformat(ele['time_end'][:-1]).astimezone(timezone.utc)
+                            difference = relativedelta(end, start)
+
+                            if difference.days == 1:
+                                days = "1 day "
+                            else:
+                                days = str(difference.days) + " days "
+                            if difference.hours == 1:
+                                hours = "1 hour "
+                            else:
+                                hours = str(difference.hours) + " hours "
+                            if difference.minutes == 1:
+                                minutes = "and 1 minute."
+                            else:
+                                minutes = "and " + str(difference.minutes) + " minutes."
+                        else:
+                            days = "0 days "
+                            hours = "0 hours "
+                            minutes = "and 0 minutes."
+                        ransomware_results.append("Ransomware activity was reported by end users within " + days + hours + minutes)
+                    else:
+                        ransomware_results.append("Ransomware activity was not reported by end users.")
+
+        for line in ransomware_results:
+            paragraph = ransomware_placeholder.add_paragraph()
+            paragraph.level = 1
+            run = paragraph.add_run()
+            run.text = line
+            paragraph.font.color.rgb = gray
+
+    else:
+        print("No ransomware data.")
+
+    # insert data exfiltration slide
+    if af.get_db_info(rva_info, 'dataexfil', 'NA') is not None:
+        data_exfil_results = []
+        
+        for de in af.model_gen(rva_info, 'ptportal.dataexfil'):
+            ele = de['fields']
+            data = {"type": ele['datatype'], "protocol": ele['protocol'], "detection": ele['detection'], "prevention": ele['prevention']}
+            data_exfil_results.append(data)
+
+        data_exfil_layout = prs.slide_layouts[5]
+        slide = prs.slides.add_slide(data_exfil_layout)
+        shapes = slide.shapes
+        shapes.title.text = "DATA EXFILTRATION"
+
+        # data exfil table
+        rows = len(data_exfil_results) + 1
+        cols = 4
+        left = Inches(0.65)
+        top = Inches(1.5)
+        width = Inches(8.71)
+        height = Inches(rows * 0.4)
+        table = shapes.add_table(rows, cols, left, top, width, height).table
+        tbl = table._graphic_frame._element.graphic.graphicData.tbl
+        tbl[0][-1].text = MediumStyle4Accent4
+
+        # set column widths
+        table.columns[0].width = Inches(3.2)
+        table.columns[1].width = Inches(1.8)
+        table.columns[2].width = Inches(1.85)
+        table.columns[3].width = Inches(1.85)
+
+        cell_text(table, 0, 0, "Data Type", "c", white)
+        cell_text(table, 0, 1, "Protocol", "c", white)
+        cell_text(table, 0, 2, "Detection", "c", white)
+        cell_text(table, 0, 3, "Prevention", "c", white)
+
+        for i in range(0, 4):
+            table.cell(0, i).fill.solid()
+            table.cell(0, i).fill.fore_color.rgb = blue
+            table.cell(0, i).text_frame.paragraphs[0].font.size = Pt(11)
+            table.cell(0, i).vertical_anchor = MSO_ANCHOR.MIDDLE
+
+        for cnt, item in enumerate(data_exfil_results):
+            cell_text(table, cnt + 1, 0, item['type'], color=gray)
+            cell_text(table, cnt + 1, 1, item['protocol'], color=gray)
+
+            det_cell = table.cell(cnt + 1, 2).text_frame.paragraphs[0]
+            det_color = det_cell.add_run()
+            det_color.text = ("• ")
+
+            if item['detection'] == "D":
+                det_color.font.color.rgb = low
+                detection = det_cell.add_run()
+                detection.text = "Detected"
+                detection.font.color.rgb = gray
+            else:
+                det_color.font.color.rgb = crit
+                detection = det_cell.add_run()
+                detection.text = "Not Detected"
+                detection.font.color.rgb = gray
+
+            pre_cell = table.cell(cnt + 1, 3).text_frame.paragraphs[0]
+            pre_color = pre_cell.add_run()
+            pre_color.text = ("• ")
+
+            if item['prevention'] == "B":
+                pre_color.font.color.rgb = low
+                prevention = pre_cell.add_run()
+                prevention.text = "Blocked"
+                prevention.font.color.rgb = gray
+            else:
+                pre_color.font.color.rgb = crit
+                prevention = pre_cell.add_run()
+                prevention.text = "Not Blocked"
+                prevention.font.color.rgb = gray
+
+            for i in range(0, 4):
+                if i == 2 or i == 3:
+                    table.cell(cnt + 1, i).text_frame.paragraphs[0].runs[0].font.bold = True
+                    table.cell(cnt + 1, i).text_frame.paragraphs[0].runs[1].font.bold = True
+                    table.cell(cnt + 1, i).text_frame.paragraphs[0].runs[0].font.size = Pt(11)
+                    table.cell(cnt + 1, i).text_frame.paragraphs[0].runs[1].font.size = Pt(11)
+                else:
+                    table.cell(cnt + 1, i).text_frame.paragraphs[0].runs[0].font.size = Pt(11)
+
+                table.cell(cnt + 1, i).text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
+                table.cell(cnt + 1, i).vertical_anchor = MSO_ANCHOR.MIDDLE
+                table.cell(cnt + 1, i).fill.solid()
+                table.cell(cnt + 1, i).fill.fore_color.rgb = white
+
+    else:
+        print("No data exfiltration data.")
+
+    # insert payload testing slide
+    if af.get_db_info(rva_info, 'payload', 'NA') is not None:
+        payload_testing_results = []
+        
+        for pt in af.model_gen(rva_info, 'ptportal.payload'):
+            ele = pt['fields']
+            payload = {"description": ele['payload_description'], "protocol": ele['c2_protocol'], "host": ele['host_protection'], "border": ele['border_protection']}
+            payload_testing_results.append(payload)
+
+        chunks = [payload_testing_results[x:x+10] for x in range(0, len(payload_testing_results), 10)]
+
+        for cnt, chunk in enumerate(chunks):
+            payload_testing_layout = prs.slide_layouts[5]
+            slide = prs.slides.add_slide(payload_testing_layout)
+            shapes = slide.shapes
+            shapes.title.text = "PAYLOAD TESTING"
+
+            # payload table
+            rows = len(chunk) + 1
+            cols = 4
+            left = Inches(0.65)
+            top = Inches(1.5)
+            width = Inches(8.71)
+            height = Inches(rows * 0.4)
+            table = shapes.add_table(rows, cols, left, top, width, height).table
+            tbl = table._graphic_frame._element.graphic.graphicData.tbl
+            tbl[0][-1].text = MediumStyle4Accent4
+
+            # set column widths
+            table.columns[0].width = Inches(4)
+            table.columns[1].width = Inches(1.3)
+            table.columns[2].width = Inches(1.7)
+            table.columns[3].width = Inches(1.7)
+
+            cell_text(table, 0, 0, "Payload Description", "c", white)
+            cell_text(table, 0, 1, "C2 Protocol", "c", white)
+            cell_text(table, 0, 2, "Host Protection", "c", white)
+            cell_text(table, 0, 3, "Border Protection", "c", white)
+
+            for i in range(0, 4):
+                table.cell(0, i).fill.solid()
+                table.cell(0, i).fill.fore_color.rgb = blue
+                table.cell(0, i).text_frame.paragraphs[0].font.size = Pt(11)
+                table.cell(0, i).vertical_anchor = MSO_ANCHOR.MIDDLE
+
+            for cnt, item in enumerate(chunk):
+                cell_text(table, cnt + 1, 0, item['description'], color=gray)
+                cell_text(table, cnt + 1, 1, item['protocol'], color=gray)
+
+                host_cell = table.cell(cnt + 1, 2).text_frame.paragraphs[0]
+                host_color = host_cell.add_run()
+                host_color.text = ("• ")
+
+                if item['host'] == "B":
+                    host_color.font.color.rgb = low
+                    host_protection = host_cell.add_run()
+                    host_protection.text = "Blocked"
+                    host_protection.font.color.rgb = gray
+                else:
+                    host_color.font.color.rgb = crit
+                    host_protection = host_cell.add_run()
+                    host_protection.text = "Not Blocked"
+                    host_protection.font.color.rgb = gray
+
+                bord_cell = table.cell(cnt + 1, 3).text_frame.paragraphs[0]
+                bord_color = bord_cell.add_run()
+                bord_color.text = ("• ")
+
+                if item['border'] == "B":
+                    bord_color.font.color.rgb = low
+                    border_protection = bord_cell.add_run()
+                    border_protection.text = "Blocked"
+                    border_protection.font.color.rgb = gray
+                else:
+                    bord_color.font.color.rgb = crit
+                    border_protection = bord_cell.add_run()
+                    border_protection.text = "Not Blocked"
+                    border_protection.font.color.rgb = gray
+
+                for i in range(0, 4):
+                    if i == 2 or i == 3:
+                        table.cell(cnt + 1, i).text_frame.paragraphs[0].runs[0].font.bold = True
+                        table.cell(cnt + 1, i).text_frame.paragraphs[0].runs[1].font.bold = True
+                        table.cell(cnt + 1, i).text_frame.paragraphs[0].runs[0].font.size = Pt(11)
+                        table.cell(cnt + 1, i).text_frame.paragraphs[0].runs[1].font.size = Pt(11)
+                    else:
+                        table.cell(cnt + 1, i).text_frame.paragraphs[0].runs[0].font.size = Pt(11)
+
+                    table.cell(cnt + 1, i).text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
+                    table.cell(cnt + 1, i).vertical_anchor = MSO_ANCHOR.MIDDLE
+                    table.cell(cnt + 1, i).fill.solid()
+                    table.cell(cnt + 1, i).fill.fore_color.rgb = white
+    else:
+        print("No payload testing results.")
+
+    # insert phishing campaign slide
+    if af.get_db_info(rva_info, 'campaign', 'NA') is not None:
+        phishing_campaign_results = []
+
+        for pc in af.model_gen(rva_info, 'ptportal.campaign'):
+            ele = pc['fields']
+            campaign = {"sent": ele['emails_sent'], "delivered": ele['emails_delivered'], "rate": ele['click_rate'], "total": ele['total_clicks'], "unique": ele['unique_clicks'], "first": ele['time_to_first_click'], "harvest": ele['creds_harvested'], "exploit": ele['number_exploited'], "length": ele['length_of_campaign']}
+            phishing_campaign_results.append(campaign)
+
+        for cnt, c in enumerate(phishing_campaign_results):
+            phishing_campaign_layout = prs.slide_layouts[5]
+            slide = prs.slides.add_slide(phishing_campaign_layout)
+            shapes = slide.shapes
+            shapes.title.text = "PHISHING CAMPAIGN"
+
+            # phishing campaign table
+            rows = 10
+            cols = 2
+            left = Inches(0.65)
+            top = Inches(1.5)
+            width = Inches(8.71)
+            height = Inches(rows * 0.4)
+            table = shapes.add_table(rows, cols, left, top, width, height).table
+            tbl = table._graphic_frame._element.graphic.graphicData.tbl
+            tbl[0][-1].text = MediumStyle4Accent4
+
+            # set column widths
+            table.columns[0].width = Inches(5.3)
+            table.columns[1].width = Inches(3.4)
+
+            cell_text(table, 0, 0, "Campaign #" + str(cnt + 1), "c", color=white)
+            table.cell(0, 0).merge(table.cell(0, 1))
+            table.cell(0, 0).fill.solid()
+            table.cell(0, 0).fill.fore_color.rgb = blue
+            table.cell(0, 0).text_frame.paragraphs[0].font.size = Pt(11)
+            table.cell(0, 0).vertical_anchor = MSO_ANCHOR.MIDDLE
+
+            click_rate = round(float(c['rate']) * 100, 2)
+            click_time = str(c['first']).split(" ")
+
+            if len(click_time) > 1:
+                if int(click_time[0]) == 1:
+                    time_to_first_click = click_time[0] + " Day, " + click_time[1]
+                else:
+                    time_to_first_click = click_time[0] + " Days, " + click_time[1]
+            else:
+                time_to_first_click = str(c['first'])
+
+            if int(c['length']) == 1:
+                length = str(c['length']) + " Day"
+            else:
+                length = str(c['length']) + " Days"
+
+            cell_text(table, 1, 0, "Emails Sent", color=gray)
+            cell_text(table, 2, 0, "Emails Successfully Delivered", color=gray)
+            cell_text(table, 3, 0, "Click Rate", color=gray)
+            cell_text(table, 4, 0, "Total Clicks", color=gray)
+            cell_text(table, 5, 0, "Unique Clicks", color=gray)
+            cell_text(table, 6, 0, "Time to First Click (HH:MM:SS)", color=gray)
+            cell_text(table, 7, 0, "Credentials Harvested", color=gray)
+            cell_text(table, 8, 0, "Users Exploited", color=gray)
+            cell_text(table, 9, 0, "Length of Campaign", color=gray)
+
+            cell_text(table, 1, 1, str(c['sent']), color=gray)
+            cell_text(table, 2, 1, str(c['delivered']), color=gray)
+            cell_text(table, 3, 1, str(click_rate) + "%", color=gray)
+            cell_text(table, 4, 1, str(c['total']), color=gray)
+            cell_text(table, 5, 1, str(c['unique']), color=gray)
+            cell_text(table, 6, 1, time_to_first_click, color=gray)
+            cell_text(table, 7, 1, str(c['harvest']), color=gray)
+            cell_text(table, 8, 1, str(c['exploit']), color=gray)
+            cell_text(table, 9, 1, length, color=gray)
+
+            for i in range(1, 10):
+                for j in range(0, 2):
+                    table.cell(i, j).text_frame.paragraphs[0].runs[0].font.size = Pt(11)
+                    table.cell(i, j).text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
+                    table.cell(i, j).vertical_anchor = MSO_ANCHOR.MIDDLE
+                    table.cell(i, j).fill.solid()
+                    table.cell(i, j).fill.fore_color.rgb = white
+
+    else:
+        print("No phishing campaign data.")
+
+
+def insert_attack_paths(prs, rva_info, ss_info, media_path):
+    # ---- add Attack Path Section Slide
+    title_only = prs.slide_layouts[11]
+    slide = prs.slides.add_slide(title_only)
+    slide.placeholders[13].text = "ATTACK PATHS"
+
+
+    for cnt, path in enumerate(af.model_gen(rva_info, "ptportal.narrative")):
+        ele = path['fields']
+        name = ele['name'] + " " + str(ele['order'])
+
+        attack_path_layout = prs.slide_layouts[15]
+        slide = prs.slides.add_slide(attack_path_layout)
+        shapes = slide.shapes
+        shapes.title.text = name.upper()
+
+        if ele['file']:
+            dfile = media_path + ele['file']
+            (x, y, w, h) = iu.get_screenshot_dimensions(dfile, "path")
+
+            shapes.add_picture(dfile, Inches(x), Inches(y), width=Inches(w), height=Inches(h))
+            slide.placeholders[12].text = ele['caption']
+
+
+def insert_conclusion_slides(prs, rva_info):
+    # ---- add Conclusion Section Slide
+    title_only = prs.slide_layouts[11]
+    slide = prs.slides.add_slide(title_only)
+    slide.placeholders[13].text = "CONCLUSION"
+
+    # insert Observations slide
+    observation_layout = prs.slide_layouts[4]
+    slide = prs.slides.add_slide(observation_layout)
+    title = slide.shapes.title
+    title.text = "OBSERVATIONS"
+    obs_placeholder = slide.placeholders[1].text_frame
+
+    observations = af.get_db_info(rva_info, 'report.fields.observed_strengths', "").replace("\r", "\n")
+
+    for cnt, bullet in enumerate(observations.split("\n")[::-1]):
+        if cnt == 0:
+            paragraph = obs_placeholder.paragraphs[0]
+        else:
+            paragraph = obs_placeholder.add_paragraph()
+        paragraph.level = 0
+        run = paragraph.add_run()
+        run.text = bullet
+        paragraph.font.color.rgb = gray
+
+    # insert Next Steps slide
+    next_steps_layout = prs.slide_layouts[4]
+    slide = prs.slides.add_slide(next_steps_layout)
+    title = slide.shapes.title
+    title.text = "NEXT STEPS"
     ns_placeholder = slide.placeholders[1].text_frame
 
-    title = slide.shapes.title
-    title.text = "Next Steps"
+    poc_name = af.get_db_info(
+        rva_info, "engagementmeta.fields.customer_POC_name", "Customer Name"
+    )
+    fed_name = af.get_db_info(
+        rva_info, "engagementmeta.fields.team_lead_name", "Fed Lead Name"
+    )
+    customer_initials = af.get_db_info(
+        rva_info, "engagementmeta.fields.customer_initials", "Stakeholder Initials"
+    )
 
-    # RVA Team Bullet
     paragraph = ns_placeholder.paragraphs[0]
-    paragraph.level = 1
+    paragraph.level = 0
     run = paragraph.add_run()
-    run.text = "{} Team".format(report_type)
+    run.text = fed_name
+    paragraph.font.color.rgb = gray
 
-    paragraph_two = ns_placeholder.add_paragraph()
-    paragraph_two.level = 2
-    run = paragraph_two.add_run()
-    run.text = "Additional Analysis"
-
-    paragraph_two = ns_placeholder.add_paragraph()
-    paragraph_two.level = 2
-    run = paragraph_two.add_run()
-    run.text = "Draft Report to POC"
-
-    # FN Bullet
-    ns_placeholder.add_paragraph()
     paragraph = ns_placeholder.add_paragraph()
     paragraph.level = 1
     run = paragraph.add_run()
-    run.text = af.get_db_info(
-        rva_info, "engagementmeta.fields.customer_POC_name", "POC Name"
-    )
+    run.text = "Additional analysis of assessment data"
+    paragraph.font.color.rgb = gray
 
-    paragraph_two = ns_placeholder.add_paragraph()
-    paragraph_two.level = 2
-    run = paragraph_two.add_run()
-    run.text = "Review & validate findings"
+    paragraph = ns_placeholder.add_paragraph()
+    paragraph.level = 1
+    run = paragraph.add_run()
+    run.text = "Send report draft to " + customer_initials
+    paragraph.font.color.rgb = gray
 
-    paragraph_two = ns_placeholder.add_paragraph()
-    paragraph_two.level = 2
-    run = paragraph_two.add_run()
-    run.text = "Action Plans to remediate, as appropriate"
+    paragraph = ns_placeholder.add_paragraph()
+    paragraph.level = 1
+    run = paragraph.add_run()
+    run.text = "Finalize report after review"
+    paragraph.font.color.rgb = gray
 
-    paragraph_two = ns_placeholder.add_paragraph()
-    paragraph_two.level = 2
-    run = paragraph_two.add_run()
-    run.text = "Future work with DHS CISA"
+    paragraph = ns_placeholder.add_paragraph()
+    paragraph.level = 0
+    run = paragraph.add_run()
+    run.text = poc_name
+    paragraph.font.color.rgb = gray
 
-    add_section_title(prs, "Questions?")
+    paragraph = ns_placeholder.add_paragraph()
+    paragraph.level = 1
+    run = paragraph.add_run()
+    run.text = "Review and validate findings"
+    paragraph.font.color.rgb = gray
+
+    paragraph = ns_placeholder.add_paragraph()
+    paragraph.level = 1
+    run = paragraph.add_run()
+    run.text = "Provide high level report draft feedback"
+    paragraph.font.color.rgb = gray
+
+    paragraph = ns_placeholder.add_paragraph()
+    paragraph.level = 1
+    run = paragraph.add_run()
+    run.text = "Create mitigation plans, as appropriate"
+    paragraph.font.color.rgb = gray
+
+    paragraph = ns_placeholder.add_paragraph()
+    paragraph.level = 1
+    run = paragraph.add_run()
+    run.text = "Consider future work with CISA"
+    paragraph.font.color.rgb = gray
+
+    # insert Questions slide
+    questions_layout = prs.slide_layouts[12]
+    slide = prs.slides.add_slide(questions_layout)
+
+    # insert final slide
+    final_layout = prs.slide_layouts[17]
+    slide = prs.slides.add_slide(final_layout)
 
 
 def generate_ptp_slides(template, output, draft, json, media):
@@ -1273,12 +1507,6 @@ def generate_ptp_slides(template, output, draft, json, media):
         json (string): Path to the json file with the assessment data.
         media (string): Path to the media folder that contains the assessment screenshots.
     """
-    # ---- constant group to type
-    to_groups = {
-        "phishing-assessment": "Phishing Assessment",
-        "penetration-testing": "Penetration Testing",
-        "web-application-assessment": "Web Application Assessment",
-    }
 
     # ---- find all screenshot information
     rva_info = af.load_rva_info(json)
@@ -1286,8 +1514,10 @@ def generate_ptp_slides(template, output, draft, json, media):
 
     rep_fields = af.get_db_info(rva_info, "report.fields", "keyNA")
     report_type = rep_fields["report_type"]
-    ip_ext = rep_fields["IP_scanned_ext"]
-    ip_int = rep_fields["IP_scanned_int"]
+    ip_ext_scan = rep_fields["external_scanned"]
+    ip_ext_disc = rep_fields["external_discovered"]
+    ip_int_scan = rep_fields["internal_scanned"]
+    ip_int_disc = rep_fields["internal_discovered"]
 
     # ---- open the powerpoint template
     prs = pptx.Presentation(template)
@@ -1295,19 +1525,18 @@ def generate_ptp_slides(template, output, draft, json, media):
     insert_title_slide(prs, report_type, rva_info, draft)
     insert_notice_slide(prs, report_type)
     insert_agenda_slide(prs, report_type)
-    insert_timeframe(prs, report_type, rva_info)
-    insert_scope_slide(prs, report_type, rva_info, ip_ext, ip_int)
-
+    insert_logistics(prs, report_type, rva_info)
+    insert_scope_slide(prs, report_type, rva_info, ip_ext_scan, ip_ext_disc, ip_int_scan, ip_int_disc)
     insert_goals_slide(prs, report_type)
 
-    insert_narrative_slide(prs, report_type, rva_info, media)
-    if report_type == "RPT":
-        insert_OSINT_slide(prs, report_type, rva_info)
     insert_findings_slides(prs, report_type, rva_info, ss_info, media)
+    insert_services_slides(prs, rva_info)
+    insert_attack_paths(prs, rva_info, ss_info, media)
 
-    insert_observation_slide(prs)
-    insert_requirements_slide(prs, report_type, rva_info)
-    insert_nextstep_slide(prs, report_type, rva_info)
+    insert_conclusion_slides(prs, rva_info)
+
+    #if report_type == "RPT":
+    #    insert_OSINT_slide(prs, report_type, rva_info)
 
     prs.save(output)
 

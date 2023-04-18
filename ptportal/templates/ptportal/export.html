@@ -1,0 +1,637 @@
+<!-- Risk & Vulnerability Assessment Reporting Engine
+
+Copyright 2022 The Risk & Vulnerability Reporting Engine Contributors, All Rights Reserved.
+(see Contributors.txt for a full list of Contributors)
+
+SPDX-License-Identifier: BSD-3-Clause
+
+Please see additional acknowledgments (including references to third party source code, object code, documentation and other files) in the license.txt file or contact permission@sei.cmu.edu for full terms.
+
+Created, in part, with funding and support from the United States Government. (see Acknowledgments file).
+
+DM22-1011
+ -->
+{% extends 'ptportal/base.html' %}
+{% block active %}#export{% endblock %}
+
+{% block style %}
+<style>
+.card {
+    width: 280px;
+    height: 320px;
+    padding: 15px;
+    display: inline-flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.card-inner {
+    border: 2px solid #333;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    padding: 15px;
+}
+
+.card-inner img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 40%;
+    height: 40%;
+    padding: 20px 0px;
+}
+
+.card h1 {
+    font-size: 14pt;
+    color: #333;
+    font-weight: bold;
+}
+
+.card p {
+    font-size: 10pt;
+    color: #555;
+    padding: 20px 0px;
+}
+
+.errorcard {
+    width: 80%;
+    font-size: 10pt;
+    background-color: #FFEFF2;
+    padding: 15px;
+    border: 2px solid #AB2317;
+    text-align: left;
+    overflow: auto;
+}
+
+.errorcard img {
+    float: left;
+    padding: 2px;
+}
+
+.errorcard p {
+    float: left;
+    padding: 0px 10px;
+}
+
+.warningcard {
+    width: 80%;
+    font-size: 10pt;
+    background-color: #FFE3CB;
+    padding: 15px;
+    border: 2px solid #F79322;
+    text-align: left;
+    overflow: auto;
+}
+
+.warningcard img {
+    float: left;
+    padding: 2px;
+}
+
+.warningcard p {
+    float: left;
+    padding: 0px 10px;
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+
+<sds-section v-bind="exportArgs" class="mb-4" align="center">
+
+    {% if not eng_meta %}
+    <div class="errorcard">
+        <img class="w-8 h-8" src="/static/icons/circle-xmark-solid.svg">
+        <p><b>Missing Assessment Details:</b> The required fields on the Assessment Details form must be completed before generating artifacts.</p>
+        <br>
+    </div>
+
+    <br>
+    {% endif %}
+
+    <!--<div class="warningcard">
+        <img class="w-8 h-8" src="/static/icons/triangle-exclamation-solid.svg">
+        <p><b>Warning:</b> Description of warning.</p>
+        <br>
+    </div>-->
+
+    <div class="card">
+        <div class="card-inner" align="center">
+            <img src="/static/icons/file-word-regular.svg">
+            <h1>Report</h1>
+            <p>Download a DOCX file containing report data</p>
+            {% if eng_meta %}
+            <sds-button variant="primary" size="sm" @click="redirectLink('{% url "generate_report" %}')">Export</sds-button>
+            {% else %}
+            <sds-floating-ui
+                popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                placement="top"
+                arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                placement-top-arrow-class="-bottom-1"
+                placement-right-arrow-class="-left-1"
+                placement-bottom-arrow-class="-top-1"
+                placement-left-arrow-class="-right-1"
+                :will-open="willOpen"
+                :will-close="willClose"
+            >
+                <template #trigger="{ open, close }">
+                    <sds-button variant="primary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                </template>
+                <template #default>
+                    <div class="p-2">
+                        <p>Complete the required Assessment Details fields before exporting data.</p>
+                    </div>
+                </template>
+            </sds-floating-ui>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-inner" align="center">
+            <img src="/static/icons/file-powerpoint-regular.svg">
+            <h1>Out-Brief</h1>
+            <p>Download a PPTX slide deck containing report data</p>
+            {% if eng_meta %}
+            <sds-button variant="primary" size="sm" @click="redirectLink('{% url "generate_outbrief" %}')">Export</sds-button>
+            {% else %}
+            <sds-floating-ui
+                popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                placement="top"
+                arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                placement-top-arrow-class="-bottom-1"
+                placement-right-arrow-class="-left-1"
+                placement-bottom-arrow-class="-top-1"
+                placement-left-arrow-class="-right-1"
+                :will-open="willOpen"
+                :will-close="willClose"
+            >
+                <template #trigger="{ open, close }">
+                    <sds-button variant="primary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                </template>
+                <template #default>
+                    <div class="p-2">
+                        <p>Complete the required Assessment Details fields before exporting data.</p>
+                    </div>
+                </template>
+            </sds-floating-ui>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-inner" align="center">
+            <img src="/static/icons/file-pdf-regular.svg">
+            <h1>PACE</h1>
+            <p>Download a Post-Assessment Closure Evaluation PDF</p>
+            {% if eng_meta %}
+            <sds-button variant="primary" size="sm" @click="redirectLink('{% url "generate_pace" %}')">Export</sds-button>
+            {% else %}
+            <sds-floating-ui
+                popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                placement="top"
+                arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                placement-top-arrow-class="-bottom-1"
+                placement-right-arrow-class="-left-1"
+                placement-bottom-arrow-class="-top-1"
+                placement-left-arrow-class="-right-1"
+                :will-open="willOpen"
+                :will-close="willClose"
+            >
+                <template #trigger="{ open, close }">
+                    <sds-button variant="primary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                </template>
+                <template #default>
+                    <div class="p-2">
+                        <p>Complete the required Assessment Details fields before exporting data.</p>
+                    </div>
+                </template>
+            </sds-floating-ui>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-inner" align="center">
+            <img src="/static/icons/file-excel-regular.svg">
+            <h1>Activity Tracker</h1>
+            <p>Download a XLSX file containing logged activities</p>
+            {% if eng_meta %}
+            <sds-button variant="primary" size="sm" @click="redirectLink('{% url "generate_tracker" %}')">Export</sds-button>
+            {% else %}
+            <sds-floating-ui
+                popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                placement="top"
+                arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                placement-top-arrow-class="-bottom-1"
+                placement-right-arrow-class="-left-1"
+                placement-bottom-arrow-class="-top-1"
+                placement-left-arrow-class="-right-1"
+                :will-open="willOpen"
+                :will-close="willClose"
+            >
+                <template #trigger="{ open, close }">
+                    <sds-button variant="primary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                </template>
+                <template #default>
+                    <div class="p-2">
+                        <p>Complete the required Assessment Details fields before exporting data.</p>
+                    </div>
+                </template>
+            </sds-floating-ui>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-inner" align="center">
+            <img src="/static/icons/file-code-regular.svg">
+            <h1>JSON</h1>
+            <p>Download a JSON file containing report data</p>
+            {% if eng_meta %}
+            <sds-button variant="primary" size="sm" @click="redirectLink('{% url "generate_json" %}')">Export</sds-button>
+            {% else %}
+            <sds-floating-ui
+                popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                placement="top"
+                arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                placement-top-arrow-class="-bottom-1"
+                placement-right-arrow-class="-left-1"
+                placement-bottom-arrow-class="-top-1"
+                placement-left-arrow-class="-right-1"
+                :will-open="willOpen"
+                :will-close="willClose"
+            >
+                <template #trigger="{ open, close }">
+                    <sds-button variant="primary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                </template>
+                <template #default>
+                    <div class="p-2">
+                        <p>Complete the required Assessment Details fields before exporting data.</p>
+                    </div>
+                </template>
+            </sds-floating-ui>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-inner" align="center">
+            <img src="/static/icons/file-code-regular.svg">
+            <h1>EI JSON</h1>
+            <p>Download a JSON file containing EI data</p>
+            {% if eng_meta %}
+            <sds-button variant="primary" size="sm" @click="redirectLink('{% url "generate_EI_json" %}')">Export</sds-button>
+            {% else %}
+            <sds-floating-ui
+                popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                placement="top"
+                arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                placement-top-arrow-class="-bottom-1"
+                placement-right-arrow-class="-left-1"
+                placement-bottom-arrow-class="-top-1"
+                placement-left-arrow-class="-right-1"
+                :will-open="willOpen"
+                :will-close="willClose"
+            >
+                <template #trigger="{ open, close }">
+                    <sds-button variant="primary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                </template>
+                <template #default>
+                    <div class="p-2">
+                        <p>Complete the required Assessment Details fields before exporting data.</p>
+                    </div>
+                </template>
+            </sds-floating-ui>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-inner" align="center">
+            <img src="/static/icons/file-zipper-regular.svg">
+            <h1>Backup</h1>
+            <p>Download a backup ZIP file containing all data</p>
+            {% if eng_meta %}
+            <sds-button variant="primary" size="sm" @click="redirectLink('{% url "download_backup" %}')">Export</sds-button>
+            {% else %}
+            <sds-floating-ui
+                popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                placement="top"
+                arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                placement-top-arrow-class="-bottom-1"
+                placement-right-arrow-class="-left-1"
+                placement-bottom-arrow-class="-top-1"
+                placement-left-arrow-class="-right-1"
+                :will-open="willOpen"
+                :will-close="willClose"
+            >
+                <template #trigger="{ open, close }">
+                    <sds-button variant="primary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                </template>
+                <template #default>
+                    <div class="p-2">
+                        <p>Complete the required Assessment Details fields before exporting data.</p>
+                    </div>
+                </template>
+            </sds-floating-ui>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-inner" align="center">
+            <img src="/static/icons/file-export-solid.svg">
+            <h1>Export All</h1>
+            <p>Download all files listed on this page</p>
+            {% if eng_meta %}
+            <sds-floating-ui
+                popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                placement="top"
+                arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                placement-top-arrow-class="-bottom-1"
+                placement-right-arrow-class="-left-1"
+                placement-bottom-arrow-class="-top-1"
+                placement-left-arrow-class="-right-1"
+                :will-open="willOpen"
+                :will-close="willClose"
+            >
+                <template #trigger="{ open, close }">
+                    <sds-button variant="primary" size="sm" @click="exportAll" @mouseover="open" @mouseout="close">Export</sds-button>
+                </template>
+                <template #default>
+                    <div class="p-2">
+                        <p>This function requires pop-ups and redirects to be enabled for this web application.</p>
+                    </div>
+                </template>
+            </sds-floating-ui>
+            {% else %}
+            <sds-floating-ui
+                popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                placement="top"
+                arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                placement-top-arrow-class="-bottom-1"
+                placement-right-arrow-class="-left-1"
+                placement-bottom-arrow-class="-top-1"
+                placement-left-arrow-class="-right-1"
+                :will-open="willOpen"
+                :will-close="willClose"
+            >
+                <template #trigger="{ open, close }">
+                    <sds-button variant="primary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                </template>
+                <template #default>
+                    <div class="p-2">
+                        <p>Complete the required Assessment Details fields before exporting data.</p>
+                    </div>
+                </template>
+            </sds-floating-ui>
+            {% endif %}
+        </div>
+    </div>
+
+    <div id="risk-chart" style="visibility:hidden;overflow:hidden;height:0;width:0"><apexchart height="400" width="800" :options="riskArgs.options" :series="riskArgs.data"></apexchart></div>
+    <div id="nistsp-chart" style="visibility:hidden;overflow:hidden;height:0;width:0"><apexchart height="500" width="800" :options="nistSPArgs.options" :series="nistSPArgs.data"></apexchart></div>
+    <div id="nistframework-chart" style="visibility:hidden;overflow:hidden;height:0;width:0"><apexchart height="500" width="800" :options="nistFrameworkArgs.chartOptions" :series="nistFrameworkArgs.series"></apexchart></div>
+
+</sds-section>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+    window.addEventListener("load", function(event) {
+
+        charts = {"riskChart": "", "nistSPChart": "", "nistFrameworkChart": ""}
+        
+        const riskChart = document.getElementById("risk-chart").getElementsByTagName("svg")[0].outerHTML
+        const nistSPChart = document.getElementById("nistsp-chart").getElementsByTagName("svg")[0].outerHTML
+        const nistFrameworkChart = document.getElementById("nistframework-chart").getElementsByTagName("svg")[0].outerHTML
+
+        charts["riskChart"] = riskChart
+        charts["nistSPChart"] = nistSPChart
+        charts["nistFrameworkChart"] = nistFrameworkChart
+
+        fetch(window.location.href, {
+            method: "POST",
+            body: JSON.stringify(charts),
+            credentials: "same-origin",
+            headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
+        }).then(response => {
+        if(response.ok) {
+            console.log("Charts saved.")
+        }
+        else {
+            console.log("Error saving charts.")
+        }
+        }).catch(error => {
+          console.log("Error saving charts.")
+        })
+    });
+
+    function pageData() {
+        pageData = {
+            riskArgs: {
+                options: {
+                    chart: {
+                        type: 'bar',
+                        height: 400,
+                        animations: {
+                            enabled: false
+                        }
+                    },
+                    plotOptions: {
+                        bar: {
+                            horizontal: false,
+                            columnWidth: '30%',
+                            endingShape: 'rounded',
+                            distributed: true
+                        }
+                    },
+                    dataLabels: {
+                        enabled: false,
+                    },
+                    colors: ['#FF7471', '#FCBF8F', '#FFDE59', '#83E08E', '#4AA1D2'],
+                    stroke: {
+                        show: true,
+                        width: 2,
+                        colors: ['transparent']
+                    },
+                    fill: {
+                        opacity: 1
+                    },
+                    tooltip: {
+                        enabled: false
+                    },
+                    title: {
+                        text: ''
+                    },
+                    legend: {
+                        show: false
+                    },
+                    yaxis: {
+                        title: {
+                            text: ''
+                        }
+                    },
+                    xaxis: {
+                        categories: ['Critical', 'High', 'Medium', 'Low', 'Informational'],
+                        labels: {
+                            rotate: 0,
+                            rotateAlways: false,
+                            offsetX: 0
+                        }
+                    }
+                },
+                data: [
+                    {
+                        data: ['{{findings_breakdown.Critical.count}}', '{{findings_breakdown.High.count}}', '{{findings_breakdown.Medium.count}}', '{{findings_breakdown.Low.count}}', '{{findings_breakdown.Info.count}}']
+                    }
+                ],
+            },
+            nistSPArgs: {
+                options: {
+                    chart: {
+                        type: 'bar',
+                        height: 500,
+                        animations: {
+                            enabled: false
+                        }
+                    },
+                    noData: {
+                        text: undefined,
+                    },
+                    plotOptions: {
+                        bar: {
+                            horizontal: true,
+                            columnWidth: '50%',
+                            endingShape: 'rounded',
+                            distributed: true,
+                        },
+                    },
+                    dataLabels: {
+                        enabled: false,
+                    },
+                    colors: ['#447b9a'],
+                    stroke: {
+                        show: true,
+                        width: 2,
+                        colors: ['transparent']
+                    },
+                    fill: {
+                        opacity: 1
+                    },
+                    tooltip: {
+                        enabled: false
+                    },
+                    title: {
+                        text: ''
+                    },
+                    legend: {
+                        show: false
+                    },
+                    yaxis: {
+                        title: {
+                            text: ''
+                        },
+                    },
+                    xaxis: {
+                        title: {
+                            text: 'Number of Findings'
+                        },
+                        categories: ['AC', 'AT', 'AU', 'CA', 'CM', 'CP', 'IA', 'IR', 'MA', 'MP', 'PE', 'PL', 'PM', 'PS', 'RA', 'SA', 'SC', 'SI', 'SR'],
+                    },
+                },
+                data: [
+                    {
+                        data: ['{{nist_ac}}', '{{nist_at}}', '{{nist_au}}', '{{nist_ca}}', '{{nist_cm}}', '{{nist_cp}}', '{{nist_ia}}', '{{nist_ir}}', '{{nist_ma}}', '{{nist_mp}}', '{{nist_pe}}', '{{nist_pl}}', '{{nist_pm}}', '{{nist_ps}}', '{{nist_ra}}', '{{nist_sa}}', '{{nist_sc}}', '{{nist_si}}', '{{nist_sr}}']
+                    }
+                ],
+            },
+            nistFrameworkArgs: {
+                series: [],
+                chartOptions: {
+                    chart: {
+                        height: 500,
+                        type: 'pie',
+                        animations: {
+                            enabled: false
+                        }
+                    },
+                    labels: ['ID.AM','ID.GV','ID.RA','ID.SC','PR.AC','PR.AT','PR.DS','PR.IP','PR.MA','PR.PT','DE.AE','DE.CM','RS.MI'],
+                    legend: {
+                        show: false
+                    },
+                    dataLabels: {
+                        enabled: true,
+                        style: {
+                            fontSize: '16px',
+                            colors: ['black']
+                        },
+                        formatter(val, opts) {
+                            const name = opts.w.globals.labels[opts.seriesIndex]
+                            return [name, val.toFixed(1) + '%']
+                        },
+                        dropShadow: {
+                            enabled: false,
+                        },
+                    },
+                    plotOptions: {
+                        pie: {
+                            customScale: 0.7,
+                            dataLabels: {
+                                offset:100
+                            }
+                        }
+                    },
+                    colors: ['#f5a149', '#e86332', '#8f6da9', '#7fcde4', '#07aeb6', '#447b9a', '#acd672', '#558824', '#f9d46c', '#c2a1c0', '#84407e', '#fbbfcb', '#e35b79']
+                },
+            },
+        }
+
+        pageData.nistFrameworkArgs.series.push(parseInt("{{nist_iam}}"))
+        pageData.nistFrameworkArgs.series.push(parseInt('{{nist_ig}}'))
+        pageData.nistFrameworkArgs.series.push(parseInt('{{nist_ira}}'))
+        pageData.nistFrameworkArgs.series.push(parseInt('{{nist_isc}}'))
+        pageData.nistFrameworkArgs.series.push(parseInt('{{nist_pac}}'))
+        pageData.nistFrameworkArgs.series.push(parseInt('{{nist_pat}}'))
+        pageData.nistFrameworkArgs.series.push(parseInt('{{nist_pds}}'))
+        pageData.nistFrameworkArgs.series.push(parseInt('{{nist_pip}}'))
+        pageData.nistFrameworkArgs.series.push(parseInt('{{nist_pma}}'))
+        pageData.nistFrameworkArgs.series.push(parseInt('{{nist_ppt}}'))
+        pageData.nistFrameworkArgs.series.push(parseInt('{{nist_dae}}'))
+        pageData.nistFrameworkArgs.series.push(parseInt('{{nist_dcm}}'))
+        pageData.nistFrameworkArgs.series.push(parseInt('{{nist_rmi}}'))
+
+        return pageData
+    }
+
+
+function pageCreated() {
+    this.baseData.layoutArgs.pageTitle = "Export Data"
+}
+
+function pageMethods() {
+    functions = {
+        exportAll: function() {
+            base = String(window.location.origin)
+            window.open(base.concat("/ptportal/generate-report"))
+            window.open(base.concat("/ptportal/generate-outbrief"))
+            window.open(base.concat("/ptportal/generate-pace"))
+            window.open(base.concat("/ptportal/generate-tracker"))
+            window.open(base.concat("/ptportal/generate-JSON"))
+            window.open(base.concat("/ptportal/generate-EI-JSON"))
+            window.open(base.concat("/ptportal/download-backup"))
+        }
+    }
+
+    return functions
+}
+
+</script>
+{% endblock %}

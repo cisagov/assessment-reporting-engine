@@ -1,5 +1,6 @@
 attackcti
 beautifulsoup4==4.10.0
+cairosvg==2.7.0
 django==3.1
 django-axes==5.4.3
 django-extra-views
@@ -11,9 +12,10 @@ iptools==0.7.0
 netaddr==0.7.19
 openpyxl==2.6.2
 pandas==1.0.0
-Pillow==6.0.0
+Pillow==9.0.0
 psycopg2-binary==2.8.2
 python-docx==0.8.10
 python-pptx==0.6.18
 pyzipper
 numpy==1.23.5
+reportlab==3.6.12

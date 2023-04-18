@@ -93,7 +93,7 @@ DM22-1011
                 </div>
                 <div class="col-md-6" style="float:left">
                     {% if asmt_id != '' %}
-                        <sds-button style="margin:5px" variant="success" type="button" @click="redirectLink('{% url "generateEIJSON" %}')"> Download JSON</sds-button>
+                        <sds-button style="margin:5px" variant="success" type="button" @click="redirectLink('{% url "generate_EI_json" %}')"> Download JSON</sds-button>
                     {% else %}
                         <sds-floating-ui
                             popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"

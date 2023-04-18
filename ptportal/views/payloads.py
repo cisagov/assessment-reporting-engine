@@ -17,7 +17,7 @@ from django.core.exceptions import ValidationError
 from django.views import generic
 from django.http import HttpResponse
 import json, re, os
-from ..models import Payload
+from ..models import Payload, Report
 
 
 class PayloadResults(generic.base.TemplateView):
@@ -26,14 +26,27 @@ class PayloadResults(generic.base.TemplateView):
     def get_context_data(self, **kwargs):
         context = {}
         context['payloads'] = Payload.objects.all().order_by('order')
+        context['description'] = Report.objects.all().first()
         return context
 
     def post(self, request, *args, **kwargs):
         postData = json.loads(request.body)
+        report = Report.objects.all().first()
 
         payloads = []
 
-        for order, data in enumerate(postData):
+        try:
+            report.exception = str(postData['exception'])
+        except Exception as e:
+            print(e)
+        try:
+            report.browser = str(postData['browser'])
+        except Exception as e:
+            print(e)
+
+        report.save()
+
+        for order, data in enumerate(postData['payloads']):
 
             if (
                 data['payload_description']

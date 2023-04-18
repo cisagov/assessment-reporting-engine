@@ -35,10 +35,8 @@ DM22-1011
     <meta name="theme-color" content="#ffffff">
 
     <!-- Vue Compiler/Runtime-->
-    <!-- Vue development version. Uncomment if you need prod.
-      <script src="{{ STATIC_URL }}js/vue.global.prod.js"></script>
-    -->
-    <script src="https://unpkg.com/vue@3"></script>
+    <!--<script src="https://unpkg.com/vue@3"></script>-->
+    <script src="{{ STATIC_URL }}js/vue.global.prod.js"></script>
     <script src="{{ STATIC_URL }}js/sds.umd.js"></script>
 
     <!-- ApexCharts -->
@@ -152,9 +150,9 @@ DM22-1011
                   },
                   {
                     id: 14,
-                    title: "Tools",
-                    href: "{% url 'tools' %}",
-                    iconUrl: "{% static 'icons/wrench-solid.svg' %}"
+                    title: "Export",
+                    href: "{% url 'export' %}",
+                    iconUrl: "{% static 'icons/download-solid.svg' %}"
                   },
                   {
                     id: 15,

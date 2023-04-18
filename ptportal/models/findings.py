@@ -297,6 +297,10 @@ class UploadedFinding(abstract_models.TimeStampedModel):
     uploaded_finding_name = models.CharField(max_length=50000)
     uploaded_finding_id = models.IntegerField(default=0)
 
+    NIST_800_53 = models.TextField(blank=True)
+    NIST_CSF = models.TextField(blank=True)
+    CIS_CSC = models.TextField(blank=True)
+
     description = models.TextField(
         blank=False,
         verbose_name='Finding Description',

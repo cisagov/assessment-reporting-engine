@@ -245,11 +245,11 @@ DM22-1011
 			<div class="mt-2 mb-4 block">
 				<h1 class="text-xl">Additional Information</h1>
 			</div>
-			<h4 class=""><b>{{form.traffic_light_protocol.label_tag}}</b></h4>
+			<h4 class=""><b>{{form.traffic_light_protocol.label_tag}}</b><span class="text-red-500 text-sm"> * required</span></h4>
 			<span class="text-sm text-gray-600">
 				{{form.traffic_light_protocol.help_text}}
 			</span>
-			<sds-radio-group v-bind="TLP_Button_Options" v-model="formData.traffic_light_protocol" class="mb-4"></sds-radio-group>
+			<sds-radio-group required v-bind="TLP_Button_Options" v-model="formData.traffic_light_protocol" class="mb-4"></sds-radio-group>
 
 			<div class="grid gap-2 mb-2 fieldlabel">
 				<div>

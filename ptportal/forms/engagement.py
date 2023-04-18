@@ -50,7 +50,7 @@ class EngagementForm(BaseModelForm):
         fields = '__all__'
         widgets = {
             'traffic_light_protocol': forms.RadioSelect(
-                {'class': 'form-check-input', 'required': False}
+                {'class': 'form-check-input', 'required': True}
             )
         }
         exclude = ['fy']

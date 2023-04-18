@@ -20,12 +20,15 @@ import sys
 import os.path
 import argparse
 import datetime
+import inflect
 
-from docx.oxml.ns import nsdecls
+from datetime import timezone
+from dateutil.relativedelta import relativedelta
+from docx.oxml.ns import nsdecls, qn
 from docx.oxml import parse_xml
 from docx.oxml.xmlchemy import OxmlElement
-from docx.shared import Inches, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
+from docx.shared import Inches, RGBColor, Pt
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK, WD_COLOR_INDEX
 from docx.enum.table import WD_TABLE_ALIGNMENT
 
 from PIL import Image
@@ -42,426 +45,214 @@ except ImportError:
     print("Must have python docx library installed")
     sys.exit(1)
 
-colors = {
-    "Critical": "C00000",
-    "High": "FF0000",
-    "Medium": "E36C0A",
-    "Low": "548DD4",
-    "Informational": "000000",
-}
+
 # ---- constants
 tstamp = str(datetime.datetime.now().strftime("%Y%m%d_%H.%M.%S"))
+today = datetime.date.today()
+num = inflect.engine()
 
 
-def insert_rpt_appendix_b_table_one(doc, db):
-    """Generates the domains table of the social enegineering section.
+def insert_assessment_info(doc, db):
+    """Function that fills out the tags on the report cover.
 
-    Parameters
-    ----------
-    doc : docx document
-        Template being edited.
-    db : list
-        Assessment data
+    Args:
+        doc (docx object): The docx template.
+        db (List of dictionaries): The JSON of the engagment data.
     """
-    p_tag = xu.find_paragraph(doc, "{Table: Identified Domains}")
 
-    if p_tag is None:
-        return
+    asmt_id = af.get_db_info(db, 'engagementmeta.fields.asmt_id', '{ASMT ID}')
+    stakeholder_name = af.get_db_info(db, 'engagementmeta.fields.customer_long_name', '{STAKEHOLDER NAME}')
 
-    domain_table = doc.add_table(1, 1)
-    domain_table.style = doc.styles['MediumShading1-Accent1']
-    domain_table.cell(0, 0).text = "Domain"
+    subtitle = "RV" + asmt_id + " - " + stakeholder_name
 
-    for cnt, domain in enumerate(af.model_gen(db, "ptportal.rptidentifiednetworks")):
-        ele = domain['fields']
-        row = domain_table.add_row()
-        row.cells[0].text = xu.xsafe(ele['domain'])
+    p_tag = xu.find_paragraph(doc, "{REPORT SUBTITLE}")
+    if p_tag is not None:
+        p_tag.text = subtitle
 
-    for cell in domain_table.columns[0].cells:
-        cell.width = Inches(1.2)
-    xu.move_table_after(domain_table, p_tag)
-    xu.delete_paragraph(p_tag)
+    p_tag = xu.find_paragraph(doc, "{ DATE }")
+    if p_tag is not None:
+        p_tag.text = today.strftime("%B %-d, %Y")
 
 
-def insert_rpt_appendix_b_table_two(doc, db):
-    """Generates the networks table of the social engieering section.
+def insert_fs_table(doc, db, fs_tag):
+    """Generates and inserts the findings summary table.
 
     Args:
         doc (docx document): The docx template being edited.
         db (list): Assessment data
+        fs_tag (string): The string in the docx document that will be replaced with the table.
     """
-    p_tag = xu.find_paragraph(doc, "{Table: Identified Networks}")
 
+    # Find tag location in document
+    p_tag = xu.find_paragraph(doc, fs_tag)
+
+    # Stop if location does not exist
     if p_tag is None:
         return
 
-    network_table = doc.add_table(1, 3)
-    network_table.style = doc.styles['MediumShading1-Accent1']
-    network_table.cell(0, 0).text = "Network or IP Address"
-    network_table.cell(0, 1).text = "Domain"
-    network_table.cell(0, 2).text = "Registrant"
+    fs_table = doc.add_table(1, 4)
+    fs_table.style = doc.styles['Findings Table']
 
-    for cnt, domain in enumerate(af.model_gen(db, "ptportal.rptidentifiednetworks")):
-        ele = domain['fields']
-        row = network_table.add_row()
+    fs_table.cell(0, 0).text = ""
+    fs_table.cell(0, 0).alignment = WD_ALIGN_PARAGRAPH.CENTER
+    fs_table.cell(0, 1).text = "Finding Name"
+    fs_table.cell(0, 1).alignment = WD_ALIGN_PARAGRAPH.CENTER
+    fs_table.cell(0, 2).text = "Severity"
+    fs_table.cell(0, 2).alignment = WD_ALIGN_PARAGRAPH.CENTER
+    fs_table.cell(0, 3).text = "Mitigation Status"
+    fs_table.cell(0, 3).alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-        row.cells[0].text = xu.xsafe(ele['ip_address'])
-        row.cells[1].text = xu.xsafe(ele['domain'])
-        row.cells[2].text = xu.xsafe(ele['registrant'])
-
-    xu.move_table_after(network_table, p_tag)
-    # Delete tag
-    xu.delete_paragraph(p_tag)
-
-
-def insert_rpt_appendix_b_table_three(doc, db):
-    """Generates the breach information table of the social engineering section.
-
-    Args:
-        doc (docx document): The docx template being edited.
-        db (list): Assessment data
-    """
-    p_tag = xu.find_paragraph(doc, "{Table: Breached Emails}")
-
-    if p_tag is None:
-        return
-
-    email_table = doc.add_table(1, 2)
-    email_table.style = doc.styles['MediumShading1-Accent1']
-    email_table.cell(0, 0).text = "Email Address"
-    email_table.cell(0, 1).text = "Breach Information"
-
-    for cnt, domain in enumerate(af.model_gen(db, "ptportal.rptbreachedemails")):
-        ele = domain['fields']
-        row = email_table.add_row()
-
-        row.cells[0].text = xu.xsafe(ele['breached_email'])
-        row.cells[1].text = xu.xsafe(ele['breach_info'])
-
-    xu.move_table_after(email_table, p_tag)
-    # Delete tag
-    xu.delete_paragraph(p_tag)
-
-
-def insert_fse_table(doc, db):
-    """Generates and inserts the findings summary of the HVA report.
-
-    Args:
-        doc (docx document): The docx template being edited.
-        db (list): Assessment data
-    """
-    ef_tag_str = '{Table: External Findings}'
-    if_tag_str = '{Table: Internal Findings}'
-    se_tag_str = '{Table: Social E Findings}'
-
-    ef_tag = xu.find_paragraph(doc, ef_tag_str)
-    if ef_tag is None:
-        return
-
-    if_tag = xu.find_paragraph(doc, if_tag_str)
-    if if_tag is None:
-        return
-
-    se_tag = xu.find_paragraph(doc, se_tag_str)
-    if se_tag is None:
-        return
-
-    internal_table = doc.add_table(1, 3)
-    external_table = doc.add_table(1, 3)
-    social_table = doc.add_table(1, 3)
-
-    internal_table.style = doc.styles['MediumShading1-Accent1']
-    external_table.style = doc.styles['MediumShading1-Accent1']
-    social_table.style = doc.styles['MediumShading1-Accent1']
-
-    internal_table.cell(0, 1).text = "Internal Finding Name"
-    internal_table.cell(0, 2).text = "Severity"
-    external_table.cell(0, 1).text = "External Finding Name"
-    external_table.cell(0, 2).text = "Severity"
-    social_table.cell(0, 1).text = "Social Engineering Finding Name"
-    social_table.cell(0, 2).text = "Severity"
-
-    count = 1
     for cnt, finding in enumerate(af.model_gen(db, "ptportal.uploadedfinding")):
-        fname = finding["fields"]["uploaded_finding_name"]
-        ele = finding["fields"]
+        ele = finding['fields']
+        row = fs_table.add_row()
 
-        severity_color = xu.hex_to_rgb(colors[ele['severity']])
+        fid = str(cnt + 1)
+        fname = ele['uploaded_finding_name']
 
-        if ele['assessment_type'] == 'Internal/External':
-            row = external_table.add_row()
-            row.cells[0].text = str(count) + '.'
-            row.cells[1].text = xu.xsafe(fname)
-            row.cells[2].text = ele['severity']
+        severity = ele['severity']
 
-            row.cells[0].paragraphs[0].runs[0].font.color.rgb = RGBColor(42, 72, 121)
-            row.cells[0].paragraphs[0].runs[0].font.bold = True
-            row.cells[2].paragraphs[0].runs[0].font.color.rgb = RGBColor(
-                severity_color[0], severity_color[1], severity_color[2]
-            )
+        if ele['mitigation']:
+            mitigation = "Mitigated"
+        else:
+            mitigation = "Not Mitigated"
 
-            count += 1
+        fs_table.cell(cnt + 1, 0).text = fid
+        fs_table.cell(cnt + 1, 0).paragraphs[0].runs[0].font.bold = True
+        fs_table.cell(cnt + 1, 0).paragraphs[0].runs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+        fs_table.cell(cnt + 1, 1).text = fname
+        fs_table.cell(cnt + 1, 1).paragraphs[0].runs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-            row = internal_table.add_row()
-            row.cells[0].text = str(count) + '.'
-            row.cells[1].text = xu.xsafe(fname)
-            row.cells[2].text = ele['severity']
+        sev_cell = fs_table.cell(cnt + 1, 2).paragraphs[0]
 
-            row.cells[0].paragraphs[0].runs[0].font.color.rgb = RGBColor(42, 72, 121)
-            row.cells[0].paragraphs[0].runs[0].font.bold = True
-            row.cells[2].paragraphs[0].runs[0].font.color.rgb = RGBColor(
-                severity_color[0], severity_color[1], severity_color[2]
-            )
+        if severity == "Critical":
+            sev_cell.add_run("• ").font.color.rgb = RGBColor(255, 116, 113)
+        elif severity == "High":
+            sev_cell.add_run("• ").font.color.rgb = RGBColor(252, 191, 143)
+        elif severity == "Medium":
+            sev_cell.add_run("• ").font.color.rgb = RGBColor(255, 222, 89)
+        elif severity == "Low":
+            sev_cell.add_run("• ").font.color.rgb = RGBColor(131, 224, 142)
+        else:
+            sev_cell.add_run("• ").font.color.rgb = RGBColor(79, 175, 227)
 
-            count += 1
+        sev_cell.add_run(severity)
+        fs_table.cell(cnt + 1, 2).paragraphs[0].runs[0].font.bold = True
+        fs_table.cell(cnt + 1, 2).paragraphs[0].runs[1].font.bold = True
+        fs_table.cell(cnt + 1, 2).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-        if ele['assessment_type'] == 'External':
-            row = external_table.add_row()
-            row.cells[0].text = str(count) + '.'
-            row.cells[1].text = xu.xsafe(fname)
-            row.cells[2].text = ele['severity']
+        mit_cell = fs_table.cell(cnt + 1, 3).paragraphs[0]
 
-            row.cells[0].paragraphs[0].runs[0].font.color.rgb = RGBColor(42, 72, 121)
-            row.cells[0].paragraphs[0].runs[0].font.bold = True
-            row.cells[2].paragraphs[0].runs[0].font.color.rgb = RGBColor(
-                severity_color[0], severity_color[1], severity_color[2]
-            )
+        if mitigation == "Mitigated":
+            mit_cell.add_run("• ").font.color.rgb = RGBColor(131, 224, 142)
+        else:
+            mit_cell.add_run("• ").font.color.rgb = RGBColor(255, 116, 113)
 
-            count += 1
+        mit_cell.add_run(mitigation)
+        fs_table.cell(cnt + 1, 3).paragraphs[0].runs[0].font.bold = True
+        fs_table.cell(cnt + 1, 3).paragraphs[0].runs[1].font.bold = True
+        fs_table.cell(cnt + 1, 3).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-        if ele['assessment_type'] == 'Internal':
-            row = internal_table.add_row()
-            row.cells[0].text = str(count) + '.'
-            row.cells[1].text = xu.xsafe(fname)
-            row.cells[2].text = ele['severity']
+    fs_table.cell(0, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    fs_table.cell(0, 0).paragraphs[0].runs[0].font.bold = True
+    fs_table.cell(0, 1).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    fs_table.cell(0, 1).paragraphs[0].runs[0].font.bold = True
+    fs_table.cell(0, 2).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    fs_table.cell(0, 2).paragraphs[0].runs[0].font.bold = True
+    fs_table.cell(0, 3).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    fs_table.cell(0, 3).paragraphs[0].runs[0].font.bold = True
 
-            row.cells[0].paragraphs[0].runs[0].font.color.rgb = RGBColor(42, 72, 121)
-            row.cells[0].paragraphs[0].runs[0].font.bold = True
-            row.cells[2].paragraphs[0].runs[0].font.color.rgb = RGBColor(
-                severity_color[0], severity_color[1], severity_color[2]
-            )
+    xu.set_column_width(fs_table.columns[0], 0.38)
+    xu.set_column_width(fs_table.columns[1], 3.38)
+    xu.set_column_width(fs_table.columns[2], 1.38)
+    xu.set_column_width(fs_table.columns[3], 1.37)
 
-            count += 1
-
-        if ele['assessment_type'] == 'Phishing':
-            row = social_table.add_row()
-            row.cells[0].text = str(count) + '.'
-            row.cells[1].text = xu.xsafe(fname)
-            row.cells[2].text = ele['severity']
-
-            row.cells[0].paragraphs[0].runs[0].font.color.rgb = RGBColor(42, 72, 121)
-            row.cells[0].paragraphs[0].runs[0].font.bold = True
-            row.cells[2].paragraphs[0].runs[0].font.color.rgb = RGBColor(
-                severity_color[0], severity_color[1], severity_color[2]
-            )
-
-            count += 1
-
-    xu.set_column_width(internal_table.columns[0], 0.61)
-    xu.set_column_width(internal_table.columns[1], 3.01)
-    xu.set_column_width(internal_table.columns[2], 1.1)
-    xu.set_column_width(external_table.columns[0], 0.61)
-    xu.set_column_width(external_table.columns[1], 3.01)
-    xu.set_column_width(external_table.columns[2], 1.1)
-    xu.set_column_width(social_table.columns[0], 0.61)
-    xu.set_column_width(social_table.columns[1], 3.01)
-    xu.set_column_width(social_table.columns[2], 1.1)
-
-    xu.move_table_after(external_table, ef_tag)
-    xu.move_table_after(social_table, se_tag)
-    xu.move_table_after(internal_table, if_tag)
-    # Delete tag
-    xu.delete_paragraph(ef_tag)
-    xu.delete_paragraph(if_tag)
-    xu.delete_paragraph(se_tag)
+    xu.move_table_after(fs_table, p_tag)
+    xu.delete_paragraph(p_tag)
 
 
-def insert_mam_tactic(doc, mam_tag, mam_data):
-    """
-    Takes data containing information about the Mitre Attack Matrix
-    (mam) and replaces the paragraph containing landscape table
-    grouped by columns of tactics.
-    """
-    # if you update framework and there's a new tactic, have to add here
-    tactics = [
-        "Reconnaissance",
-        "Resource Development",
-        "Initial Access",
-        "Execution",
-        "Persistence",
-        "Privilege Escalation",
-        "Defense Evasion",
-        "Credential Access",
-        "Discovery",
-        "Lateral Movement",
-        "Collection",
-        "Command and Control",
-        "Exfiltration",
-        "Impact",
-    ]
+def insert_kev_table(doc, db, kev_tag):
+    """Generates and inserts the known exploited vulnerability table.
 
-    p = xu.find_paragraph(doc, mam_tag)
-    if p is None:
-        return  # tag must not be in the document
-
-    matrix_entries = []
-    for ele in af.model_gen(mam_data, "ptportal.attackframework"):
-        matrix_entries.append(ele)
-
-    # create an empty dictionary of lists to put the elements
-    mtd = {}  # matrix tactics dictionary (mtd)
-    for txt in tactics:
-        mtd[txt] = []
-
-    for ele in matrix_entries:
-        m_ele = ele["fields"]
-        tactic_type = m_ele["tactics"].split(',')
-        tactic_type = [x.strip() for x in tactic_type]
-        if m_ele["used"]:
-            for m in tactic_type:
-                mtd[m].append(ele)
-
-    # find the max dict length, that is the number of rows you need
-    # for max row
-    #   walk through all the elements,
-    #      if stack not empty: emit element name
-
-    max_rows = 0
-    for txt in tactics:
-        max_rows = max(len(mtd[txt]), max_rows)
-
-    table = doc.add_table(rows=1, cols=len(tactics))
-    table.style = doc.styles['Table Grid']
-    table.alignment = WD_TABLE_ALIGNMENT.CENTER
-
-    hdr_cells = table.rows[0].cells
-    for cnt, txt in enumerate(tactics):
-        hdr_cells[cnt].text = txt
-        hdr_cells[cnt].width = Inches(1.01)
-        hdr_cells[cnt]._tc.get_or_add_tcPr().append(
-            parse_xml(r'<w:shd {} w:fill="E1E9F0"/>'.format(nsdecls('w')))
-        )
-
-    # add in the rows
-    for row in range(max_rows):
-        row_cell = table.add_row().cells
-        for cnt, txt in enumerate(tactics):
-            if len(mtd[txt]) > row:
-                name = mtd[txt][row]["fields"]["name"]
-                url = mtd[txt][row]["fields"]["url"]
-                tl = mam_xml.mam_link.format(
-                    nsdecls('w'), ptp_mam_name=xu.xsafe(name), ptp_mam_url=xu.xsafe(url)
-                )
-
-                ptl = parse_xml(tl)
-                row_cell[cnt].paragraphs[0]._p.addnext(ptl)
-                xu.delete_paragraph(row_cell[cnt].paragraphs[0])
-
-    xu.move_table_after(table, p)
-
-    xu.delete_paragraph(p)
-
-
-def insert_mam_table(doc, mam_tag, mam_data):
-    """
-    Takes data containing information about the Mitre Attack Matrix
-    (mam) and replaces the paragraph containing the mam_tag
+    Args:
+        doc (docx document): The docx template being edited.
+        db (list): Assessment data
+        kev_tag (string): The string in the docx document that will be replaced with the table.
     """
 
-    # ---- constants used for hueristic to size the number of
-    #      mitre attack matrix (mam) entries per page
-    # the hueristic looks if the total of
-    #    paragraphs_seperator + lines_from_description + base_table_headers
-    # contributed by each entry does not exceed the total lines per page.
-    # if it does, add a page break and reset the counters
-    #
-    # these numbers were derived looking through various examples of
-    # attack matrix descriptions and estimating how much they contribute
-    # to the totals.  these are not precise values and may be tweaked
-    # in the future.
-    BASE_TABLE_LINES = 5
-    LINES_PER_CHAR = 100
-    LINES_PER_PAGE = 70
-    # ---- find the tag
-    p_tag = xu.find_paragraph(doc, mam_tag)
+    p_tag = xu.find_paragraph(doc, kev_tag)
 
     if p_tag is None:
-        return  # tag must not be in the document
+        return
 
-    matrix_entries = []
-    for ele in af.model_gen(mam_data, "ptportal.attackframework"):
-        m_ele = ele["fields"]
-        if m_ele["used"]:
-            matrix_entries.append(m_ele)
+    kevs = []
+    kev_ids = []
 
-    # ---- create the mam table
-    p = p_tag._p  # starting point
-    cnt = 0
-    idx = 0
-    for ele in matrix_entries:
-        idx += 1
-        # XXX the description may come in one string line break separated.
-        d = ele["description"]
-        desc = []
-        for d_ele in d.split('\\n\\n'):
-            d_ele = xu.xsafe(d_ele)
+    for cnt, kev in enumerate(af.model_gen(db, "ptportal.kev")):
+        ele = kev['fields']
 
-            d_ele = d_ele.encode('latin1', errors='ignore').decode(
-                'cp1252', errors='ignore'
-            )
-            # d_ele = d_ele.encode('utf-8').decode('cp1252')
+        if ele['found']:
+            found_kev = {"id": kev['pk'], "cve": ele['cve_id'], "vendor": ele['vendor_project'], "product": ele['product'], "vuln": ele['vulnerability_name'], "findings": []}
+            kevs.append(found_kev)
 
-            desc.append(mam_xml.desc_para.format(mam_xml.desc_run.format(d_ele)))
-            # add a blank paragraph
-            desc.append(mam_xml.desc_para.format(""))
+    for cnt, finding in enumerate(af.model_gen(db, "ptportal.uploadedfinding")):
+        ele = finding['fields']
 
-        descr_paras = len(desc)
-        descr_len = len(''.join(desc))
+        if ele['KEV']:        
+            for item in kevs:
+                if item['id'] in ele['KEV']:
+                    item['findings'].append(ele['uploaded_finding_name'])
 
-        cnt += BASE_TABLE_LINES  # overall base table lines
-        cnt += descr_paras
-        cnt += (descr_len // LINES_PER_CHAR) + 1
+    kev_list = sorted(kevs, key=lambda d: d['cve']) 
 
-        # uncomment to get info for tuning constants
-        # print("--->", idx, ">"+ele["name"]+"<", descr_paras,
-        #       descr_len, (descr_len // 100) + 1, cnt)
+    kev_table = doc.add_table(1, 5)
+    kev_table.style = doc.styles['CISA Table']
 
-        if cnt > LINES_PER_PAGE:
-            break_page = mam_xml.page_break
-            # reset the count
-            cnt = BASE_TABLE_LINES
-            cnt += descr_paras
-            cnt += (descr_len // 100) + 1
-        else:
-            break_page = ""
+    kev_table.cell(0, 0).text = "CVE"
+    kev_table.cell(0, 0).alignment = WD_ALIGN_PARAGRAPH.CENTER
+    kev_table.cell(0, 1).text = "Vendor"
+    kev_table.cell(0, 1).alignment = WD_ALIGN_PARAGRAPH.CENTER
+    kev_table.cell(0, 2).text = "Product"
+    kev_table.cell(0, 2).alignment = WD_ALIGN_PARAGRAPH.CENTER
+    kev_table.cell(0, 3).text = "Vulnerability"
+    kev_table.cell(0, 3).alignment = WD_ALIGN_PARAGRAPH.CENTER
+    kev_table.cell(0, 4).text = "Finding(s)"
+    kev_table.cell(0, 4).alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-        # XXX - for now, don't worry about page breaks, but may change back
-        break_page = ""
+    kev_table.cell(0, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    kev_table.cell(0, 0).paragraphs[0].runs[0].font.bold = True
+    kev_table.cell(0, 1).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    kev_table.cell(0, 1).paragraphs[0].runs[0].font.bold = True
+    kev_table.cell(0, 2).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    kev_table.cell(0, 2).paragraphs[0].runs[0].font.bold = True
+    kev_table.cell(0, 3).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    kev_table.cell(0, 3).paragraphs[0].runs[0].font.bold = True
+    kev_table.cell(0, 4).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    kev_table.cell(0, 4).paragraphs[0].runs[0].font.bold = True
 
-        # ---- replace information in generic xml string - `mam_tab'
-        mtab = mam_xml.mam_tab  # convience variable
-        mamns = mtab.format(
-            nsdecls('w'),
-            ptp_mam_id=ele["T_id"],
-            ptp_mam_url=xu.xsafe(ele["url"]),
-            ptp_mam_technique=xu.xsafe(ele["name"]),
-            ptp_mam_tactic=xu.xsafe(ele["tactics"]),
-            ptp_mam_desc_para=''.join(desc),
-            ptp_mam_page_break=break_page,
-        )
+    for cnt, vuln in enumerate(kev_list):
+        row = kev_table.add_row()
 
-        tbl = parse_xml(mamns)
-        p.addnext(tbl)
+        url = "https://nvd.nist.gov/vuln/detail/" + vuln['cve']
+        cve_cell = kev_table.cell(cnt + 1, 0)
+        p = cve_cell.paragraphs[0]
+        xu.add_link(p, 0, url, vuln['cve'])
+        kev_table.cell(cnt + 1, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
+        kev_table.cell(cnt + 1, 1).text = vuln['vendor']
+        kev_table.cell(cnt + 1, 1).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
+        kev_table.cell(cnt + 1, 2).text = vuln['product']
+        kev_table.cell(cnt + 1, 2).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
+        kev_table.cell(cnt + 1, 3).text = vuln['vuln']
+        kev_table.cell(cnt + 1, 3).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
+        kev_table.cell(cnt + 1, 4).text = ', '.join(vuln['findings'])
+        kev_table.cell(cnt + 1, 4).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-        # get a handle on the newly inserted table
-        t = p.getnext()
-        # create a new paragraph and add after table
-        new_p = OxmlElement("w:p")
-        t.addnext(new_p)
-        # point to the new paragraph
-        p = new_p
+    xu.set_column_width(kev_table.columns[0], 0.6)
+    xu.set_column_width(kev_table.columns[1], 0.72)
+    xu.set_column_width(kev_table.columns[2], 0.81)
+    xu.set_column_width(kev_table.columns[3], 2.19)
+    xu.set_column_width(kev_table.columns[4], 2.19)
 
-    # ---- remove the paragraph containing the tag
+    xu.move_table_after(kev_table, p_tag)
     xu.delete_paragraph(p_tag)
 
 
@@ -475,130 +266,59 @@ def insert_cis_csc_table(doc, db, cis_csc_tag):
     """
     p_tag = xu.find_paragraph(doc, cis_csc_tag)
 
-    # Stop if location does not exist
     if p_tag is None:
         return
 
     cis_csc_table = doc.add_table(1, 3)
-    cis_csc_table.style = doc.styles['MediumShading1-Accent1']
+    cis_csc_table.style = doc.styles['CISA Table']
 
     cis_csc_table.cell(0, 0).text = "ID"
+    cis_csc_table.cell(0, 0).alignment = WD_ALIGN_PARAGRAPH.CENTER
     cis_csc_table.cell(0, 1).text = "Controls"
+    cis_csc_table.cell(0, 1).alignment = WD_ALIGN_PARAGRAPH.CENTER
     cis_csc_table.cell(0, 2).text = "Finding ID"
-    cis_csc_table.columns[0].width = Inches(0.16)
-    cis_csc_table.columns[1].width = Inches(5.38)
-    cis_csc_table.columns[2].width = Inches(0.85)
+    cis_csc_table.cell(0, 2).alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     for cnt, rec in enumerate(af.model_gen(db, "ptportal.cis_csc")):
         ele = rec['fields']
         row = cis_csc_table.add_row()
 
-        row.cells[0].text = str(ele['CIS_ID'])
-        row.cells[1].text = xu.xsafe(ele['name'])
+        cis_csc_table.cell(cnt + 1, 0).text = str(ele['CIS_ID'])
+        cis_csc_table.cell(cnt + 1, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+        cis_csc_table.cell(cnt + 1, 1).text = xu.xsafe(ele['name'])
+        cis_csc_table.cell(cnt + 1, 1).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
+        cis_csc_table.cell(cnt + 1, 2).text = ele['finding_ids']
+        cis_csc_table.cell(cnt + 1, 2).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-        cis_csc_fid = ele['findings']
-        f_list = []
-        fid_list = ""
-        for f_cnt, f in enumerate(af.model_gen(db, "ptportal.uploadedfinding")):
-            fid = f['fields']['finding']
-            if fid in cis_csc_fid:
-                f_list.append(f_cnt + 1)
-            fid_list = ', '.join(str(e) for e in f_list)
+    cis_csc_table.cell(0, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    cis_csc_table.cell(0, 0).paragraphs[0].runs[0].font.bold = True
+    cis_csc_table.cell(0, 1).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    cis_csc_table.cell(0, 1).paragraphs[0].runs[0].font.bold = True
+    cis_csc_table.cell(0, 2).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    cis_csc_table.cell(0, 2).paragraphs[0].runs[0].font.bold = True
 
-        row.cells[2].text = fid_list
-        row.height = Inches(0.25)
+    xu.set_column_width(cis_csc_table.columns[0], 0.37)
+    xu.set_column_width(cis_csc_table.columns[1], 5.06)
+    xu.set_column_width(cis_csc_table.columns[2], 1.06)
 
     xu.move_table_after(cis_csc_table, p_tag)
-    print(cis_csc_table.autofit)
     xu.delete_paragraph(p_tag)
 
 
-def insert_hva_targets_table(doc, db, hva_targets_tag):
-    """Generates the HVA table that lists the high value assets of the report.
-
-    Args:
-        doc (docx document): The docx template being edited.
-        db (list): Assessment data
-        hva_targets_tag (string): The string inside of the docx document that will be replaced with the table.
-    """
-    p_tag = xu.find_paragraph(doc, hva_targets_tag)
-
-    # Stop if location does not exist
-    if p_tag is None:
-        return
-
-    targets_table = doc.add_table(1, 3)
-    targets_table.style = doc.styles['MediumShading1-Accent1']
-    targets_table.cell(0, 0).text = "Target"
-    targets_table.cell(0, 1).text = "Address"
-    targets_table.cell(0, 2).text = "Status"
-
-    for cnt, rec in enumerate(af.model_gen(db, "ptportal.hvatarget")):
-        ele = rec['fields']
-        row = targets_table.add_row()
-
-        row.cells[0].text = xu.xsafe(ele['name'])
-        row.cells[1].text = xu.xsafe(ele['address'])
-        row.cells[2].text = xu.xsafe(ele['status'])
-
-    xu.move_table_after(targets_table, p_tag)
-    # Delete tag
-    xu.delete_paragraph(p_tag)
-
-
-def insert_hva_str_table(doc, db, hva_str_tag):
-    """Generates and inserts the table which lists out the HVA scenarios for the assessment.
-
-    Args:
-        doc (docx document): The docx template being edited.
-        db (list): Assessment data
-        hva_str_tag (string): The string inside of the docx document that will be replaced with the table.
-    """
-
-    hva_str_keys = [
-        ["HVA_external_scenario", "Scenario #1 – External Assessment - "],
-        ["HVA_phishing_scenario", "Scenario #2 – Phishing Assessment - "],
-        ["HVA_web_application_scenario", "Scenario #3 – Web Application Assessment - "],
-        ["HVA_internal_scenario", "Scenario #4 – Internal Assessment - "],
-        ["HVA_ITE_scenario", "Scenario #5 – Internal Threat Emulation (ITE) - "],
-        ["HVA_data_exfiltration_scenario", "Scenario #6 – Data Exfiltration - "],
-    ]
-
-    # Find tag location in document
-    p_tag = xu.find_paragraph(doc, hva_str_tag)
-
-    # Stop if location does not exist
-    if p_tag is None:
-        return
-    hva_str_table = doc.add_table(len(hva_str_keys), 1)
-    hva_str_table.style = doc.styles['LightShading-Accent1']
-
-    for cnt, k in enumerate(hva_str_keys):
-        val = k[1] + af.get_db_info(
-            db, "report.fields." + k[0], "keyNA", allow_empty=True
-        )
-        hva_str_table.cell(cnt, 0).text = xu.xsafe(val)
-
-    xu.move_table_after(hva_str_table, p_tag)
-    # Delete tag
-    xu.delete_paragraph(p_tag)
-
-
-def insert_ndf_table(doc, db, ndf_tag, media_path):
+def insert_df_table(doc, db, df_tag, media_path):
     """Generates the NCATS Detailed findings table for each finding that is listed/added to the report.
 
     Args:
         doc (docx document): The docx template being edited.
         db (list): Assessment data
-        ndf_tag (string): The string inside of the docx document that will be replaced with the tables.
+        df_tag (string): The string inside of the docx document that will be replaced with the tables.
         media_path (string): Path to the location where the report screenshots are.
     """
 
-    # ---- find the tag
-    p_tag = xu.find_paragraph(doc, ndf_tag)
+    p_tag = xu.find_paragraph(doc, df_tag)
 
     if p_tag is None:
-        return  # tag must not be in the document
+        return
 
     current_mark = p_tag
 
@@ -609,206 +329,185 @@ def insert_ndf_table(doc, db, ndf_tag, media_path):
     as_info = {k: xu.xsafe(v) for k, v in as_info.items()}
 
     for cnt, finding in enumerate(af.model_gen(db, "ptportal.uploadedfinding")):
+        ele = finding['fields']
+
         fpk = finding['pk']
-        fname = finding["fields"]["uploaded_finding_name"]
-        ele = finding["fields"]
+        fid = str(cnt + 1)
+        fname = ele['uploaded_finding_name']
 
-        # ---- replace information in generic xml string - `ndf_tab'
-        if fname.startswith("Spear Phishing Weaknesses"):
-            ptp_ndf_screen_text = 'Payload Testing Results'
-            ptp_ndf_screenshot_note = ele["payload_description"]
+        severity = ele['severity']
+        location = ele['assessment_type']
 
-        elif fname.startswith("Spear Phishing Susceptibility"):
-            ptp_ndf_screen_text = 'Phishing Assessment Results'
-            ptp_ndf_screenshot_note = ele["campaign_description"]
-
+        if ele['mitigation']:
+            mitigation = "Mitigated"
         else:
-            finding_sshot = af.find_screenshots(ss_info, fpk)
+            mitigation = "Not Mitigated"
 
-            have_ss = ""
-            if len(finding_sshot) == 0:
-                have_ss = "No "
-            ptp_ndf_screen_text = have_ss + 'Relevant Screenshot'
-            ptp_ndf_screenshot_note = ele['screenshot_description']
+        finding_sshot = af.find_screenshots(ss_info, fpk)
+
+        have_ss = ""
+        if len(finding_sshot) == 0:
+            have_ss = "No "
+        ptp_df_screen_text = have_ss + "Relevant Screenshots"
+        ptp_df_screenshot_note = ele['screenshot_description']
 
         # ---- build the affected systems string
-        affected_systems = af.find_affected_systems(as_info, ele["affected_systems"])
+        affected_systems = af.find_affected_systems(as_info, ele['affected_systems'])
 
-        ndf_table = doc.add_table(12, 5)
-        ndf_table.style = doc.styles['NDF Table']
-        rgb = xu.hex_to_rgb(colors[ele['severity']])
+        df_table = doc.add_table(12, 5)
+        df_table.style = doc.styles['Findings Table']
 
-        ndf_table.cell(0, 0).text = "ID"
-        ndf_table.cell(0, 1).text = "Finding"
-        ndf_table.cell(0, 2).text = "Severity"
-        ndf_table.cell(0, 3).text = "Location"
-        ndf_table.cell(0, 4).text = "Mitigated"
-        ndf_table.cell(1, 0).text = str(cnt + 1)
-        ndf_table.cell(1, 1).text = xu.xsafe(fname)
-        ndf_table.cell(1, 2).text = ele["severity"]
-        ndf_table.cell(1, 3).text = xu.xsafe(ele['assessment_type'])
-        if xu.xsafe(str(ele['mitigation'])) == "True":
-            ndf_table.cell(1, 4).text = "Yes"
+        df_table.cell(0, 0).text = "ID"
+        df_table.cell(0, 1).text = "Finding"
+        df_table.cell(0, 2).text = "Severity"
+        df_table.cell(0, 3).text = "Location"
+        df_table.cell(0, 4).text = "Mitigation Status"
+
+        df_table.cell(1, 0).text = fid
+        df_table.cell(1, 1).text = xu.xsafe(fname)
+        #df_table.cell(1, 2).text = "• " + xu.xsafe(severity)
+        sev_cell = df_table.cell(1, 2).paragraphs[0]
+        
+        if severity == "Critical":
+            sev_cell.add_run("• ").font.color.rgb = RGBColor(255, 116, 113)
+        elif severity == "High":
+            sev_cell.add_run("• ").font.color.rgb = RGBColor(252, 191, 143)
+        elif severity == "Medium":
+            sev_cell.add_run("• ").font.color.rgb = RGBColor(255, 222, 89)
+        elif severity == "Low":
+            sev_cell.add_run("• ").font.color.rgb = RGBColor(131, 224, 142)
         else:
-            ndf_table.cell(1, 4).text = "No"
-        ndf_table.cell(1, 2).paragraphs[0].runs[0].font.color.rgb = RGBColor(
-            rgb[0], rgb[1], rgb[2]
-        )
-        xu.set_cell_border(
-            ndf_table.cell(1, 0), end={"sz": 8, "val": "single", "color": "#000000"}
-        )
-        xu.set_cell_border(
-            ndf_table.cell(1, 1), end={"sz": 8, "val": "single", "color": "#000000"}
-        )
-        xu.set_cell_border(
-            ndf_table.cell(1, 2), end={"sz": 8, "val": "single", "color": "#000000"}
-        )
-        xu.set_cell_border(
-            ndf_table.cell(1, 3), end={"sz": 8, "val": "single", "color": "#000000"}
-        )
+            sev_cell.add_run("• ").font.color.rgb = RGBColor(79, 175, 227)
 
-        ndf_table.cell(2, 0).merge(ndf_table.cell(2, 3))
-        ndf_table.cell(2, 0).text = "Affected Systems"
-        ndf_table.cell(3, 0).merge(ndf_table.cell(3, 3))
-        ndf_table.cell(3, 0).text = affected_systems
+        sev_cell.add_run(xu.xsafe(severity))
+        df_table.cell(1, 2).paragraphs[0].runs[0].font.bold = True
+        df_table.cell(1, 2).paragraphs[0].runs[1].font.bold = True
+        df_table.cell(1, 3).text = xu.xsafe(location)
 
-        ndf_table.cell(4, 0).merge(ndf_table.cell(4, 3))
-        ndf_table.cell(4, 0).text = "Description"
-        ndf_table.cell(5, 0).merge(ndf_table.cell(5, 3))
-        ndf_table.cell(5, 0).text = xu.xsafe(ele["description"])
+        mit_cell = df_table.cell(1, 4).paragraphs[0]
 
-        ndf_table.cell(6, 0).merge(ndf_table.cell(6, 3))
-        ndf_table.cell(6, 0).text = "Recommended Mitigation"
-        ndf_table.cell(7, 0).merge(ndf_table.cell(7, 3))
-        ndf_table.cell(7, 0).text = xu.xsafe(ele["remediation"])
+        if mitigation == "Mitigated":
+            mit_cell.add_run("• ").font.color.rgb = RGBColor(131, 224, 142)
+        else:
+            mit_cell.add_run("• ").font.color.rgb = RGBColor(255, 116, 113)
 
-        ndf_table.cell(8, 0).merge(ndf_table.cell(8, 3))
-        ndf_table.cell(8, 0).text = xu.xsafe(ptp_ndf_screen_text)
-        ndf_table.cell(9, 0).merge(ndf_table.cell(9, 3))
-        ndf_table.cell(9, 0).paragraphs[0].text = ptp_ndf_screenshot_note
+        mit_cell.add_run(xu.xsafe(mitigation))
+        df_table.cell(1, 4).paragraphs[0].runs[0].font.bold = True
+        df_table.cell(1, 4).paragraphs[0].runs[1].font.bold = True
 
-        ndf_table.cell(10, 0).merge(ndf_table.cell(10, 3))
-        ndf_table.cell(10, 0).text = "Security Reference (FCRM, NIST, etc.)"
-        ndf_table.cell(11, 0).merge(ndf_table.cell(11, 3))
-        nist_800 = ndf_table.cell(11, 0).paragraphs[0]
+        for i in range(0, 5):
+            df_table.cell(0, i).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+            df_table.cell(0, i).paragraphs[0].runs[0].font.bold = True
+            xu.set_cell_border(df_table.cell(0, i), top={"sz": 8, "val": "single", "color": "#000000"})
+            xu.set_cell_border(df_table.cell(0, i), bottom={"sz": 8, "val": "single", "color": "#000000"})
+            if i < 4:
+                xu.set_cell_border(df_table.cell(0, i), end={"sz": 8, "val": "single", "color": "#000000"})
+
+        for i in range(0, 5):
+            df_table.cell(1, i).paragraphs[0].runs[0].font.bold = True
+            xu.set_cell_border(df_table.cell(1, i), top={"sz": 8, "val": "single", "color": "#000000"})
+            xu.set_cell_border(df_table.cell(1, i), bottom={"sz": 8, "val": "single", "color": "#000000"})
+            if i < 4:
+                xu.set_cell_border(df_table.cell(1, i), end={"sz": 8, "val": "single", "color": "#000000"})
+
+        df_table.cell(2, 0).merge(df_table.cell(2, 4))
+        df_table.cell(2, 0).text = "Affected Systems"
+        df_table.cell(2, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(3, 82, 136)
+        df_table.cell(2, 0).paragraphs[0].runs[0].font.bold = True
+        df_table.cell(2, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
+        xu.set_cell_border(df_table.cell(2, 0), bottom={"sz": 8, "val": "single", "color": "#BFBFBF"})
+        df_table.cell(3, 0).merge(df_table.cell(3, 4))
+        df_table.cell(3, 0).text = affected_systems
+        df_table.cell(3, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+        df_table.cell(4, 0).merge(df_table.cell(4, 4))
+        df_table.cell(4, 0).text = "Description"
+        df_table.cell(4, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(3, 82, 136)
+        df_table.cell(4, 0).paragraphs[0].runs[0].font.bold = True
+        df_table.cell(4, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
+        xu.set_cell_border(df_table.cell(4, 0), bottom={"sz": 8, "val": "single", "color": "#BFBFBF"})
+        df_table.cell(5, 0).merge(df_table.cell(5, 4))
+        df_table.cell(5, 0).text = xu.xsafe(ele['description'])
+        df_table.cell(5, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+        df_table.cell(6, 0).merge(df_table.cell(6, 4))
+        df_table.cell(6, 0).text = "Recommended Mitigation"
+        df_table.cell(6, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(3, 82, 136)
+        df_table.cell(6, 0).paragraphs[0].runs[0].font.bold = True
+        df_table.cell(6, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
+        xu.set_cell_border(df_table.cell(6, 0), bottom={"sz": 8, "val": "single", "color": "#BFBFBF"})
+        df_table.cell(7, 0).merge(df_table.cell(7, 4))
+        df_table.cell(7, 0).text = xu.xsafe(ele['remediation'])
+        df_table.cell(7, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+        df_table.cell(8, 0).merge(df_table.cell(8, 4))
+        df_table.cell(8, 0).text = xu.xsafe(ptp_df_screen_text)
+        df_table.cell(8, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(3, 82, 136)
+        df_table.cell(8, 0).paragraphs[0].runs[0].font.bold = True
+        df_table.cell(8, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
+        xu.set_cell_border(df_table.cell(8, 0), bottom={"sz": 8, "val": "single", "color": "#BFBFBF"})
+        df_table.cell(9, 0).merge(df_table.cell(9, 4))
+        df_table.cell(9, 0).paragraphs[0].text = ptp_df_screenshot_note
+        df_table.cell(9, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+        df_table.cell(10, 0).merge(df_table.cell(10, 4))
+        df_table.cell(10, 0).text = "Security References"
+        df_table.cell(10, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(3, 82, 136)
+        df_table.cell(10, 0).paragraphs[0].runs[0].font.bold = True
+        df_table.cell(10, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
+        xu.set_cell_border(df_table.cell(10, 0), bottom={"sz": 8, "val": "single", "color": "#BFBFBF"})
+        df_table.cell(11, 0).merge(df_table.cell(11, 4))
+
+        if len(ele['KEV']) > 0:
+            kev = df_table.cell(11, 0).paragraphs[0]
+            kev.add_run("This finding is a ")
+            kev.add_run("Known Exploited Vulnerability.\n").bold = True
+
+        nist_800 = df_table.cell(11, 0).paragraphs[0]
         nist_800.add_run("NIST 800-53: ").bold = True
-        nist_800.add_run(str(ele["NIST_800_53"]) + '\n')
-        nist_csf = ndf_table.cell(11, 0).paragraphs[0]
+        nist_800.add_run(str(ele['NIST_800_53']) + '\n')
+        nist_csf = df_table.cell(11, 0).paragraphs[0]
         nist_csf.add_run("NIST CSF: ").bold = True
-        nist_csf.add_run(str(ele["NIST_CSF"]) + '\n')
-        cmmc = ndf_table.cell(11, 0).paragraphs[0]
-        cmmc.add_run("CMMC: ").bold = True
-        cmmc.add_run(str(ele["CMMC"]) + '\n')
-        ncats_id = ndf_table.cell(11, 0).paragraphs[0]
-        ncats_id.add_run("CISA ID: ").bold = True
-        ncats_id.add_run(str(ele["finding"]))
+        nist_csf.add_run(str(ele['NIST_CSF']))
+        df_table.cell(11, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+        xu.set_column_width(df_table.columns[0], 0.42)
+        xu.set_column_width(df_table.columns[1], 2.22)
+        xu.set_column_width(df_table.columns[2], 1.23)
+        xu.set_column_width(df_table.columns[3], 1.25)
+        xu.set_column_width(df_table.columns[4], 1.32)
 
         page_break = doc.add_paragraph()
         page_break.add_run().add_break(WD_BREAK.PAGE)
         current_mark._p.addnext(page_break._p)
-        xu.move_table_after(ndf_table, current_mark)
+        xu.move_table_after(df_table, current_mark)
 
-        if fname.startswith("Spear Phishing Weaknesses"):
-            spw_payloads = af.model_gen(db, "ptportal.spearphishingweaknesses")
-            spw_table = ndf_table.cell(9, 0).add_table(1, 4)
-            spw_table.style = doc.styles['Report Default Table']
+        screenshot_cell = df_table.cell(9, 0)
+        for sshot in finding_sshot:
+            ssf = sshot['fields']
+            sfile = media_path + ssf['file']
+            if not os.path.exists(sfile):
+                print("Can't find screenshot file", sfile)
+                continue
 
-            spw_table.cell(0, 0).text = "Payload"
-            spw_table.cell(0, 1).text = "C2 Protocol"
-            spw_table.cell(0, 2).text = "Border Protection"
-            spw_table.cell(0, 3).text = "Host Protection"
+            screenshot = screenshot_cell.add_paragraph()
+            screenshot.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            screenshot_run = screenshot.add_run()
 
-            for ele in spw_payloads:
-                # build up the payload rows
-                vals = ele['fields']
-                row = spw_table.add_row()
-                row.cells[0].text = vals['payload_description']
-                row.cells[1].text = vals['c2_protocol']
+            scap = xu.xsafe(ssf['caption'])
 
-                if vals['border_protection'] == 'B':
-                    row.cells[2].text = "Blocked"
-                    row.cells[2].paragraphs[0].runs[0].font.color.rgb = RGBColor(
-                        79, 174, 91
-                    )
-                else:
-                    row.cells[2].text = "Not Blocked"
-                    row.cells[2].paragraphs[0].runs[0].font.color.rgb = RGBColor(
-                        255, 0, 0
-                    )
+            with Image.open(sfile) as img:
+                swidth = img.size[0]
+                xu.dpi_safe(sfile, img)
 
-                if vals['host_protection'] == 'B':
-                    row.cells[3].text = "Blocked"
-                    row.cells[3].paragraphs[0].runs[0].font.color.rgb = RGBColor(
-                        79, 174, 91
-                    )
-                else:
-                    row.cells[3].text = "Not Blocked"
-                    row.cells[3].paragraphs[0].runs[0].font.color.rgb = RGBColor(
-                        255, 0, 0
-                    )
+            if swidth < 455:
+                screenshot_run.add_picture(sfile)
+            else:
+                screenshot_run.add_picture(sfile, width=Inches(5.5))
 
-            caption = xu.insert_caption(doc, "Payload Testing Results")
-            spw_table._tbl.addnext(caption._p)
+            caption = xu.insert_caption(doc, True, scap)
+            screenshot._p.addnext(caption._p)
 
-        elif fname.startswith("Spear Phishing Susceptibility"):
-            sps_payloads = af.model_gen(db, "ptportal.spearphishingsusceptibility")
-
-            for idx, ele in enumerate(sps_payloads):
-                val = ele['fields']
-                campaign_table = ndf_table.cell(9, 0).add_table(9, 2)
-
-                campaign_table.style = doc.styles['Report Default Table']
-
-                campaign_table.cell(0, 0).text = "Campaign"
-                campaign_table.cell(0, 1).text = str(idx + 1)
-                campaign_table.cell(1, 0).text = "Emails sent:"
-                campaign_table.cell(1, 1).text = str(val["emails_sent"])
-                campaign_table.cell(2, 0).text = "Emails successfully delivered:"
-                campaign_table.cell(2, 1).text = str(val["emails_delivered"])
-                campaign_table.cell(3, 0).text = "Click-through rate:"
-                campaign_table.cell(3, 1).text = "{0:.2%}".format(
-                    float(val["click_rate"])
-                )
-                campaign_table.cell(4, 0).text = "Total Clicks:"
-                campaign_table.cell(4, 1).text = str(val['total_clicks'])
-                campaign_table.cell(5, 0).text = "Unique Clicks:"
-                campaign_table.cell(5, 1).text = str(val['unique_clicks'])
-                campaign_table.cell(6, 0).text = "Time to first click:"
-                campaign_table.cell(6, 1).text = str(val['time_to_first_click'])
-                campaign_table.cell(7, 0).text = "Users exploited:"
-                campaign_table.cell(7, 1).text = str(val['number_exploited'])
-                campaign_table.cell(8, 0).text = "Length of Campaign:"
-                campaign_table.cell(8, 1).text = str(val['length_of_campaign'])
-
-            caption = xu.insert_caption(doc, "Phishing Assessment Results")
-            campaign_table._tbl.addnext(caption._p)
-
-        else:
-            screenshot_cell = ndf_table.cell(9, 0)
-            for sshot in finding_sshot:
-                ssf = sshot["fields"]
-                sfile = media_path + ssf['file']
-                if not os.path.exists(sfile):
-                    print("Can't find screenshot file", sfile)
-                    sys.exit(1)
-
-                screenshot = screenshot_cell.add_paragraph()
-                screenshot.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                screenshot_run = screenshot.add_run()
-
-                scap = xu.xsafe(ssf['caption'])
-
-                with Image.open(sfile) as img:
-                    swidth = img.size[0]
-                    xu.dpi_safe(sfile, img)
-
-                if swidth < 455:
-                    screenshot_run.add_picture(sfile)
-                else:
-                    screenshot_run.add_picture(sfile, width=Inches(5.5))
-
-                caption = xu.insert_caption(doc, scap)
-                screenshot._p.addnext(caption._p)
         # now delete the temporary screenshot xml tag
         current_mark = page_break
 
@@ -816,42 +515,83 @@ def insert_ndf_table(doc, db, ndf_tag, media_path):
     xu.delete_paragraph(p_tag)
 
 
-def insert_as_table(doc, db, as_tag):
-    """Generates and inserts the table with the assessment scenarios for a HVA assessment.
+def insert_rs_table(doc, db, rs_tag, media_path):
+    """Generates and inserts the table with the risk scores and findings chart.
 
     Args:
         doc (docx document): The docx template being edited.
         db (list): Assessment data
-        as_tag (string): The string in the docx document that will be replaced with the table.
+        rs_tag (string): The string in the docx document that will be replaced with the table.
+        media_path (string): Path to the location where the report images are.
     """
-    # Find tag location in document
-    p_tag = xu.find_paragraph(doc, as_tag)
 
-    # Stop if location does not exist
+    p_tag = xu.find_paragraph(doc, rs_tag)
+
     if p_tag is None:
         return
 
-    as_list = []
-    for ascenario in af.model_gen(db, "ptportal.assessmentscenarios"):
-        as_list.append(ascenario)
+    total_risk_score = 0
+    mitigated_risk_score = 0
 
-    if len(as_list) == 0:
-        as_table = doc.add_table(1, 1)
-        as_table.style = doc.styles['LightShading-Accent1']
-        as_table.cell(0, 0).text = "No Assessment Scenarios found"
+    for finding in af.model_gen(db, 'ptportal.uploadedfinding'):
+        total_risk_score += finding.get("fields").get("risk_score")
+        if not finding.get("fields").get("mitigation"):
+            mitigated_risk_score += finding.get("fields").get("risk_score")
+
+    rs_table = doc.add_table(1, 2)
+    score_cell = rs_table.cell(0, 0)
+    chart_cell = rs_table.cell(0, 1)
+
+    total_label = score_cell.add_paragraph()
+    total_label.text = "Total Risk Score"
+    total_label.style = "NormalBold"
+    total_label.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+    total_score = score_cell.add_paragraph()
+    total_score.text = str(total_risk_score)
+    total_score.style = "RiskScore"
+
+    mitigated_label = score_cell.add_paragraph()
+    mitigated_label.text = "Mitigated Risk Score"
+    mitigated_label.style = "NormalBold"
+    mitigated_label.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+    mitigated_score = score_cell.add_paragraph()
+    mitigated_score.text = str(mitigated_risk_score)
+    mitigated_score.style = "RiskScore"
+
+    blank = score_cell.add_paragraph()
+    blank.text = ""
+    blank.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+    file = media_path + 'charts/riskchart.png'
+    if not os.path.exists(file):
+        print("Can't find chart file", file)
     else:
-        as_table = doc.add_table(len(as_list), 1)
-        as_table.style = doc.styles['LightShading-Accent1']
-        for cnt, ele in enumerate(as_list):
-            ascenario_descr = ele['fields']['scenario']
-            ascenario_type = ele['fields']['assessment_scenario_type']
-            tmp_str = "Scenario #{} - {} - {}".format(
-                cnt + 1, ascenario_type, ascenario_descr
-            )
-            as_table.cell(cnt, 0).text = xu.xsafe(tmp_str)
+        chart = chart_cell.paragraphs[0].add_run()
+        chart_cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-    xu.move_table_after(as_table, p_tag)
-    # Delete tag
+        with Image.open(file) as img:
+            swidth = img.size[0]
+        if swidth < 455:
+            chart.add_picture(file)
+        else:
+            chart.add_picture(file, width=Inches(4.5))
+
+    xu.set_cell_border(rs_table.cell(0, 0), start={"sz": 8, "val": "single", "color": "#BFBFBF"})
+    xu.set_cell_border(rs_table.cell(0, 1), start={"sz": 8, "val": "single", "color": "#BFBFBF"})
+    xu.set_cell_border(rs_table.cell(0, 0), top={"sz": 8, "val": "single", "color": "#BFBFBF"})
+    xu.set_cell_border(rs_table.cell(0, 1), top={"sz": 8, "val": "single", "color": "#BFBFBF"})
+    xu.set_cell_border(rs_table.cell(0, 0), bottom={"sz": 8, "val": "single", "color": "#BFBFBF"})
+    xu.set_cell_border(rs_table.cell(0, 1), bottom={"sz": 8, "val": "single", "color": "#BFBFBF"})
+    xu.set_cell_border(rs_table.cell(0, 0), end={"sz": 8, "val": "single", "color": "#BFBFBF"})
+    xu.set_cell_border(rs_table.cell(0, 1), end={"sz": 8, "val": "single", "color": "#BFBFBF"})
+
+    xu.set_column_width(rs_table.columns[0], 1.62)
+    xu.set_column_width(rs_table.columns[1], 4.87)
+
+    xu.move_table_after(rs_table, p_tag)
+    
     xu.delete_paragraph(p_tag)
 
 
@@ -862,12 +602,13 @@ def insert_pass_analysis(doc, db):
         doc (Docx object): The docx template.
         db (List of dictionaries): Json of the engagement data.
     """
-    p_tag = xu.find_paragraph(doc, '{Password Analysis Output}')
+    p_tag = xu.find_paragraph(doc, "{PASSWORD ANALYSIS}")
+
     if p_tag is None:
         return
 
-    p_tag.style = doc.styles['Tech Text']
-    p_tag.text = af.get_db_info(db, 'report.fields.password_analysis', 'NA')
+    p_tag.style = doc.styles['Pass Analysis']
+    p_tag.text = af.get_db_info(db, 'report.fields.password_analysis', 'If password analysis data is available, paste it here. Otherwise, consider removing this section and renaming the subsequent appendices accordingly.')
 
 
 def insert_acronyms(doc, db):
@@ -878,60 +619,26 @@ def insert_acronyms(doc, db):
         db (List of dictionaries): Json of the engagement data.
     """
 
-    p_tag = xu.find_paragraph(doc, '{Table: Abbreviations and Acronyms}')
+    p_tag = xu.find_paragraph(doc, "{Table: Acronyms}")
+
     if p_tag is None:
         return
 
-    acronym_table = doc.add_table(2, 2)
+    acronym_table = doc.add_table(1, 2)
+    acronym_table.style = doc.styles['Acronyms']
 
-    acronym_table.style = "Report Default Table"
-    acronym_table.cell(0, 0).text = "Acronym"
-    acronym_table.cell(0, 1).text = "Definition"
+    for cnt, acr in enumerate(af.model_gen(db, "ptportal.acronym")):
+        ele = acr['fields']
+        row = acronym_table.add_row()
 
-    acronym_table.cell(1, 0).text = af.get_db_info(
-        db, 'engagementmeta.fields.customer_initials', 'Customer Acronym'
-    )
-    acronym_table.cell(1, 1).text = af.get_db_info(
-        db, 'engagementmeta.fields.customer_long_name', 'Customer Name'
-    )
-
-    for a in af.model_gen(db, "ptportal.acronym"):
-        cells = acronym_table.add_row().cells
-        cells[0].text = a["fields"]["acronym"]
-        cells[1].text = a["fields"]["definition"]
+        acronym_table.cell(cnt, 0).text = ele['acronym']
+        acronym_table.cell(cnt, 1).text = ele['definition']
+        
+    xu.set_column_width(acronym_table.columns[0], 1.38)
+    xu.set_column_width(acronym_table.columns[1], 5.23)
 
     xu.move_table_after(acronym_table, p_tag)
-    xu.delete_paragraph(p_tag)
-
-
-def insert_port_mappings(doc, db):
-    """Inserts the port mappings from the portal into the report.
-
-    Args:
-        doc (docx object): The docx template.
-        db (List of dictionaries): The json data of the engagement.
-    """
-    p_tag = xu.find_paragraph(doc, '{Table: Port Mapping')
-    if p_tag is None:
-        return
-
-    port_data = af.model_gen(db, 'ptportal.portmappinghost')
-    port_table = doc.add_table(sum(1 for _ in port_data) + 1, 4)
-    port_table.style = doc.styles['Report Default Table']
-    port_table.cell(0, 0).text = "IP"
-    port_table.cell(0, 1).text = "Hostname"
-    port_table.cell(0, 2).text = "Ports"
-    port_table.cell(0, 3).text = "Services"
-
-    # We collect the data twice due to a generator only being able to be used once.
-    port_data = af.model_gen(db, 'ptportal.portmappinghost')
-    for port in enumerate(port_data):
-        port_table.cell(port[0] + 1, 0).text = port[1]['fields']['ip']
-        port_table.cell(port[0] + 1, 1).text = port[1]['fields']['hostname']
-        port_table.cell(port[0] + 1, 2).text = port[1]['fields']['ports']
-        port_table.cell(port[0] + 1, 3).text = port[1]['fields']['services']
-
-    xu.move_table_after(port_table, p_tag)
+    
     xu.delete_paragraph(p_tag)
 
 
@@ -943,66 +650,82 @@ def insert_attack_paths(doc, db, media_path):
         db (List of dictionaries): The JSON of the engagment data.
         media_path (String): Path to the media files
     """
-    maxHeight = 6.2
-    maxWidth = 9
-    p_tag = xu.find_paragraph(doc, '{Attack Path Diagrams}')
 
-    if p_tag is None:
-        return
+    p_tag = xu.find_paragraph(doc, "{ATTACK PATHS}")
 
-    p = p_tag._p
-    images = list(af.model_gen(db, 'ptportal.attackpath'))
+    techniques = []
 
-    for i in images[::-1]:
-        screen_p = doc.add_paragraph()
-        screen_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    for technique in af.model_gen(db, "ptportal.attack"):
+        ele = technique['fields']
+        t_data = {"id": technique['pk'], "t_id": ele['t_id'], "name": ele['name']}
+        techniques.append(t_data)
 
-        dimension = Image.open(media_path + i.get("fields").get("image_upload"))
-        oldWidth, oldHeight = dimension.size
-        dimension.close()
-        # The division is to convert the pixels into inches for the docx.
-        newWidth, newHeight = xu.resize_image(
-            oldWidth / 72.0, oldHeight / 72.0, maxWidth, maxHeight
-        )
+    for cnt, path in reversed(list(enumerate(af.model_gen(db, "ptportal.narrative")))):
 
-        r = screen_p.add_run()
-        r.add_picture(
-            media_path + i.get("fields").get("image_upload"),
-            width=Inches(newWidth),
-            height=Inches(newHeight),
-        )
+        page_break = doc.add_paragraph()
+        page_break.add_run().add_break(WD_BREAK.PAGE)
+        p_tag._p.addnext(page_break._p)
 
-        caption = xu.insert_caption(doc, i.get("fields").get("figure_description"))
-        caption.add_run().add_break(WD_BREAK.PAGE)
+        ele = path['fields']
 
-        p.addnext(screen_p._p)
-        screen_p._p.addnext(caption._p)
+        name = ele['name'] + " " + str(ele['order'])
+        used_techniques = []
+
+        if ele['attack']:
+            for item in techniques:
+                if item['id'] in ele['attack']:
+                    used_techniques.append(item)
+
+        for t in reversed(used_techniques):
+            b = doc.add_paragraph()
+            if t['t_id']:
+                url = "https://attack.mitre.org/techniques/" + t['t_id']
+            else:
+                url = "https://attack.mitre.org/techniques/"
+            xu.add_link(b, 0, url, t['name'])
+            b.style = "List Bullet 2"
+            p_tag._p.addnext(b._p)
+
+        mitre = doc.add_paragraph()
+        mitre_start = mitre.add_run("The following ")
+        xu.add_link(mitre, 1, "https://attack.mitre.org/", "MITRE ATT&CK")
+        mitre_end = mitre.add_run(" Techniques were leveraged in this attack path:")
+        mitre.runs[1].font.bold = True
+        mitre.style = "Normal"
+        p_tag._p.addnext(mitre._p)
+
+        if ele['file']:
+            dcap = xu.xsafe(ele['caption'])
+            caption = xu.insert_caption(doc, True, dcap)
+            p_tag._p.addnext(caption._p)
+
+            file = media_path + ele['file']
+            if not os.path.exists(file):
+                print("Can't find diagram file", file)
+                continue
+            diagram = doc.add_paragraph()
+            diagram.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            diagram_run = diagram.add_run()
+
+            with Image.open(file) as img:
+                swidth = img.size[0]
+                xu.dpi_safe(file, img)
+
+            if swidth < 455:
+                diagram_run.add_picture(file)
+            else:
+                diagram_run.add_picture(file, width=Inches(6.5))
+
+            p_tag._p.addnext(diagram._p)
+        else:
+            diagram = doc.add_paragraph("<NO ATTACK PATH DIAGRAM>")
+            diagram.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            print("No diagram.")
+
+        header = doc.add_paragraph(name, style="Heading 2")
+        p_tag._p.addnext(header._p)
 
     xu.delete_paragraph(p_tag)
-
-
-def generate_narrative_data(db):
-    """
-    Generates and returns all of the data needed to populate the narrative section of the report.
-
-    Args:
-        db (List of dict(s)): The JSON output of the assessment facts.
-
-    Returns:
-        List: List with the needed narrative information.
-    """
-    narrative = af.model_gen(db, 'ptportal.narrative')
-    # Narrative is sorted by PK to get all of the sections sorted based on their main narrative.
-    sorted_narrative = sorted(narrative, key=lambda i: i['pk'])
-    screenshots = af.model_gen(db, 'ptportal.toolscreenshot')
-
-    for s in screenshots:
-        n = sorted_narrative[s.get("fields").get("narrative") - 1]
-        # Screenshots are seperated from the main narrative so have to match up narratives with their respective screenshots.
-        if "Screenshots" not in n:
-            n["Screenshots"] = []
-        n["Screenshots"].append(s)
-    return sorted_narrative
 
 
 def insert_narrative(doc, db, media_path):
@@ -1013,171 +736,237 @@ def insert_narrative(doc, db, media_path):
         db (List of dictionaries): The JSON of the engagment data.
         media_path (String): Path to the media files.
     """
-    p_tag = xu.find_paragraph(doc, '{Narrative Sections}')
+
+    p_tag = xu.find_paragraph(doc, "{NARRATIVE SECTION}")
+
     if p_tag is None:
         return
 
-    narrative_data = generate_narrative_data(db)
-    order = ['External', 'Phishing']
+    narratives = af.model_gen(db, 'ptportal.narrative')
 
-    if af.get_db_info(db, 'report.fields.report_type', 'NA') != 'RPT':
-        order.insert(1, 'Internal')
+    external_narratives = []
+    internal_narratives = []
+    phishing_narratives = []
+    tools = []
 
-    # Due to the way sections are added everything is created in reverse order.
-    for idx, o in enumerate(order):
-        # heading  = doc.add_paragraph(o,style='Heading 2')
-        heading = p_tag.insert_paragraph_before(o, style="Heading 2")
-        # p_tag._p.addnext(heading._p)
+    for cnt, tool in enumerate(af.model_gen(db, 'ptportal.tools')):
+        ele = tool['fields']
+        t = {"id": tool['pk'], "name": ele['name'], "url": ele['url']}
+        tools.append(t)
 
-        # Collect all narrative sections corresponding to the current main section since they are not in the correct order.
-        narrative = [
-            x for x in narrative_data if x.get("fields").get("type") == idx + 1
-        ]
-        for n in narrative[::-1]:
-            # If the section has no screenshots or tool output then skip the section.
-            if "Screenshots" not in n and n["fields"]["tool_output"] == "":
-                print("Skipping narrative")
-                continue
+    for narrative in narratives:
+        ele = narrative['fields']
 
-            subheading = doc.add_paragraph(n["fields"]["name"], style='Heading 3')
-            heading._p.addnext(subheading._p)
+        if ele['assessment_type'] == 1:
+            external_narratives.append(narrative)
+        elif ele['assessment_type'] == 2:
+            internal_narratives.append(narrative)
+        else:
+            phishing_narratives.append(narrative)
 
-            if n["fields"]["tool_output"] != "":
-                tool_description = doc.add_paragraph()
-                tool_description.text = n['fields']['tool_output_description']
-                subheading._p.addnext(tool_description._p)
+    if len(phishing_narratives) > 0:
 
-                codeblock = doc.add_paragraph("")
-                subheading._p.addnext(codeblock._p)
+        page_break = doc.add_paragraph()
+        page_break.add_run().add_break(WD_BREAK.PAGE)
+        p_tag._p.addnext(page_break._p)
+        
+        for p_cnt, pn in reversed(list(enumerate(phishing_narratives))):
+            narrative_steps = af.model_gen(db, 'ptportal.narrativestep')
 
-                parser = rtp.RichTextParser(codeblock, text_style='Tech Text')
-                parser.feed(n["fields"]["tool_output"])
-                parser.emit_docx()
+            for pc, p_step in reversed(list(enumerate(narrative_steps))):
+                ele = p_step['fields']
+                if pn['pk'] == ele['narrative']:
+                    if ele['file']:
+                        p_scap = xu.xsafe(ele['caption'])
+                        p_caption = xu.insert_caption(doc, True, p_scap)
+                        p_tag._p.addnext(p_caption._p)
 
-                xu.delete_paragraph(codeblock)
+                        file = media_path + ele['file']
+                        if not os.path.exists(file):
+                            print("Can't find diagram file", file)
+                            continue
+                        p_ss = doc.add_paragraph()
+                        p_ss.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                        p_ss_run = p_ss.add_run()
 
-            if "Screenshots" in n:
-                for s in n['Screenshots']:
-                    screen_p = doc.add_paragraph()
+                        with Image.open(file) as img:
+                            swidth = img.size[0]
+                            xu.dpi_safe(file, img)
 
-                    r = screen_p.add_run()
-                    screen_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                        if swidth < 455:
+                            p_ss_run.add_picture(file)
+                        else:
+                            p_ss_run.add_picture(file, width=Inches(5.5))
 
-                    sfile = media_path + s['fields']['file']
-                    with Image.open(sfile) as img:
-                        xu.dpi_safe(sfile, img)
+                        p_tag._p.addnext(p_ss._p)
 
-                    r.add_picture(sfile, width=Inches(5.24))
-                    subheading._p.addnext(screen_p._p)
+                    p_description = doc.add_paragraph(ele['description'], style="Normal")
+                    p_tag._p.addnext(p_description._p)
 
-                    caption = xu.insert_caption(doc, s['fields']['caption'])
-                    screen_p._p.addnext(caption._p)
+            if pn['fields']['tools']:
+                p_tools = []
 
-        # Adds a page break for each major section except for the phishing.
-        if idx < 2:
-            page_break = heading.insert_paragraph_before()
-            r = page_break.add_run()
-            r.add_break(WD_BREAK.PAGE)
+                tool_space = doc.add_paragraph("", style="Normal")
+                p_tag._p.addnext(tool_space._p)
+                
+                for item in tools:
+                    if item['id'] in pn['fields']['tools']:
+                        p_tools.append(item)
+                for tool in reversed(p_tools):
+                    b = doc.add_paragraph()
+                    tool_name = b.add_run(tool['name'] + " ")
+                    if tool['url']:
+                        ob = b.add_run("[")
+                        tool_url = b.add_run()
+                        xu.add_link(b, 2, tool['url'], tool['url'])
+                        cb = b.add_run("]")
+                    b.style = "List Bullet 2"
+                    p_tag._p.addnext(b._p)
+
+                tool_header = doc.add_paragraph("Relevant Tools:", style="Normal")
+                p_tag._p.addnext(tool_header._p)
+
+            p_ap_header = doc.add_paragraph("Attack Path " + str(p_cnt + 1), style="Heading 3")
+            p_tag._p.addnext(p_ap_header._p)
+
+        phi_header = doc.add_paragraph("Phishing", style="Heading 2")
+        p_tag._p.addnext(phi_header._p)
+
+
+    if len(internal_narratives) > 0:
+
+        page_break = doc.add_paragraph()
+        page_break.add_run().add_break(WD_BREAK.PAGE)
+        p_tag._p.addnext(page_break._p)
+        
+        for i_cnt, inn in reversed(list(enumerate(internal_narratives))):
+
+            narrative_steps = af.model_gen(db, 'ptportal.narrativestep')
+
+            for ic, i_step in reversed(list(enumerate(narrative_steps))):
+                ele = i_step['fields']
+                if inn['pk'] == ele['narrative']:
+                    if ele['file']:
+                        i_scap = xu.xsafe(ele['caption'])
+                        i_caption = xu.insert_caption(doc, True, i_scap)
+                        p_tag._p.addnext(i_caption._p)
+
+                        file = media_path + ele['file']
+                        if not os.path.exists(file):
+                            print("Can't find diagram file", file)
+                            continue
+                        i_ss = doc.add_paragraph()
+                        i_ss.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                        i_ss_run = i_ss.add_run()
+
+                        with Image.open(file) as img:
+                            swidth = img.size[0]
+                            xu.dpi_safe(file, img)
+
+                        if swidth < 455:
+                            i_ss_run.add_picture(file)
+                        else:
+                            i_ss_run.add_picture(file, width=Inches(5.5))
+
+                        p_tag._p.addnext(i_ss._p)
+
+                    i_description = doc.add_paragraph(ele['description'], style="Normal")
+                    p_tag._p.addnext(i_description._p)
+
+            if inn['fields']['tools']:
+                i_tools = []
+                
+                for item in tools:
+                    if item['id'] in inn['fields']['tools']:
+                        i_tools.append(item)
+                for tool in reversed(i_tools):
+                    b = doc.add_paragraph()
+                    tool_name = b.add_run(tool['name'] + " ")
+                    if tool['url']:
+                        ob = b.add_run("[")
+                        tool_url = b.add_run()
+                        xu.add_link(b, 2, tool['url'], tool['url'])
+                        cb = b.add_run("]")
+                    b.style = "List Bullet 2"
+                    p_tag._p.addnext(b._p)
+
+                tool_header = doc.add_paragraph("Relevant Tools:", style="Normal")
+                p_tag._p.addnext(tool_header._p)
+
+            i_ap_header = doc.add_paragraph("Attack Path " + str(i_cnt + 1), style="Heading 3")
+            p_tag._p.addnext(i_ap_header._p)
+
+        int_header = doc.add_paragraph("Internal", style="Heading 2")
+        p_tag._p.addnext(int_header._p)
+
+
+    if len(external_narratives) > 0:
+
+        page_break = doc.add_paragraph()
+        page_break.add_run().add_break(WD_BREAK.PAGE)
+        p_tag._p.addnext(page_break._p)
+        
+        for e_cnt, en in reversed(list(enumerate(external_narratives))):
+
+            narrative_steps = af.model_gen(db, 'ptportal.narrativestep')
+
+            for ec, e_step in reversed(list(enumerate(narrative_steps))):
+                ele = e_step['fields']
+                if en['pk'] == ele['narrative']:
+                    if ele['file']:
+                        e_scap = xu.xsafe(ele['caption'])
+                        e_caption = xu.insert_caption(doc, True, e_scap)
+                        p_tag._p.addnext(e_caption._p)
+
+                        file = media_path + ele['file']
+                        if not os.path.exists(file):
+                            print("Can't find diagram file", file)
+                            continue
+                        e_ss = doc.add_paragraph()
+                        e_ss.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                        e_ss_run = e_ss.add_run()
+
+                        with Image.open(file) as img:
+                            swidth = img.size[0]
+                            xu.dpi_safe(file, img)
+
+                        if swidth < 455:
+                            e_ss_run.add_picture(file)
+                        else:
+                            e_ss_run.add_picture(file, width=Inches(5.5))
+
+                        p_tag._p.addnext(e_ss._p)
+
+                    e_description = doc.add_paragraph(ele['description'], style="Normal")
+                    p_tag._p.addnext(e_description._p)
+
+            if en['fields']['tools']:
+                e_tools = []
+                
+                for item in tools:
+                    if item['id'] in en['fields']['tools']:
+                        e_tools.append(item)
+                for tool in reversed(e_tools):
+                    b = doc.add_paragraph()
+                    tool_name = b.add_run(tool['name'] + " ")
+                    if tool['url']:
+                        ob = b.add_run("[")
+                        tool_url = b.add_run()
+                        xu.add_link(b, 2, tool['url'], tool['url'])
+                        cb = b.add_run("]")
+                    b.style = "List Bullet 2"
+                    p_tag._p.addnext(b._p)
+
+                tool_header = doc.add_paragraph("Relevant Tools:", style="Normal")
+                p_tag._p.addnext(tool_header._p)
+
+            e_ap_header = doc.add_paragraph("Attack Path " + str(e_cnt + 1), style="Heading 3")
+            p_tag._p.addnext(e_ap_header._p)
+
+        ext_header = doc.add_paragraph("External", style="Heading 2")
+        p_tag._p.addnext(ext_header._p)
 
     xu.delete_paragraph(p_tag)
-
-
-def insert_risk_assessment(doc, db, mediapath):
-    """Inserts the risk gauges into the report.
-
-    Args:
-        doc (docx document): The docx template being filled in.
-        db (List of lists): Json format of assessment facts
-        mediapath (String): Location of screenshots
-    """
-
-    # Build the findings lists for the verified exposures/risk assessments
-    ite_exp = []
-    dde_exp = []
-    pe_exp = []
-    re_exp = []
-    for finding in af.model_gen(db, 'ptportal.uploadedfinding'):
-        if finding.get("fields").get("insider_threat_exp") != 0.0:
-            ite_exp.append(finding)
-        if finding.get("fields").get("data_disclosure_exp") != 0.0:
-            dde_exp.append(finding)
-        if finding.get("fields").get("phishing_exp") != 0.0:
-            pe_exp.append(finding)
-        if finding.get("fields").get("ransomware_exp") != 0.0:
-            re_exp.append(finding)
-
-    table_tag = xu.find_paragraph(doc, '{Table: Verified Exposures}')
-    # Makes it easier to then just loop through each entry associated with each section.
-    risk_gauges = [
-        ('Insider Threat', '/charts/itrisk.png', ite_exp),
-        ('Phishing', '/charts/prisk.png', pe_exp),
-        ('Ransomware', '/charts/rrisk.png', re_exp),
-        ('Data Disclosure', '/charts/ddrisk.png', dde_exp),
-    ]
-
-    for gauge in risk_gauges[::-1]:
-        p_tag = xu.find_paragraph(doc, "{" + gauge[0] + " Risk Gauge}")
-        if p_tag is None:
-            continue
-
-        p = p_tag._p
-
-        screen_p = doc.add_paragraph()
-        r = screen_p.add_run()
-        screen_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        r.add_picture(mediapath + gauge[1], width=Inches(5.24))
-        p.addnext(screen_p._p)
-
-        # Caption under the gauge.
-        caption = xu.insert_caption(doc, gauge[0] + " Exposure")
-        screen_p._p.addnext(caption._p)
-
-        if table_tag is not None:
-            # Setting up finding table and headers.
-            finding_table = doc.add_table(len(gauge[2]) + 1, 3)
-            finding_table.style = doc.styles['Report Default Table']
-            finding_table.cell(0, 0).text = 'Finding'
-            finding_table.cell(0, 1).text = 'Weight'
-            finding_table.cell(0, 2).text = 'Affected Systems'
-
-            # Get the Affected systems
-            as_info = af.build_affected_systems_info(db)
-            as_info = {k: xu.xsafe(v) for k, v in as_info.items()}
-
-            # Enumerate through the findings list and populate the table.
-            for num, f in enumerate(gauge[2]):
-                finding_table.cell(num + 1, 0).text = f['fields'][
-                    'uploaded_finding_name'
-                ]
-
-                if gauge[0] == "Insider Threat":
-                    finding_table.cell(num + 1, 1).text = str(
-                        f['fields']['insider_threat_exp']
-                    )
-                elif gauge[0] == "Phishing":
-                    finding_table.cell(num + 1, 1).text = str(
-                        f['fields']['phishing_exp']
-                    )
-                elif gauge[0] == "Ransomware":
-                    finding_table.cell(num + 1, 1).text = str(
-                        f['fields']['ransomware_exp']
-                    )
-                elif gauge[0] == "Data Disclosure":
-                    finding_table.cell(num + 1, 1).text = str(
-                        f['fields']['data_disclosure_exp']
-                    )
-
-                finding_table.cell(num + 1, 2).text = af.find_affected_systems(
-                    as_info, f["fields"]["affected_systems"]
-                )
-
-            xu.move_table_after(finding_table, table_tag)
-            table_tag._p.addnext(doc.add_paragraph(gauge[0], style='Heading 2')._p)
-
-        xu.delete_paragraph(p_tag)
-
-    if table_tag is not None:
-        xu.delete_paragraph(table_tag)
 
 
 def insert_report_summary(doc, db, media_path):
@@ -1189,15 +978,53 @@ def insert_report_summary(doc, db, media_path):
         media_path (String): Path to the media files
     """
 
-    # Update all the charts in that section.
-    xu.update_charts(doc, media_path, '{Table: CISA Findings}', 'fschart.png')
-    xu.update_charts(doc, media_path, "{NIST 800-53 Controls}", "nistcontrol.png")
-    xu.update_charts(doc, media_path, "{NIST CSF}", "nistcsf.png")
+    nc_tag = xu.find_paragraph(doc, "{NIST CONTROLS}")
+
+    if nc_tag is not None:
+        file = media_path + 'charts/nistspchart.png'
+        if not os.path.exists(file):
+            print("Can't find chart file", file)
+        else:
+            para = doc.add_paragraph()
+            r = para.add_run()
+            para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+            with Image.open(file) as img:
+                swidth = img.size[0]
+            if swidth < 455:
+                r.add_picture(file)
+            else:
+                r.add_picture(file, width=Inches(6.5))
+
+            nc_tag._p.addnext(para._p)
+            xu.delete_paragraph(nc_tag)
+
+    nf_tag = xu.find_paragraph(doc, "{NIST CSF}")
+
+    if nf_tag is not None:
+        file = media_path + 'charts/nistframeworkchart.png'
+        if not os.path.exists(file):
+            print("Can't find chart file", file)
+        else:
+            para = doc.add_paragraph()
+            r = para.add_run()
+            para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+            with Image.open(file) as img:
+                swidth = img.size[0]
+            if swidth < 455:
+                r.add_picture(file)
+            else:
+                r.add_picture(file, width=Inches(6.5))
+
+            nf_tag._p.addnext(para._p)
+            xu.delete_paragraph(nf_tag)
 
     # Creates the bulleted sections in the summary.
     bullet_lists = [
-        ('{Cisa Results}', 'report.fields.cisa_results'),
-        ('{Cisa Recommendations}', 'report.fields.cisa_recommendations'),
+        ('{SIGNIFICANT FINDINGS}', 'report.fields.significant_findings'),
+        ('{ RECOMMENDATIONS }', 'report.fields.recommendations'),
+        ('{OBSERVED STRENGTHS}', 'report.fields.observed_strengths'),
     ]
     for bl in bullet_lists:
         p_tag = xu.find_paragraph(doc, bl[0])
@@ -1206,23 +1033,677 @@ def insert_report_summary(doc, db, media_path):
             for bullet in text.split("\n")[::-1]:
                 para = doc.add_paragraph()
                 para.text = bullet
-                para.style = "MemoBullet1"
+                para.style = "List Bullet 2"
                 p_tag._p.addnext(para._p)
             xu.delete_paragraph(p_tag)
 
     # Counts the number of findings of the severities.
     counts = {"Critical": 0, "High": 0, "Medium": 0, "Low": 0, "Informational": 0}
+    words = {"Critical": "", "High": "", "Medium": "", "Low": "", "Informational": ""}
+    plural = {"Critical": "findings", "High": "findings", "Medium": "findings", "Low": "findings", "Informational": "findings"}
+    total_risk_score = 0
+    mitigated_risk_score = 0
     for finding in af.model_gen(db, 'ptportal.uploadedfinding'):
         counts[finding.get("fields").get("severity")] = (
             counts.get(finding.get("fields").get("severity"), 0) + 1
         )
+        total_risk_score += finding.get("fields").get("risk_score")
+        if not finding.get("fields").get("mitigation"):
+            mitigated_risk_score += finding.get("fields").get("risk_score")
 
-    p_tag = xu.find_paragraph(doc, "{CISA Findings Summary}")
+    words['Critical'] = num.number_to_words(counts['Critical'])
+    words['High'] = num.number_to_words(counts['High'])
+    words['Medium'] = num.number_to_words(counts['Medium'])
+    words['Low'] = num.number_to_words(counts['Low'])
+    words['Informational'] = num.number_to_words(counts['Informational'])
+
+    for sev in counts:
+        if counts[sev] == 1:
+            plural[sev] = "finding"
+
+    p_tag = xu.find_paragraph(doc, "{FINDINGS SUMMARY}")
     if p_tag is not None:
-        p_tag.text = f"CISA identified {counts['Critical']} critical-severity finding(s), {counts['High']} high-severity finding(s), {counts['Medium']} medium-severity finding(s), {counts['Low']} low-severity finding(s), and {counts['Informational']} informational-severity finding(s)."
+        p_tag.text = f"CISA identified {words['Critical']} ({counts['Critical']}) critical {plural['Critical']}, {words['High']} ({counts['High']}) high {plural['High']}, {words['Medium']} ({counts['Medium']}) medium {plural['Medium']}, {words['Low']} ({counts['Low']}) low {plural['Low']}, and {words['Informational']} ({counts['Informational']}) informational {plural['Informational']}. The Total Risk Score for this assessment is {total_risk_score} and the Mitigated Risk Score after deducting mitigated findings is {mitigated_risk_score}."
 
-    # Inserts all of the risk assessment section.
-    insert_risk_assessment(doc, db, media_path)
+    p_tag = xu.find_paragraph(doc, "{Total Score}")
+    if p_tag is not None:
+        p_tag.text = str(total_risk_score)
+
+    p_tag = xu.find_paragraph(doc, "{Mitigated Score}")
+    if p_tag is not None:
+        p_tag.text = str(mitigated_risk_score)
+
+
+def insert_scope(doc, db):
+    """Function that fills out all the tags inside of the scope section of the report.
+
+    Args:
+        doc (docx object): The docx template.
+        db (List of dictionaries): The JSON of the engagment data.
+    """
+
+    p_tag = xu.find_paragraph(doc, "{PHISHING USERS}")
+    if p_tag is not None:
+        phishing_users = af.get_db_info(db, 'report.fields.users_targeted', '{USERS TARGETED}')
+        p_tag.text = f"{phishing_users} users were included in the phishing campaign(s) targeting the following mail domain(s):"
+
+    p_tag = xu.find_paragraph(doc, "{PHISHING DOMAINS}")
+    if p_tag is not None:
+        p_tag.text = af.get_db_info(db, 'engagementmeta.fields.phishing_domains', '{PHISHING DOMAINS}')
+
+    p_tag = xu.find_paragraph(doc, "{EXTERNAL HOSTS}")
+    if p_tag is not None:
+        ext_disc = af.get_db_info(db, 'report.fields.external_discovered', '{EXTERNAL DISCOVERED}')
+        ext_scan = af.get_db_info(db, 'report.fields.external_scanned', '{EXTERNAL SCANNED}')
+        p_tag.text = f"{ext_disc} of {ext_scan} scanned hosts were discovered to be live during testing of the following in scope targets:"
+
+    p_tag = xu.find_paragraph(doc, "{EXTERNAL SCOPE}")
+    if p_tag is not None:
+        p_tag.text = af.get_db_info(db, 'engagementmeta.fields.ext_scope', '{EXTERNAL SCOPE}')
+
+    p_tag = xu.find_paragraph(doc, "{INTERNAL HOSTS}")
+    if p_tag is not None:
+        int_disc = af.get_db_info(db, 'report.fields.internal_discovered', '{INTERNAL DISCOVERED}')
+        int_scan = af.get_db_info(db, 'report.fields.internal_scanned', '{INTERNAL SCANNED}')
+        p_tag.text = f"{int_disc} of {int_scan} scanned hosts were discovered to be live during testing of the following in scope targets:"
+
+    p_tag = xu.find_paragraph(doc, "{INTERNAL SCOPE}")
+    if p_tag is not None:
+        p_tag.text =af.get_db_info(db, 'engagementmeta.fields.int_scope', '{INTERNAL SCOPE}')
+
+
+def insert_ransomware(doc, db):
+    """Function that fills out the ransomware susceptibility section of the report, if ransomware results exist.
+
+    Args:
+        doc (docx object): The docx template.
+        db (List of dictionaries): The JSON of the engagment data.
+    """
+
+    p_tag = xu.find_paragraph(doc, "{RANSOMWARE RESULTS}")
+
+    if p_tag is None:
+        return
+
+    if af.get_db_info(db, 'ransomwarescenarios', 'NA') is not None or af.get_db_info(db, 'ransomware', 'NA') is not None:
+
+        rg_url = "https://www.cisa.gov/stopransomware/ransomware-guide"
+        rr_url = "https://www.cisa.gov/stopransomware/report-ransomware-0"
+
+        page_break = doc.add_paragraph()
+        page_break.add_run().add_break(WD_BREAK.PAGE)
+        p_tag._p.addnext(page_break._p)
+
+        respond = doc.add_paragraph()
+        r_run1 = respond.add_run("In the event that a ransomware attack has taken place, the incident should be reported to federal law enforcement (see ")
+        xu.add_link(respond, 1, rr_url, "CISA's ransomware report page")
+        r_run3 = respond.add_run(") and it is recommended to follow the steps outlined in the ")
+        r_run4 = respond.add_run("Ransomware Response Checklist")
+        r_run5 = respond.add_run(" section of the ")
+        xu.add_link(respond, 5, rg_url, "CISA Ransomware Guide")
+        r_end = respond.add_run(".")
+        respond.runs[3].font.bold = True
+        respond.style = "Normal"
+        p_tag._p.addnext(respond._p)
+
+        prevent = doc.add_paragraph()
+        p_run1 = prevent.add_run("In addition to the recommended mitigations provided throughout the ")
+        p_run2 = prevent.add_run("Findings")
+        p_run3 = prevent.add_run(" section of this report, the CISA team recommends taking the proactive actions listed in the ")
+        p_run4 = prevent.add_run("Ransomware Prevention Best Practices")
+        p_run5 = prevent.add_run(" section of the ")
+        xu.add_link(prevent, 5, rg_url, "CISA Ransomware Guide")
+        p_end = prevent.add_run(".")
+        prevent.runs[1].font.bold = True
+        prevent.runs[3].font.bold = True
+        prevent.style = "Normal"
+        p_tag._p.addnext(prevent._p)
+
+        if af.get_db_info(db, 'ransomware', 'NA') is not None:
+            ransomware_results = []
+
+            for item in af.model_gen(db, 'ptportal.ransomware'):
+                ele = item['fields']
+                if not ele['disabled']:
+                    if "detected by security software" in ele['description']:
+                        if ele['trigger'] == "Y":
+                            if ele['time_start'] and ele['time_end']:
+                                start = datetime.datetime.fromisoformat(ele['time_start'][:-1]).astimezone(timezone.utc)
+                                end = datetime.datetime.fromisoformat(ele['time_end'][:-1]).astimezone(timezone.utc)
+                                difference = relativedelta(end, start)
+
+                                if difference.days == 1:
+                                    days = "1 day "
+                                else:
+                                    days = str(difference.days) + " days "
+                                if difference.hours == 1:
+                                    hours = "1 hour "
+                                else:
+                                    hours = str(difference.hours) + " hours "
+                                if difference.minutes == 1:
+                                    minutes = "and 1 minute."
+                                else:
+                                    minutes = "and " + str(difference.minutes) + " minutes."
+                            else:
+                                days = "0 days "
+                                hours = "0 hours "
+                                minutes = "and 0 minutes."
+                            ransomware_results.append("Ransomware activity was detected by security software within " + days + hours + minutes)
+                        else:
+                            ransomware_results.append("Ransomware activity was not detected by security software.")
+
+                    if "prevented by security software" in ele['description']:
+                        if ele['trigger'] == "Y":
+                            if ele['time_start'] and ele['time_end']:
+                                start = datetime.datetime.fromisoformat(ele['time_start'][:-1]).astimezone(timezone.utc)
+                                end = datetime.datetime.fromisoformat(ele['time_end'][:-1]).astimezone(timezone.utc)
+                                difference = relativedelta(end, start)
+
+                                if difference.days == 1:
+                                    days = "1 day "
+                                else:
+                                    days = str(difference.days) + " days "
+                                if difference.hours == 1:
+                                    hours = "1 hour "
+                                else:
+                                    hours = str(difference.hours) + " hours "
+                                if difference.minutes == 1:
+                                    minutes = "and 1 minute."
+                                else:
+                                    minutes = "and " + str(difference.minutes) + " minutes."
+                            else:
+                                days = "0 days "
+                                hours = "0 hours "
+                                minutes = "and 0 minutes."
+                            ransomware_results.append("Ransomware activity was prevented by security software within " + days + hours + minutes)
+                        else:
+                            ransomware_results.append("Ransomware activity was not prevented by security software.")
+
+                    if "detected by security and/or IT personnel" in ele['description']:
+                        if ele['trigger'] == "Y":
+                            if ele['time_start'] and ele['time_end']:
+                                start = datetime.datetime.fromisoformat(ele['time_start'][:-1]).astimezone(timezone.utc)
+                                end = datetime.datetime.fromisoformat(ele['time_end'][:-1]).astimezone(timezone.utc)
+                                difference = relativedelta(end, start)
+
+                                if difference.days == 1:
+                                    days = "1 day "
+                                else:
+                                    days = str(difference.days) + " days "
+                                if difference.hours == 1:
+                                    hours = "1 hour "
+                                else:
+                                    hours = str(difference.hours) + " hours "
+                                if difference.minutes == 1:
+                                    minutes = "and 1 minute."
+                                else:
+                                    minutes = "and " + str(difference.minutes) + " minutes."
+                            else:
+                                days = "0 days "
+                                hours = "0 hours "
+                                minutes = "and 0 minutes."
+                            ransomware_results.append("Ransomware activity was detected by security and/or IT personnel within " + days + hours + minutes)
+                        else:
+                            ransomware_results.append("Ransomware activity was not detected by security and/or IT personnel.")
+
+                    if "reported by end users" in ele['description']:
+                        if ele['trigger'] == "Y":
+                            if ele['time_start'] and ele['time_end']:
+                                start = datetime.datetime.fromisoformat(ele['time_start'][:-1]).astimezone(timezone.utc)
+                                end = datetime.datetime.fromisoformat(ele['time_end'][:-1]).astimezone(timezone.utc)
+                                difference = relativedelta(end, start)
+
+                                if difference.days == 1:
+                                    days = "1 day "
+                                else:
+                                    days = str(difference.days) + " days "
+                                if difference.hours == 1:
+                                    hours = "1 hour "
+                                else:
+                                    hours = str(difference.hours) + " hours "
+                                if difference.minutes == 1:
+                                    minutes = "and 1 minute."
+                                else:
+                                    minutes = "and " + str(difference.minutes) + " minutes."
+                            else:
+                                days = "0 days "
+                                hours = "0 hours "
+                                minutes = "and 0 minutes."
+                            ransomware_results.append("Ransomware activity was reported by end users within " + days + hours + minutes)
+                        else:
+                            ransomware_results.append("Ransomware activity was not reported by end users.")
+
+            for r in reversed(ransomware_results):
+                b = doc.add_paragraph()
+                b.text = r
+                b.style = "List Bullet 2"
+                p_tag._p.addnext(b._p)
+
+            if len(ransomware_results) > 0:
+                customer_name = af.get_db_info(db, 'engagementmeta.fields.customer_long_name', '{STAKEHOLDER NAME}')
+                results = doc.add_paragraph(f"Additionally, in coordination with the {customer_name} point-of-contact, the team identified the following detection and response results:", style="Normal")
+                p_tag._p.addnext(results._p)
+
+        if af.get_db_info(db, 'ransomwarescenarios', 'NA') is not None:
+            vuln = 0
+            total = 0
+            if af.get_db_info(db, 'ransomwarescenarios.fields.vuln', 'NA') != '<not set: NA>':
+                vuln = int(af.get_db_info(db, 'ransomwarescenarios.fields.vuln', 'NA'))
+            if af.get_db_info(db, 'ransomwarescenarios.fields.total', 'NA') != '<not set: NA>':
+                total = int(af.get_db_info(db, 'ransomwarescenarios.fields.total', 'NA'))
+
+            customer_name = af.get_db_info(db, 'engagementmeta.fields.customer_long_name', '{STAKEHOLDER NAME}')
+            sim = doc.add_paragraph(f"During ransomware simulation, the CISA team found that endpoints in the {customer_name} network are vulnerable to {vuln} out of the {total} ransomware scenarios tested. Details of the ransomware simulation can be found in the corresponding report provided with the scan reports and raw data.", style="Normal")
+            p_tag._p.addnext(sim._p)
+
+        para = doc.add_paragraph("Ransomware is malicious software that encrypts files on infected hosts. In order to decrypt affected files, users or organizations are instructed to pay a ransom. Infection occurs via manual or automated deployment after an attacker has compromised a host. The impact of mass infection can be severe including lost revenue, lost data, diminished reputation, and various costs associated with incident response and recovery.", style="Normal")
+        p_tag._p.addnext(para._p)
+
+        header = doc.add_paragraph("Ransomware Susceptibility", style="Heading 2")
+        p_tag._p.addnext(header._p)
+
+    xu.delete_paragraph(p_tag)
+
+
+def insert_de_table(doc, db):
+    """Function that fills out the data exfiltration section of the report if data exfiltration results exist.
+
+    Args:
+        doc (docx object): The docx template.
+        db (List of dictionaries): The JSON of the engagment data.
+    """
+
+    p_tag = xu.find_paragraph(doc, "{DATA EXFILTRATION RESULTS}")
+
+    if p_tag is None:
+        return
+
+    if af.get_db_info(db, 'dataexfil', 'NA') is not None:
+
+        page_break = doc.add_paragraph()
+        page_break.add_run().add_break(WD_BREAK.PAGE)
+        p_tag._p.addnext(page_break._p)
+
+        rec = doc.add_paragraph()
+        r_run1 = rec.add_run("In addition to the recommended mitigations provided throughout the ")
+        r_run2 = rec.add_run("Findings")
+        r_run3 = rec.add_run(" section pertaining to protecting sensitive data, the CISA team recommends designing and implementing network perimeter controls to detect and prevent data exfiltration. Where possible, outbound traffic should be forced through authenticated proxy servers on the enterprise perimeter. These proxy servers can be configured to decrypt and inspect network traffic, flagging suspicious or anomalous characteristics. Additionally, perimeter controls should be configured with rules that allow or block traffic based on its destination.")
+        rec.runs[1].font.bold = True
+        rec.style = "Normal"
+        p_tag._p.addnext(rec._p)
+
+        caption = xu.insert_caption(doc, False, "Data Exfiltration Results")
+        p_tag._p.addnext(caption._p)
+
+        de_table = doc.add_table(1, 5)
+        de_table.style = doc.styles['CISA Table']
+
+        de_table.cell(0, 0).text = "Data Type"
+        de_table.cell(0, 1).text = "Protocol"
+        de_table.cell(0, 2).text = "Timestamp"
+        de_table.cell(0, 3).text = "Detection"
+        de_table.cell(0, 4).text = "Prevention"
+
+        for cnt, data in enumerate(af.model_gen(db, "ptportal.dataexfil")):
+            ele = data['fields']
+            row = de_table.add_row()
+
+            if ele['detection'] == "D":
+                detection = "Detected"
+            else:
+                detection = "Not Detected"
+
+            if ele['prevention'] == "B":
+                prevention = "Blocked"
+            else:
+                prevention = "Not Blocked"
+
+            if ele['date_time'] is not None:
+                time = datetime.datetime.fromisoformat(ele['date_time'][:-1]).strftime("%m/%d/%Y %H:%M %p")
+                timestamp = str(time) + " (UTC)"
+            else:
+                timestamp = ""
+
+            de_table.cell(cnt + 1, 0).text = xu.xsafe(ele['datatype'])
+            de_table.cell(cnt + 1, 1).text = xu.xsafe(ele['protocol'])
+            de_table.cell(cnt + 1, 2).text = timestamp
+
+            det_cell = de_table.cell(cnt + 1, 3).paragraphs[0]
+
+            if detection == "Detected":
+                det_cell.add_run("• ").font.color.rgb = RGBColor(131, 224, 142)
+            else:
+                det_cell.add_run("• ").font.color.rgb = RGBColor(255, 116, 113)
+
+            det_cell.add_run(detection)
+
+            pre_cell = de_table.cell(cnt + 1, 4).paragraphs[0]
+
+            if prevention == "Blocked":
+                pre_cell.add_run("• ").font.color.rgb = RGBColor(131, 224, 142)
+            else:
+                pre_cell.add_run("• ").font.color.rgb = RGBColor(255, 116, 113)
+
+            pre_cell.add_run(prevention)
+
+            de_table.cell(cnt + 1, 3).paragraphs[0].runs[0].font.bold = True
+            de_table.cell(cnt + 1, 3).paragraphs[0].runs[1].font.bold = True
+            de_table.cell(cnt + 1, 3).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+            de_table.cell(cnt + 1, 4).paragraphs[0].runs[0].font.bold = True
+            de_table.cell(cnt + 1, 4).paragraphs[0].runs[1].font.bold = True
+            de_table.cell(cnt + 1, 4).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+
+        de_table.cell(0, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+        de_table.cell(0, 0).paragraphs[0].runs[0].font.bold = True
+        de_table.cell(0, 1).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+        de_table.cell(0, 1).paragraphs[0].runs[0].font.bold = True
+        de_table.cell(0, 2).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+        de_table.cell(0, 2).paragraphs[0].runs[0].font.bold = True
+        de_table.cell(0, 3).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+        de_table.cell(0, 3).paragraphs[0].runs[0].font.bold = True
+        de_table.cell(0, 4).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+        de_table.cell(0, 4).paragraphs[0].runs[0].font.bold = True
+
+        xu.set_column_width(de_table.columns[0], 2.32)
+        xu.set_column_width(de_table.columns[1], 0.74)
+        xu.set_column_width(de_table.columns[2], 1.09)
+        xu.set_column_width(de_table.columns[3], 1.17)
+        xu.set_column_width(de_table.columns[4], 1.17)
+
+        xu.move_table_after(de_table, p_tag)
+
+        space = doc.add_paragraph("", style="Normal")
+        p_tag._p.addnext(space._p)
+
+        intro = doc.add_paragraph("The loss of sensitive business data often represents one of the highest risks to an enterprise. The CISA team conducted a data exfiltration simulation, in which fabricated data formatted to look like Personally Identifiable Information (PII) was transferred from an internal network to a CISA-controlled server outside of the network. The following results were observed when the CISA team attempted to exfiltrate data over common protocols:", style="Normal")
+        p_tag._p.addnext(intro._p)
+
+        header = doc.add_paragraph("Data Exfiltration", style="Heading 2")
+        p_tag._p.addnext(header._p)
+
+    xu.delete_paragraph(p_tag)
+
+
+def insert_pt_table(doc, db):
+    """Function that fills out the payload testing section of the report if payload testing results exist.
+
+    Args:
+        doc (docx object): The docx template.
+        db (List of dictionaries): The JSON of the engagment data.
+    """
+
+    p_tag = xu.find_paragraph(doc, "{PAYLOAD TESTING RESULTS}")
+
+    if p_tag is None:
+        return
+
+    if af.get_db_info(db, 'payload', 'NA') is not None:
+
+        page_break = doc.add_paragraph()
+        page_break.add_run().add_break(WD_BREAK.PAGE)
+        p_tag._p.addnext(page_break._p)
+
+        caption = xu.insert_caption(doc, False, "Payload Testing Results")
+        p_tag._p.addnext(caption._p)
+
+        pt_table = doc.add_table(1, 4)
+        pt_table.style = doc.styles['CISA Table']
+
+        pt_table.cell(0, 0).text = "Payload"
+        pt_table.cell(0, 1).text = "C2 Protocol"
+        pt_table.cell(0, 2).text = "Host Protection"
+        pt_table.cell(0, 3).text = "Border Protection"
+
+        for cnt, payload in enumerate(af.model_gen(db, "ptportal.payload")):
+            ele = payload['fields']
+            row = pt_table.add_row()
+
+            if ele['host_protection'] == "B":
+                host = "Blocked"
+            else:
+                host = "Not Blocked"
+
+            if ele['border_protection'] == "B":
+                border = "Blocked"
+            else:
+                border = "Not Blocked"
+
+            pt_table.cell(cnt + 1, 0).text = xu.xsafe(ele['payload_description'])
+            pt_table.cell(cnt + 1, 1).text = xu.xsafe(ele['c2_protocol'])
+
+            host_cell = pt_table.cell(cnt + 1, 2).paragraphs[0]
+
+            if host == "Blocked":
+                host_cell.add_run("• ").font.color.rgb = RGBColor(131, 224, 142)
+            else:
+                host_cell.add_run("• ").font.color.rgb = RGBColor(255, 116, 113)
+
+            host_cell.add_run(host)
+
+            bord_cell = pt_table.cell(cnt + 1, 3).paragraphs[0]
+
+            if border == "Blocked":
+                bord_cell.add_run("• ").font.color.rgb = RGBColor(131, 224, 142)
+            else:
+                bord_cell.add_run("• ").font.color.rgb = RGBColor(255, 116, 113)
+
+            bord_cell.add_run(border)
+
+            pt_table.cell(cnt + 1, 2).paragraphs[0].runs[0].font.bold = True
+            pt_table.cell(cnt + 1, 2).paragraphs[0].runs[1].font.bold = True
+            pt_table.cell(cnt + 1, 2).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+            pt_table.cell(cnt + 1, 3).paragraphs[0].runs[0].font.bold = True
+            pt_table.cell(cnt + 1, 3).paragraphs[0].runs[1].font.bold = True
+            pt_table.cell(cnt + 1, 3).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+
+        pt_table.cell(0, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+        pt_table.cell(0, 0).paragraphs[0].runs[0].font.bold = True
+        pt_table.cell(0, 1).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+        pt_table.cell(0, 1).paragraphs[0].runs[0].font.bold = True
+        pt_table.cell(0, 2).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+        pt_table.cell(0, 2).paragraphs[0].runs[0].font.bold = True
+        pt_table.cell(0, 3).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+        pt_table.cell(0, 3).paragraphs[0].runs[0].font.bold = True
+
+        xu.set_column_width(pt_table.columns[0], 3.12)
+        xu.set_column_width(pt_table.columns[1], 0.88)
+        xu.set_column_width(pt_table.columns[2], 1.25)
+        xu.set_column_width(pt_table.columns[3], 1.25)
+
+        xu.move_table_after(pt_table, p_tag)
+
+        space = doc.add_paragraph("", style="Normal")
+        p_tag._p.addnext(space._p)
+
+        third = doc.add_paragraph("For the purpose of this testing, border protection refers to the ability to make an outbound connection from the internal network to the CISA-controlled C2 server. If this connection can be made over a particular protocol, it is assumed that all payloads utilizing the same protocol would not be blocked at the border.", style="Normal")
+        p_tag._p.addnext(third._p)
+
+        second = doc.add_paragraph("While it is good to have strong filters and configurations in place to protect users from phishing attacks, it is important to note that a determined adversary could likely circumvent mail and browser filters if an established, trusted domain is used. For this reason, all recommendations outlined in this report are important considerations for defense-in-depth.", style="Normal")
+        p_tag._p.addnext(second._p)
+
+        customer_name = af.get_db_info(db, 'engagementmeta.fields.customer_long_name', '{STAKEHOLDER NAME}')
+        exception = af.get_db_info(db, 'report.fields.exception', '{MANUAL EXCEPTION}')
+        browser = af.get_db_info(db, 'report.fields.browser', '{INTERNET BROWSER}')
+        intro = doc.add_paragraph(f"During payload testing with {customer_name}, a manual exception {exception} necessary for the test email to reach the target inbox. {browser} was used to download the payloads and was deemed a primary browser used by {customer_name} users.", style="Normal")
+        p_tag._p.addnext(intro._p)
+
+        header = doc.add_paragraph("Payload Testing Results", style="Heading 2")
+        p_tag._p.addnext(header._p)
+
+    xu.delete_paragraph(p_tag)
+
+
+def insert_pc_table(doc, db):
+    """Function that fills out the payload campaign section of the report if payload campaign data exists.
+
+    Args:
+        doc (docx object): The docx template.
+        db (List of dictionaries): The JSON of the engagment data.
+    """
+
+    p_tag = xu.find_paragraph(doc, "{PHISHING CAMPAIGN RESULTS}")
+
+    if p_tag is None:
+        return
+
+    if af.get_db_info(db, 'campaign', 'NA') is not None:
+
+        page_break = doc.add_paragraph()
+        page_break.add_run().add_break(WD_BREAK.PAGE)
+        p_tag._p.addnext(page_break._p)
+
+        for cnt, cam in reversed(list(enumerate(af.model_gen(db, "ptportal.campaign")))):
+            ele = cam['fields']
+
+            click_rate = round(float(ele['click_rate']) * 100, 2)
+            click_time = str(ele['time_to_first_click']).split(" ")
+
+            if len(click_time) > 1:
+                if int(click_time[0]) == 1:
+                    time_to_first_click = click_time[0] + " Day, " + click_time[1]
+                else:
+                    time_to_first_click = click_time[0] + " Days, " + click_time[1]
+            else:
+                time_to_first_click = str(ele['time_to_first_click'])
+
+            if int(ele['length_of_campaign']) == 1:
+                length = str(ele['length_of_campaign']) + " Day"
+            else:
+                length = str(ele['length_of_campaign']) + " Days"
+
+            end_space = doc.add_paragraph("", style="Normal")
+            p_tag._p.addnext(end_space._p)
+
+            caption = xu.insert_caption(doc, False, "Phishing Campaign Results (" + str(cnt + 1) + ")")
+            p_tag._p.addnext(caption._p)
+
+            pc_table = doc.add_table(1, 2)
+            pc_table.style = doc.styles['CISA Table']
+
+            pc_table.cell(0, 0).merge(pc_table.cell(0, 1))
+            pc_table.cell(0, 0).text = "Campaign #" + str(cnt + 1)
+
+            row1 = pc_table.add_row()
+
+            pc_table.cell(1, 0).text = "Emails Sent"
+            pc_table.cell(1, 1).text = str(ele['emails_sent'])
+
+            row2 = pc_table.add_row()
+
+            pc_table.cell(2, 0).text = "Emails Successfully Delivered"
+            pc_table.cell(2, 1).text = str(ele['emails_delivered'])
+
+            row3 = pc_table.add_row()
+
+            pc_table.cell(3, 0).text = "Click Rate"
+            pc_table.cell(3, 1).text = str(click_rate) + "%"
+
+            row4 = pc_table.add_row()
+
+            pc_table.cell(4, 0).text = "Total Clicks"
+            pc_table.cell(4, 1).text = str(ele['total_clicks'])
+
+            row5 = pc_table.add_row()
+
+            pc_table.cell(5, 0).text = "Unique Clicks"
+            pc_table.cell(5, 1).text = str(ele['unique_clicks'])
+
+            row6 = pc_table.add_row()
+
+            pc_table.cell(6, 0).text = "Time to First Click (HH:MM:SS)"
+            pc_table.cell(6, 1).text = time_to_first_click
+
+            row7 = pc_table.add_row()
+
+            pc_table.cell(7, 0).text = "Credentials Harvested"
+            pc_table.cell(7, 1).text = str(ele['creds_harvested'])
+
+            row8 = pc_table.add_row()
+
+            pc_table.cell(8, 0).text = "Users Exploited"
+            pc_table.cell(8, 1).text = str(ele['number_exploited'])
+
+            row9 = pc_table.add_row()
+
+            pc_table.cell(9, 0).text = "Length of Campaign"
+            pc_table.cell(9, 1).text = length
+
+            pc_table.cell(0, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+            pc_table.cell(0, 0).paragraphs[0].runs[0].font.bold = True
+
+            xu.set_column_width(pc_table.columns[0], 4)
+            xu.set_column_width(pc_table.columns[1], 2.5)
+
+            xu.move_table_after(pc_table, p_tag)
+
+            space = doc.add_paragraph("", style="Normal")
+            p_tag._p.addnext(space._p)
+
+            description = xu.xsafe(ele['campaign_description'])
+            campaign_description = doc.add_paragraph(description, style="Normal")
+            p_tag._p.addnext(campaign_description._p)
+
+        header = doc.add_paragraph("Phishing Campaign Results", style="Heading 2")
+        p_tag._p.addnext(header._p)
+
+    xu.delete_paragraph(p_tag)
+
+
+def insert_pm_table(doc, db):
+    """Function that fills out the port mapping appendix of the report.
+
+    Args:
+        doc (docx object): The docx template.
+        db (List of dictionaries): The JSON of the engagment data.
+    """
+
+    p_tag = xu.find_paragraph(doc, "{Table: Port Mapping}")
+
+    if p_tag is None:
+        return
+
+    pm_table = doc.add_table(1, 4)
+    pm_table.style = doc.styles['CISA Table']
+
+    pm_table.cell(0, 0).text = "IP"
+    pm_table.cell(0, 1).text = "Hostname"
+    pm_table.cell(0, 2).text = "Ports"
+    pm_table.cell(0, 3).text = "Services"
+
+    for cnt, host in enumerate(af.model_gen(db, "ptportal.portmappinghost")):
+        ele = host['fields']
+        row = pm_table.add_row()
+
+        ports = ele['ports'].split(", ")
+        port_list = '\n'.join(ports)
+
+        services = ele['services'].split(", ")
+        service_list = '\n'.join(services)
+
+        pm_table.cell(cnt + 1, 0).text = xu.xsafe(ele['ip'])
+        pm_table.cell(cnt + 1, 1).text = xu.xsafe(ele['hostname'])
+        pm_table.cell(cnt + 1, 2).text = port_list
+        pm_table.cell(cnt + 1, 3).text = service_list
+
+    pm_table.cell(0, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    pm_table.cell(0, 0).paragraphs[0].runs[0].font.bold = True
+    pm_table.cell(0, 1).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    pm_table.cell(0, 1).paragraphs[0].runs[0].font.bold = True
+    pm_table.cell(0, 2).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    pm_table.cell(0, 2).paragraphs[0].runs[0].font.bold = True
+    pm_table.cell(0, 3).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    pm_table.cell(0, 3).paragraphs[0].runs[0].font.bold = True
+
+    xu.set_column_width(pm_table.columns[0], 0.93)
+    xu.set_column_width(pm_table.columns[1], 2.69)
+    xu.set_column_width(pm_table.columns[2], 1.44)
+    xu.set_column_width(pm_table.columns[3], 1.44)
+
+    xu.move_table_after(pm_table, p_tag)
+
+    xu.delete_paragraph(p_tag)
 
 
 def generate_ptp_report(template, output, draft, json, media):
@@ -1252,16 +1733,8 @@ def generate_ptp_report(template, output, draft, json, media):
     if draft:
         af.set_draft(rva_info)
 
-    af.set_title(rva_info)
-
-    # populate the nist information from the ndf data
-    af.get_nist_control_data(rva_info)
-
     # ---- open the report template
     doc = docx.Document(template)
-
-    # ---- update the document header
-    xu.update_title(doc, rva_info)
 
     # ---- replace paragraph tags
     for para in doc.paragraphs:
@@ -1271,7 +1744,33 @@ def generate_ptp_report(template, output, draft, json, media):
                 # Loop added to work with runs (strings with same style)
                 for i in range(len(inline)):
                     if key in inline[i].text:
-                        replace_str = af.get_db_info(rva_info, af.tag_db_map[key], key)
+                        if key == "{External Start Date}":
+                            try:
+                                ext_start_date = af.get_db_info(rva_info, 'engagementmeta.fields.ext_start_date', '{EXT START DATE}')
+                                replace_str = datetime.datetime.strptime(ext_start_date, '%Y-%m-%d').strftime('%B %-d, %Y')
+                            except:
+                                replace_str = "<NO DATE SET>"
+                        elif key == "{External End Date}":
+                            try:
+                                ext_end_date = af.get_db_info(rva_info, 'engagementmeta.fields.ext_end_date', '{EXT END DATE}')
+                                replace_str = datetime.datetime.strptime(ext_end_date, '%Y-%m-%d').strftime('%B %-d, %Y')
+                            except:
+                                replace_str = "<NO DATE SET>"
+                        elif key == "{Internal Start Date}":
+                            try:
+                                int_start_date = af.get_db_info(rva_info, 'engagementmeta.fields.int_start_date', '{INT START DATE}')
+                                replace_str = datetime.datetime.strptime(int_start_date, '%Y-%m-%d').strftime('%B %-d, %Y')
+                            except:
+                                replace_str = "<NO DATE SET>"
+                        elif key == "{Internal End Date}":
+                            try:
+                                int_end_date = af.get_db_info(rva_info, 'engagementmeta.fields.int_end_date', '{INT END DATE}')
+                                replace_str = datetime.datetime.strptime(int_end_date, '%Y-%m-%d').strftime('%B %-d, %Y')
+                            except:
+                                replace_str = "<NO DATE SET>"
+                        else:    
+                            replace_str = af.get_db_info(rva_info, af.tag_db_map[key], key)
+
                         if isinstance(replace_str, list):
                             replace_str = ', '.join(replace_str)
 
@@ -1294,39 +1793,112 @@ def generate_ptp_report(template, output, draft, json, media):
                             para.text = text
 
     # RVA 2.0 Template Insertions
+    insert_assessment_info(doc, rva_info)
     insert_report_summary(doc, rva_info, media)
-    insert_narrative(doc, rva_info, media)
-    insert_attack_paths(doc, rva_info, media)
-    insert_port_mappings(doc, rva_info)
-    insert_pass_analysis(doc, rva_info)
-    insert_acronyms(doc, rva_info)
+    insert_scope(doc, rva_info)
 
-    # ---- update tables
-    # ---- update assumption scenarios
-    insert_as_table(doc, rva_info, "{Table: Assessment Scenarios}")
-
-    # ---- add ndf appendix
-    insert_ndf_table(doc, rva_info, "{Table: NCATS Detailed Findings}", media)
-
-    insert_hva_str_table(doc, rva_info, "{Table: HVA Scenario Testing Results}")
-
-    # ---- add HVA Targets
-    insert_hva_targets_table(doc, rva_info, "{Table: HVA Targets}")
+    # ---- add risk score table
+    insert_rs_table(doc, rva_info, "{Table: Risk Score}", media)
 
     # ---- add cis_csc recommendations
     insert_cis_csc_table(doc, rva_info, "{Table: CIS_CSC}")
 
-    # ---- add mam appendix
-    insert_mam_table(doc, mam_xml.mam_tag, rva_info)
-    insert_mam_tactic(doc, mam_xml.mam_tactic_tag, rva_info)
+    # ---- add findings and kevs
+    insert_fs_table(doc, rva_info, "{Table: Findings Summary}")
+    insert_df_table(doc, rva_info, "{Table: Detailed Findings}", media)
+    insert_kev_table(doc, rva_info, "{Table: KEVs}")
 
-    # ---- add fse appendix
-    insert_fse_table(doc, rva_info)
+    # ---- add additional service sections
+    insert_ransomware(doc, rva_info)
+    insert_de_table(doc, rva_info)
+    insert_pt_table(doc, rva_info)
+    insert_pc_table(doc, rva_info)
 
-    # ---- add appendix b for RPT
-    insert_rpt_appendix_b_table_one(doc, rva_info)
-    insert_rpt_appendix_b_table_two(doc, rva_info)
-    insert_rpt_appendix_b_table_three(doc, rva_info)
+    # ---- add attack paths
+    insert_attack_paths(doc, rva_info, media)
+
+    # ---- add appendices
+    insert_pm_table(doc, rva_info)
+    insert_narrative(doc, rva_info, media)
+    insert_pass_analysis(doc, rva_info)
+    insert_acronyms(doc, rva_info)
+
+    tlp = af.get_db_info(rva_info, 'engagementmeta.fields.traffic_light_protocol', '{TRAFFIC LIGHT PROTOCOL}')
+
+    first_header = doc.sections[0].first_page_header
+    first_footer = doc.sections[0].first_page_footer
+
+    if tlp == "Red":
+        label = " TLP:RED"
+        color = RGBColor(255, 43, 43)
+    elif tlp == "Amber":
+        label = " TLP:AMBER"
+        color = RGBColor(255, 192, 0)
+    elif tlp == "Amber+Strict":
+        label = " TLP:AMBER+STRICT"
+        color = RGBColor(255, 192, 0)
+    else:
+        label = None
+
+    if label is not None:
+        for fheaderp in first_header.paragraphs:
+            if "TLP" in fheaderp.text:
+                p = fheaderp._p
+            for run in fheaderp.runs:
+                if "TLP" in run.text:
+                    p.remove(run._r)
+                    tlp_label = fheaderp.add_run(label)
+                    tlp_label.font.color.rgb = color
+                    tlp_label.font.name = "Franklin Gothic Medium"
+                    tlp_label.font.size = docx.shared.Pt(14)
+                    tlp_label.font.highlight_color = WD_COLOR_INDEX.BLACK
+                    tlp_end = fheaderp.add_run(".")
+                    tlp_end.font.color.rgb = RGBColor(0, 0, 0)
+                    tlp_end.font.highlight_color = WD_COLOR_INDEX.BLACK
+
+        for ffooterp in first_footer.paragraphs:
+            if "TLP" in ffooterp.text:
+                p = ffooterp._p
+            for run in ffooterp.runs:
+                if "TLP" in run.text:
+                    p.remove(run._r)
+                    tlp_label = ffooterp.add_run(label)
+                    tlp_label.font.color.rgb = color
+                    tlp_label.font.name = "Franklin Gothic Medium"
+                    tlp_label.font.size = docx.shared.Pt(14)
+                    tlp_label.font.highlight_color = WD_COLOR_INDEX.BLACK
+                    tlp_end = ffooterp.add_run(".")
+                    tlp_end.font.color.rgb = RGBColor(0, 0, 0)
+                    tlp_end.font.highlight_color = WD_COLOR_INDEX.BLACK
+
+        for section in doc.sections:
+            header = section.header
+            footer = section.footer
+            for headerp in header.paragraphs:
+                if "TLP" in headerp.text:
+                    p = headerp._p
+                    headerp.style = "TLP"
+                    for run in headerp.runs:
+                        p.remove(run._r)
+                    tlp_label = headerp.add_run(label)
+                    tlp_label.font.color.rgb = color
+                    tlp_label.font.highlight_color = WD_COLOR_INDEX.BLACK
+                    tlp_end = headerp.add_run(".")
+                    tlp_end.font.color.rgb = RGBColor(0, 0, 0)
+                    tlp_end.font.highlight_color = WD_COLOR_INDEX.BLACK
+
+            for footerp in footer.paragraphs:
+                if "TLP" in footerp.text:
+                    p = footerp._p
+                    footerp.style = "TLP"
+                    for run in footerp.runs:
+                        p.remove(run._r)
+                    tlp_label = footerp.add_run(label)
+                    tlp_label.font.color.rgb = color
+                    tlp_label.font.highlight_color = WD_COLOR_INDEX.BLACK
+                    tlp_end = footerp.add_run(".")
+                    tlp_end.font.color.rgb = RGBColor(0, 0, 0)
+                    tlp_end.font.highlight_color = WD_COLOR_INDEX.BLACK
 
     # ---- save the report
     doc.save(output)

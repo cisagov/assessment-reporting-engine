@@ -29,7 +29,6 @@ CENTER = Alignment(horizontal='center', vertical='center')
 BOLD14 = px.styles.Font(bold=True, size=14)
 BOLD = px.styles.Font(bold=True)
 ITALIC = px.styles.Font(italic=True)
-# DOUBLE = px.styles.Side(border_style="double", color="0000FF")
 DOUBLE = px.styles.Side(border_style="hair")
 TOP = px.styles.Border(top=DOUBLE)
 BOTTOM = px.styles.Border(bottom=DOUBLE)
@@ -59,8 +58,7 @@ def write_header(ws, lst, r, border=True, space=True, cap=True):
         # adjust the column widths
         if space:
             col_ltr = px.utils.get_column_letter(col + 1)
-            width = int((len(name) + 2) * 1.5)
-            ws.column_dimensions[col_ltr].width = width
+            ws.column_dimensions[col_ltr].width = 30
 
 
 # ---- tracker parameters
@@ -68,30 +66,34 @@ def write_header(ws, lst, r, border=True, space=True, cap=True):
 tabs = [
     "infrastructure",
     "lateralmovement",
-    "persistence",
     "files",
     "interactivelogons",
+    "highimpactscans",
     "significantevents",
+    "artifact"
 ]
 
 tabs_display_name = {
     "infrastructure": "Infrastructure",
     "lateralmovement": "Lateral Movement",
-    "persistence": "Persistence",
     "files": "Files",
     "interactivelogons": "Interactive Logons",
+    "highimpactscans": "High Impact Scans",
     "significantevents": "Significant Events",
+    "artifact": "Artifacts"
 }
 
 cols = {}
 
-cols["infrats"] = ["teamserver_ip", "linked_domain", "beacon_kill_date"]
-cols["infraws"] = ["hostname", "ip_address", "assigned_to"]
+cols["infrats"] = ["hostname", "ip_address", "domain", "beacon_kill_date"]
+cols["infraphishing"] = ["hostname", "ip_address", "domain"]
+cols["infraredirectors"] = ["url"]
+cols["infraws"] = ["hostname", "ip_address", "operating_system", "operator"]
 
 cols["lateralmovement"] = [
     "initial_beacon",
-    "ip_address",
     "hostname",
+    "ip_address",
     "account_used",
     "host_moved_from",
     "movement_method",
@@ -99,40 +101,51 @@ cols["lateralmovement"] = [
     "notes",
 ]
 
-cols["persistence"] = [
-    "installation_time",
-    "machine_ip",
-    "machine_hostname",
-    "description",
-    "persistence_method",
-    "persistence_info",
-    "callback_server",
-    "removal_time",
-]
-
 cols["files"] = [
-    "host",
-    "ip",
-    "location",
-    "filename",
-    "deleted",
-    "date",
-    "time_dropped_to_disk",
-    "time_deleted",
+    "hostname",
+    "ip_address",
+    "file_location",
+    "file_name",
+    "status",
+    "datetime_created",
+    "datetime_deleted",
 ]
 
 cols["interactivelogons"] = [
-    "datetime",
+    "hostname",
+    "ip_address",
+    "account",
+    "method",
+    "logon_datetime",
+    "logoff_datetime",
     "operator",
-    "host",
-    "username",
-    "password",
-    "type",
-    "access_ended",
     "notes",
 ]
 
-cols["significantevents"] = ["event", "notes", "datetime"]
+cols["highimpactscans"] = [
+    "scan_type",
+    "tool_used",
+    "ip_ranges_targeted",
+    "domains_targeted",
+    "scan_start",
+    "scan_end",
+    "notes",
+]
+
+cols["significantevents"] = [
+    "event",
+    "notes",
+    "start_datetime",
+    "end_datetime",
+]
+
+cols["artifact"] = [
+    "file_name",
+    "description",
+    "md5",
+    "sha1",
+    "sha256",
+]
 
 
 def json_name(s):
@@ -142,6 +155,22 @@ def json_name(s):
     # special fixup for ip -> IP
     if "Ip" in lst:
         idx = lst.index('Ip')
+        lst[idx] = lst[idx].upper()
+    # special fixup for url -> URL
+    if "Url" in lst:
+        idx = lst.index('Url')
+        lst[idx] = lst[idx].upper()
+    # special fixup for md5 -> MD5
+    if "Md5" in lst:
+        idx = lst.index('Md5')
+        lst[idx] = lst[idx].upper()
+    # special fixup for sha1 -> SHA1
+    if "Sha1" in lst:
+        idx = lst.index('Sha1')
+        lst[idx] = lst[idx].upper()
+    # special fixup for sha256 -> SHA256
+    if "Sha256" in lst:
+        idx = lst.index('Sha256')
         lst[idx] = lst[idx].upper()
     # special fixup for date/time
     if "Datetime" in lst:
@@ -154,12 +183,19 @@ def json_name(s):
 def add_infra_details(ws, tracker_data):
 
     # find the teamserver information
-    ts_fnds = af.get_db_info(tracker_data, "infrats.fields", "findings")
-
-    ts_fnds = ts_fnds[0]  # remove extra json level
-    print('ts_fnds: ', ts_fnds)
+    ts_fnds = []
+    for cnt, item in enumerate(af.model_gen(tracker_data, 'ptportal.infrats')):
+        ele = item['fields']
+        ts_fnds.append(ele)
 
     curr_row = 1
+    ws.merge_cells('A' + str(curr_row) + ':D' + str(curr_row))
+    write_header(
+        ws, ["TEAMSERVERS"], curr_row, border=False, space=False, cap=False
+    )
+
+    curr_row += 1
+
     add_sheet_details(ws, cols["infrats"], ts_fnds, curr_row)
     if isinstance(ts_fnds, str):  # didn't find a dictionary with data
         no_of_rows = 0
@@ -167,17 +203,61 @@ def add_infra_details(ws, tracker_data):
         no_of_rows = len(ts_fnds)
     curr_row += no_of_rows + 3  # add some blank rows
 
-    # find the dhs workstation
-    ws_fnds = af.get_db_info(tracker_data, "infraws.fields", "findings")
-    ws_fnds = ws_fnds[0]  # remove extra json level
+    # find the phishing information
+    ph_fnds = []
+    for cnt, item in enumerate(af.model_gen(tracker_data, 'ptportal.infraphishing')):
+        ele = item['fields']
+        ph_fnds.append(ele)
 
-    # add a title
-    ws.merge_cells('A' + str(curr_row) + ':C' + str(curr_row))
+    ws.merge_cells('A' + str(curr_row) + ':D' + str(curr_row))
     write_header(
-        ws, ["DHS Workstations"], curr_row, border=False, space=False, cap=False
+        ws, ["PHISHING"], curr_row, border=False, space=False, cap=False
     )
 
     curr_row += 1
+
+    add_sheet_details(ws, cols["infraphishing"], ph_fnds, curr_row)
+    if isinstance(ph_fnds, str):  # didn't find a dictionary with data
+        no_of_rows = 0
+    else:
+        no_of_rows = len(ph_fnds)
+    curr_row += no_of_rows + 3  # add some blank rows
+
+    # find the redirector information
+    rd_fnds = []
+    for cnt, item in enumerate(af.model_gen(tracker_data, 'ptportal.infraredirectors')):
+        ele = item['fields']
+        rd_fnds.append(ele)
+
+    ws.merge_cells('A' + str(curr_row) + ':D' + str(curr_row))
+    write_header(
+        ws, ["REDIRECTORS"], curr_row, border=False, space=False, cap=False
+    )
+
+    curr_row += 1
+
+    add_sheet_details(ws, cols["infraredirectors"], rd_fnds, curr_row)
+    if isinstance(rd_fnds, str):  # didn't find a dictionary with data
+        no_of_rows = 0
+    else:
+        no_of_rows = len(rd_fnds)
+    curr_row += no_of_rows + 3  # add some blank rows
+
+    # find the workstation information
+    ws_fnds = []
+    for cnt, item in enumerate(af.model_gen(tracker_data, 'ptportal.infraws')):
+        ele = item['fields']
+        ws_fnds.append(ele)
+    print(ws_fnds)
+
+    # add a title
+    ws.merge_cells('A' + str(curr_row) + ':D' + str(curr_row))
+    write_header(
+        ws, ["WORKSTATIONS"], curr_row, border=False, space=False, cap=False
+    )
+
+    curr_row += 1
+
     add_sheet_details(ws, cols["infraws"], ws_fnds, curr_row)
 
 
@@ -185,22 +265,18 @@ def add_sheet_details(ws, col_names, fnds, start_row=1):
     # write the header row
     for c, name in enumerate(col_names):
         # set style for header row
-        write_header(ws, col_names, start_row)
+        write_header(ws, col_names, start_row, border=False, space=True)
 
     # add each finding to subsequent rows
     if isinstance(fnds, str):  # didn't find a dictionary with data
         return
 
-    print('fnds: ', fnds)
     for r, ele in enumerate(fnds):
         for c, name in enumerate(col_names):
-            print(ele)
-            # +1 to skip of header row
             ws.cell(row=start_row + r + 1, column=c + 1).value = ele[name]
 
 
 def create_tracker(outfile, json_file):
-    print('create tracker')
 
     tracker_data = af.load_rva_info(json_file)
     # create the excel spreadsheet
@@ -220,19 +296,12 @@ def create_tracker(outfile, json_file):
     # populate the rest of the tabs
     for t in tabs[1:]:
         if t in cols:
-            fnds = af.get_db_info(tracker_data, t + ".fields", "findings")
-            fnds = fnds[0]  # remove extra json level
-            print('finds in create_tracker: ', fnds)
+            fnds = []
+            for cnt, item in enumerate(af.model_gen(tracker_data, 'ptportal.' + t)):
+                ele = item['fields']
+                fnds.append(ele)
             add_sheet_details(wb[tabs_display_name[t]], cols[t], fnds)
 
-    wb.create_sheet("Artifact Tracking")
-    data = []
-    fnds = af.model_gen(tracker_data, "ptportal.artifactfindings")
-    for f in fnds:
-        data.append(f["fields"])
-    add_sheet_details(
-        wb["Artifact Tracking"], ["file_name", "md5", "sha1", "sha256"], data
-    )
     # clean up and save out spreadsheet
     del wb["Cover Page"]
     wb.save(outfile)
