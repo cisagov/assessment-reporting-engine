@@ -18,13 +18,9 @@ DM22-1011
 {% block content %}
 {% csrf_token %}
 
-<sds-section type="accented">
-    <template #title>
-        <p class="text-2xl font-bold">{{ narrative_assessment_type }}</p>
-        <br>
+<sds-section>
         <sds-button variant="primary" @click="redirectLink('{% url "narrative_create" narrative_assessment_type.name|lower %}')">+ Attack Path</sds-button>
-        <br>
-    </template>
+        <br><br>
 </sds-section>
 <br>
 <sds-section v-for="path in formData.attackPaths" :key="path.order" type="simple" class="mb-4">
@@ -84,6 +80,10 @@ function pageData() {
     {% endfor %}
 
     return pageData
+}
+
+function pageCreated() {
+    this.baseData.layoutArgs.pageTitle = "{{ narrative_assessment_type }}"
 }
 </script>
 

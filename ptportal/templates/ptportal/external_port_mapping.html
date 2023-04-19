@@ -29,11 +29,10 @@ DM22-1011
 			<sds-button variant="danger" @click="this.overwriteWarning = false">Cancel</sds-button>
 		</div>
 	</sds-modal>
-	<sds-section class="mb-4">
-		<template #title>
-			<p class="text-2xl font-bold">Nmap Data Upload</p>
-			<sds-file-uploader class="" v-bind="fileUploadArgs"></sds-file-uploader>
-		</template>
+	<sds-section class="mb-4" type="accented">
+		<template #title><b>DATA UPLOAD</b></template>
+		<sds-file-uploader class="" v-bind="fileUploadArgs"></sds-file-uploader>
+		<br>
 		<div class="grid gap-2 grid-cols-2">
 			<div class="flex gap-2">
 				<sds-button variant="primary" @click="parseNmap(false)"><img class="w-8 h-8" src="/static/icons/circle-plus-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Append</sds-button>
@@ -46,6 +45,7 @@ DM22-1011
 		<span class="border-top border-dark"></span>
 		<template #title><b>EXTERNAL NMAP RESULTS</b></template>
 		<!-- Nmap Table -->
+		<p><b>NOTE:</b> To ensure correct parsing of data, please format ports as a comma delimited list (e.g., 22/tcp, 53/tcp, 80/tcp) and ensure that, for every port, there is a corresponding service in the comma delimited service list (e.g., ssh, dns, http). If a service is unknown, it should be listed as 'unknown'.</p>
 		<sds-section>
 			<div class="mb-8">
 				<sds-table :fields="fields" :items="items" class="table-prose" v-bind="NmapTableArgs">
@@ -144,7 +144,7 @@ DM22-1011
 				let duplicates = findDuplicates(ips)
 
 				if (duplicates.length > 0) {
-					this.displayNotification({title: "Duplicate IPs Detected", text: "The following duplicate IP address entries were found and must be removed before saving: " + duplicates.join(", "), variant:"danger", autoHideDelay:10000})
+					this.displayNotification({title: "Duplicate IPs Detected", text: "The following duplicate IP address entries were found and must be removed before saving: " + duplicates.join(", "), variant:"warning", autoHideDelay:10000})
 				}
 
 				else {
@@ -156,7 +156,7 @@ DM22-1011
 						headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
 					}).then(response => {
 						if(response.ok) {
-							this.displayNotification({title: "Nmap Data Saved", text: "Port mapping data saved successfully. Please wait while the page refreshes...", variant: "success"})
+							this.displayNotification({title: "Port Mapping Data Saved", text: "Port mapping data saved successfully. Please wait while the page refreshes...", variant: "success"})
 							setTimeout(() => {this.redirectLink("{% url 'port_mapping' %}")}, 2000)
 						}
 						else {

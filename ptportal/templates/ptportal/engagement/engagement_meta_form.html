@@ -36,10 +36,7 @@ DM22-1011
         border-top:1px solid black!important;
         border-color:#1b1c1d!important;
     }
-	.w-full{
-		width: 85% !important;
-	}
-	.gap-2{
+	.form-spacing{
 		gap: 1.5rem !important;
 	}
 	/* .form-control{
@@ -62,35 +59,31 @@ DM22-1011
 {% endblock %}
 
 {% block content %}
-<div class="header">
-   <h2> Assessment Details</h2>
-</div>
-<br>
-
 <div class="col-span-5">
-    <sds-section class="col-span-5" type="accented">
-        <span class="border-top border-dark"></span>
-            <template #title><b>ASSESSMENT DETAILS</b></template>
 		{% if object %}
-		<div class="mt-2 grid grid-cols-2">
-			<div class="">
-				<h2>{{report.report_type}} ID: {{object.asmt_id}}</h2>
-				<p>Last modified on {{object.updated_at | naturaltime}}</p>
+		<sds-section>
+			<div>
+				<div style="float:left">
+					<h2>{{report.report_type}} ID: {{object.asmt_id}}</h2>
+					<p>Last modified: {{object.updated_at | naturaltime}}</p>
+				</div>
+				<div style="float:right">
+					<sds-button variant="danger" @click="redirectLink('{% url "engagement_delete" %}')"><i class="fa fa-trash"></i> Delete</sds-button>
+				</div>
 			</div>
-			<div class="justify-self-end">
-				<sds-button variant="danger" @click="redirectLink('{% url "engagement_delete" %}')"><i class="fa fa-trash"></i> Delete</sds-button>
-			</div>
-		</div>
+			<br><br><br>
+		</sds-section>
+		<br>
 		{% endif %}
 
 		<form @submit="submitEngagement" class="block">
 			{% csrf_token %}
 
-			<div class="mt-2 mb-4 block">
-				<h1 class="text-xl">Stakeholder Information</h1>
-			</div>
+		<sds-section class="col-span-5" type="accented">
+        	<span class="border-top border-dark"></span>
+            <template #title><b>STAKEHOLDER INFORMATION</b></template>
 
-			<div class="grid grid-cols-6 gap-2 mb-8">
+			<div class="grid grid-cols-6 form-spacing mb-8">
 				<div class="col-span-3">
 					<h4><b>{{ form.customer_long_name.label_tag }}</b></h4>
 					<sds-input v-model="formData.customer_long_name" placeholder="Organization Name"></sds-input>
@@ -124,11 +117,13 @@ DM22-1011
 					<sds-select v-model="formData.customer_ci_type" :options="ci_options"/>
 				</div>
 			</div>
+		</sds-section>
+		<br>
+		<sds-section class="col-span-5" type="accented">
+        	<span class="border-top border-dark"></span>
+            <template #title><b>ASSESSOR DETAILS</b></template>
 
-			<div class="mt-2 mb-4 block">
-				<h1 class="text-xl">Assessor Details</h1>
-			</div>
-			<div class="grid grid-cols-6 gap-2 mb-8">
+			<div class="grid grid-cols-6 form-spacing mb-8">
 				<div class="col-span-3">
 					<h4><b>{{ form.team_lead_name.label_tag }}</b></h4>
 					<sds-input v-model="formData.team_lead_name" placeholder="Jane Doe"></sds-input>
@@ -142,8 +137,9 @@ DM22-1011
 					<sds-textarea v-model="formData.business_goal" placeholder="Enter a brief description of the assessment business goal." v-bind:rows="3"></sds-textarea>
 				</div>-->
 			</div>
+		</sds-section>
 
-			{% if report.report_type == 'HVA' %}
+			<!--{% if report.report_type == 'HVA' %}
 				<div class="mb-2">
 					<h2>High Valued Asset(s)</h2>
 				</div>
@@ -167,12 +163,13 @@ DM22-1011
 					</sds-table>
 					<sds-button variant="primary" type="button" size="sm" @click="addHVASystem">Add System</sds-button>
 				</div>
-			{% endif %}
+			{% endif %}-->
+		<br>
+		<sds-section class="col-span-5" type="accented">
+        	<span class="border-top border-dark"></span>
+            <template #title><b>PHISHING TESTING</b></template>
 
-			<div class="mt-2 mb-4 block">
-				<h1 class="text-xl">Phishing Testing</h1>
-			</div>
-			<div class="grid grid-cols-6 gap-2 mb-8">
+			<div class="grid grid-cols-6 form-spacing mb-8">
 				<div class="col-span-3">
 					<h4><b>
 						{{form.phishing_domains.label_tag}}
@@ -183,11 +180,13 @@ DM22-1011
 					<sds-textarea v-model="formData.phishing_domains" placeholder="dhs.gov, cisa.gov"></sds-textarea>
 				</div>
 			</div>
+		</sds-section>
+		<br>
+		<sds-section class="col-span-5" type="accented">
+        	<span class="border-top border-dark"></span>
+            <template #title><b>EXTERNAL TESTING</b></template>
 
-			<div class="mt-2 mb-4 block">
-				<h1 class="text-xl">External Testing</h1>
-			</div>
-			<div class="grid grid-cols-6 gap-2 mb-8">
+			<div class="grid grid-cols-6 form-spacing mb-8">
 				<div class="col-span-4">
 					<h4 class="mb-2"><b>External Start and End Date</b></h4>
 					<sds-datepicker v-model="formData.ext_date"></sds-datepicker>
@@ -211,81 +210,87 @@ DM22-1011
 					<sds-textarea v-model="formData.ext_excluded_scope" placeholder="192.168.0.0, 192.168.0.1-4, 192.168.0.5-192.168.1.7, 192.168.0.0/25, subdomain.domain.com"></sds-textarea>
 				</div>
 			</div>
-
+		</sds-section>
+		<br>
 			{% if report.report_type != 'RPT' %}
-			<div class="mt-2 mb-4 block">
-				<h1 class="text-xl">Internal Testing</h1>
-			</div>
-			<div class="grid grid-cols-6 gap-2 mb-8">
-				<div class="col-span-4">
-					<h4 class="mb-2"><b>Internal Start and End Date</b></h4>
-					<sds-datepicker v-model="formData.int_date"></sds-datepicker>
+			<sds-section class="col-span-5" type="accented">
+	        	<span class="border-top border-dark"></span>
+	            <template #title><b>INTERNAL TESTING</b></template>
+
+				<div class="grid grid-cols-6 form-spacing mb-8">
+					<div class="col-span-4">
+						<h4 class="mb-2"><b>Internal Start and End Date</b></h4>
+						<sds-datepicker v-model="formData.int_date"></sds-datepicker>
+					</div>
+					<div class="col-span-3">
+						<h4><b>
+							{{form.int_scope.label_tag}}
+						</b></h4>
+						<span class="text-sm text-gray-600">
+							{{form.int_scope.help_text}}
+						</span>
+						<sds-textarea v-model="formData.int_scope" placeholder="192.168.0.0, 192.168.0.1-4, 192.168.0.5-192.168.1.7, 192.168.0.0/25, subdomain.domain.com"></sds-textarea>
+					</div>
+					<div class="col-span-3">
+						<h4><b>
+							{{form.int_excluded_scope.label_tag}}
+						</b></h4>
+						<span class="text-sm text-gray-600">
+							{{form.int_excluded_scope.help_text}}
+						</span>
+						<sds-textarea v-model="formData.int_excluded_scope" placeholder="192.168.0.0, 192.168.0.1-4, 192.168.0.5-192.168.1.7, 192.168.0.0/25, subdomain.domain.com"></sds-textarea>
+					</div>
 				</div>
-				<div class="col-span-3">
-					<h4><b>
-						{{form.int_scope.label_tag}}
-					</b></h4>
-					<span class="text-sm text-gray-600">
-						{{form.int_scope.help_text}}
-					</span>
-					<sds-textarea v-model="formData.int_scope" placeholder="192.168.0.0, 192.168.0.1-4, 192.168.0.5-192.168.1.7, 192.168.0.0/25, subdomain.domain.com"></sds-textarea>
-				</div>
-				<div class="col-span-3">
-					<h4><b>
-						{{form.int_excluded_scope.label_tag}}
-					</b></h4>
-					<span class="text-sm text-gray-600">
-						{{form.int_excluded_scope.help_text}}
-					</span>
-					<sds-textarea v-model="formData.int_excluded_scope" placeholder="192.168.0.0, 192.168.0.1-4, 192.168.0.5-192.168.1.7, 192.168.0.0/25, subdomain.domain.com"></sds-textarea>
-				</div>
-			</div>
+			</sds-section>
+			<br>
 			{% endif %}
 
-			<div class="mt-2 mb-4 block">
-				<h1 class="text-xl">Additional Information</h1>
-			</div>
-			<h4 class=""><b>{{form.traffic_light_protocol.label_tag}}</b><span class="text-red-500 text-sm"> * required</span></h4>
-			<span class="text-sm text-gray-600">
-				{{form.traffic_light_protocol.help_text}}
-			</span>
-			<sds-radio-group required v-bind="TLP_Button_Options" v-model="formData.traffic_light_protocol" class="mb-4"></sds-radio-group>
+			<sds-section class="col-span-5" type="accented">
+	        	<span class="border-top border-dark"></span>
+	            <template #title><b>ADDITONAL INFORMATION</b></template>
 
-			<div class="grid gap-2 mb-2 fieldlabel">
-				<div>
-					<h4 class="mb-2"><b>Create Assessment ID</b><span class="text-red-500 text-sm"> * required</span></h4>
-					<span class="text-sm text-gray-600">
-						Assessment ID Max Length = 8 characters
-					</span>
-					<!-- <sds-input v-model="formData.asmt_id" v-bind="asmt_idArgs" @update:model-value="validateAsmtID"></sds-input> -->
-				</div>
-				<div>
-					<h4><b>{{form.report_password.label_tag}}</b><span class="text-red-500 text-sm"> * required</span></h4>
-					<span class="text-sm text-gray-600">
-						{{form.report_password.help_text}}
-						<i v-if="passwordArgs.invalid" class="fas fa-times-circle"></i>
-						<i v-if="passwordArgs.valid" class="fas fa-check-circle"></i>
-					</span>
-					<!-- <sds-input required v-model="formData.report_password" v-bind="passwordArgs" @update:model-value="validatePassword"></sds-input> -->
-				</div>
-				<div >
-					<h4><b>{{form.confirm_report_password.label_tag}}</b><span class="text-red-500 text-sm"> * required</span></h4>
-					<span class="text-sm text-gray-600">
-						{{form.confirm_report_password.help_text}}
-						<i v-if="confirmPasswordArgs.invalid" class="fas fa-times-circle"></i>
-						<i v-if="confirmPasswordArgs.valid" class="fas fa-check-circle"></i>
-					</span>
-					<!-- <sds-input required v-model="formData.confirm_report_password" v-bind="confirmPasswordArgs" @update:model-value="confirmPassword"></sds-input> -->
-				</div>
-			</div>
-			<div class="grid gap-2 fields">
-					<div class ="label-sm">
-						<sds-input v-model="formData.asmt_id" v-bind="asmt_idArgs" @update:model-value="validateAsmtID"></sds-input>
+				<h4 class=""><b>{{form.traffic_light_protocol.label_tag}}</b><span class="text-red-500 text-sm"> * required</span></h4>
+				<span class="text-sm text-gray-600">
+					{{form.traffic_light_protocol.help_text}}
+				</span>
+				<sds-radio-group required v-bind="TLP_Button_Options" v-model="formData.traffic_light_protocol" class="mb-4"></sds-radio-group>
+
+				<div class="grid form-spacing mb-2 fieldlabel">
+					<div>
+						<h4 class="mb-2"><b>Create Assessment ID</b><span class="text-red-500 text-sm"> * required</span></h4>
+						<span class="text-sm text-gray-600">
+							Assessment ID Max Length = 8 characters
+						</span>
+						<!-- <sds-input v-model="formData.asmt_id" v-bind="asmt_idArgs" @update:model-value="validateAsmtID"></sds-input> -->
 					</div>
-					<sds-input required v-model="formData.report_password" v-bind="passwordArgs" @update:model-value="validatePassword"></sds-input>
-					<sds-input required v-model="formData.confirm_report_password" v-bind="confirmPasswordArgs" @update:model-value="confirmPassword"></sds-input>
-			</div>
-			<sds-button type="submit" variant="primary">Submit</sds-button>
+					<div>
+						<h4><b>{{form.report_password.label_tag}}</b><span class="text-red-500 text-sm"> * required</span></h4>
+						<span class="text-sm text-gray-600">
+							{{form.report_password.help_text}}
+							<i v-if="passwordArgs.invalid" class="fas fa-times-circle"></i>
+							<i v-if="passwordArgs.valid" class="fas fa-check-circle"></i>
+						</span>
+						<!-- <sds-input required v-model="formData.report_password" v-bind="passwordArgs" @update:model-value="validatePassword"></sds-input> -->
+					</div>
+					<div >
+						<h4><b>{{form.confirm_report_password.label_tag}}</b><span class="text-red-500 text-sm"> * required</span></h4>
+						<span class="text-sm text-gray-600">
+							{{form.confirm_report_password.help_text}}
+							<i v-if="confirmPasswordArgs.invalid" class="fas fa-times-circle"></i>
+							<i v-if="confirmPasswordArgs.valid" class="fas fa-check-circle"></i>
+						</span>
+						<!-- <sds-input required v-model="formData.confirm_report_password" v-bind="confirmPasswordArgs" @update:model-value="confirmPassword"></sds-input> -->
+					</div>
+				</div>
+				<div class="grid form-spacing fields">
+						<div class ="label-sm">
+							<sds-input v-model="formData.asmt_id" v-bind="asmt_idArgs" @update:model-value="validateAsmtID"></sds-input>
+						</div>
+						<sds-input required v-model="formData.report_password" v-bind="passwordArgs" @update:model-value="validatePassword"></sds-input>
+						<sds-input required v-model="formData.confirm_report_password" v-bind="confirmPasswordArgs" @update:model-value="confirmPassword"></sds-input>
+				</div>
+				<sds-button type="submit" variant="primary">Submit</sds-button>
+			</sds-section>
 		</form>
 	</sds-section>
 </div>
@@ -301,18 +306,18 @@ DM22-1011
 		data = {
 			//Form data
 			formData: {
-				customer_long_name: "{{ object.customer_long_name }}",
-				customer_initials: "{{ object.customer_initials }}",
-				customer_POC_name: "{{ object.customer_POC_name }}",
-				customer_POC_email: "{{ object.customer_POC_email }}",
+				customer_long_name: "{{ object.customer_long_name | escapejs }}",
+				customer_initials: "{{ object.customer_initials | escapejs }}",
+				customer_POC_name: "{{ object.customer_POC_name | escapejs }}",
+				customer_POC_email: "{{ object.customer_POC_email | escapejs }}",
 				customer_state: "{{ object.customer_state }}",
 				customer_sector: "{{ object.customer_sector }}",
 				customer_ci_type: "{{ object.customer_ci_type }}",
-				customer_location: "{{ object.customer_location }}",
-				team_lead_name: "{{ object.team_lead_name }}",
-				team_lead_email: "{{ object.team_lead_email }}",
-				technical_lead_name: "{{ object.technical_lead_name }}",
-				technical_lead_email: "{{ object.technical_lead_email }}",
+				customer_location: "{{ object.customer_location | escapejs }}",
+				team_lead_name: "{{ object.team_lead_name | escapejs }}",
+				team_lead_email: "{{ object.team_lead_email | escapejs }}",
+				technical_lead_name: "{{ object.technical_lead_name | escapejs }}",
+				technical_lead_email: "{{ object.technical_lead_email | escapejs }}",
 				ext_date: {start: "{{object.ext_start_date}}" ? new Date("{{object.ext_start_date}}") : "", end: "{{object.ext_end_date}}" ? new Date("{{object.ext_end_date}}") : ""},
 				int_date: {start: "{{object.int_start_date}}" ? new Date("{{object.int_start_date}}") : "", end: "{{object.int_end_date}}" ? new Date("{{object.int_end_date}}") : ""},
 				phishing_domains: "{{ object.phishing_domains }}",
@@ -521,6 +526,10 @@ DM22-1011
 		return data
 	}
 
+	function pageCreated() {
+		this.baseData.layoutArgs.pageTitle = "Assessment Details"
+	}
+
 	function pageMethods() {
 		pageFunctions = {
 			validateForm: function () {
@@ -544,14 +553,14 @@ DM22-1011
 					headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
 				}).then(response => {
 					if (response.ok) {
-						this.displayNotification({title: "Assessment Details Saved", variant:"success", text: "Assessment details saved successfully. Redirecting to detail page."})
-						this.redirectLink("{% url 'engagement_detail'%}")
+						this.displayNotification({title: "Assessment Details Saved", variant:"success", text: "Assessment details saved successfully. Redirecting to detail page..."})
+						setTimeout(() => {this.redirectLink("{% url 'engagement_detail' %}")}, 2000)
 					}
 					else {
-						this.displayNotification({title: "Error Saving Assessment Details", variant: "danger", text: "Assessment details could not be saved. Please check the form for errors and try again."})
+						this.displayNotification({title: "Error Saving Data", variant: "danger", text: "Bad response received from server. Check for errors in forms and try again."})
 					}
 				}).catch(error => {
-					this.displayNotification({text: error, title: "Error saving engagement", variant:"danger"})
+					this.displayNotification({text: error, title: "Error Saving Data", variant:"danger"})
 				})
 			},
 			showPasswordToggle: function () {

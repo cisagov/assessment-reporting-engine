@@ -477,6 +477,11 @@ DM22-1011
                     yaxis: {
                         title: {
                             text: ''
+                        },
+                        labels: {
+                            formatter: function(val) {
+                                return val.toFixed(0);
+                            }
                         }
                     },
                     xaxis: {

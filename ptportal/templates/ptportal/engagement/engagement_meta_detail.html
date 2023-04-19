@@ -17,20 +17,18 @@ DM22-1011
 {% block active %}#engagement{% endblock %}
 {% block content %}
 
-<h1>Engagement Metadata</h1>
-<hr />
-
-<div class="mt-2 mb-4 grid grid-cols-2">
-	<div class="">
+<sds-section>
+	<div style="float:left">
 		<h2>{{report.report_type}} ID: {{object.asmt_id}}</h2>
-		<p>Last modified on {{object.updated_at | naturaltime}}</p>
+		<p>Last modified: {{object.updated_at | naturaltime}}</p>
 	</div>
-	<div class="justify-self-end">
+	<div style="float:right">
     <sds-button class="mr-2" variant="primary" @click="redirectLink('{% url "engagement_update" %}')"><i class="fa fa-edit"></i> Edit</sds-button>
 		<sds-button variant="danger" @click="redirectLink('{% url "engagement_delete" %}')"><i class="fa fa-trash"></i> Delete</sds-button>
 	</div>
-</div>
-
+  <br><br><br>
+</sds-section>
+<br>
 <sds-section type="simple" class="mb-4 w-1/2">
   <template #title>
     <h4><b>Stakeholder Information</b></h4>
@@ -129,6 +127,10 @@ DM22-1011
 		{% endif %}
 
     return data
+  }
+
+  function pageCreated() {
+    this.baseData.layoutArgs.pageTitle = "Assessment Details"
   }
 </script>
 {% endblock %}

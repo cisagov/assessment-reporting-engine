@@ -24,15 +24,129 @@ DM22-1011
     background-color: #DDDDDD;
   }
 
+  .module {
+  	display:block;
+  	margin:5px;
+  	min-height:300px;
+  	background-color:white;
+  	padding:15px;
+  	float:left;
+  	overflow:auto;
+  }
+
+  .module-sm {
+  	display:block;
+  	margin:5px;
+  	min-height:200px;
+  	width: 24%;
+  	background-color:white;
+  	padding:15px;
+  	float:left;
+  }
+
+  .module h1 {
+  	align:center;
+  	font-size: 14pt;
+    color: #333;
+    font-weight: bold;
+  }
+
+  .module-sm h1 {
+  	align:center;
+  	font-size: 14pt;
+    color: #333;
+    font-weight: bold;
+  }
+
+  .content-xl {
+  	font-size: 60pt;
+  	text-align: center;
+  	color: #333;
+    font-weight: bold;
+  }
+
+  .content-med {
+  	font-size: 28pt;
+  	text-align: center;
+  	color: #333;
+    font-weight: bold;
+  }
+
+  .content-sm {
+  	font-size: 12pt;
+  	text-align: center;
+  	color: #333;
+    font-weight: bold;
+  }
+
 </style>
 
 {% endblock %}
 
 {% block content %}
-<div id="vueApp">
-	<h1 class='text-4xl'><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
-	<hr />
-	<div id="dashboardTrackers" class="grid md:grid-cols-3 gap-x-8 mt-4 h-48 mb-4">
+<div class="module-sm">
+	<h1>Findings</h1>
+	<div class="content-xl">{{total_findings}}</div>
+</div>
+<div class="module-sm">
+	<h1>KEVs</h1>
+	<div class="content-xl">{{total_kevs}}</div>
+</div>
+<div class="module-sm">
+	<h1>Phishing</h1>
+	<br>
+	<div style="float:left; width:50%;">
+		<div class="content-med">{{click_rate}}%</div>
+		<div class="content-sm">Click Rate</div>
+	</div>
+	<div style="float:left; width:50%; border-left: 1px solid black;">
+		<div class="content-med">{{total_payloads}}</div>
+		<div class="content-sm">Payloads</div>
+	</div>
+</div>
+<div class="module-sm">
+	<h1>Risk Score</h1>
+	<br>
+	<div style="float:left; width:50%;">
+		<div class="content-med">{{total_risk_score}}</div>
+		<div class="content-sm">Total</div>
+	</div>
+	<div style="float:left; width:50%; border-left: 1px solid black;">
+		<div class="content-med">{{mitigated_risk_score}}</div>
+		<div class="content-sm">Mitigated</div>
+	</div>
+</div>
+<br><br><br><br><br>
+<div class="module" style="width:49%;">
+	<h1>Assessor Checklist</h1>
+	<br>
+	<ul>
+		<li><input type="checkbox" :checked="added_assessment_details" :disabled="true">&emsp; Add Assessment Details</li>
+		<li><input type="checkbox" :checked="added_findings" :disabled="true">&emsp; Add Finding Data</li>
+		<li><input type="checkbox" :checked="added_payloads" :disabled="true">&emsp; Add Payload Data</li>
+		<li><input type="checkbox" :checked="added_campaigns" :disabled="true">&emsp; Add Campaign Data</li>
+		<li><input type="checkbox" :checked="added_port_mappings" :disabled="true">&emsp; Add Port Mapping Data</li>
+		<li><input type="checkbox" :checked="added_data_exfil" :disabled="true">&emsp; Add Data Exfiltration Data</li>
+		<li><input type="checkbox" :checked="added_ransomware" :disabled="true">&emsp; Add Ransomware Data</li>
+		<li><input type="checkbox" :checked="added_narratives" :disabled="true">&emsp; Add Narrative Data</li>
+		<li><input type="checkbox" :checked="added_kevs" :disabled="true">&emsp; Add Known Exploited Vulnerabilities</li>
+	</ul>
+</div>
+<div class="module" style="width:49%; float:left;">
+	<h1>Total Findings by Severity</h1>
+	<br>
+	<apexchart height="200" width="100%" :options="severityArgs.options" :series="severityArgs.data"></apexchart>
+</div>
+<br><br><br><br><br><br><br><br><br>
+<div class="module" style="width:99%; float:left;">
+
+		<!--<template #title style="float:left"><b style="font-size:18pt">FINDINGS ({{total_findings}})</b>
+			<div style="float:right">
+				<sds-button v-if="'{{engagement_present}}' == 'True'" variant="primary" @click="redirectLink('{% url "finding_create" %}')">Add Finding</sds-button>
+				<sds-button v-else variant="danger" @click="redirectLink('{% url "engagement_create" %}')">Add Assessment Details</sds-button>
+			</div>
+		</template>-->
+	<!--<div id="dashboardTrackers" class="grid md:grid-cols-3 gap-x-8 mt-4 h-48 mb-4">
 		<div class="block bg-white dark:bg-gray-800 dark:border-gray-700 border">
 			<header class='h-4/6 bg-red-500 border-b dark:border-gray-700'>
 				<h2 class="text-3xl pt-3 pl-3 absolute"><i class="fa fa-exclamation-circle"></i></h2>
@@ -60,36 +174,25 @@ DM22-1011
 				<sds-link href="" variant="info" v-bind:cta="true">View Details</sds-link>
 			</div>
 		</div>
-	</div>
+	</div>-->
 
-	<div class="grid md:grid-cols-2 mb-4">
-		<div>
-			<h3 class="inline-block text-2xl">Showing {{total_findings}} findings</h3>
-		</div>
-		<div class="text-right">
-			<sds-button v-if="'{{engagement_present}}' == 'True'" variant="primary" @click="redirectLink('{% url "finding_create" %}')">Add Finding</sds-button>
-			<sds-button v-else variant="danger" @click="redirectLink('{% url "engagement_create" %}')">Add Assessment Details</sds-button>
-		</div>
-	</div>
-
-	<sds-table :fields="fields" :items="items" class="table-prose" v-bind="dashboardTableArgs">
-		<template #cell(finding_name)="{item}">
-			<sds-button v-model="item.finding_name" type="button" @click="redirectLink([[item.url]])">[[item.finding_name]]</sds-button>
-		</template>
-		<template #cell(assessment_type)="{item}">
-			<sds-button v-model="item.assessment_type" type="button" @click="redirectLink([[item.url]])">[[item.assessment_type]]</sds-button>
-		</template>
-		<template #cell(severity)="{item}">
-			<sds-button v-model="item.severity" type="button" @click="redirectLink([[item.url]])">[[item.severity]]</sds-button>
-		</template>
-		<template #cell(created)="{item}">
-			<sds-button v-model="item.created" type="button" @click="redirectLink([[item.url]])">[[item.created]]</sds-button>
-		</template>
-		<template #cell(updated)="{item}">
-			<sds-button v-model="item.updated" type="button" @click="redirectLink([[item.url]])">[[item.updated]]</sds-button>
-		</template>
-	</sds-table>
-	
+		<sds-table :fields="fields" :items="items" class="table-prose" v-bind="dashboardTableArgs">
+			<template #cell(finding_name)="{item}">
+				<sds-button v-model="item.finding_name" type="button" @click="redirectLink([[item.url]])">[[item.finding_name]]</sds-button>
+			</template>
+			<template #cell(assessment_type)="{item}">
+				<sds-button v-model="item.assessment_type" type="button" @click="redirectLink([[item.url]])">[[item.assessment_type]]</sds-button>
+			</template>
+			<template #cell(severity)="{item}">
+				<sds-button v-model="item.severity" type="button" @click="redirectLink([[item.url]])">[[item.severity]]</sds-button>
+			</template>
+			<template #cell(created)="{item}">
+				<sds-button v-model="item.created" type="button" @click="redirectLink([[item.url]])">[[item.created]]</sds-button>
+			</template>
+			<template #cell(updated)="{item}">
+				<sds-button v-model="item.updated" type="button" @click="redirectLink([[item.url]])">[[item.updated]]</sds-button>
+			</template>
+		</sds-table>
 </div>
 {% endblock %}
 
@@ -128,8 +231,116 @@ DM22-1011
 				],
 				items: [],
 				sortBy: "finding_name"
-			}
+			},
+			severityArgs: {
+				options: {
+					chart: {
+						type: 'bar',
+						height: 200,
+						animations: {
+							enabled: true
+						}
+					},
+					plotOptions: {
+						bar: {
+							horizontal: false,
+							columnWidth: '30%',
+							endingShape: 'rounded',
+							distributed: true
+						}
+					},
+					dataLabels: {
+						enabled: false,
+					},
+					colors: ['#FF7471', '#FCBF8F', '#FFDE59', '#83E08E', '#4AA1D2'],
+					stroke: {
+						show: true,
+						width: 2,
+						colors: ['transparent']
+					},
+					fill: {
+						opacity: 1
+					},
+					tooltip: {
+						enabled: false
+					},
+					title: {
+						text: ''
+					},
+					legend: {
+						show: false
+					},
+					yaxis: {
+						title: {
+							text: ''
+						},
+						labels: {
+      				formatter: function(val) {
+        				return val.toFixed(0);
+      				}
+    				}
+					},
+					xaxis: {
+						categories: ['Critical', 'High', 'Medium', 'Low', 'Informational'],
+						labels: {
+							rotate: 0,
+							rotateAlways: false,
+							offsetX: 0
+						}
+					}
+				},
+				data: [
+					{
+						data: ['{{total_critical}}', '{{total_high}}', '{{total_medium}}', '{{total_low}}', '{{total_info}}']
+					}
+				],
+			},
+			added_assessment_details: false,
+			added_findings: false,
+			added_payloads: false,
+			added_campaigns: false,
+			added_port_mapping: false,
+			added_data_exfil: false,
+			added_ransomware: false,
+			added_narratives: false,
+			added_kevs: false
 		}
+
+		{% if engagement_present == True %}
+			pageData.added_assessment_details = true
+		{% endif %}
+
+		{% if total_findings > 0 %}
+			pageData.added_findings = true
+		{% endif %}
+
+		{% if total_payloads > 0 %}
+			pageData.added_payloads = true
+		{% endif %}
+
+		{% if total_campaigns > 0 %}
+			pageData.added_campaigns = true
+		{% endif %}
+
+		{% if total_port_mappings > 0 %}
+			pageData.added_port_mapping = true
+		{% endif %}
+
+		{% if total_data_exfil > 0 %}
+			pageData.added_data_exfil = true
+		{% endif %}
+
+		{% if total_ransomware > 0 %}
+			pageData.added_ransomware = true
+		{% endif %}
+
+		{% if total_narratives > 0 %}
+			pageData.added_narratives = true
+		{% endif %}
+
+		{% if total_kevs > 0 %}
+			pageData.added_kevs = true
+		{% endif %}
 
 		{% for i in object_list %}
 
@@ -139,6 +350,10 @@ DM22-1011
 
 		return pageData
 	}
+
+	function pageCreated() {
+    this.baseData.layoutArgs.pageTitle = "Dashboard"
+  }
 
 	function pageMethods() {
 		return {

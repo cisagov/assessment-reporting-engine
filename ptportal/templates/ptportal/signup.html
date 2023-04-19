@@ -14,6 +14,10 @@ DM22-1011
 
 <html>
 <head>
+    <!-- SDS CSS -->
+    <link href="{{ STATIC_URL }}css/sds.tailwind.css" rel="stylesheet" />
+    <link href="{{ STATIC_URL }}css/sds.style.css" rel="stylesheet" />
+
 	<!-- CSS -->
 	<link href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css" rel="stylesheet" />
 	<link href="{{ STATIC_URL }}bootstrap/css/bootstrap-datepicker3.css" rel="stylesheet" />
@@ -88,6 +92,7 @@ DM22-1011
                     {% endfor %}
                 </div>
             {% endif %}
+            <br>
             <div>
                 <button type="submit" class="btn btn-success">Register</button>
             </div>

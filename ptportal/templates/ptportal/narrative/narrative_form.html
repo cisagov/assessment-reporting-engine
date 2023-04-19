@@ -51,9 +51,6 @@ DM22-1011
 
 {% block content %}
 {% csrf_token %}
-<div class="header">
-    <h2>{% if object.name %}{{ object.name }}{% else %}New Attack Path{% endif %}</h2>
-</div>
 
 <div class="col-span-5">
 
@@ -280,6 +277,14 @@ DM22-1011
         return pageData
     }
 
+    function pageCreated() {
+        {% if object.name %}
+            this.baseData.layoutArgs.pageTitle = "{{object.name}}"
+        {% else %}
+            this.baseData.layoutArgs.pageTitle = "New Attack Path"
+        {% endif %}
+    }
+
     function pageMethods() {
         pageFunctions = {
             addFile: function (event) {
@@ -357,26 +362,28 @@ DM22-1011
                     headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
                 }).then(response => {
                 if(response.ok) {
-
-                    this.displayNotification({title: "Narrative Details Saved", text: "Narative details have been saved successfully.", variant: "success"})
                     
                     base = String(window.location.origin)
                     path = String(window.location.pathname)
                     if (path.includes("phishing") && path.includes("create")) {
-                        window.location.href=base.concat("/ptportal/narrative/phishing")
+                        this.displayNotification({title: "Narrative Details Saved", text: "Narative details saved successfully. Redirecting...", variant: "success"})
+                        setTimeout(() => {window.location.href=base.concat("/ptportal/narrative/phishing")}, 2000)
                     }
                     else if (path.includes("external") && path.includes("create")) {
-                        window.location.href=base.concat("/ptportal/narrative/external")
+                        this.displayNotification({title: "Narrative Details Saved", text: "Narative details saved successfully. Redirecting...", variant: "success"})
+                        setTimeout(() => {window.location.href=base.concat("/ptportal/narrative/external")}, 2000)
                     }
                     else if (path.includes("create")) {
-                        window.location.href=base.concat("/ptportal/narrative/internal")
+                        this.displayNotification({title: "Narrative Details Saved", text: "Narative details saved successfully. Redirecting...", variant: "success"})
+                        setTimeout(() => {window.location.href=base.concat("/ptportal/narrative/internal")}, 2000)
                     }
                     else {
-                        location.reload()
+                        this.displayNotification({title: "Narrative Details Saved", text: "Narative details saved successfully. Please wait while the page refreshes...", variant: "success"})
+                        setTimeout(() => {location.reload()}, 2000)
                     }
                 }
                 else {
-                    this.displayNotification({title: "Error Saving Data", text: "Bad response received from server. Check for errors in form and try again.", variant: "danger"})
+                    this.displayNotification({title: "Error Saving Data", text: "Bad response received from server. Check for errors in forms and try again.", variant: "danger"})
                 }
                 }).catch(error => {
                     this.displayNotification({title: "Error Saving Data", text: error, variant: "danger"})

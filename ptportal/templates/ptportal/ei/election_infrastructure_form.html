@@ -40,11 +40,6 @@ DM22-1011
 {% endblock %}
 
 {% block content %}
-<div class="header">
-   <h2> Election Infrastructure</h2>
-
-</div>
-<br>
 <form @submit="submitEI" class="block">
 
 {% csrf_token %}
@@ -295,6 +290,10 @@ DM22-1011
         return data
     }
 
+    function pageCreated() {
+        this.baseData.layoutArgs.pageTitle = "Election Infrastructure"
+    }
+
     function pageMethods() {
         pageFunctions = {
             submitEI: function (event) {
@@ -309,14 +308,14 @@ DM22-1011
                     headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
                 }).then(response => {
                     if (response.ok) {
-                        this.displayNotification({title: "EI Data Saved", variant:"success", text: "EI data has successfully saved!"})
-                        this.redirectLink("{% url 'ei_update'%}")
+                        this.displayNotification({title: "Election Data Saved", variant:"success", text: "Election data saved successfully. Please wait while the page refreshes..."})
+                        setTimeout(() => {this.redirectLink("{% url 'ei_update' %}")}, 2000)
                     }
                     else {
                         this.displayNotification({title: "Error Saving Data", text: 'Bad response received from server. Check for errors in forms and try again.', variant: "danger"})
                     }
                 }).catch(error => {
-                    this.displayNotification({text: error, title: "Error Saving EI Data", variant:"danger"})
+                    this.displayNotification({text: error, title: "Error Saving Data", variant:"danger"})
                 })
             },
 

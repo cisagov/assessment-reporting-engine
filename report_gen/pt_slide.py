@@ -1235,7 +1235,10 @@ def insert_services_slides(prs, rva_info):
 
             for cnt, item in enumerate(chunk):
                 cell_text(table, cnt + 1, 0, item['description'], color=gray)
-                cell_text(table, cnt + 1, 1, item['protocol'], color=gray)
+                if item['protocol'] == "":
+                    cell_text(table, cnt + 1, 1, " ", color=gray)
+                else:
+                    cell_text(table, cnt + 1, 1, item['protocol'], color=gray)
 
                 host_cell = table.cell(cnt + 1, 2).text_frame.paragraphs[0]
                 host_color = host_cell.add_run()

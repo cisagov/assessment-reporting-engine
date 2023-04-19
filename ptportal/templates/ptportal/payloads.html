@@ -61,11 +61,11 @@ DM22-1011
 				<sds-button variant="danger" @click="this.overwriteWarning = false">Cancel</sds-button>
 			</div>
 		</sds-modal>
-		<sds-section class="mb-4">
-			<template #title>
-				<p class="text-2xl font-bold">Payload Data Upload</p>
-				<sds-file-uploader v-bind="fileUploadArgs" @add="addFile"></sds-file-uploader>
-			</template>
+		<sds-section class="mb-4" type="accented">
+			<span class="border-top border-dark"></span>
+            <template #title><b>DATA UPLOAD</b></template>
+			<sds-file-uploader v-bind="fileUploadArgs" @add="addFile"></sds-file-uploader>
+			<br>
 			<div class="grid gap-2 grid-cols-2">
 				<div class="flex gap-2">
 					<sds-button variant="primary" @click="parseData(false)"><i class="fas fa-plus-circle"></i> Append</sds-button>
@@ -73,9 +73,29 @@ DM22-1011
 				</div>
 			</div>
 		</sds-section>
+
+		<sds-section type="accented">
+			<template #title>
+				<span class="font-bold">SECURITY SOLUTIONS</span>
+			</template>
+			Select all security solutions in use by the target organization.<br><br>
+			<div class="grid place-items-center">
+				<sds-search-box class="place-self-center w-16" :disableSearch="true" variant="primary" placeholder="Search Term" v-model="securityArgs.searchTerm" @update:model-value="filterSolutions(securityArgs.searchTerm)"></sds-search-box>
+				<sds-scroll-area class="px-4 pt-4 place-self-center h-64" style="width:60%">
+					<div v-for="sol in securityArgs.solutionSearchList" :key="sol.fields.cve_id" class="border-b border-slate-700 hover:bg-gray-700/[.1]">
+						<div class="py-2 px-4">
+							<div class="font-bold">
+								<input v-if="formData.security_solutions.includes(sol.fields.security_solution_name)" type="checkbox" :id="sol.fields.security_solution_name" name="solution" :value="sol.fields.security_solution_name" :checked="true" @click=checkSolution(sol.fields.security_solution_name)><input v-else type="checkbox" :id="sol.fields.security_solution_name" name="solution" :value="sol.fields.security_solution_name" @click=checkSolution(sol.fields.security_solution_name)>  [[sol.fields.security_solution_name]]
+							</div>
+						</div>
+					</div>
+				</sds-scroll-area>
+		    </div>
+		  </sds-section>
+	<br>
     <sds-section class="col-span-5" type="accented">
         <span class="border-top border-dark"></span>
-            <template #title><b>PAYLOAD TESTING RESULTS</b></template>
+            <template #title><b>RESULTS</b></template>
             <p style="float:left;padding:10px">During payload testing, a manual exception</p><sds-select v-model="formData.exception" :options="exceptionOptions" style="text-align:center;width:120px;float:left;"></sds-select><p style="float:left;padding:10px">necessary for the test email to reach the target inbox.</p>
             <br><br><br><br>
             <sds-input v-model="formData.browser" style="width:180px;float:left;padding:0px 10px" placeholder="Google Chrome" :maxlength="100"></sds-input><p style="float:left;padding:10px 0px">was used to download the payloads and was deemed a primary browser used by users.</p>
@@ -132,11 +152,12 @@ DM22-1011
 {% block scripts %}
 <script>
 function pageData() {
-	data = {
+	pageData = {
 		fileList: [],
 		formData: {
 			exception: "{{ description.exception }}",
 			browser: "{{ description.browser }}",
+			security_solutions: []
 		},
 		exceptionOptions: [
 			{ id: 1, value: 'was', text: 'was' },
@@ -177,13 +198,37 @@ function pageData() {
 				items: []
 		},
 		fileUploadArgs: {
-			helperText: "Upload a CSV under 10 MB with the following headers: Description,ATT&CK,Protocol,Host,Border and row format: <string>,<string>,<string>,<B/N>,<B/N>",
+			helperText: "Upload a CSV under 10 MB with the following headers: Description,Protocol,Host,Border and row format: <string>,<string>,<string>,<B/N>,<B/N>",
 			accept: ".csv",
 			allowedFiletypes: ["text/csv"],
 			name: "payloadUpload",
 			multiple: false
-		}
+		},
+		securityArgs: {
+			type: "accented",
+			hideContent: false,
+			solutionSearchList: [],
+			searchTerm: "",
+		},
+		securityData: function() {
+			var security_list = [];
+			var solutions = {{ security_solutions | safe }};
+			for (i = 0; i < solutions.length; i++) {
+				const proxy = new Proxy(solutions[i], {});
+				security_list.push(proxy);
+			}
+
+			return security_list;
+    	},
 	}
+
+	pageData.securityArgs.solutionSearchList = pageData.securityData().filter(solution => solution)
+
+	{% for s in used_solutions %}
+
+		pageData.formData.security_solutions.push("{{s.security_solution_name}}")
+
+	{% endfor %}
 
 	{% for payload in payloads %}
 
@@ -199,15 +244,15 @@ function pageData() {
       border = true
     {% endif %}
 
-		data.PayloadTableArgs.items.push({id: "{{payload.order}}", payload_description: "{{payload.payload_description|escapejs}}", attack_name: "{{payload.attack_name|escapejs}}", c2_protocol: "{{payload.c2_protocol|escapejs}}", host_protection: host, border_protection: border})
+		pageData.PayloadTableArgs.items.push({id: "{{payload.order}}", payload_description: "{{payload.payload_description|escapejs}}", attack_name: "{{payload.attack_name|escapejs}}", c2_protocol: "{{payload.c2_protocol|escapejs}}", host_protection: host, border_protection: border})
 
 	{% endfor %}
 
-	return data
+	return pageData
 }
 
 function pageCreated() {
-	this.baseData.layoutArgs.pageTitle = "Payload Testing Results"
+	this.baseData.layoutArgs.pageTitle = "Payload Testing"
 }
 
 function pageMethods() {
@@ -229,10 +274,6 @@ function pageMethods() {
 				formattedData = JSON.parse(JSON.stringify(this.formData))
 				formattedData['payloads'] = JSON.parse(JSON.stringify(this.PayloadTableArgs.items))
 
-				console.log(formattedData['payloads'])
-				console.log(this.formData.exception)
-				console.log(this.formData.browser)
-
 				fetch(window.location.href, {
 					method: "POST",
 					body: JSON.stringify(formattedData),
@@ -244,10 +285,10 @@ function pageMethods() {
 					setTimeout(() => {this.redirectLink("{% url 'payloads' %}")}, 2000)
 				}
 				else {
-					this.displayNotification({title: "Error saving data", text: 'Bad response received from server. Check for errors in forms and try again.', variant: "danger"})
+					this.displayNotification({title: "Error Saving Data", text: 'Bad response received from server. Check for errors in forms and try again.', variant: "danger"})
 				}
 				}).catch(error => {
-					this.displayNotification({title: "Error saving data", text: error, variant: "danger"})
+					this.displayNotification({title: "Error Saving Data", text: error, variant: "danger"})
 				})
 			}
 		},
@@ -283,25 +324,39 @@ function pageMethods() {
 			for (var i = 1; i < length; i++) {
 				values = lines[i].split(',')
 
-				if (values[3][0] == "N") {
+				if (values[2][0] == "N") {
 					h = false
 				}
 				else {
 					h = true
 				}
 			    
-				if (values[4][0] == "N") {
+				if (values[3][0] == "N") {
 					b = false
 				}
 				else {
 					b = true
 				}
 
-				this.PayloadTableArgs.items.push({id: this.PayloadTableArgs.items.length + 1, payload_description: values[0], attack_name: values[1], c2_protocol: values[2], host_protection: h, border_protection: b})
+				this.PayloadTableArgs.items.push({id: this.PayloadTableArgs.items.length + 1, payload_description: values[0], attack_name: "", c2_protocol: values[1], host_protection: h, border_protection: b})
 			}
 
 			this.displayNotification({'title': 'Payloads Added', text: 'Payloads have been added to the table below. Saving this screen will populate the MITRE ATT&CK formats accordingly.', variant:"info"})
-		}
+		},
+
+		checkSolution: function(sol) {
+			if (document.getElementById(sol).checked) {
+				this.formData.security_solutions.push(sol)
+			}
+                
+			else {
+				index = this.formData.security_solutions.indexOf(sol)
+				this.formData.security_solutions.splice(index, 1)
+			}
+		},
+		filterSolutions: function(searchTerm) {
+			this.securityArgs.solutionSearchList = this.securityData().filter(sol => sol.fields.security_solution_name.toLowerCase().includes(searchTerm.toLowerCase()))
+		},
     }
 
     return pageFunctions

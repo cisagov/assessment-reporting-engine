@@ -14,6 +14,10 @@ DM22-1011
 
 <html>
 <head>
+    <!-- SDS CSS -->
+    <link href="{{ STATIC_URL }}css/sds.tailwind.css" rel="stylesheet" />
+    <link href="{{ STATIC_URL }}css/sds.style.css" rel="stylesheet" />
+
 	<!-- CSS -->
 	<link href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css" rel="stylesheet" />
 	<link href="{{ STATIC_URL }}bootstrap/css/bootstrap-datepicker3.css" rel="stylesheet" />
@@ -46,32 +50,37 @@ DM22-1011
                     <h2>Login</h2>
                     <hr>
                 </div>
+                <br>
                 <div class="form-group">
                     <label for="username"><strong>Username</strong></label>
-                    <input type="text" class="form-control" id="username" placeholder="Username" name="username" value="{{ username }}" />
+                    <input type="text" required="true" class="form-control" id="username" placeholder="Username" name="username" value="{{ username }}" />
                 </div>
+                <br>
                 <div class="form-group">
                   <label for="password"><strong>Password</strong></label>
-                   <input type="password" class="form-control input-large" id="password" placeholder="Password" name="password" value="" />
+                   <input type="password" required="true" class="form-control input-large" id="password" placeholder="Password" name="password" value="" />
                 </div>
+                <br>
+                <div>
+                    <button type="submit" name="login" class="btn btn-success" value="login">Login</button>
+                </div>
+                {% csrf_token %}
+                <br>
+                Don't have an account? <a href={% url 'signup' %}>&nbspSign up here!</a>
+                <br>
                 {% if messages %}
                     {% for message in messages %}
                         {% if message.tags == 'error' %}
-                            <div class="form-group alert alert-danger alert-dismissible">
+                            <div class="form-group alert alert-danger alert-dismissible" style="color:red">
                                 <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
                         {% else %}
-                            <div class="form-group alert alert-{{ message.tags }} alert-dismissible">
+                            <div class="form-group alert alert-{{ message.tags }} alert-dismissible" style="color:red">
                                 <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
                         {% endif %}
                         {{ message }}
                         </div>
                     {% endfor %}
                 {% endif %}
-                <div>
-                    <button type="submit" name="login" class="btn btn-success" value="login">Login</button>
-                </div>
-                {% csrf_token %}
-                  Don't have an account? <a href={% url 'signup' %}>&nbspSign up here!</a>
               </form>
         </div>
       </div>

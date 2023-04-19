@@ -81,7 +81,43 @@ class IndexView(generic.ListView):
         context['total_critical'] = UploadedFinding.critical.count()
         context['total_high'] = UploadedFinding.high.count()
         context['total_medium'] = UploadedFinding.medium.count()
+        context['total_low'] = UploadedFinding.low.count()
+        context['total_info'] = UploadedFinding.informational.count()
         context['total_findings'] = UploadedFinding.objects.all().count()
+        context['total_payloads'] = Payload.objects.all().count()
+        context['total_campaigns'] = Campaign.objects.all().count()
+        context['total_port_mappings'] = PortMappingHost.objects.all().count()
+        context['total_data_exfil'] = DataExfil.objects.all().count()
+        context['total_ransomware'] = Ransomware.objects.all().count()
+        context['total_narratives'] = Narrative.objects.all().count()
+        context['total_kevs'] = KEV.objects.filter(found=True).count()
+
+        unique_clicks = 0
+        emails_delivered = 0
+        total_click_rate = 0
+
+        if Campaign.objects.all().count() > 0:
+            for i in Campaign.objects.all():
+                unique_clicks += i.unique_clicks
+                emails_delivered += i.emails_delivered
+
+            temp = (unique_clicks / emails_delivered) * 100
+            total_click_rate = round(temp)
+
+        context['click_rate'] = total_click_rate
+
+        mitigated_score = 0
+        total_score = 0
+
+        if UploadedFinding.objects.all().count() > 0:
+            for i in UploadedFinding.objects.all():
+                if not i.mitigation:
+                    mitigated_score += i.risk_score
+                total_score += i.risk_score
+
+        context['total_risk_score'] = total_score
+        context['mitigated_risk_score'] = mitigated_score
+
         return context
 
 
@@ -100,11 +136,11 @@ def signup(request):
             messages.warning(request, warn)
 
             # Notify Admin Users
-            notify.send(
-                User.objects.filter(username=username).first(),
-                recipient=User.objects.filter(is_admin=True, is_active=True),
-                verb="User '" + username + "' Needs Permissions",
-            )
+            #notify.send(
+            #    User.objects.filter(username=username).first(),
+            #    recipient=User.objects.filter(is_admin=True, is_active=True),
+            #    verb="User '" + username + "' Needs Permissions",
+            #)
             return redirect('index')
         else:
             key = list(form.errors.keys())[0]

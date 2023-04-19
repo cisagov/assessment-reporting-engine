@@ -41,17 +41,12 @@ DM22-1011
 {% block content %}
 
 {% csrf_token %}
-<div class="header">
-    <h2>KEV Catalog</h2>
-</div>
-
 <div class="col-span-5">
 
-    <sds-section class="mb-4">
-      <template #title>
-        <p class="text-2xl font-bold">Nessus Results Upload</p>
+    <sds-section class="mb-4" type="accented">
+      <template #title><b>DATA UPLOAD</b></template>
         <sds-file-uploader v-bind="fileUploadArgs" v-model="fileList" :filesize="20"></sds-file-uploader>
-      </template>
+        <br>
       <div class="grid gap-2 grid-cols-2">
         <div class="flex gap-2">
           <sds-button variant="primary" @click="parseData">Upload</sds-button>
@@ -146,6 +141,10 @@ DM22-1011
     return pageData
   }
 
+  function pageCreated() {
+    this.baseData.layoutArgs.pageTitle = "KEV Catalog"
+  }
+
   function pageMethods() {
     pageFunctions = {
       parseData: async function() {
@@ -177,11 +176,11 @@ DM22-1011
                 }
               }
             }
-            this.displayNotification({title: "Data Successfully Parsed", text: "KEVs derived from " + fileName + " have been selected from the catalog. Be sure to save before leaving this page.", variant: "success"})
+            this.displayNotification({title: "Data Successfully Parsed", text: "KEVs derived from " + fileName + " have been selected from the catalog. Be sure to save before leaving this page.", variant: "info"})
           }
 
           else {
-            this.displayNotification({title: "Error Parsing Data", text: "The following Nessus CSV file appears to be missing a valid 'CVE' column: " + fileName, variant: "danger"})
+            this.displayNotification({title: "Error Parsing Data", text: "The following Nessus CSV file appears to be missing a valid 'CVE' column: " + fileName, variant: "warning"})
           }
 
         }
@@ -223,7 +222,8 @@ DM22-1011
           headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
         }).then(response => {
           if(response.ok) {
-            this.displayNotification({title: "KEVs Saved", text: "KEV data has been saved successfully.", variant: "success"})
+            this.displayNotification({title: "KEVs Saved", text: "KEV data saved successfully. Please wait while the page refreshes...", variant: "success"})
+            setTimeout(() => {this.redirectLink("{% url 'kev_catalog' %}")}, 2000)
           }
           else {
             this.displayNotification({title: "Error Saving Data", text: "Bad response received from server. Check for errors in form and try again.", variant: "danger"})

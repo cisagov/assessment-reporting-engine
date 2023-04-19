@@ -148,10 +148,12 @@ DM22-1011
             <p>The assessment team identified {{findings_breakdown.Critical.count | num_to_word}} (<b>{{findings_breakdown.Critical.count}}</b>) critical {% if findings_breakdown.Critical.count == 1 %}finding{% else %}findings{% endif %}, {{findings_breakdown.High.count | num_to_word}} (<b>{{findings_breakdown.High.count}}</b>) high {% if findings_breakdown.High.count == 1 %}finding{% else %}findings{% endif %}, {{findings_breakdown.Medium.count | num_to_word}} (<b>{{findings_breakdown.Medium.count}}</b>) medium {% if findings_breakdown.Medium.count == 1 %}finding{% else %}findings{% endif %}, {{findings_breakdown.Low.count | num_to_word}} (<b>{{findings_breakdown.Low.count}}</b>) low {% if findings_breakdown.Low.count == 1 %}finding{% else %}findings{% endif %}, and {{findings_breakdown.Info.count | num_to_word}} (<b>{{findings_breakdown.Info.count}}</b>) informational {% if findings_breakdown.Info.count == 1 %}finding{% else %}findings{% endif %}. The Total Risk Score for this assessment is <b>[[formData.risk_score]]</b> and the Mitigated Risk Score after deducting mitigated findings is <b>[[formData.mitigated_risk_score]]</b>.</p>
             <br>
             <h1>NIST-Based Summary</h1>
+            <p>The assessment team mapped all findings to applicable National Institute of Standards and Technology (NIST) controls as described in <sds-link href="https://csrc.nist.gov/Projects/risk-management/sp800-53-controls"><b>NIST Special Publication (SP) 800-53</b></sds-link>. The figure below illustrates the relevant control families cited based on findings. Please refer to NIST SP 800-53 for a full list of control families. The Findings section of this report provides specific mappings of controls to findings and the detailed technical description for each finding. Note that some findings may be mapped to multiple applicable NIST controls.</p>
             <apexchart height="600" width="100%" :options="nistSPArgs.options" :series="nistSPArgs.data"></apexchart>
             <div class="figure" align="center">Figure {{ figure_count.increment }}: Findings Mapped to NIST Security and Privacy Controls</div>
             <br>
             <h1>NIST Cybersecurity Framework</h1>
+            <p>Findings are mapped to the NIST Framework for Improving Critical Infrastructure Cybersecurity, Version 1.1, April 16, 2018, called the <sds-link href="https://www.nist.gov/cyberframework"><b>Cybersecurity Framework</b></sds-link>. The figure below illustrates the relevant functions and categories cited based on findings. Please refer to the NIST Cybersecurity Framework for a full list of functions and categories. The Findings section of this report provides specific mappings of categories to findings and the detailed technical description for each finding. Note that some findings may be mapped to multiple applicable NIST categories.</p>
             <apexchart height="500" width="100%" :options="nistFrameworkArgs.chartOptions" :series="nistFrameworkArgs.series"></apexchart>
             <div class="figure" align="center">Figure {{ figure_count.increment }}: Findings Mapped to NIST Cybersecurity Framework Categories</div>
             <br>
@@ -434,19 +436,9 @@ DM22-1011
         <span class="border-top border-dark"></span>
             <template #title><b>ATTACK PATHS</b></template>
             <p>Attack paths are used to demonstrate impact by chaining together vulnerabilities and misconfigurations to achieve a significant level of access. The sections below provide a high-level overview of attack paths that the team executed during the engagement and the corresponding MITRE ATT&CK techniques that were leveraged in each attack. A detailed breakdown of each attack path can be found in the corresponding <sds-link href="#appendix_d"><b>Appendix D: Narrative</b></sds-link> section.</p>
-            <div v-for="path in attackPathArgs.phishing">
-            	<h1>Phishing Attack Path [[path.order]]</h1>
-            	<img :src="[[path.imgURL]]" align="center">
-            	<div class="figure" align="center">[[path.caption]]</div>
-            	<p>The following <sds-link href="https://attack.mitre.org/"><b>MITRE ATT&CK</b></sds-link> Techniques were leveraged in this attack path:</p>
-            	<ul class="list">
-            		<li v-for="t in path.techniques">[[t]]</li>
-            	</ul>
-            	<br>
-            </div>
             <div v-for="path in attackPathArgs.external">
             	<h1>External Attack Path [[path.order]]</h1>
-            	<img :src="[[path.imgURL]]" align="center">
+            	<img :src="[[path.imgURL]]" align="center" onerror="this.style.display='none'">
             	<div class="figure" align="center">[[path.caption]]</div>
             	<p>The following <sds-link href="https://attack.mitre.org/"><b>MITRE ATT&CK</b></sds-link> Techniques were leveraged in this attack path:</p>
             	<ul class="list">
@@ -456,7 +448,17 @@ DM22-1011
             </div>
             <div v-for="path in attackPathArgs.internal">
             	<h1>Internal Attack Path [[path.order]]</h1>
-            	<img :src="[[path.imgURL]]" align="center">
+            	<img :src="[[path.imgURL]]" align="center" onerror="this.style.display='none'">
+            	<div class="figure" align="center">[[path.caption]]</div>
+            	<p>The following <sds-link href="https://attack.mitre.org/"><b>MITRE ATT&CK</b></sds-link> Techniques were leveraged in this attack path:</p>
+            	<ul class="list">
+            		<li v-for="t in path.techniques">[[t]]</li>
+            	</ul>
+            	<br>
+            </div>
+            <div v-for="path in attackPathArgs.phishing">
+            	<h1>Phishing Attack Path [[path.order]]</h1>
+            	<img :src="[[path.imgURL]]" align="center" onerror="this.style.display='none'">
             	<div class="figure" align="center">[[path.caption]]</div>
             	<p>The following <sds-link href="https://attack.mitre.org/"><b>MITRE ATT&CK</b></sds-link> Techniques were leveraged in this attack path:</p>
             	<ul class="list">
@@ -541,31 +543,7 @@ DM22-1011
         <span class="border-top border-dark"></span>
             <template #title><b>APPENDIX C: NARRATIVE</b></template>
             <p>This section highlights key tools and techniques the team utilized during testing and can be used to replicate the team’s actions or better understand how a particular finding was identified. These actions should only be replicated by an experienced individual who thoroughly understands the functionality and risks of the tools and techniques.</p>
-            <h1>Phishing</h1>
-            <div v-for="path in attackPathArgs.phishing">
-            	<h2>Attack Path [[path.order]]</h2>
-            	<p><b>Tools</b></p>
-            	<ul class="list">
-            		<li v-for="tool in path.tools">[[tool.name]] ([[tool.url]])</li>
-            	</ul>
-            	<br>
-            	<div v-for="step in path.steps">
-            		<p><b>Step [[step.order]]:</b> [[step.description]]</p>
-            		<ul v-if="step.url">
-            			<table align="center">
-	            			<tr>
-			            		<td width="15%"></td>
-			            		<td width="70%"><img :src="[[step.url]]" align="center" onerror="this.style.display='none'" /></td>
-				            	<td width="15%"></td>
-				            </tr>
-				            <tr>
-				            	<td colspan="3"><div class="figure" align="center">[[step.caption]]</div></td>
-				            </tr>
-			        	</table>
-			        </ul>
-            		<br>
-            	</div>
-            </div>
+            
             <h1>External</h1>
             <div v-for="path in attackPathArgs.external">
             	<h2>Attack Path [[path.order]]</h2>
@@ -593,6 +571,31 @@ DM22-1011
             </div>
             <h1>Internal</h1>
             <div v-for="path in attackPathArgs.internal">
+            	<h2>Attack Path [[path.order]]</h2>
+            	<p><b>Tools</b></p>
+            	<ul class="list">
+            		<li v-for="tool in path.tools">[[tool.name]] ([[tool.url]])</li>
+            	</ul>
+            	<br>
+            	<div v-for="step in path.steps">
+            		<p><b>Step [[step.order]]:</b> [[step.description]]</p>
+            		<ul v-if="step.url">
+            			<table align="center">
+	            			<tr>
+			            		<td width="15%"></td>
+			            		<td width="70%"><img :src="[[step.url]]" align="center" onerror="this.style.display='none'" /></td>
+				            	<td width="15%"></td>
+				            </tr>
+				            <tr>
+				            	<td colspan="3"><div class="figure" align="center">[[step.caption]]</div></td>
+				            </tr>
+			        	</table>
+			        </ul>
+            		<br>
+            	</div>
+            </div>
+            <h1>Phishing</h1>
+            <div v-for="path in attackPathArgs.phishing">
             	<h2>Attack Path [[path.order]]</h2>
             	<p><b>Tools</b></p>
             	<ul class="list">
@@ -729,7 +732,12 @@ DM22-1011
 					yaxis: {
 						title: {
 							text: ''
-						}
+						},
+						labels: {
+      						formatter: function(val) {
+        						return val.toFixed(0);
+      						}
+    					}
 					},
 					xaxis: {
 						categories: ['Critical', 'High', 'Medium', 'Low', 'Informational'],
@@ -979,10 +987,10 @@ DM22-1011
 						setTimeout(() => {this.redirectLink("{% url 'report'%}")}, 2000)
 					}
 					else {
-						this.displayNotification({title: "Error Saving Report", variant:"success", text: "Report data could not be saved. Please check the form for errors and try again."})
+						this.displayNotification({title: "Error Saving Data", variant:"danger", text: "Bad response received from server. Check for errors in forms and try again."})
 					}
 				}).catch(error => {
-					this.displayNotification({text: error, title: "Error Saving Report", variant:"danger", text: "Report data could not be saved. Please check the form for errors and try again."})
+					this.displayNotification({text: error, title: "Error Saving Data", variant:"danger"})
 				})
 			},
 		}

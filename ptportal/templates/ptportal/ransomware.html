@@ -48,16 +48,11 @@ DM22-1011
 {% endblock %}
 
 {% block content %}
-<div class="header">
-  <h2> Ransomware Susceptibility</h2>
-</div>
-<br>
-
 <div class="col-span-5">
   {% csrf_token %}
     <sds-section class="col-span-5" type="accented">
         <span class="border-top border-dark"></span>
-            <template #title><b>RANSOMWARE SUSCEPTIBILITY</b></template>
+            <template #title><b>RESULTS</b></template>
             <!-- Ransomware Scenarios -->
               <sds-section>
                 <div style="float:left; padding: 10px 0px 0px 0px">Endpoints were found to be vulnerable to </div>
@@ -196,6 +191,10 @@ DM22-1011
 
   }
 
+  function pageCreated() {
+    this.baseData.layoutArgs.pageTitle = "Ransomware Susceptibility"
+  }
+
   function pageMethods() {
     pageFunctions = {
       submitRansomware: function() {
@@ -209,13 +208,14 @@ DM22-1011
           headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
         }).then(response => {
           if(response.ok) {
-            this.displayNotification({title: "Ransomware Susceptibility Results Saved", variant:"success", text: "Ransomware Susceptibility results saved successfully."})
+            this.displayNotification({title: "Ransomware Data Saved", variant:"success", text: "Ransomware data saved successfully. Please wait while the page refreshes..."})
+            setTimeout(() => {this.redirectLink("{% url 'ransomware' %}")}, 2000)
           }
           else {
-            this.displayNotification({text: "Bad response received from server. Check for errors in forms and try again.", title: "Error saving data", variant:"danger"})
+            this.displayNotification({text: "Bad response received from server. Check for errors in forms and try again.", title: "Error Saving Data", variant:"danger"})
           }
         }).catch(error => {
-          this.displayNotification({text: error, title: "Error saving data", variant:"danger"})
+          this.displayNotification({text: error, title: "Error Saving Data", variant:"danger"})
         })
       }
     }

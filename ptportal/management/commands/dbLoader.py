@@ -36,6 +36,7 @@ from ptportal.models import (
     SpecificFinding,
     KEV,
     KEVMetadata,
+    SecuritySolution
 )
 
 
@@ -156,6 +157,20 @@ class Command(BaseCommand):
                 Tools.objects.create(
                     name=row['Tool Name'],
                     url=row['URL']
+                )
+            except Exception as e:
+                print(e)
+                continue
+
+        security_solutions = pd.read_csv('assets/security-solutions.csv')
+        solution_iter = security_solutions.iterrows()
+
+        for index, row in solution_iter:
+            try:
+                SecuritySolution.objects.create(
+                    security_solution_name=row['Name'],
+                    used=False,
+                    order=index + 1
                 )
             except Exception as e:
                 print(e)

@@ -48,16 +48,13 @@ DM22-1011
 {% endblock %}
 
 {% block content %}
-<div class="header">
-  <h2> Phishing Campaign Results</h2>
-</div>
 
 <div class="col-span-5">
 	{% csrf_token %}
 
     <sds-section class="col-span-10" type="accented">
         <span class="border-top border-dark"></span>
-            <template #title><b>PHISHING CAMPAIGN RESULTS</b></template>
+            <template #title><b>RESULTS</b></template>
 			<!-- Campaign Table -->
 			<sds-section>
 				<div class="mb-8">
@@ -134,10 +131,10 @@ DM22-1011
 				</div>
 			</sds-section>
 		</sds-section>
-
+		<br>
 		<sds-section class="col-span-5" type="accented">
         <span class="border-top border-dark"></span>
-        	<template #title><b>PHISHING CAMPAIGN DESCRIPTIONS</b></template>
+        	<template #title><b>DESCRIPTIONS</b></template>
 			<!-- Campaign Descriptions -->
 			<sds-section>
 				<div class="mb-8">
@@ -229,11 +226,15 @@ function pageData() {
 
 		data.CampaignTableArgs.items.push({id: "{{campaign.order}}", emails_sent: "{{campaign.emails_sent}}", emails_delivered: "{{campaign.emails_delivered}}", total_clicks: "{{campaign.total_clicks}}", unique_clicks: "{{campaign.unique_clicks}}", time_to_first_click: "{{campaign.time_to_first_click}}", creds_harvested: "{{campaign.creds_harvested}}", number_exploited: "{{campaign.number_exploited}}", length_of_campaign: "{{campaign.length_of_campaign}}"})
 
-		data.CampaignDescArgs.items.push({id: "{{campaign.order}}", campaign_description: "{{campaign.campaign_description}}"})
+		data.CampaignDescArgs.items.push({id: "{{campaign.order}}", campaign_description: "{{campaign.campaign_description|escapejs}}"})
 
 	{% endfor %}
 
 	return data
+}
+
+function pageCreated() {
+	this.baseData.layoutArgs.pageTitle = "Phishing Campaigns"
 }
 
 function pageMethods() {
@@ -264,13 +265,14 @@ function pageMethods() {
 					headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
 				}).then(response => {
 				if(response.ok) {
-					this.displayNotification({title: "Campaign(s) Saved", text: "Campaign data saved successfully.", variant: "success"})
+					this.displayNotification({title: "Campaign(s) Saved", text: "Campaign data saved successfully. Please wait while the page refreshes...", variant: "success"})
+					setTimeout(() => {this.redirectLink("{% url 'campaigns' %}")}, 2000)
 				}
 				else {
-					this.displayNotification({title: "Error saving data", text: 'Bad response received from server. Check for errors in forms and try again.', variant: "danger"})
+					this.displayNotification({title: "Error Saving Data", text: 'Bad response received from server. Check for errors in forms and try again.', variant: "danger"})
 				}
 				}).catch(error => {
-					this.displayNotification({title: "Error saving data", text: error, variant: "danger"})
+					this.displayNotification({title: "Error Saving Data", text: error, variant: "danger"})
 				})
 			}
 		},

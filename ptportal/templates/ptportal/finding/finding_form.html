@@ -223,13 +223,13 @@ function pageData() {
   let pageData = {
     formData: {
       selectedFinding: null,
-      findingDescription: "{{ object.description }}",
-      findingRemediation: "{{ object.remediation }}",
+      findingDescription: "{{ object.description | escapejs }}",
+      findingRemediation: "{{ object.remediation | escapejs }}",
       findingSeverity: "{{ object.severity.severity_name }}",
       assessmentType: "{{ object.assessment_type }}",
       findingMitigation: "{{ object.mitigation }}",
       affectedSystemList: "",
-      screenshotDescription: "{{ object.screenshot_description }}",
+      screenshotDescription: "{{ object.screenshot_description | escapejs }}",
       kevs: [],
       screenshots: [],
     },
@@ -551,20 +551,14 @@ function pageMethods() {
           headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
         }).then(response => {
           if (response.ok) {
-            this.displayNotification({'title': 'Finding Saved', text: 'Finding saved successfully.', variant:'success'})
-            if ("{{object}}") {
-              location.reload()
-            }
-            else {
-              base = String(window.location.origin)
-              window.location.href=base.concat("/ptportal/")
-            }
+            this.displayNotification({'title': 'Finding Saved', text: 'Finding saved successfully. Redirecting to dashboard...', variant:'success'})
+            setTimeout(() => {this.redirectLink("{% url 'index' %}")}, 2000)
           }
           else {
             this.displayNotification({title: "Error Saving Data", text: "Bad response received from server. Check for errors in form and try again.", variant: "danger"})
           }
         }).catch(error => {
-          this.displayNotification({'title': 'Save Error', text: 'There was an error saving the finding. Please wait and try again.', variant:'danger'})
+          this.displayNotification({'title': 'Error Saving Data', variant:'danger'})
         })
       }
     },

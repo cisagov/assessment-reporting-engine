@@ -43,13 +43,6 @@ DM22-1011
     <script src="{% static 'js/apexcharts.amd.js' %}"></script>
     <script src="{% static 'js/vue3-apexcharts.umd.min.js' %}"></script>
 
-    <!-- Custom CSS -->
-    <link href="{{ STATIC_URL }}css/custom/sidebar-nav.css" rel="stylesheet" />
-    <link href="{{ STATIC_URL }}css/custom/sei-brand.css" rel="stylesheet" />
-    <link href="{{ STATIC_URL }}css/custom/forms.css" rel="stylesheet" />
-    <link href="{{ STATIC_URL }}css/custom/main.css" rel="stylesheet" />
-
-
     <script>
       //Only runs the code once the DOM has been loaded.
       document.addEventListener("DOMContentLoaded", function()
@@ -100,103 +93,96 @@ DM22-1011
                   },
                   {
                     id: 4,
-                    title: "Payloads",
-                    href: "{% url 'payloads' %}",
-                    iconUrl: "{% static 'icons/file-code.svg' %}"
-
-                  },
-                  {
-                    id: 5,
-                    title: "Campaigns",
-                    href: "{% url 'campaigns' %}",
-                    iconUrl: "{% static 'icons/envelope.svg' %}"
-
-                  },
-                  {
-                    id: 6,
                     title: "Add Finding",
                     href: "{% url 'finding_create' %}",
                     iconUrl: "{% static 'icons/upload-solid.svg' %}"
                   },
                   {
-                    id: 7,
-                    title: "Data Exfiltration",
-                    href: "{% url 'data_exfiltration' %}",
-                    iconUrl: "{% static 'icons/upload-solid.svg' %}" // to be replaced with different icon
+                    id: 5,
+                    title: "KEV Catalog",
+                    href: "{% url 'kev_catalog' %}",
+                    iconUrl: "{% static 'icons/book-solid.svg' %}"
                   },
                   {
-                    id: 8,
-                    title: "Ransomware",
-                    href: "{% url 'ransomware' %}",
-                    iconUrl: "{% static 'icons/upload-solid.svg' %}" // to be replaced with different icon
-                  },
-                  {
-                    id: 9,
+                    id: 6,
                     title: "Risk Scoring",
                     href: "{% url 'risk_score' %}",
                     iconUrl: "{% static 'icons/calculator-solid.svg' %}"
                   },
                   {
-                    id: 10,
-                    title: "Report",
-                    href: "{% url 'report' %}",
-                    iconUrl: "{% static 'icons/file-alt-solid.svg' %}",
-                  },
-                  {
-                    id: 11,
+                    id: 7,
                     title: "Activity Tracker",
                     href: "{% url 'activity_tracker' %}",
                     iconUrl: "{% static 'icons/table-solid.svg' %}"
                   },
                   {
-                    id: 14,
+                    id: 8,
+                    title: "Report",
+                    href: "{% url 'report' %}",
+                    iconUrl: "{% static 'icons/file-alt-solid.svg' %}",
+                  },
+                  {
+                    id: 9,
                     title: "Export",
                     href: "{% url 'export' %}",
                     iconUrl: "{% static 'icons/download-solid.svg' %}"
                   },
                   {
-                    id: 15,
+                    id: 10,
                     title: "Election Infrastructure",
                     href: "{% url 'ei' %}",
                     iconUrl: "{% static 'icons/poll-h-solid.svg' %}"
-                  },
-                  {
-                    id: 16,
-                    title: "KEV Catalog",
-                    href: "{% url 'kev_catalog' %}",
-                    iconUrl: "{% static 'icons/poll-h-solid.svg' %}"
-                  }
+                  },  
                 ]
               },
-              //Side bar links for if the phishing findings are added to the engagement.
               phishingLinks: {
-                port: {
-                  id: 17,
-                  title: "Port Mapping",
-                  href: "{% url 'port_mapping' %}",
-                  iconUrl: "{% static 'icons/network-wired-solid.svg' %}"
-                }
-              },
-              //The links for the side bar for the narrative section. Have to check the assessment before these are inserted.
-              narrativeLinks:
-              {
-                phishing: {
-                  id: 18,
-                  title: "Phishing",
-                  href: "{% url 'narratives' 'phishing' %}",
+                payloads: {
+                  id: 5,
+                  title: "Payloads",
+                  href: "{% url 'payloads' %}"
                 },
-                external: {
-                  id: 19,
-                  title: "External",
-                  href: "{% url 'narratives' 'external' %}",
+                campaigns: {
+                  id: 6,
+                  title: "Campaigns",
+                  href: "{% url 'campaigns' %}"
                 },
-                internal: {
-                  id: 24,
-                  title: "Internal",
-                  href: "{% url 'narratives' 'internal' %}",
-                }
               },
 
+              serviceLinks :{
+                port: {
+                  id: 7,
+                  title: "Port Mapping",
+                  href: "{% url 'port_mapping' %}"
+                },
+                data_exfil: {
+                  id: 8,
+                  title: "Data Exfiltration",
+                  href: "{% url 'data_exfiltration' %}"
+                },
+                ransomware: {
+                  id: 9,
+                    title: "Ransomware",
+                    href: "{% url 'ransomware' %}"
+                  },
+                },
+
+                narrativeLinks: {
+                  phishing: {
+                    id: 10,
+                    title: "Phishing",
+                    href: "{% url 'narratives' 'phishing' %}",
+                  },
+                  external: {
+                    id: 11,
+                    title: "External",
+                    href: "{% url 'narratives' 'external' %}",
+                  },
+                  internal: {
+                    id: 12,
+                    title: "Internal",
+                    href: "{% url 'narratives' 'internal' %}",
+                  }
+                },
             }
             //If the current page content contains a function called pageData, it will merge the dictionary returned
             //from that function and merge it with the base template datalabels.
@@ -229,25 +215,45 @@ DM22-1011
           //If a function called pageCreated exists on the page that will be ran at the end of the lifecycle.
           created()
           {
-            //Logic to add extra side bar tabs based on conditions.
-            //Report type Specific
-            if ("{{report_type}}" != "HVA") {
-              narrativeTabs = {
-                id: 66,
-                title: "Narrative",
-                items: [this.narrativeLinks['phishing'], this.narrativeLinks['external']],
-                iconUrl: "{% static 'icons/list-solid.svg' %}"
-              }
-              if ("{{report_type}}" != "RPT") {
-                narrativeTabs['items'].push(this.narrativeLinks['internal'])
-              }
 
-              this.layoutArgs.sidebarNavigationItems.splice(6, 0, narrativeTabs)
-              this.layoutArgs.sidebarNavigationItems.splice(6, 0, this.phishingLinks['port'])
+            phishingTabs = {
+              id: 20,
+              title: "Phishing",
+              items: [this.phishingLinks['payloads'], this.phishingLinks['campaigns']],
+              iconUrl: "{% static 'icons/envelope.svg' %}"
             }
 
+            serviceTabs = {
+              id: 30,
+              title: "Services",
+              items: [this.serviceLinks['port'], this.serviceLinks['data_exfil'], this.serviceLinks['ransomware']],
+              iconUrl: "{% static 'icons/gear-solid.svg' %}"
+            }
+
+            narrativeTabs = {
+              id: 40,
+              title: "Narrative",
+              items: [this.narrativeLinks['phishing'], this.narrativeLinks['external'], this.narrativeLinks['internal']],
+              iconUrl: "{% static 'icons/list-solid.svg' %}"
+            }
+
+            this.layoutArgs.sidebarNavigationItems.splice(3, 0, narrativeTabs)
+            this.layoutArgs.sidebarNavigationItems.splice(3, 0, serviceTabs)
+            this.layoutArgs.sidebarNavigationItems.splice(3, 0, phishingTabs)
+
             for(let tab in this.layoutArgs.sidebarNavigationItems){
-              if(this.layoutArgs.sidebarNavigationItems[tab]['href'] === window.location.pathname){
+              href = String(this.layoutArgs.sidebarNavigationItems[tab]['href'])
+              title = String(this.layoutArgs.sidebarNavigationItems[tab]['title'])
+              path = String(window.location.pathname)
+              if(href === path){
+                this.layoutArgs.sidebarNavigationItems[tab]['active'] = true
+                break
+              }
+              else if(href.includes("engagement") && path.includes("engagement")) {
+                this.layoutArgs.sidebarNavigationItems[tab]['active'] = true
+                break
+              }
+              else if(href.includes("election-infrastructure") && path.includes("election-infrastructure")) {
                 this.layoutArgs.sidebarNavigationItems[tab]['active'] = true
                 break
               }

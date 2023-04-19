@@ -18,9 +18,7 @@ DM22-1011
 
 {% block content %}
 {% csrf_token %}
-	<h1 class='text-2xl font-bold'>Risk Scoring</h1>
-	<hr />
-
+<sds-section>
 	<sds-table class="table-prose mb-2" v-bind="scoreTableArgs">
 		<template #cell(id)="{item}"></template>
 		<template #cell(finding)="{item}"></template>
@@ -43,6 +41,8 @@ DM22-1011
 		</sds-table>
 	</div>
 	<sds-button variant="primary" class="float-right" @click="submitRiskScore"><i class="fas fa-save"></i> Save</sds-button>
+	<br><br>
+</sds-section>
 {% endblock %}
 
 
@@ -120,7 +120,7 @@ DM22-1011
 
 		{% for finding in findings %}
 
-			{% if finding.KEV != null %}
+			{% if finding.KEV.count > 0 %}
 				iskev = "True"
 			{% else %}
 				iskev = "False"
@@ -139,6 +139,10 @@ DM22-1011
 		return data
 	}
 
+	function pageCreated() {
+		this.baseData.layoutArgs.pageTitle = "Risk Scoring"
+	}
+
 	function pageMethods() {
 		pageFunctions = {
 			submitRiskScore: function() {
@@ -150,13 +154,14 @@ DM22-1011
 					headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
 				}).then(response => {
 					if(response.ok) {
-						this.displayNotification({title: "Risk Score Saved", variant:"success", text: "Risk scoring data saved successfully. Refresh page to see updated Risk Score."})
+						this.displayNotification({title: "Risk Score Saved", variant:"success", text: "Risk scoring data saved successfully.  Please wait while the page refreshes..."})
+						setTimeout(() => {this.redirectLink("{% url 'risk_score' %}")}, 2000)
 					}
 					else {
-						this.displayNotification({text: "Bad response received from server. Check for errors in forms and try again.", title: "Error saving data", variant:"danger"})
+						this.displayNotification({text: "Bad response received from server. Check for errors in forms and try again.", title: "Error Saving Data", variant:"danger"})
 					}
 				}).catch(error => {
-					this.displayNotification({text: error, title: "Error saving data", variant:"danger"})
+					this.displayNotification({text: error, title: "Error Saving Data", variant:"danger"})
 				})
 			}
 		}
