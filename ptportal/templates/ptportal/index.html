@@ -84,38 +84,48 @@ DM22-1011
 {% endblock %}
 
 {% block content %}
-<div class="module-sm">
-	<h1>Findings</h1>
-	<div class="content-xl">{{total_findings}}</div>
-</div>
-<div class="module-sm">
-	<h1>KEVs</h1>
-	<div class="content-xl">{{total_kevs}}</div>
-</div>
+<sds-link href="{% url 'finding_create' %}">
+	<div class="module-sm">
+		<h1>Findings</h1>
+		<div class="content-xl">{{total_findings}}</div>
+	</div>
+</sds-link>
+<sds-link href="{% url 'kev_catalog' %}">
+	<div class="module-sm">
+		<h1>KEVs</h1>
+		<div class="content-xl">{{total_kevs}}</div>
+	</div>
+</sds-link>
 <div class="module-sm">
 	<h1>Phishing</h1>
 	<br>
-	<div style="float:left; width:50%;">
-		<div class="content-med">{{click_rate}}%</div>
-		<div class="content-sm">Click Rate</div>
-	</div>
-	<div style="float:left; width:50%; border-left: 1px solid black;">
-		<div class="content-med">{{total_payloads}}</div>
-		<div class="content-sm">Payloads</div>
-	</div>
+	<sds-link href="{% url 'campaigns' %}">
+		<div style="float:left; width:50%;">
+			<div class="content-med">{{click_rate}}%</div>
+			<div class="content-sm">Click Rate</div>
+		</div>
+	</sds-link>
+	<sds-link href="{% url 'payloads' %}">
+		<div style="float:left; width:50%; border-left: 1px solid black;">
+			<div class="content-med">{{total_payloads}}</div>
+			<div class="content-sm">Payloads</div>
+		</div>
+	</sds-link>
 </div>
-<div class="module-sm">
-	<h1>Risk Score</h1>
-	<br>
-	<div style="float:left; width:50%;">
-		<div class="content-med">{{total_risk_score}}</div>
-		<div class="content-sm">Total</div>
+<sds-link href="{% url 'risk_score' %}">
+	<div class="module-sm">
+		<h1>Risk Score</h1>
+		<br>
+		<div style="float:left; width:50%;">
+			<div class="content-med">{{total_risk_score}}</div>
+			<div class="content-sm">Total</div>
+		</div>
+		<div style="float:left; width:50%; border-left: 1px solid black;">
+			<div class="content-med">{{mitigated_risk_score}}</div>
+			<div class="content-sm">Mitigated</div>
+		</div>
 	</div>
-	<div style="float:left; width:50%; border-left: 1px solid black;">
-		<div class="content-med">{{mitigated_risk_score}}</div>
-		<div class="content-sm">Mitigated</div>
-	</div>
-</div>
+</sds-link>
 <br><br><br><br><br>
 <div class="module" style="width:49%;">
 	<h1>Assessor Checklist</h1>

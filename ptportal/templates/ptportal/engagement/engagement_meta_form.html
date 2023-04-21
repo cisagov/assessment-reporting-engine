@@ -86,23 +86,23 @@ DM22-1011
 			<div class="grid grid-cols-6 form-spacing mb-8">
 				<div class="col-span-3">
 					<h4><b>{{ form.customer_long_name.label_tag }}</b></h4>
-					<sds-input v-model="formData.customer_long_name" placeholder="Organization Name"></sds-input>
+					<sds-input v-model="formData.customer_long_name" placeholder="Organization Name" :maxlength="200"></sds-input>
 				</div>
 				<div class="col-span-3">
 					<h4><b>{{ form.customer_initials.label_tag }}</b></h4>
-					<sds-input v-model="formData.customer_initials" placeholder="ON"></sds-input>
+					<sds-input v-model="formData.customer_initials" placeholder="ON" :maxlength="20"></sds-input>
 				</div>
 				<div class="col-span-3">
 					<h4><b>{{ form.customer_POC_name.label_tag }}</b></h4>
-					<sds-input v-model="formData.customer_POC_name" placeholder="John Doe"></sds-input>
+					<sds-input v-model="formData.customer_POC_name" placeholder="John Doe" :maxlength="100"></sds-input>
 				</div>
 				<div class="col-span-3">
 					<h4><b>{{ form.customer_POC_email.label_tag }}</b></h4>
-					<sds-input v-model="formData.customer_POC_email" placeholder="John.Doe@organization.gov" type="email"></sds-input>
+					<sds-input v-model="formData.customer_POC_email" placeholder="John.Doe@organization.gov" type="email" :maxlength="100"></sds-input>
 				</div>
 				<div class="col-span-3">
 					<h4><b>{{ form.customer_location.label_tag }}</b></h4>
-					<sds-input v-model="formData.customer_location" placeholder="123 Main Street, Arlington, VA 12345"></sds-input>
+					<sds-input v-model="formData.customer_location" placeholder="123 Main Street, Arlington, VA 12345" :maxlength="200"></sds-input>
 				</div>
 				<div class="col-span-1">
 					<h4><b>{{ form.customer_state.label_tag }}</b></h4>
@@ -126,11 +126,11 @@ DM22-1011
 			<div class="grid grid-cols-6 form-spacing mb-8">
 				<div class="col-span-3">
 					<h4><b>{{ form.team_lead_name.label_tag }}</b></h4>
-					<sds-input v-model="formData.team_lead_name" placeholder="Jane Doe"></sds-input>
+					<sds-input v-model="formData.team_lead_name" placeholder="Jane Doe" :maxlength="50"></sds-input>
 				</div>
 				<div class="col-span-3">
 					<h4><b>{{ form.team_lead_email.label_tag }}</b></h4>
-					<sds-input v-model="formData.team_lead_email" placeholder="Jane.Doe@cisa.dhs.gov" type="email"></sds-input>
+					<sds-input v-model="formData.team_lead_email" placeholder="Jane.Doe@cisa.dhs.gov" type="email" :maxlength="50"></sds-input>
 				</div>
 				<!--<div class="col-span-full">
 					<h4><b>{{ form.business_goal.label_tag }}</b></h4>
@@ -177,7 +177,7 @@ DM22-1011
 					<span class="text-sm text-gray-600">
 						{{form.phishing_domains.help_text}}
 					</span>
-					<sds-textarea v-model="formData.phishing_domains" placeholder="dhs.gov, cisa.gov"></sds-textarea>
+					<sds-textarea v-model="formData.phishing_domains" placeholder="dhs.gov, cisa.gov" :maxlength="1000"></sds-textarea>
 				</div>
 			</div>
 		</sds-section>
@@ -198,7 +198,7 @@ DM22-1011
 					<span class="text-sm text-gray-600">
 						{{form.ext_scope.help_text}}
 					</span>
-					<sds-textarea v-model="formData.ext_scope" placeholder="192.168.0.0, 192.168.0.1-4, 192.168.0.5-192.168.1.7, 192.168.0.0/25, subdomain.domain.com"></sds-textarea>
+					<sds-textarea v-model="formData.ext_scope" placeholder="192.168.0.0, 192.168.0.1-4, 192.168.0.5-192.168.1.7, 192.168.0.0/25, subdomain.domain.com" :maxlength="10000"></sds-textarea>
 				</div>
 				<div class="col-span-3">
 					<h4><b>
@@ -207,7 +207,7 @@ DM22-1011
 					<span class="text-sm text-gray-600">
 						{{form.ext_excluded_scope.help_text}}
 					</span>
-					<sds-textarea v-model="formData.ext_excluded_scope" placeholder="192.168.0.0, 192.168.0.1-4, 192.168.0.5-192.168.1.7, 192.168.0.0/25, subdomain.domain.com"></sds-textarea>
+					<sds-textarea v-model="formData.ext_excluded_scope" placeholder="192.168.0.0, 192.168.0.1-4, 192.168.0.5-192.168.1.7, 192.168.0.0/25, subdomain.domain.com" :maxlength="10000"></sds-textarea>
 				</div>
 			</div>
 		</sds-section>
@@ -229,7 +229,7 @@ DM22-1011
 						<span class="text-sm text-gray-600">
 							{{form.int_scope.help_text}}
 						</span>
-						<sds-textarea v-model="formData.int_scope" placeholder="192.168.0.0, 192.168.0.1-4, 192.168.0.5-192.168.1.7, 192.168.0.0/25, subdomain.domain.com"></sds-textarea>
+						<sds-textarea v-model="formData.int_scope" placeholder="192.168.0.0, 192.168.0.1-4, 192.168.0.5-192.168.1.7, 192.168.0.0/25, subdomain.domain.com" :maxlength="10000"></sds-textarea>
 					</div>
 					<div class="col-span-3">
 						<h4><b>
@@ -238,7 +238,7 @@ DM22-1011
 						<span class="text-sm text-gray-600">
 							{{form.int_excluded_scope.help_text}}
 						</span>
-						<sds-textarea v-model="formData.int_excluded_scope" placeholder="192.168.0.0, 192.168.0.1-4, 192.168.0.5-192.168.1.7, 192.168.0.0/25, subdomain.domain.com"></sds-textarea>
+						<sds-textarea v-model="formData.int_excluded_scope" placeholder="192.168.0.0, 192.168.0.1-4, 192.168.0.5-192.168.1.7, 192.168.0.0/25, subdomain.domain.com" :maxlength="10000"></sds-textarea>
 					</div>
 				</div>
 			</sds-section>
@@ -438,7 +438,7 @@ DM22-1011
 				{ id: 12, value: 'Healthcare and Public Health', text: 'Healthcare and Public Health' },
 				{ id: 13, value: 'Identifying Critical Infrastructure During COVID-19', text: 'Identifying Critical Infrastructure During COVID-19' },
 				{ id: 14, value: 'Information Technology', text: 'Information Technology' },
-				{ id: 15, value: 'Nuclear Reactors', text: 'Nuclear Reactors' },
+				{ id: 15, value: 'Nuclear Reactors, Materials, and Waste', text: 'Nuclear Reactors, Materials, and Waste' },
 				{ id: 16, value: 'Sector-Specific Agencies', text: 'Sector-Specific Agencies' },
 				{ id: 17, value: 'Transportation Systems', text: 'Transportation Systems' },
 				{ id: 18, value: 'Water and Wastewater Systems', text: 'Water and Wastewater Systems' }

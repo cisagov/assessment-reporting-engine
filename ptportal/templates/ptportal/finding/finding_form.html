@@ -114,12 +114,12 @@ DM22-1011
           <div class="mb-4">
             <h2 class="after:content-['*required'] after:ml-0.5 after:text-red-500 after:font-normal font-bold">Finding Description</h2>
             <span class="font-light text-gray-700">Contains the description of this finding from the database. Edit the text below to clarify the description for this specific case.</span>
-            <sds-textarea v-model="formData.findingDescription" :required="true"></sds-textarea>
+            <sds-textarea v-model="formData.findingDescription" :required="true" :maxlength="10000"></sds-textarea>
           </div>
           <div class="mb-4">
             <h2 class="after:content-['*required'] after:ml-0.5 after:text-red-500 after:font-normal font-bold">Finding Remediation</h2>
             <span class="font-light text-gray-700">Contains the standard remediation of this finding from the database. Edit the text below to clarify the remediation for this specific case.</span>
-            <sds-textarea v-model="formData.findingRemediation" :required="true"></sds-textarea>
+            <sds-textarea v-model="formData.findingRemediation" :required="true" :maxlength="10000"></sds-textarea>
           </div>
           <div class="grid grid-cols-4 mb-4">
             <div>
@@ -173,7 +173,7 @@ DM22-1011
       <div class="mb-4">
         <h2 class="after:font-normal font-bold">Screenshot Description</h2>
         <span class="font-light text-gray-700">Describe the relevance of the screenshots to this finding and to one another (if applicable).</span>
-        <sds-textarea v-model="formData.screenshotDescription" :required="false" :rows="3" placeholder="These screenshots show..."></sds-textarea>
+        <sds-textarea v-model="formData.screenshotDescription" :required="false" :rows="3" placeholder="These screenshots show..." :maxlength="10000"></sds-textarea>
       </div>
       <br>
       <sds-file-uploader class="place-self-center w-full" v-bind="findingImageSectionArgs.fileUploaderArgs" @add=addFile>
@@ -184,7 +184,7 @@ DM22-1011
           <sds-button @click="screenshotModal(screenshot)"><img :src="[[screenshot.imgURL]]"></sds-button>
           <div style="float:left; padding:19px 15px 0px 10px; cursor:pointer"><div style="width:15px; height:2px; background-color:gray; margin:2px 0;"></div><div style="width:15px; height:2px; background-color:gray; margin:2px 0;"></div></div><div class="delete" style="float:right; padding:0px 8px 0px 0px; font-size:20pt"><sds-button @click="deleteFile(screenshot)">&#10799;</sds-button></div>
           <br>
-          <sds-textarea v-model="screenshot.caption" :rows="1" placeholder="Caption"></sds-textarea>
+          <sds-textarea v-model="screenshot.caption" :rows="1" placeholder="Caption" :maxlength="250"></sds-textarea>
         </div>
       </ul>
     </div>
@@ -209,11 +209,9 @@ DM22-1011
           </div>
         </sds-scroll-area>
     </div>
+    <sds-button class="float-right" variant="primary" @click="submitFinding"><img class="w-8 h-8" src="/static/icons/floppy-disk-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Save</sds-button>
+    <br><br>
   </sds-section>
-
-  <div class="flex flex-row-reverse">
-    <sds-button variant="primary" @click="submitFinding">Save</sds-button>
-  </div>
 </div>
 {% endblock %}
 
@@ -471,7 +469,7 @@ function pageMethods() {
         this.formData.screenshots.push({order: this.formData.screenshots.length + 1, imgOrder: imgOrder, uuid: null, imgURL: URL.createObjectURL(newFiles[file]), caption: ""})
         imgOrder++
       }
-      this.displayNotification({'title': 'Images Added', text: 'Files added to list! Make sure to save the new images.', variant:"info"})
+      this.displayNotification({'title': 'Image(s) Added', text: 'Image(s) uploaded successfully. Be sure to save before leaving this page.', variant:"info", autoHideDelay:10000})
     },
     deleteFile: function (screenshot) {
       index = this.formData.screenshots.indexOf(screenshot.file)

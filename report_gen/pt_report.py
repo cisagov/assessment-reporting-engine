@@ -1618,12 +1618,18 @@ def insert_pc_table(doc, db):
             row7 = pc_table.add_row()
 
             pc_table.cell(7, 0).text = "Credentials Harvested"
-            pc_table.cell(7, 1).text = str(ele['creds_harvested'])
+            if str(ele['creds_harvested']) == "None":
+                pc_table.cell(7, 1).text = "N/A"
+            else:
+                pc_table.cell(7, 1).text = str(ele['creds_harvested'])
 
             row8 = pc_table.add_row()
 
             pc_table.cell(8, 0).text = "Users Exploited"
-            pc_table.cell(8, 1).text = str(ele['number_exploited'])
+            if str(ele['number_exploited']) == "None":
+                pc_table.cell(8, 1).text = "N/A"
+            else:
+                pc_table.cell(8, 1).text = str(ele['number_exploited'])
 
             row9 = pc_table.add_row()
 
@@ -1806,7 +1812,7 @@ def generate_ptp_report(template, output, draft, json, media):
     # ---- add findings and kevs
     insert_fs_table(doc, rva_info, "{Table: Findings Summary}")
     insert_df_table(doc, rva_info, "{Table: Detailed Findings}", media)
-    insert_kev_table(doc, rva_info, "{Table: KEVs}")
+    #insert_kev_table(doc, rva_info, "{Table: KEVs}")
 
     # ---- add additional service sections
     insert_ransomware(doc, rva_info)

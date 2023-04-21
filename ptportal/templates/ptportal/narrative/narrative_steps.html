@@ -45,7 +45,7 @@ DM22-1011
   <sds-file-uploader v-bind="fileUploadArgs" @add="addFile">
   </sds-file-uploader>
   <br>
-  <sds-button variant="primary" @click="addStep()" style="float:left">+ Step Without Screenshot</sds-button><sds-button variant="primary" @click="saveSteps" style="float:right">Save</sds-button>
+  <sds-button variant="primary" @click="addStep()" style="float:left">+ Step Without Screenshot</sds-button><sds-button variant="primary" @click="saveSteps" style="float:right"><img class="w-8 h-8" src="/static/icons/floppy-disk-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Save</sds-button>
   <br><br><br>
 </sds-section>
 
@@ -59,7 +59,7 @@ DM22-1011
       <div class="grid grid-cols-2 mb-2">
         <h4>Description:</h4>
       </div>
-      <sds-textarea v-model="step.description" :rows="3"></sds-textarea>
+      <sds-textarea v-model="step.description" :rows="3" :maxlength="5000"></sds-textarea>
       <br>
       <div v-if="step.imgURL">
         <img :src="[[step.imgURL]]" onerror="this.style.display='none'" />
@@ -67,7 +67,7 @@ DM22-1011
         <div class="grid grid-cols-2 mb-2">
           <h4>Caption:</h4>
         </div>
-        <sds-textarea v-model="step.caption" :rows="1"></sds-textarea>
+        <sds-textarea v-model="step.caption" :rows="1" :maxlength="250"></sds-textarea>
       </div>
     </sds-section>
   </div>
@@ -84,7 +84,7 @@ DM22-1011
 
 <div v-if="steps.length > 0" style="float:left; width:78%; border:1px solid #DDDDDD;">
     <sds-section>
-      <sds-button variant="primary" @click="addStep()" style="float:left">+ Step Without Screenshot</sds-button><sds-button variant="primary" @click="saveSteps" style="float:right">Save</sds-button>
+      <sds-button variant="primary" @click="addStep()" style="float:left">+ Step Without Screenshot</sds-button><sds-button variant="primary" @click="saveSteps" style="float:right"><img class="w-8 h-8" src="/static/icons/floppy-disk-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Save</sds-button>
       <br><br><br>
     </sds-section>
   </div>
@@ -114,13 +114,13 @@ function pageData() {
     
     {% if step.file %}
       imgURL = window.location.origin + "/media/" + "{{step.file}}"
-      caption = "{{step.caption}}"
+      caption = "{{step.caption|escapejs}}"
     {% else %}
       imgURL = ""
       caption = ""
     {% endif %}
 
-      pageData.steps.push({order: "{{step.order}}", uuid: "{{step.uuid}}", imgURL: imgURL, caption: caption, description: "{{step.description}}"})
+      pageData.steps.push({order: "{{step.order}}", uuid: "{{step.uuid}}", imgURL: imgURL, caption: caption, description: "{{step.description|escapejs}}"})
 
   {% endfor %}
 
@@ -145,7 +145,7 @@ function pageMethods() {
         this.steps.push({order: this.steps.length + 1, imgOrder: imgOrder, uuid: null, imgURL: URL.createObjectURL(newFiles[file]), caption: "", description: ""})
         imgOrder++
       }
-      this.displayNotification({'title': 'Images added', text: 'File added to list! Make sure to save the new images.', variant:"info"})
+      this.displayNotification({'title': 'Image(s) Added', text: 'A step for each uploaded image has been created. Be sure to save before leaving this page.', variant:"info", autoHideDelay:10000})
     },
     deleteFile: function (step) {
       index = this.steps.indexOf(step.file)

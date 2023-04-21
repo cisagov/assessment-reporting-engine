@@ -53,13 +53,13 @@ DM22-1011
                 <div class="mb-8">
                     <sds-table :fields="fields" :items="items" class="table-prose" v-bind="EITableArgs">
                             <template #cell(ei_make)="{item}">
-                                <sds-input v-model="item.ei_make" placeholder="Make"></sds-input>
+                                <sds-input v-model="item.ei_make" placeholder="Make" :maxlength="200"></sds-input>
                             </template>
                             <template #cell(ei_model)="{item}">
-                                <sds-input v-model="item.ei_model" placeholder="Model"></sds-input>
+                                <sds-input v-model="item.ei_model" placeholder="Model" :maxlength="200"></sds-input>
                             </template>
                             <template #cell(ei_model_num)="{item}">
-                                <sds-input v-model="item.ei_model_num" placeholder="#"></sds-input>
+                                <sds-input v-model="item.ei_model_num" placeholder="#" :maxlength="200"></sds-input>
                             </template>
 
                             <template #cell(delete)="{item}">
@@ -136,7 +136,7 @@ DM22-1011
                     <div class='form-row mb-3 d-none' id='{{ q.name }}Field'>
                         <div class="col-md-7">
                             <h6 class="control-label">{{ q.label_tag }} {{ q.help_text }}</h6>
-                            <sds-textarea v-model="formData.{{ q.name }}" placeholder="Description" v-bind:rows="3"></sds-textarea>
+                            <sds-textarea v-model="formData.{{ q.name }}" placeholder="Description" v-bind:rows="3" :maxlength="2000"></sds-textarea>
                         </div>
                     </div>
                 {% elif q.name == 'q24' or q.name == 'q25' or q.name == 'q26' or q.name == 'q27' %}
@@ -157,7 +157,7 @@ DM22-1011
                 <br>
             {% endfor %}
 
-        <sds-button type="submit" variant="primary">Save</sds-button>
+        <sds-button type="submit" variant="primary"><img class="w-8 h-8" src="/static/icons/floppy-disk-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Save</sds-button>
         <br>
     </sds-section>
 </div>
@@ -173,13 +173,13 @@ DM22-1011
                 q2: "{{ object.q2 }}",
                 q3: "{{ object.q3 }}",
                 q4: "{{ object.q4 }}",
-                q4A: "{{ object.q4A }}",
+                q4A: "{{ object.q4A | escapejs }}",
                 q5: "{{ object.q5 }}",
                 q6: "{{ object.q6 }}",
                 q7: "{{ object.q7 }}",
                 q8: "{{ object.q8 }}",
                 q9: "{{ object.q9 }}",
-                q9A: "{{ object.q9A }}",
+                q9A: "{{ object.q9A | escapejs }}",
                 q10: "{{ object.q10 }}",
                 q11: "{{ object.q11 }}",
                 q12: "{{ object.q12 }}",

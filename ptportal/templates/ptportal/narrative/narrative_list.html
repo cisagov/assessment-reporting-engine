@@ -65,11 +65,11 @@ function pageData() {
         techniques = []
 
         {% for tool in path.tools.all %}
-            tools.push("{{tool.name}}")
+            tools.push("{{tool.name|escapejs}}")
         {% endfor %}
 
         {% for technique in path.attack.all %}
-            techniques.push("{{technique.name}}")
+            techniques.push("{{technique.name|escapejs}}")
         {% endfor %}
 
         tool_list = tools.join(', ')

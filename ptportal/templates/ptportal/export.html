@@ -215,6 +215,8 @@ DM22-1011
         </div>
     </div>
 
+    <br>
+
     <div class="card">
         <div class="card-inner" align="center">
             <img src="/static/icons/file-excel-regular.svg">
@@ -286,6 +288,40 @@ DM22-1011
             <p>Download a JSON file containing EI data</p>
             {% if eng_meta %}
             <sds-button variant="primary" size="sm" @click="redirectLink('{% url "generate_EI_json" %}')">Export</sds-button>
+            {% else %}
+            <sds-floating-ui
+                popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                placement="top"
+                arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                placement-top-arrow-class="-bottom-1"
+                placement-right-arrow-class="-left-1"
+                placement-bottom-arrow-class="-top-1"
+                placement-left-arrow-class="-right-1"
+                :will-open="willOpen"
+                :will-close="willClose"
+            >
+                <template #trigger="{ open, close }">
+                    <sds-button variant="primary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                </template>
+                <template #default>
+                    <div class="p-2">
+                        <p>Complete the required Assessment Details fields before exporting data.</p>
+                    </div>
+                </template>
+            </sds-floating-ui>
+            {% endif %}
+        </div>
+    </div>
+
+    <br>
+
+    <div class="card">
+        <div class="card-inner" align="center">
+            <img src="/static/icons/file-lines-regular.svg">
+            <h1>KEV Report</h1>
+            <p>Download a DOCX file containing KEV data</p>
+            {% if eng_meta %}
+            <sds-button variant="primary" size="sm" @click="redirectLink('{% url "generate_kev_report" %}')">Export</sds-button>
             {% else %}
             <sds-floating-ui
                 popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
@@ -631,6 +667,7 @@ function pageMethods() {
             window.open(base.concat("/ptportal/generate-tracker"))
             window.open(base.concat("/ptportal/generate-JSON"))
             window.open(base.concat("/ptportal/generate-EI-JSON"))
+            window.open(base.concat("/ptportal/generate-kev-report"))
             window.open(base.concat("/ptportal/download-backup"))
         }
     }

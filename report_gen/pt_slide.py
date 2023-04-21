@@ -892,6 +892,7 @@ def insert_findings_slides(prs, report_type, rva_info, ss_info, media_path):
                 if kev:
                     add_tag(shapes, "kev", "KEV")
 
+    """
     kevs = []
 
     for cnt, kev in enumerate(af.model_gen(rva_info, 'ptportal.kev')):
@@ -946,6 +947,7 @@ def insert_findings_slides(prs, report_type, rva_info, ss_info, media_path):
                 table.cell(count + 1, i).text_frame.paragraphs[0].runs[0].font.size = Pt(11)
                 table.cell(count + 1, i).text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
                 table.cell(count + 1, i).vertical_anchor = MSO_ANCHOR.MIDDLE
+    """
 
 
 def insert_services_slides(prs, rva_info):
@@ -1355,8 +1357,14 @@ def insert_services_slides(prs, rva_info):
             cell_text(table, 4, 1, str(c['total']), color=gray)
             cell_text(table, 5, 1, str(c['unique']), color=gray)
             cell_text(table, 6, 1, time_to_first_click, color=gray)
-            cell_text(table, 7, 1, str(c['harvest']), color=gray)
-            cell_text(table, 8, 1, str(c['exploit']), color=gray)
+            if str(c['harvest']) == "None":
+                cell_text(table, 7, 1, "N/A", color=gray)
+            else:
+                cell_text(table, 7, 1, str(c['harvest']), color=gray)
+            if str(c['exploit']) == "None":
+                cell_text(table, 8, 1, "N/A", color=gray)
+            else:
+                cell_text(table, 8, 1, str(c['exploit']), color=gray)
             cell_text(table, 9, 1, length, color=gray)
 
             for i in range(1, 10):

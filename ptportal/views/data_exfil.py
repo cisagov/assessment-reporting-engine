@@ -30,8 +30,8 @@ class DataExfiltration(generic.base.TemplateView):
 
     def post(self, request, *args, **kwargs):
         postData = json.loads(request.body)
+        data_exfil = []
 
-        DataExfil.objects.all().delete()
         for order, data in enumerate(postData):
             if (
                 data['protocol']
@@ -53,16 +53,35 @@ class DataExfiltration(generic.base.TemplateView):
             else:
                 prevent = "B"
 
-            try:
-                DataExfil.objects.create(
-                    order=order + 1,
-                    protocol=data['protocol'],
-                    datatype=data['datatype'],
-                    date_time=data['date_time'],
-                    detection=detect,
-                    prevention=prevent
-                )
+            if DataExfil.objects.filter(order=order + 1).exists():
+                obj = DataExfil.objects.filter(order=order + 1).first()
+                obj.order = order + 1
+                obj.protocol = data['protocol']
+                obj.datatype = data['datatype']
+                obj.date_time = data['date_time']
+                obj.detection = detect
+                obj.prevention = prevent
+                obj.save()
 
-            except (KeyError, ValidationError) as e:
-                return HttpResponse(status=400, reason=e)
+            else:
+                try:
+                    obj = DataExfil.objects.create(
+                        order=order + 1,
+                        protocol=data['protocol'],
+                        datatype=data['datatype'],
+                        date_time=data['date_time'],
+                        detection=detect,
+                        prevention=prevent
+                    )
+
+                except (KeyError, ValidationError) as e:
+                    print(e)
+                    return HttpResponse(status=400, reason=e)
+            data_exfil.append(obj)
+
+        deletedItems = set(DataExfil.objects.all()) - set(data_exfil)
+
+        for deleted in deletedItems:
+            deleted.delete()
+
         return HttpResponse(status=200)

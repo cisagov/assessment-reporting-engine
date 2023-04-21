@@ -100,8 +100,9 @@ DM22-1011
                   </sds-table>
                 </div>
               </sds-section>
+              <sds-button variant="primary" class="float-right" @click="submitRansomware"><img class="w-8 h-8" src="/static/icons/floppy-disk-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Save</sds-button>
+              <br><br>
           </sds-section>
-    <sds-button variant="primary" class="float-right" @click="submitRansomware"><i class="fas fa-save"></i> Save</sds-button>
 </div>
 {% endblock %}
 
@@ -150,7 +151,7 @@ DM22-1011
         date: null,
         max: null,
         min: null,
-        mode: 'dateTime',
+        mode: 'date',
         size: 'md'
       },
     }

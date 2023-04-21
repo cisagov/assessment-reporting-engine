@@ -49,7 +49,7 @@ DM22-1011
         <br>
       <div class="grid gap-2 grid-cols-2">
         <div class="flex gap-2">
-          <sds-button variant="primary" @click="parseData">Upload</sds-button>
+          <sds-button variant="primary" @click="parseData"><img class="w-8 h-8" src="/static/icons/upload-solid-white.svg" style="float:left; padding:0px 6px 0px 0px"> Upload</sds-button>
         </div>
       </div>
     </sds-section>
@@ -78,12 +78,10 @@ DM22-1011
           </div>
         </sds-scroll-area>
       </div>
-        
-      <div class="flex flex-row-reverse"></div>
+      <br><br>
+      <sds-button class="float-right" variant="primary" @click="saveDetails"><img class="w-8 h-8" src="/static/icons/floppy-disk-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Save</sds-button>
+      <br><br>
     </sds-section>
-    <div class="flex flex-row-reverse">
-      <sds-button variant="primary" @click="saveDetails">Save</sds-button>
-    </div>
 </div>
 {% endblock %}
 
@@ -176,11 +174,11 @@ DM22-1011
                 }
               }
             }
-            this.displayNotification({title: "Data Successfully Parsed", text: "KEVs derived from " + fileName + " have been selected from the catalog. Be sure to save before leaving this page.", variant: "info"})
+            this.displayNotification({title: "Data Successfully Parsed", text: "KEVs derived from " + fileName + " have been selected from the catalog. Be sure to save before leaving this page.", variant: "info", autoHideDelay:10000})
           }
 
           else {
-            this.displayNotification({title: "Error Parsing Data", text: "The following Nessus CSV file appears to be missing a valid 'CVE' column: " + fileName, variant: "warning"})
+            this.displayNotification({title: "Error Parsing Data", text: "The following Nessus CSV file appears to be missing a valid 'CVE' column: " + fileName, variant: "warning", autoHideDelay:10000})
           }
 
         }

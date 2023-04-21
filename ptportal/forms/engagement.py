@@ -35,12 +35,12 @@ class EngagementForm(BaseModelForm):
         self.fields['int_scope'].widget.attrs.update({'rows': '3'})
         self.fields['int_excluded_scope'].widget.attrs.update({'rows': '3'})
 
-        self.fields['int_start_date'].widget.attrs.update(
-            {'data-provide': 'datepicker', 'type': 'date'}
-        )
-        self.fields['int_end_date'].widget.attrs.update(
-            {'data-provide': 'datepicker', 'type': 'date'}
-        )
+        #self.fields['int_start_date'].widget.attrs.update(
+        #    {'data-provide': 'datepicker', 'type': 'date'}
+        #)
+        #self.fields['int_end_date'].widget.attrs.update(
+        #    {'data-provide': 'datepicker', 'type': 'date'}
+        #)
 
         self.fields['ext_scope'].widget.attrs.update({'rows': '3'})
         self.fields['ext_excluded_scope'].widget.attrs.update({'rows': '3'})

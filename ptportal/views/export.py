@@ -36,6 +36,7 @@ from django.http import Http404, JsonResponse
 from django.shortcuts import HttpResponse, render
 
 from report_gen.pt_report import generate_ptp_report
+from report_gen.pt_kev import generate_kev_report
 from report_gen.pt_slide import generate_ptp_slides
 from report_gen.pt_tracker import create_tracker
 from report_gen.pt_pace import generate_pace_document
@@ -381,6 +382,13 @@ def generate_artifact(artifact_type, anon_report=False):
 
         generate_pace_document(artifact_name, json_filename, assets)
 
+    elif artifact_type == "KEV":
+        content_type = base_ctype + "wordprocessingml.document"
+        template_name = 'report_gen/templates/KEV-template.docx'
+        artifact_name = report_type + "-" + asmt_id + "-" + "Known-Exploited-Vulnerabilities" + '.docx'
+
+        generate_kev_report(template_name, artifact_name, json_filename, settings.MEDIA_ROOT)
+
     elif artifact_type == "Tracker":
         content_type = base_ctype + "spreadsheetml.sheet"
         artifact_name = report_type + "-" + asmt_id + "-" + cust_initials + "-ActivityTracker.xlsx"
@@ -406,6 +414,7 @@ def generate_artifact(artifact_type, anon_report=False):
 def generate_report(request):
     return generate_artifact("Report")
 
+
 def generate_outbrief(request):
     return generate_artifact("Out-Brief")
 
@@ -416,4 +425,8 @@ def generate_tracker(request):
 
 def generate_pace(request):
     return generate_artifact("PACE")
+
+
+def generate_kevs(request):
+    return generate_artifact("KEV")
 

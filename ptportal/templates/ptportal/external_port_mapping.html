@@ -31,7 +31,7 @@ DM22-1011
 	</sds-modal>
 	<sds-section class="mb-4" type="accented">
 		<template #title><b>DATA UPLOAD</b></template>
-		<sds-file-uploader class="" v-bind="fileUploadArgs"></sds-file-uploader>
+		<sds-file-uploader v-model="fileList" v-bind="fileUploadArgs"></sds-file-uploader>
 		<br>
 		<div class="grid gap-2 grid-cols-2">
 			<div class="flex gap-2">
@@ -50,16 +50,16 @@ DM22-1011
 			<div class="mb-8">
 				<sds-table :fields="fields" :items="items" class="table-prose" v-bind="NmapTableArgs">
 					<template #cell(ip)="{item}">
-						<sds-textarea v-model="item.ip" rows="1" placeholder="127.0.0.1"></sds-textarea>
+						<sds-textarea v-model="item.ip" rows="1" placeholder="127.0.0.1" :maxlength="15"></sds-textarea>
 					</template>
 					<template #cell(hostname)="{item}">
-						<sds-textarea v-model="item.hostname" rows="1" placeholder="test.server"></sds-textarea>
+						<sds-textarea v-model="item.hostname" rows="1" placeholder="test.server" :maxlength="500"></sds-textarea>
 					</template>
 					<template #cell(ports)="{item}">
-						<sds-textarea v-model="item.ports" rows="3" placeholder="22/tcp, 80/tcp, 443/tcp"></sds-textarea>
+						<sds-textarea v-model="item.ports" rows="3" placeholder="22/tcp, 80/tcp, 443/tcp" :maxlength="800"></sds-textarea>
 					</template>
 					<template #cell(services)="{item}">
-						<sds-textarea v-model="item.services" rows="3" placeholder="ssh, http, http"></sds-textarea>
+						<sds-textarea v-model="item.services" rows="3" placeholder="ssh, http, http" :maxlength="800"></sds-textarea>
 					</template>
 					<template #cell(delete)="{item}">
 						<sds-button type="button" @click="deleteMapping(item)"><img class="w-8 h-8" src="/static/icons/trash-solid.svg"></sds-input>
@@ -121,7 +121,7 @@ DM22-1011
 		}
 
 		{% for host in hosts %}
-			data.NmapTableArgs.items.push({ip: "{{host.ip}}", hostname: "{{host.hostname}}", ports: "{{host.ports}}", services: "{{host.services}}"})
+			data.NmapTableArgs.items.push({ip: "{{host.ip|escapejs}}", hostname: "{{host.hostname|escapejs}}", ports: "{{host.ports|escapejs}}", services: "{{host.services|escapejs}}"})
 		{% endfor %}
 
 		return data
@@ -189,7 +189,7 @@ DM22-1011
 				const parsedXML = parser.parseFromString(nmapString, "text/xml")
 
 				if (parsedXML.getElementsByTagName('nmaprun').length == 0) {
-					this.displayNotification({title: "Bad XML File", text: "The file does not appear to contain normal Nmap tags. Verify the contents of the file or re-run Nmap to generate a valid file.", variant: "warning"})
+					this.displayNotification({title: "Bad XML File", text: "The file does not appear to contain normal Nmap tags. Verify the contents of the file or re-run Nmap to generate a valid file.", variant: "warning", autoHideDelay:10000})
 					return
 				}
 
@@ -266,6 +266,8 @@ DM22-1011
 				if (duplicates.length > 0) {
 					this.displayNotification({title: "Duplicate IPs Detected", text: "The following duplicate IP address entries were found and must be removed before saving: " + duplicates.join(", "), variant:"danger", autoHideDelay:10000})
 				}
+
+				this.fileList = []
 			}
 		}
 		return pageFunctions

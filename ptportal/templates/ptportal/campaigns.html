@@ -60,16 +60,16 @@ DM22-1011
 				<div class="mb-8">
 					<sds-table :fields="fields" :items="items" class="table-prose" v-bind="CampaignTableArgs">
 						<template #cell(emails_sent)="{item}">
-                        	<sds-input v-model="item.emails_sent" placeholder="#"></sds-input>
+                        	<sds-input v-model="item.emails_sent" placeholder="#" :maxlength="10"></sds-input>
                     	</template>
                     	<template #cell(emails_delivered)="{item}">
-                        	<sds-input v-model="item.emails_delivered" placeholder="#"></sds-input>
+                        	<sds-input v-model="item.emails_delivered" placeholder="#" :maxlength="10"></sds-input>
                     	</template>
                     	<template #cell(total_clicks)="{item}">
-                        	<sds-input v-model="item.total_clicks" placeholder="#"></sds-input>
+                        	<sds-input v-model="item.total_clicks" placeholder="#" :maxlength="10"></sds-input>
                     	</template>
                     	<template #cell(unique_clicks)="{item}">
-                        	<sds-input v-model="item.unique_clicks" placeholder="#"></sds-input>
+                        	<sds-input v-model="item.unique_clicks" placeholder="#" :maxlength="10"></sds-input>
                     	</template>
                     	<template #cell(time_to_first_click)="{item}">
                     		<sds-floating-ui
@@ -84,7 +84,7 @@ DM22-1011
 								:will-close="willClose"
 							>
 							<template #trigger="{ open, close }">
-                        	<sds-input v-model="item.time_to_first_click" placeholder="HH:MM:SS" @mouseover="open" @mouseout="close"></sds-input>
+                        	<sds-input v-model="item.time_to_first_click" placeholder="HH:MM:SS" @mouseover="open" @mouseout="close" :maxlength="20"></sds-input>
                     		</template>
                     		<template #default>
 					        	<div class="p-2">
@@ -106,7 +106,7 @@ DM22-1011
 								:will-close="willClose"
 							>
 							<template #trigger="{ open, close }">
-                        	<sds-input v-model="item.creds_harvested" placeholder="#" @mouseover="open" @mouseout="close"></sds-input>
+                        	<sds-input v-model="item.creds_harvested" placeholder="#" @mouseover="open" @mouseout="close" :maxlength="20"></sds-input>
                     		</template>
                     		<template #default>
 					        	<div class="p-2">
@@ -116,10 +116,10 @@ DM22-1011
 					      	</sds-floating-ui>
 	              		</template>
                     	<template #cell(number_exploited)="{item}">
-                        	<sds-input v-model="item.number_exploited" placeholder="#"></sds-input>
+                        	<sds-input v-model="item.number_exploited" placeholder="#" :maxlength="20"></sds-input>
                     	</template>
                     	<template #cell(length_of_campaign)="{item}">
-                        	<sds-input v-model="item.length_of_campaign" placeholder="#"></sds-input>
+                        	<sds-input v-model="item.length_of_campaign" placeholder="#" :maxlength="20"></sds-input>
                     	</template>
 						<template #cell(delete)="{item}">
 							<div style="width:20px; padding:10px 0px 0px 0px">
@@ -145,9 +145,9 @@ DM22-1011
 					</sds-table>
 				</div>
 			</sds-section>
+			<sds-button variant="primary" class="float-right" @click="submitCampaigns"><img class="w-8 h-8" src="/static/icons/floppy-disk-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Save</sds-button>
+			<br><br>
 		</sds-section>
-		<!-- Save Button -->
-		<sds-button variant="primary" class="float-right" @click="submitCampaigns"> Save</sds-button>
 </div>
 {% endblock %}
 
@@ -223,8 +223,14 @@ function pageData() {
 	}
 
 	{% for campaign in campaigns %}
+		console.log("{{campaign.creds_harvested}}")
+		{% if campaign.creds_harvested == None %}
+			creds_harvested = ""
+		{% else %}
+			creds_harvested = "{{campaign.creds_harvested}}"
+		{% endif %}
 
-		data.CampaignTableArgs.items.push({id: "{{campaign.order}}", emails_sent: "{{campaign.emails_sent}}", emails_delivered: "{{campaign.emails_delivered}}", total_clicks: "{{campaign.total_clicks}}", unique_clicks: "{{campaign.unique_clicks}}", time_to_first_click: "{{campaign.time_to_first_click}}", creds_harvested: "{{campaign.creds_harvested}}", number_exploited: "{{campaign.number_exploited}}", length_of_campaign: "{{campaign.length_of_campaign}}"})
+		data.CampaignTableArgs.items.push({id: "{{campaign.order}}", emails_sent: "{{campaign.emails_sent}}", emails_delivered: "{{campaign.emails_delivered}}", total_clicks: "{{campaign.total_clicks}}", unique_clicks: "{{campaign.unique_clicks}}", time_to_first_click: "{{campaign.time_to_first_click}}", creds_harvested: creds_harvested, number_exploited: "{{campaign.number_exploited}}", length_of_campaign: "{{campaign.length_of_campaign}}"})
 
 		data.CampaignDescArgs.items.push({id: "{{campaign.order}}", campaign_description: "{{campaign.campaign_description|escapejs}}"})
 
@@ -245,12 +251,29 @@ function pageMethods() {
 				if (parseInt(element.unique_clicks) > parseInt(element.emails_delivered)) {
 					this.notify_clickrate = true
 				}
-			})
 
-			// if description field is empty show pop up notification
+				if (parseInt(element.emails_delivered) > parseInt(element.emails_sent)) {
+					this.notify_emails = true
+				}
+
+				if (parseInt(element.unique_clicks) > parseInt(element.total_clicks)) {
+					this.notify_clicks = true
+				}
+			})
+			
 			if (this.notify_clickrate) {
-				this.displayNotification({title: "Error Saving Data", text: "In order to calculate a valid click rate, the number of emails delivered must be greater than or equal to number of unique clicks.", variant: "danger"})
+				this.displayNotification({title: "Error Saving Data", text: "In order to calculate a valid click rate, the number of emails delivered must be greater than or equal to number of unique clicks. Please correct these values before saving.", variant: "warning", autoHideDelay:10000})
 				this.notify_clickrate = false
+			}
+
+			else if (this.notify_emails) {
+				this.displayNotification({title: "Error Saving Data", text: "The number of emails delivered should not exceed the number of emails sent. Please correct these values before saving.", variant: "warning", autoHideDelay:10000})
+				this.notify_emails = false
+			}
+
+			else if (this.notify_clicks) {
+				this.displayNotification({title: "Error Saving Data", text: "The number of unique clicks should not exceed the total number of clicks. Please correct these values before saving.", variant: "warning", autoHideDelay:10000})
+				this.notify_clicks = false
 			}
 
 			else {

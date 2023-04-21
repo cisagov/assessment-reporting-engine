@@ -64,12 +64,12 @@ DM22-1011
 		<sds-section class="mb-4" type="accented">
 			<span class="border-top border-dark"></span>
             <template #title><b>DATA UPLOAD</b></template>
-			<sds-file-uploader v-bind="fileUploadArgs" @add="addFile"></sds-file-uploader>
+			<sds-file-uploader v-model="fileList" v-bind="fileUploadArgs"></sds-file-uploader>
 			<br>
 			<div class="grid gap-2 grid-cols-2">
 				<div class="flex gap-2">
-					<sds-button variant="primary" @click="parseData(false)"><i class="fas fa-plus-circle"></i> Append</sds-button>
-					<sds-button variant="primary" @click="this.overwriteWarning = true"><i class="fas fa-times-circle"></i> Overwrite</sds-button>
+					<sds-button variant="primary" @click="parseData(false)"><img class="w-8 h-8" src="/static/icons/circle-plus-solid-white.svg" style="float:left; padding:0px 6px 0px 0px"> Append</sds-button>
+					<sds-button variant="primary" @click="this.overwriteWarning = true"><img class="w-8 h-8" src="/static/icons/file-circle-xmark-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Overwrite</sds-button>
 				</div>
 			</div>
 		</sds-section>
@@ -143,9 +143,9 @@ DM22-1011
 					<sds-button type="button" @click="addPayload"><img class="w-8 h-8" src="/static/icons/plus-solid.svg"></sds-button>
 				</div>
 			</sds-section>
+			<sds-button variant="primary" class="float-right" @click="submitPayloads"><img class="w-8 h-8" src="/static/icons/floppy-disk-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Save</sds-button>
+			<br><br>
 		</sds-section>
-		<!-- Save Button -->
-		<sds-button variant="primary" class="float-right" @click="submitPayloads"> Save</sds-button>
 </div>
 {% endblock %}
 
@@ -156,7 +156,7 @@ function pageData() {
 		fileList: [],
 		formData: {
 			exception: "{{ description.exception }}",
-			browser: "{{ description.browser }}",
+			browser: "{{ description.browser|escapejs }}",
 			security_solutions: []
 		},
 		exceptionOptions: [
@@ -266,7 +266,7 @@ function pageMethods() {
 			})
 
 			if (this.notify) {
-				this.displayNotification({title: "Error Saving Data", text: "One or more Payloads are missing a description. Please enter a description for each payload before saving.", variant: "danger"})
+				this.displayNotification({title: "Error Saving Data", text: "One or more Payloads are missing a description. Please enter a description for each payload before saving.", variant: "warning", autoHideDelay:10000})
 				this.notify = false
 			}
 
@@ -341,7 +341,8 @@ function pageMethods() {
 				this.PayloadTableArgs.items.push({id: this.PayloadTableArgs.items.length + 1, payload_description: values[0], attack_name: "", c2_protocol: values[1], host_protection: h, border_protection: b})
 			}
 
-			this.displayNotification({'title': 'Payloads Added', text: 'Payloads have been added to the table below. Saving this screen will populate the MITRE ATT&CK formats accordingly.', variant:"info"})
+			this.displayNotification({'title': 'Payloads Added', text: 'Payloads have been added to the table below. Saving this screen will populate the MITRE ATT&CK formats accordingly.', variant:"info", autoHideDelay:10000})
+			this.fileList = []
 		},
 
 		checkSolution: function(sol) {

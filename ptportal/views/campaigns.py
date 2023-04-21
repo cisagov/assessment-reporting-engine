@@ -18,6 +18,7 @@ from django.views import generic
 from django.http import HttpResponse
 import json
 from ..models import Campaign
+import datetime
 
 
 class Campaigns(generic.base.TemplateView):
@@ -30,11 +31,7 @@ class Campaigns(generic.base.TemplateView):
 
     def post(self, request, *args, **kwargs):
         postData = json.loads(request.body)
-        diff = Campaign.objects.all().count() - len(postData['results'])
-
-        if diff > 0:
-            for i in range(diff):
-                Campaign.objects.order_by('-order')[0].delete()
+        campaigns = []
 
         for order, data in enumerate(postData['results']):
             if (
@@ -55,31 +52,33 @@ class Campaigns(generic.base.TemplateView):
             except:
                 click_rate = 0.0
 
-            obj = Campaign.objects.filter(order=order + 1)
+            if data['creds_harvested'] == "":
+                creds_harvested = None
+            else:
+                creds_harvested = int(data['creds_harvested'])
 
-            if obj.exists():
-                try:
-                    obj.update(
-                        emails_sent=data['emails_sent'] or 0,
-                        emails_delivered=data['emails_delivered'] or 0,
-                        total_clicks=data['total_clicks'] or 0,
-                        unique_clicks=data['unique_clicks'] or 0,
-                        click_rate=click_rate,
-                        time_to_first_click=data['time_to_first_click'] or "00:00:00",
-                        creds_harvested=data['creds_harvested'] or 0,
-                        number_exploited=data['number_exploited'] or 0,
-                        length_of_campaign=data['length_of_campaign'] or 0,
-                        campaign_description=postData['descriptions'][order]['campaign_description'] or ""
-                    )
-                    
+            if data['number_exploited'] == "":
+                number_exploited = None
+            else:
+                number_exploited = int(data['number_exploited'])
 
-                except (KeyError, ValidationError) as e:
-                    return HttpResponse(status=400, reason=e)
-                
+            if Campaign.objects.filter(order=order + 1).exists():
+                obj = Campaign.objects.filter(order=order + 1).first()
+                obj.emails_sent=data['emails_sent'] or 0
+                obj.emails_delivered=data['emails_delivered'] or 0
+                obj.total_clicks=data['total_clicks'] or 0
+                obj.unique_clicks=data['unique_clicks'] or 0
+                obj.click_rate=click_rate
+                obj.time_to_first_click=data['time_to_first_click'] or "00:00:00"
+                obj.creds_harvested=creds_harvested
+                obj.number_exploited=number_exploited
+                obj.length_of_campaign=data['length_of_campaign'] or 0
+                obj.campaign_description=postData['descriptions'][order]['campaign_description'] or ""
+                obj.save()
 
             else:
                 try:
-                    Campaign.objects.create(
+                    obj = Campaign.objects.create(
                         order=order + 1,
                         emails_sent=data['emails_sent'] or 0,
                         emails_delivered=data['emails_delivered'] or 0,
@@ -87,12 +86,21 @@ class Campaigns(generic.base.TemplateView):
                         unique_clicks=data['unique_clicks'] or 0,
                         click_rate=click_rate,
                         time_to_first_click=data['time_to_first_click'] or "00:00:00",
-                        creds_harvested=data['creds_harvested'] or 0,
-                        number_exploited=data['number_exploited'] or 0,
+                        creds_harvested=creds_harvested,
+                        number_exploited=number_exploited,
                         length_of_campaign=data['length_of_campaign'] or 0,
                         campaign_description=postData['descriptions'][order]['campaign_description'] or ""
                     )
 
                 except (KeyError, ValidationError) as e:
+                    print(e)
                     return HttpResponse(status=400, reason=e)
+
+            campaigns.append(obj)
+
+        deletedItems = set(Campaign.objects.all()) - set(campaigns)
+
+        for deleted in deletedItems:
+            deleted.delete()
+
         return HttpResponse(status=200)

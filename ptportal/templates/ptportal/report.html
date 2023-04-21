@@ -112,15 +112,15 @@ DM22-1011
             <br>
             <h2>Significant Findings</h2>
             <p>During testing, the team identified the following significant findings:</p>
-			<sds-textarea placeholder="List only significant findings in the form of high-level points (one per line)" v-model="formData.significant_findings" rows="3"></sds-textarea>
+			<sds-textarea placeholder="List only significant findings in the form of high-level points (one per line)" v-model="formData.significant_findings" rows="3" :maxlength="10000"></sds-textarea>
 			<br>
             <h2>Recommendations</h2>
             <p>Based on the significant findings listed above, the team recommends the following high-level actions:</p>
-			<sds-textarea placeholder="List recommendations per each of the significant findings in the form of high-level points (one per line)" v-model="formData.recommendations" rows="3"></sds-textarea>
+			<sds-textarea placeholder="List recommendations per each of the significant findings in the form of high-level points (one per line)" v-model="formData.recommendations" rows="3" :maxlength="10000"></sds-textarea>
 			<br>
             <h2>Observed Strengths</h2>
             <p>In addition to the findings described throughout this report, the team also observed the following strengths pertaining to the {{ eng_meta.customer_long_name }} network and personnel:</p>
-			<sds-textarea placeholder="List observed strengths in the form of high-level points (one per line)" v-model="formData.observed_strengths" rows="3"></sds-textarea>
+			<sds-textarea placeholder="List observed strengths in the form of high-level points (one per line)" v-model="formData.observed_strengths" rows="3" :maxlength="10000"></sds-textarea>
 			<br>
             <h1>Risk Score</h1>
             <p>The team derives a risk score from each finding based on factors related to impact and likelihood. Together, these factors help determine risk from a technical standpoint and make no assumptions about specific threat actors or the business elements of risk.</p>
@@ -166,29 +166,29 @@ DM22-1011
             <template #title><b>SCOPE</b></template>
             <h1>Phishing</h1>
             <div class="num">
-                <sds-input v-model="formData.users_targeted" placeholder="#"></sds-input>
+                <sds-input v-model="formData.users_targeted" placeholder="#" :maxlength="10"></sds-input>
             </div>
             <div style="float:left; padding: 10px 0px 0px 0px"><p>users were included in the phishing campaign(s) targeting the following mail domain(s):</p></div>
             <br>
             <div style="padding:30px 0px 10px 10px"><p>{{ eng_meta.phishing_domains }}</p></div>
             <h1>External</h1>
             <div class="num">
-                <sds-input v-model="formData.external_discovered" placeholder="#"></sds-input>
+                <sds-input v-model="formData.external_discovered" placeholder="#" :maxlength="20"></sds-input>
             </div>
                 <div style="float:left; padding: 10px 0px 0px 0px;"><p>of</p></div>
             <div class="num">
-                <sds-input v-model="formData.external_scanned" placeholder="#"></sds-input>
+                <sds-input v-model="formData.external_scanned" placeholder="#" :maxlength="20"></sds-input>
             </div>
             <div style="float:left; padding: 10px 0px 0px 0px"><p>scanned hosts were discovered to be live during testing of the following in-scope targets:</p></div>
             <br>
             <div style="padding:30px 0px 10px 10px"><p>{{ eng_meta.ext_scope }}</p></div>
             <h1>Internal</h1>
             <div class="num">
-                <sds-input v-model="formData.internal_discovered" placeholder="#"></sds-input>
+                <sds-input v-model="formData.internal_discovered" placeholder="#" :maxlength="20"></sds-input>
             </div>
             <div style="float:left; padding: 10px 0px 0px 0px;"><p>of</p></div>
             <div class="num">
-                <sds-input v-model="formData.internal_scanned" placeholder="#"></sds-input>
+                <sds-input v-model="formData.internal_scanned" placeholder="#" :maxlength="20"></sds-input>
             </div>
             <div style="float:left; padding: 10px 0px 0px 0px"><p>scanned hosts were discovered to be live during testing of the following in-scope targets:</p></div>
             <br>
@@ -627,7 +627,7 @@ DM22-1011
         <span class="border-top border-dark"></span>
             <template #title><b>APPENDIX D: PASSWORD ANALYSIS</b></template>
             <p>The assessment team obtained the hashed passwords for all the {{ eng_meta.customer_long_name }} users during the assessment and attempted to obtain the clear text passwords represented by the hashed values. The following output shows statistical analysis of the clear text passwords recovered by the team:</p>
-            <sds-textarea v-model="formData.password_analysis" rows="10" placeholder="Copy/paste output from the password analysis tool (do not include the tool banner)"></sds-textarea>
+            <sds-textarea v-model="formData.password_analysis" rows="10" placeholder="Copy/paste output from the password analysis tool (do not include the tool banner)" :maxlength="10000"></sds-textarea>
 	</sds-section><br>
 
 </div>
@@ -658,7 +658,7 @@ DM22-1011
 	</ul>
 	<br><br>
 	<div align="center">
-		<sds-button variant="primary" class="ml-4" @click="saveReport">Save</sds-button>
+		<sds-button variant="primary" class="ml-4" @click="saveReport"><img class="w-8 h-8" src="/static/icons/floppy-disk-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Save</sds-button>
 		<br><br>
 		{% if previously_saved %}<p>Last Updated: {{ previously_saved | naturaltime }}</p>{% endif %}
 	</div>

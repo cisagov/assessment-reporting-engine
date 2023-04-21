@@ -57,19 +57,20 @@ class Campaign(abstract_models.TimeStampedModel):
     )
     
     time_to_first_click = models.DurationField(
-        default=datetime.time.min,
+        default=datetime.timedelta(days=0, hours=0, minutes=0, seconds=0),
+        null=True,
         blank=True,
         verbose_name="Time to First Click"
     )
 
     creds_harvested = models.PositiveIntegerField(
-        default=0,
+        null=True,
         blank=True,
         verbose_name="Credentials Harvested"
     )
 
     number_exploited = models.PositiveIntegerField(
-        default=0,
+        null=True,
         blank=True,
         verbose_name="Users Exploited"
     )

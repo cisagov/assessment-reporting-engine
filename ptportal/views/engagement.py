@@ -73,17 +73,19 @@ class EngagementCreate(generic.edit.CreateView):
                 postData['ext_date']['start'].split("T")[0]
             )
         if postData['ext_date']['end']:
-            postData['ext_end_date'] = datetime.date.fromisoformat(
+            ext_end_date = datetime.date.fromisoformat(
                 postData['ext_date']['end'].split("T")[0]
             )
+            postData['ext_end_date'] = ext_end_date - datetime.timedelta(days=1)
         if postData['int_date']['start']:
             postData['int_start_date'] = datetime.date.fromisoformat(
                 postData['int_date']['start'].split("T")[0]
             )
         if postData['int_date']['end']:
-            postData['int_end_date'] = datetime.date.fromisoformat(
+            int_end_date = datetime.date.fromisoformat(
                 postData['int_date']['end'].split("T")[0]
             )
+            postData['int_end_date'] = int_end_date - datetime.timedelta(days=1)
 
         engageForm = EngagementForm(postData)
 
@@ -143,17 +145,20 @@ class EngagementUpdate(generic.edit.UpdateView):
                 postData['ext_date']['start'].split("T")[0]
             )
         if postData['ext_date']['end']:
-            postData['ext_end_date'] = datetime.date.fromisoformat(
+            ext_end_date = datetime.date.fromisoformat(
                 postData['ext_date']['end'].split("T")[0]
             )
+            postData['ext_end_date'] = ext_end_date - datetime.timedelta(days=1)
         if postData['int_date']['start']:
             postData['int_start_date'] = datetime.date.fromisoformat(
                 postData['int_date']['start'].split("T")[0]
             )
         if postData['int_date']['end']:
-            postData['int_end_date'] = datetime.date.fromisoformat(
+            int_end_date = datetime.date.fromisoformat(
                 postData['int_date']['end'].split("T")[0]
             )
+            postData['int_end_date'] = int_end_date - datetime.timedelta(days=1)
+        
         if postData['traffic_light_protocol'] == 'None':
             postData['traffic_light_protocol'] = None
 
