@@ -44,8 +44,6 @@ from django.core import serializers
 
 from ptportal.serializers import ElectionInfrastructureSerializer
 
-from netaddr import *
-
 from django.conf import settings
 from builtins import int
 

@@ -81,19 +81,21 @@ def compose_env(proxy=None):
     """Compose environment file"""
     mode = get_mode()
 
-    docker_env_path = Path(f'docker/{mode}/env.txt')
-    docker_env_backup_path = Path(f'docker/{mode}/env-backup.txt')
-    docker_env_backup_path.touch()
+    if not os.path.exists(f'docker/{mode}/env.txt'):
 
-    shutil.copyfile(docker_env_path, docker_env_backup_path)
+        docker_env_path = Path(f'docker/{mode}/env.txt')
+        docker_env_backup_path = Path(f'docker/{mode}/env-backup.txt')
+        docker_env_backup_path.touch()
 
-    if proxy and proxy != 'False':
-        with open(proxy, 'r') as f:
-            proxy_info = f.read()
+        shutil.copyfile(docker_env_path, docker_env_backup_path)
 
-        with open(docker_env_path, 'w') as f:
-            f.write('\n')
-            f.write(proxy_info)
+        if proxy and proxy != 'False':
+            with open(proxy, 'r') as f:
+                proxy_info = f.read()
+
+            with open(docker_env_path, 'w') as f:
+                f.write('\n')
+                f.write(proxy_info)
 
 
 def restore_env():
@@ -282,10 +284,44 @@ def run(args):
 
     check_if_ptportal_exists(log_handler)
 
-    clear_migrations()
+    has_secret_key = False
+    new_line = False
+
+    with open('docker/prod/env.txt', 'r') as f:
+        lines = f.readlines()
+
+        if "\n" in lines[-1]:
+            new_line = True
+
+        for line in lines:
+            if line.find("SECRET_KEY=") != -1:
+                has_secret_key = True
+                break
+
+    if not has_secret_key:
+        f=open('docker/prod/env.txt', 'a')
+        if not new_line:
+            f.write("\n")
+        f.write("SECRET_KEY=\'")
+        f.close()
+        secret_key_cmd = "python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key(), end=\"\")' >> docker/prod/env.txt"
+        subprocess.run(secret_key_cmd, shell=True)
+        f=open('docker/prod/env.txt', 'a')
+        f.write("\'\n")
+        f.close()
+
+    if os.path.isfile("docker/prod/nginx/ssl/selfsigned.crt") and os.path.isfile("docker/prod/nginx/ssl/selfsigned.key"):
+        print("Using existing SSL files in docker/prod/nginx/ssl")
+    else:
+        print("Generating SSL files...")
+        ssl_cmd = "openssl req -x509 -nodes -days 365 -subj \"/C=CA/ST=QC/O=Assessment Team/CN=reporting_engine\" -newkey rsa:2048 -keyout docker/prod/nginx/ssl/selfsigned.key -out docker/prod/nginx/ssl/selfsigned.crt"
+        subprocess.run(ssl_cmd, shell=True)
+        print("SSL files saved to: docker/prod/nginx/ssl")
+
     mode = 'prod'
     set_mode(mode)
 
+    clear_migrations()
     if args.proxy:
         compose_env(args.proxy)
 

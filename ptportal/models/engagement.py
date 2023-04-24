@@ -27,8 +27,6 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
 
-from ptportal.validators import scope_validator
-
 from . import abstract_models
 from . import findings
 from . import report

@@ -8,8 +8,6 @@ django-widget-tweaks==1.4.3
 djangorestframework==3.11.1
 gunicorn==19.9.0
 inflect==4.1.0
-iptools==0.7.0
-netaddr==0.7.19
 openpyxl==3.0.7
 pandas==2.0.0
 Pillow==9.0.0

@@ -17,7 +17,7 @@ import contextlib
 import datetime
 import glob
 import os
-import netaddr, socket
+import socket
 import re
 import pyzipper
 import shutil

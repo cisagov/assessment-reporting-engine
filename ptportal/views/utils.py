@@ -26,7 +26,6 @@ from django.core import serializers as JSONserializers
 from rest_framework import serializers
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.text import slugify
-from iptools import IpRange
 from cairosvg import svg2png
 
 from rest_framework.renderers import JSONRenderer
