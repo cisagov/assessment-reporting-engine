@@ -954,6 +954,7 @@ def insert_services_slides(prs, rva_info):
 
     # insert ransomware slide
     if af.get_db_info(rva_info, 'ransomwarescenarios', 'NA') is not None or af.get_db_info(rva_info, 'ransomware', 'NA') is not None:
+
         ransomware_slide_layout = prs.slide_layouts[4]
         slide = prs.slides.add_slide(ransomware_slide_layout)
         ransomware_placeholder = slide.placeholders[1].text_frame
@@ -961,18 +962,19 @@ def insert_services_slides(prs, rva_info):
         title = slide.shapes.title
         title.text = "RANSOMWARE SUSCEPTIBILITY"
 
-        vuln = 0
-        total = 0
-        if af.get_db_info(rva_info, 'ransomwarescenarios.fields.vuln', 'NA') != '<not set: NA>':
-            vuln = int(af.get_db_info(rva_info, 'ransomwarescenarios.fields.vuln', 'NA'))
-        if af.get_db_info(rva_info, 'ransomwarescenarios.fields.total', 'NA') != '<not set: NA>':
-            total = int(af.get_db_info(rva_info, 'ransomwarescenarios.fields.total', 'NA'))
+        if af.get_db_info(rva_info, 'ransomwarescenarios', 'NA') is not None:
+            vuln = 0
+            total = 0
+            if af.get_db_info(rva_info, 'ransomwarescenarios.fields.vuln', 'NA') != '<not set: NA>':
+                vuln = int(af.get_db_info(rva_info, 'ransomwarescenarios.fields.vuln', 'NA'))
+            if af.get_db_info(rva_info, 'ransomwarescenarios.fields.total', 'NA') != '<not set: NA>':
+                total = int(af.get_db_info(rva_info, 'ransomwarescenarios.fields.total', 'NA'))
 
-        paragraph = ransomware_placeholder.paragraphs[0]
-        paragraph.level = 1
-        run = paragraph.add_run()
-        run.text = f"During ransomware simulation, the CISA team found that endpoints are vulnerable to {vuln} out of the {total} ransomware scenarios tested."
-        paragraph.font.color.rgb = gray
+            paragraph = ransomware_placeholder.paragraphs[0]
+            paragraph.level = 1
+            run = paragraph.add_run()
+            run.text = f"During ransomware simulation, the CISA team found that endpoints are vulnerable to {vuln} out of the {total} ransomware scenarios tested."
+            paragraph.font.color.rgb = gray
 
         ransomware_results = []
 

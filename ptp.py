@@ -313,7 +313,12 @@ def run(args):
     if os.path.isfile("docker/prod/nginx/ssl/selfsigned.crt") and os.path.isfile("docker/prod/nginx/ssl/selfsigned.key"):
         print("Using existing SSL files in docker/prod/nginx/ssl")
     else:
-        print("Generating SSL files...")
+        if os.path.exists("docker/prod/nginx/ssl/"):
+            print("SSL directory exists. Generating SSL files...")
+        else:
+            print("SSL directory does not exist. Creating SSL directory and generating SSL files...")
+            make_ssl = "mkdir docker/prod/nginx/ssl"
+            subprocess.run(make_ssl, shell=True)
         ssl_cmd = "openssl req -x509 -nodes -days 365 -subj \"/C=CA/ST=QC/O=Assessment Team/CN=reporting_engine\" -newkey rsa:2048 -keyout docker/prod/nginx/ssl/selfsigned.key -out docker/prod/nginx/ssl/selfsigned.crt"
         subprocess.run(ssl_cmd, shell=True)
         print("SSL files saved to: docker/prod/nginx/ssl")

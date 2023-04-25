@@ -48,6 +48,7 @@ DM22-1011
 {% endblock %}
 
 {% block content %}
+{% load static %}
 <div class="col-span-5">
 	{% csrf_token %}
 
@@ -64,6 +65,8 @@ DM22-1011
 		<sds-section class="mb-4" type="accented">
 			<span class="border-top border-dark"></span>
             <template #title><b>DATA UPLOAD</b></template>
+            <p>Download the <sds-link href="{% static 'templates/payloads-template.csv' %}" variant="primary"><b>Payloads Template</b></sds-link> and follow the format (where <b>B</b>=Blocked and <b>N</b>=Not Blocked) to construct a payloads list. Upload the list below.</p>
+            <br>
 			<sds-file-uploader v-model="fileList" v-bind="fileUploadArgs"></sds-file-uploader>
 			<br>
 			<div class="grid gap-2 grid-cols-2">

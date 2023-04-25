@@ -34,30 +34,41 @@ class RansomwareSusceptibility(generic.base.TemplateView):
 
         RansomwareScenarios.objects.all().delete()
 
-        try:
-            vuln = int(postData['vuln'])
-            total = int(postData['total'])
-            
-        except ValueError:
-            vuln = 0
-            total = 0
+        if postData['vuln'] != "" and postData['total'] != "":
+            try:
+                vuln = int(postData['vuln'])
+                total = int(postData['total'])
+                
+            except ValueError:
+                vuln = 0
+                total = 0
 
-        try:
-                RansomwareScenarios.objects.create(
-                    vuln=vuln,
-                    total=total
-                )
+            try:
+                    RansomwareScenarios.objects.create(
+                        vuln=vuln,
+                        total=total
+                    )
 
-        except (KeyError, ValidationError) as e:
-            return HttpResponse(status=400, reason=e)
-
+            except (KeyError, ValidationError) as e:
+                return HttpResponse(status=400, reason=e)
 
         for order, data in enumerate(postData['results']):
+
+            if data['time_start'] == None or data['disabled'] == True:
+                time_start = ""
+            else:
+                time_start = data['time_start']
+
+            if data['time_end'] == None or data['disabled'] == True or data['trigger'] == False:
+                time_end = ""
+            else:
+                time_end = data['time_end']
+
             if (
                 data['description']
                 == data['trigger']
-                == data['time_start']
-                == data['time_end']
+                == time_start
+                == time_end
                 == data['disabled']
                 == ""
             ):
@@ -74,8 +85,8 @@ class RansomwareSusceptibility(generic.base.TemplateView):
                 try:
                     obj.update(
                         trigger=trigger,
-                        time_start=data['time_start'],
-                        time_end=data['time_end'],
+                        time_start=None if time_start == "" else time_start,
+                        time_end=None if time_end == "" else time_end,
                         disabled=data['disabled']
                     )
 
@@ -88,8 +99,8 @@ class RansomwareSusceptibility(generic.base.TemplateView):
                         order=order + 1,
                         description=data['description'],
                         trigger=trigger,
-                        time_start=data['time_start'],
-                        time_end=data['time_end'],
+                        time_start=None if time_start == "" else time_start,
+                        time_end=None if time_end == "" else time_end,
                         disabled=data['disabled']
                     )
 

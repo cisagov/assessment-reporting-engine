@@ -51,12 +51,12 @@ DM22-1011
 
 {% block content %}
 {% csrf_token %}
-
+{% load static %}
 <div class="col-span-5">
 
     <sds-section class="mb-4">
         <template #title>
-            <p>Download the <sds-link href="{{ MEDIA_URL }}attack-path-template.pptx" variant="primary">Attack Path Template</sds-link> and follow the instructions in the document to construct/save your attack path diagram. Upload the attack path image file below.</p>
+            <p>Download the <sds-link href="{% static 'templates/attack-path-template.pptx' %}" variant="primary"><b>Attack Path Template</b></sds-link> and follow the instructions in the document to construct/save your attack path diagram. Upload the attack path image file below.</p>
         </template>
         <sds-file-uploader v-bind="attackPathUploadArgs" @add="addFile">
         </sds-file-uploader>
