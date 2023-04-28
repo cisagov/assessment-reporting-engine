@@ -198,7 +198,7 @@ DM22-1011
 					<span class="text-sm text-gray-600">
 						{{form.ext_scope.help_text}}
 					</span>
-					<sds-textarea v-model="formData.ext_scope" placeholder="192.168.0.0, 192.168.0.1-4, 192.168.0.5-192.168.1.7, 192.168.0.0/25, subdomain.domain.com" :maxlength="10000"></sds-textarea>
+					<sds-textarea v-model="formData.ext_scope" placeholder="123.45.67.8, 123.45.67.10-20, 123.45.67.10-123.45.67.20, 123.45.67.0/24" :maxlength="10000"></sds-textarea>
 				</div>
 				<div class="col-span-3">
 					<h4><b>
@@ -207,7 +207,7 @@ DM22-1011
 					<span class="text-sm text-gray-600">
 						{{form.ext_excluded_scope.help_text}}
 					</span>
-					<sds-textarea v-model="formData.ext_excluded_scope" placeholder="192.168.0.0, 192.168.0.1-4, 192.168.0.5-192.168.1.7, 192.168.0.0/25, subdomain.domain.com" :maxlength="10000"></sds-textarea>
+					<sds-textarea v-model="formData.ext_excluded_scope" placeholder="123.45.67.8, 123.45.67.10-20, 123.45.67.10-123.45.67.20, 123.45.67.0/24" :maxlength="10000"></sds-textarea>
 				</div>
 			</div>
 		</sds-section>
@@ -229,7 +229,7 @@ DM22-1011
 						<span class="text-sm text-gray-600">
 							{{form.int_scope.help_text}}
 						</span>
-						<sds-textarea v-model="formData.int_scope" placeholder="192.168.0.0, 192.168.0.1-4, 192.168.0.5-192.168.1.7, 192.168.0.0/25, subdomain.domain.com" :maxlength="10000"></sds-textarea>
+						<sds-textarea v-model="formData.int_scope" placeholder="192.168.1.2, 192.168.1.10-20, 192.168.1.10-192.168.2.20, 192.168.1.0/24" :maxlength="10000"></sds-textarea>
 					</div>
 					<div class="col-span-3">
 						<h4><b>
@@ -238,7 +238,7 @@ DM22-1011
 						<span class="text-sm text-gray-600">
 							{{form.int_excluded_scope.help_text}}
 						</span>
-						<sds-textarea v-model="formData.int_excluded_scope" placeholder="192.168.0.0, 192.168.0.1-4, 192.168.0.5-192.168.1.7, 192.168.0.0/25, subdomain.domain.com" :maxlength="10000"></sds-textarea>
+						<sds-textarea v-model="formData.int_excluded_scope" placeholder="192.168.1.2, 192.168.1.10-20, 192.168.1.10-192.168.2.20, 192.168.1.0/24" :maxlength="10000"></sds-textarea>
 					</div>
 				</div>
 			</sds-section>
@@ -259,7 +259,7 @@ DM22-1011
 					<div>
 						<h4 class="mb-2"><b>Create Assessment ID</b><span class="text-red-500 text-sm"> * required</span></h4>
 						<span class="text-sm text-gray-600">
-							Assessment ID Max Length = 8 characters
+							Assessment ID (Max Length: 8)
 						</span>
 						<!-- <sds-input v-model="formData.asmt_id" v-bind="asmt_idArgs" @update:model-value="validateAsmtID"></sds-input> -->
 					</div>

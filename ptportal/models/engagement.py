@@ -216,25 +216,25 @@ class EngagementMeta(abstract_models.TimeStampedModel):
         verbose_name="Traffic Light Protocol",
         choices=TLP_CHOICES,
         blank=True,
-        help_text="Select which TLP the generated report will be marked with",
+        help_text="Select what TLP marking should be added to the generated report",
         null=True,
     )
 
     # Stakeholder Information
     customer_long_name = models.CharField(
-        max_length=200, blank=True, unique=True, verbose_name="Customer Long Name"
+        max_length=200, blank=True, unique=True, verbose_name="Stakeholder Long Name"
     )
     customer_initials = models.CharField(
-        max_length=20, blank=True, verbose_name="Customer Initials"
+        max_length=20, blank=True, verbose_name="Stakeholder Abbreviation"
     )
     customer_POC_name = models.CharField(
-        max_length=100, blank=True, verbose_name="Customer POC"
+        max_length=100, blank=True, verbose_name="Stakeholder Point-Of-Contact (POC)"
     )
     customer_POC_email = models.EmailField(
         max_length=100,
         blank=True,
         validators=[EmailValidator()],
-        verbose_name="Customer POC \n" + "Email Address",
+        verbose_name="Stakeholder POC Email Address",
     )
     customer_state = models.CharField(
         max_length=20,
@@ -303,13 +303,13 @@ class EngagementMeta(abstract_models.TimeStampedModel):
     ext_scope = models.TextField(
         blank=True,
         verbose_name="In Scope IP Addresses/Domain Names",
-        help_text="Enter as a list of commas, space, and/or new line separated IPs, Ranges, and CIDRs",
+        help_text="Enter as a list of comma or new line delimited IPs, Ranges, and/or CIDRs",
         null=True,
     )
     ext_excluded_scope = models.TextField(
         blank=True,
         verbose_name="Out of Scope IP Addresses/Domain Names",
-        help_text="Enter as a list of commas, space, and/or new line separated IPs, Ranges, and CIDRs",
+        help_text="Enter as a list of comma or new line delimited IPs, Ranges, and/or CIDRs",
         null=True,
     )
 
@@ -331,20 +331,20 @@ class EngagementMeta(abstract_models.TimeStampedModel):
     int_scope = models.TextField(
         blank=True,
         verbose_name="In Scope IP Addresses/Domain Names",
-        help_text="Enter as a list of commas, space, and/or new line separated IPs, Ranges, and CIDRs",
+        help_text="Enter as a list of comma, space, and/or new line delimited IPs, Ranges, and/or CIDRs",
         null=True,
     )
     int_excluded_scope = models.TextField(
         blank=True,
         verbose_name="Out of Scope IP Addresses/Domain Names",
-        help_text="Enter as a list of commas, space, and/or new line separated IPs, Ranges, and CIDRs",
+        help_text="Enter as a list of comma, space, and/or new line delimited IPs, Ranges, and/or CIDRs",
         null=True,
     )
 
     phishing_domains = models.TextField(
         blank=True,
         verbose_name="In Scope Mail Domains for Phishing",
-        help_text="Enter a list of comma, space, and/or new line separated mail domains associated with in-scope phishing targets",
+        help_text="Enter a list of comma, space, and/or new line delimited mail domains associated with in-scope phishing targets",
         null=True,
     )
 

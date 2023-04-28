@@ -415,6 +415,9 @@ class ReportUpdate(generic.edit.UpdateView):
         context['nist_ps'] = UploadedFinding.objects.filter(
             finding__NIST_800_53__icontains='PS'
         ).count()
+        context['nist_pt'] = UploadedFinding.objects.filter(
+            finding__NIST_800_53__icontains='PT'
+        ).count()
         context['nist_ra'] = UploadedFinding.objects.filter(
             finding__NIST_800_53__icontains='RA'
         ).count()
@@ -467,6 +470,9 @@ class ReportUpdate(generic.edit.UpdateView):
         ).count()
         context['nist_dcm'] = UploadedFinding.objects.filter(
             finding__NIST_CSF__icontains='DE.CM'
+        ).count()
+        context['nist_ddp'] = UploadedFinding.objects.filter(
+            finding__NIST_CSF__icontains='DE.DP'
         ).count()
         context['nist_rmi'] = UploadedFinding.objects.filter(
             finding__NIST_CSF__icontains='RS.MI'

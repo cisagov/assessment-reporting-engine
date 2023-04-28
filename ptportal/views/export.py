@@ -195,6 +195,9 @@ class Export(generic.base.TemplateView):
         context['nist_ps'] = UploadedFinding.objects.filter(
             finding__NIST_800_53__icontains='PS'
         ).count()
+        context['nist_pt'] = UploadedFinding.objects.filter(
+            finding__NIST_800_53__icontains='PT'
+        ).count()
         context['nist_ra'] = UploadedFinding.objects.filter(
             finding__NIST_800_53__icontains='RA'
         ).count()
@@ -247,6 +250,9 @@ class Export(generic.base.TemplateView):
         ).count()
         context['nist_dcm'] = UploadedFinding.objects.filter(
             finding__NIST_CSF__icontains='DE.CM'
+        ).count()
+        context['nist_ddp'] = UploadedFinding.objects.filter(
+            finding__NIST_CSF__icontains='DE.DP'
         ).count()
         context['nist_rmi'] = UploadedFinding.objects.filter(
             finding__NIST_CSF__icontains='RS.MI'
@@ -373,7 +379,14 @@ def generate_artifact(artifact_type, anon_report=False):
         template_name = template_name_base + '.pptx'
         artifact_name = artifact_name_base + '.pptx'
 
-        generate_ptp_slides(template_name, artifact_name, True, json_filename, settings.MEDIA_ROOT)
+        generate_ptp_slides(template_name, artifact_name, True, json_filename, settings.MEDIA_ROOT, False)
+
+    elif artifact_type == "Out-Brief-WS":
+        content_type = base_ctype + "presentationml.presentation"
+        template_name = template_name_base + '-ws' + '.pptx'
+        artifact_name = artifact_name_base + '.pptx'
+
+        generate_ptp_slides(template_name, artifact_name, True, json_filename, settings.MEDIA_ROOT, True)
 
     elif artifact_type == "PACE":
         content_type = base_ctype + "pdf"
@@ -417,6 +430,10 @@ def generate_report(request):
 
 def generate_outbrief(request):
     return generate_artifact("Out-Brief")
+
+
+def generate_outbrief_ws(request):
+    return generate_artifact("Out-Brief-WS")
 
 
 def generate_tracker(request):

@@ -804,12 +804,12 @@ DM22-1011
 						title: {
 							text: 'Number of Findings'
 						},
-						categories: ['AC', 'AT', 'AU', 'CA', 'CM', 'CP', 'IA', 'IR', 'MA', 'MP', 'PE', 'PL', 'PM', 'PS', 'RA', 'SA', 'SC', 'SI', 'SR'],
+						categories: ['AC', 'AT', 'AU', 'CA', 'CM', 'CP', 'IA', 'IR', 'MA', 'MP', 'PE', 'PL', 'PM', 'PS', 'PT', 'RA', 'SA', 'SC', 'SI', 'SR'],
 					},
 				},
 				data: [
 					{
-						data: ['{{nist_ac}}', '{{nist_at}}', '{{nist_au}}', '{{nist_ca}}', '{{nist_cm}}', '{{nist_cp}}', '{{nist_ia}}', '{{nist_ir}}', '{{nist_ma}}', '{{nist_mp}}', '{{nist_pe}}', '{{nist_pl}}', '{{nist_pm}}', '{{nist_ps}}', '{{nist_ra}}', '{{nist_sa}}', '{{nist_sc}}', '{{nist_si}}', '{{nist_sr}}']
+						data: ['{{nist_ac}}', '{{nist_at}}', '{{nist_au}}', '{{nist_ca}}', '{{nist_cm}}', '{{nist_cp}}', '{{nist_ia}}', '{{nist_ir}}', '{{nist_ma}}', '{{nist_mp}}', '{{nist_pe}}', '{{nist_pl}}', '{{nist_pm}}', '{{nist_ps}}', '{{nist_pt}}', '{{nist_ra}}', '{{nist_sa}}', '{{nist_sc}}', '{{nist_si}}', '{{nist_sr}}']
 					}
 				],
 			},
@@ -820,7 +820,7 @@ DM22-1011
 						height: 500,
 						type: 'pie',
 					},
-					labels: ['ID.AM','ID.GV','ID.RA','ID.SC','PR.AC','PR.AT','PR.DS','PR.IP','PR.MA','PR.PT','DE.AE','DE.CM','RS.MI'],
+					labels: ['ID.AM','ID.GV','ID.RA','ID.SC','PR.AC','PR.AT','PR.DS','PR.IP','PR.MA','PR.PT','DE.AE','DE.CM','DE.DP','RS.MI'],
 					legend: {
 						show: false
 					},
@@ -846,7 +846,7 @@ DM22-1011
 							}
 						}
 					},
-					colors: ['#f5a149', '#e86332', '#8f6da9', '#7fcde4', '#07aeb6', '#447b9a', '#acd672', '#558824', '#f9d46c', '#c2a1c0', '#84407e', '#fbbfcb', '#e35b79']
+					colors: ['#f5a149', '#e86332', '#8f6da9', '#7fcde4', '#07aeb6', '#447b9a', '#acd672', '#558824', '#f9d46c', '#c2a1c0', '#84407e', '#fbbfcb', '#e35b79', "#dc4c4c"]
 				},
 			},
 		}
@@ -863,6 +863,7 @@ DM22-1011
 		pageData.nistFrameworkArgs.series.push(parseInt('{{nist_ppt}}'))
 		pageData.nistFrameworkArgs.series.push(parseInt('{{nist_dae}}'))
 		pageData.nistFrameworkArgs.series.push(parseInt('{{nist_dcm}}'))
+		pageData.nistFrameworkArgs.series.push(parseInt('{{nist_ddp}}'))
 		pageData.nistFrameworkArgs.series.push(parseInt('{{nist_rmi}}'))
 		
 
