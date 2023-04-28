@@ -11,7 +11,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
   web:
-    container_name: deb-web-1
+    container_name: dev-web-1
     build:
       context: .
       dockerfile: docker/dev/Dockerfile.web
