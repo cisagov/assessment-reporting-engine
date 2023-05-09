@@ -157,6 +157,11 @@ DM22-1011
           const file = document.getElementsByName('nessusUpload')[0].files[f]
           const fileName = document.getElementsByName('nessusUpload')[0].files[f]['name']
 
+          if (document.getElementsByName('nessusUpload')[0].files[f].size > 2097152) {
+            this.displayNotification({title: "File Exceeds Size Limit", text: "The following file is too large to upload: " + fileName + ". Consider uploading a CSV with only the 'CVE' column.", variant: "warning", autoHideDelay:10000})
+            continue
+          }
+
           let nessusString = null
           await file.text().then(text => {nessusString = text})
 
@@ -166,15 +171,18 @@ DM22-1011
           var index = headers.indexOf('CVE')
 
           if (index >= 0) {
+            var parse_error = false
             for (var i = 1; i < length; i++) {
               values = lines[i].split(',')
-              if (String(values[index]).includes('CVE')) {
-                if (this.cves.includes(values[index]) && !this.formData.kevs.includes(values[index])) {
-                  this.formData.kevs.push(values[index])
+              item = String(values[index]).replace(/['"]+/g, '')
+
+              if (String(item).includes('CVE')) {
+                if (this.cves.includes(item) && !this.formData.kevs.includes(item)) {
+                  this.formData.kevs.push(item)
                 }
               }
             }
-            this.displayNotification({title: "Data Successfully Parsed", text: "KEVs derived from " + fileName + " have been selected from the catalog. Be sure to save before leaving this page.", variant: "info", autoHideDelay:10000})
+            this.displayNotification({title: "Data Parsing Complete", text: "KEVs derived from " + fileName + " have been selected from the catalog. Be sure to save before leaving this page.", variant: "info", autoHideDelay:10000})
           }
 
           else {

@@ -222,19 +222,19 @@ class EngagementMeta(abstract_models.TimeStampedModel):
 
     # Stakeholder Information
     customer_long_name = models.CharField(
-        max_length=200, blank=True, unique=True, verbose_name="Stakeholder Long Name"
+        max_length=200, blank=True, unique=True, verbose_name="Stakeholder Name"
     )
     customer_initials = models.CharField(
         max_length=20, blank=True, verbose_name="Stakeholder Abbreviation"
     )
     customer_POC_name = models.CharField(
-        max_length=100, blank=True, verbose_name="Stakeholder Point-Of-Contact (POC)"
+        max_length=100, blank=True, verbose_name="Point of Contact Name"
     )
     customer_POC_email = models.EmailField(
         max_length=100,
         blank=True,
         validators=[EmailValidator()],
-        verbose_name="Stakeholder POC Email Address",
+        verbose_name="Point of Contact Email",
     )
     customer_state = models.CharField(
         max_length=20,
