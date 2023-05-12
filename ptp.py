@@ -166,17 +166,6 @@ def rebuild_ptportal():
     web_container = get_web_container()
 
     subprocess.run(['docker', 'exec', web_container, 'python', 'manage.py', 'migrate'])
-    #subprocess.run(
-    #    [
-    #        'docker',
-    #        'exec',
-    #        '-it',
-    #        web_container,
-    #        'python',
-    #        'manage.py',
-    #        'createsuperuser',
-    #    ]
-    #)
 
 
 def check_if_ptportal_exists(log_handler=None):
