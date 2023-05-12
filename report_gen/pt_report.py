@@ -336,7 +336,7 @@ def insert_df_table(doc, db, df_tag, media_path):
         fname = ele['uploaded_finding_name']
 
         severity = ele['severity']
-        location = ele['assessment_type']
+        assessment_type = ele['assessment_type']
 
         if ele['mitigation']:
             mitigation = "Mitigated"
@@ -360,7 +360,7 @@ def insert_df_table(doc, db, df_tag, media_path):
         df_table.cell(0, 0).text = "ID"
         df_table.cell(0, 1).text = "Finding"
         df_table.cell(0, 2).text = "Severity"
-        df_table.cell(0, 3).text = "Location"
+        df_table.cell(0, 3).text = "Type"
         df_table.cell(0, 4).text = "Mitigation Status"
 
         df_table.cell(1, 0).text = fid
@@ -382,7 +382,7 @@ def insert_df_table(doc, db, df_tag, media_path):
         sev_cell.add_run(xu.xsafe(severity))
         df_table.cell(1, 2).paragraphs[0].runs[0].font.bold = True
         df_table.cell(1, 2).paragraphs[0].runs[1].font.bold = True
-        df_table.cell(1, 3).text = xu.xsafe(location)
+        df_table.cell(1, 3).text = xu.xsafe(assessment_type)
 
         mit_cell = df_table.cell(1, 4).paragraphs[0]
 

@@ -541,24 +541,24 @@ def pre_save_engagement(sender, instance, **kwargs):
         instance.fy = date.year + 1
 
 
-@receiver(signals.post_save, sender=EngagementMeta)
-def post_save_engagement(sender, instance, **kwargs):
-    r = report.Report.object()
-    if r.report_type == 'HVA':
-        if HVAData.objects.exists():
-            hva_obj = HVAData.objects.first()
-            hva_obj.asmt_id = instance.asmt_id
-            hva_obj.agency = instance.customer_long_name
-            hva_obj.federal_lead = instance.team_lead_name
-            hva_obj.save()
-        else:
-            hva_obj = HVAData.objects.create(
-                asmt_id=instance.asmt_id,
-                agency=instance.customer_long_name,
-                federal_lead=instance.team_lead_name,
-            )
-    if HVATarget.objects.exists():
-        hva_obj.target.add(*HVATarget.objects.all())
+#@receiver(signals.post_save, sender=EngagementMeta)
+#def post_save_engagement(sender, instance, **kwargs):
+#    r = report.Report.object()
+#    if r.report_type == 'HVA':
+#        if HVAData.objects.exists():
+#            hva_obj = HVAData.objects.first()
+#            hva_obj.asmt_id = instance.asmt_id
+#            hva_obj.agency = instance.customer_long_name
+#            hva_obj.federal_lead = instance.team_lead_name
+#            hva_obj.save()
+#        else:
+#            hva_obj = HVAData.objects.create(
+#                asmt_id=instance.asmt_id,
+#                agency=instance.customer_long_name,
+#                federal_lead=instance.team_lead_name,
+#            )
+#    if HVATarget.objects.exists():
+#        hva_obj.target.add(*HVATarget.objects.all())
 
 
 #@receiver(signals.pre_delete, sender=EngagementMeta)

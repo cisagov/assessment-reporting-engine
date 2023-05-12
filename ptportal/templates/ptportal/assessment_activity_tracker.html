@@ -118,7 +118,7 @@ h3 {
     	<div class="mb-8">
 				<sds-table :fields="fields" :items="items" class="table-prose" v-bind="PhishingTableArgs">
 					<template #cell(hostname)="{item}">
-						<sds-textarea v-model="item.hostname" rows="1" placeholder="mail" :maxlength="100"></sds-textarea>
+						<sds-textarea v-model="item.hostname" rows="1" placeholder="gophish0" :maxlength="100"></sds-textarea>
 					</template>
 					<template #cell(ip)="{item}">
 						<sds-textarea v-model="item.ip" rows="1" placeholder="127.0.0.1" :maxlength="15"></sds-textarea>
