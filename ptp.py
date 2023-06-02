@@ -788,6 +788,8 @@ def partial_restore(args):
             print(e)
             print('Existing nginx image (nginx.tar) not found. Will attempt to build nginx image from scratch...')
 
+    has_secret_key = False
+
     with open('docker/' + mode + '/env.txt', 'r') as f:
         lines = f.readlines()
 
@@ -834,7 +836,14 @@ def partial_restore(args):
 
     if os.path.isfile('ptportal/migrations/0001_initial.py'):
         os.remove(Path('ptportal/migrations/0001_initial.py'))
-    shutil.copy('backup_folder/0001_initial.py', 'ptportal/migrations/0001_initial.py')
+
+    if os.path.exists("ptportal/migrations"):
+        shutil.copy('backup_folder/0001_initial.py', 'ptportal/migrations/')
+    else:
+        make_dir = "mkdir ptportal/migrations"
+        subprocess.run(make_dir, shell=True)
+        shutil.copy('backup_folder/0001_initial.py', 'ptportal/migrations/')
+    
 
     docker_compose_up(force_recreate=True, rm_orphans=True)
     rebuild_ptportal()
