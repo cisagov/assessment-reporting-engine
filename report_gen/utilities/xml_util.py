@@ -155,7 +155,7 @@ def insert_caption(doc, fig, text):
     fldChar.set(qn('w:fldCharType'), 'begin')
     r.append(fldChar)
     instrText = OxmlElement('w:instrText')
-    instrText.text = ' SEQ TableMain \\* ARABIC \\s 1 '
+    instrText.text = ' SEQ Figure \\* ARABIC'
 
     r.append(instrText)
     fldChar = OxmlElement('w:fldChar')
