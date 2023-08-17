@@ -162,12 +162,6 @@ def build_ptportal(report_type, su=True, restore=False, migrations_file=None):
         )
 
 
-def rebuild_ptportal():
-    web_container = get_web_container()
-
-    subprocess.run(['docker', 'exec', web_container, 'python', 'manage.py', 'migrate'])
-
-
 def check_if_ptportal_exists(log_handler=None):
     old_project_exists, _, _ = check_if_project_exited()
     if old_project_exists:
@@ -256,6 +250,10 @@ def setup(args):
 
 
 def dev(args, clear_docker=True):
+    dev_setup(report=args.report_type)
+
+
+def dev_setup(report):
     log_handler = logger()
     log_handler.info('Loading PT Portal with docker-compose for developers')
 
@@ -265,18 +263,22 @@ def dev(args, clear_docker=True):
     set_mode(mode)
 
     clear_migrations()
-    if args.proxy:
-        log_handler.info('composing environment variable file for docker-compose')
-        compose_env(args.proxy)
+    #if args.proxy:
+    #    log_handler.info('composing environment variable file for docker-compose')
+    #    compose_env(args.proxy)
 
     docker_compose_up(force_recreate=True, rm_orphans=True)
-    build_ptportal(report_type=args.report_type)
+    build_ptportal(report_type=report)
 
     restore_env()
     log_handler.info('App is ready at localhost:8080!')
 
 
 def run(args):
+    prod_setup(report=args.report_type)
+
+
+def prod_setup(report):
     log_handler = logger()
     log_handler.info('Loading PT Portal with docker-compose')
 
@@ -325,12 +327,12 @@ def run(args):
     set_mode(mode)
 
     clear_migrations()
-    if args.proxy:
-        compose_env(args.proxy)
+    #if args.proxy:
+    #    compose_env(args.proxy)
 
     docker_compose_down(rm_images=True, rm_volumes=True, rm_orphans=True)
     docker_compose_up(force_recreate=True, rm_orphans=True)
-    build_ptportal(report_type=args.report_type)
+    build_ptportal(report_type=report)
 
     restore_env()
     log_handler.info('App is ready at https://[IP_ADDRESS]:443')
@@ -601,6 +603,7 @@ def backup_env(backup_name='env-backup'):
     shutil.copy('docker/' + mode + '/env.txt', backup_name)
     return backup_name
 
+
 def image_backup(args=None, in_docker=False):
     mode = get_mode()
 
@@ -661,11 +664,13 @@ def partial_backup(args=None, in_docker=False, password=None):
     backup_migrations(backup_folder)
     backup_mode(backup_folder)
     backup_env(backup_folder)
+
     with open('backup_folder/app_info.txt', 'w+') as f:
         f.write(settings.VERSION_NUMBER)
     backup_file = (
         'backup-' + datetime.datetime.now().strftime("%m-%d-%Y-%H-%M") + '.zip'
     )
+    
     if in_docker:
         # From the application interface.
         # The password is the engagement password
@@ -700,7 +705,7 @@ def partial_backup(args=None, in_docker=False, password=None):
 
 
 def backup(args):
-    image_backup(args)
+    # image_backup(args)
     partial_backup(args)
 
 
@@ -730,6 +735,8 @@ def partial_restore(args):
         print(e)
         shutil.rmtree(Path('backup_folder'))
 
+    print("Restoring configuration files...")
+
     if os.path.exists(Path('backup_folder/mode.txt').resolve()):
         shutil.copy(Path('backup_folder/mode.txt'), Path('mode.txt'))
         with open(Path('mode.txt')) as mf:
@@ -738,6 +745,8 @@ def partial_restore(args):
         print("Unknown mode. Defaulting to prod.")
         mode = 'prod'
 
+    web_container = mode + '-web-1'
+
     if os.path.exists(Path('backup_folder/env.txt').resolve()):
         shutil.copy('backup_folder/env.txt', 'docker/' + mode + '/')
 
@@ -745,121 +754,8 @@ def partial_restore(args):
         compose_file = 'docker-compose.yml'
     else:
         compose_file = 'docker-compose.prod.yml'
-
-    path = 'docker/' + mode + '/'
-
-    try:
-        subprocess.run(
-            [
-                'docker',
-                'load',
-                '-i',
-                path + 'db.tar'
-            ]
-        )
-    except Exception as e:
-        print(e)
-        print('Existing database image (db.tar) not found. Will attempt to build database image from scratch...')
-
-    try:
-        subprocess.run(
-            [
-                'docker',
-                'load',
-                '-i',
-                path + 'web.tar'
-            ]
-        )
-    except Exception as e:
-        print(e)
-        print('Existing web image (web.tar) not found. Will attempt to build web image from scratch...')
-
-    if mode == 'prod':
-        try:
-            subprocess.run(
-                [
-                    'docker',
-                    'load',
-                    '-i',
-                    path + 'nginx.tar'
-                ]
-            )
-        except Exception as e:
-            print(e)
-            print('Existing nginx image (nginx.tar) not found. Will attempt to build nginx image from scratch...')
-
-    has_secret_key = False
-
-    with open('docker/' + mode + '/env.txt', 'r') as f:
-        lines = f.readlines()
-
-        if "\n" in lines[-1]:
-            new_line = True
-
-        for line in lines:
-            if line.find("SECRET_KEY=") != -1:
-                has_secret_key = True
-                break
-
-    if not has_secret_key:
-        f=open('docker/prod/env.txt', 'a')
-        if not new_line:
-            f.write("\n")
-        f.write("SECRET_KEY=\'")
-        f.close()
-        secret_key_cmd = "python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key(), end=\"\")' >> docker/prod/env.txt"
-        subprocess.run(secret_key_cmd, shell=True)
-        f=open('docker/prod/env.txt', 'a')
-        f.write("\'\n")
-        f.close()
-
-    if os.path.isfile("docker/prod/nginx/ssl/selfsigned.crt") and os.path.isfile("docker/prod/nginx/ssl/selfsigned.key"):
-        print("Using existing SSL files in docker/prod/nginx/ssl")
-    else:
-        if os.path.exists("docker/prod/nginx/ssl/"):
-            print("SSL directory exists. Generating SSL files...")
-        else:
-            print("SSL directory does not exist. Creating SSL directory and generating SSL files...")
-            make_ssl = "mkdir docker/prod/nginx/ssl"
-            subprocess.run(make_ssl, shell=True)
-        ssl_cmd = "openssl req -x509 -nodes -days 365 -subj \"/C=CA/ST=QC/O=Assessment Team/CN=reporting_engine\" -newkey rsa:2048 -keyout docker/prod/nginx/ssl/selfsigned.key -out docker/prod/nginx/ssl/selfsigned.crt"
-        subprocess.run(ssl_cmd, shell=True)
-        print("SSL files saved to: docker/prod/nginx/ssl")
-
-    web_container = mode + '-web-1'
-    # check if setting.version is the same.  if not, warn user
-    with open('backup_folder/app_info.txt', 'r') as f:
-        if f.read() != settings.VERSION_NUMBER:
-            print(
-                f'WARNING! Backup Built with a Different Version Number.  Backup Version: {f.read()}'
-            )
-
-    if os.path.isfile('ptportal/migrations/0001_initial.py'):
-        os.remove(Path('ptportal/migrations/0001_initial.py'))
-
-    if os.path.exists("ptportal/migrations"):
-        shutil.copy('backup_folder/0001_initial.py', 'ptportal/migrations/')
-    else:
-        make_dir = "mkdir ptportal/migrations"
-        subprocess.run(make_dir, shell=True)
-        shutil.copy('backup_folder/0001_initial.py', 'ptportal/migrations/')
     
-
-    docker_compose_up(force_recreate=True, rm_orphans=True)
-    rebuild_ptportal()
-
-    subprocess.run(
-        [
-            'docker',
-            'exec',
-            web_container,
-            'python',
-            'manage.py',
-            'loaddata',
-            'backup_folder/datadump.json',
-        ]
-    )
-
+    print("Restoring media...")
     if os.path.exists(Path('pentestportal/media/charts')):
         shutil.rmtree(Path('pentestportal/media/charts'))
     if os.path.exists(Path('pentestportal/media/screenshots')):
@@ -874,12 +770,25 @@ def partial_restore(args):
             str(Path('pentestportal/media/screenshots/')),
         )
 
-    shutil.rmtree('backup_folder')
-
     if mode == 'prod':
-        print('App is ready at https://[IP_ADDRESS]:443')
+        prod_setup(report=args.report_type)
     else:
-        print('App is ready at http://[IP_ADDRESS]:8080')
+        dev_setup(report=args.report_type)
+
+    print("Restoring database...")
+    subprocess.run(
+        [
+            'docker',
+            'exec',
+            web_container,
+            'python',
+            'manage.py',
+            'loaddata',
+            'backup_folder/datadump.json',
+        ]
+    )
+
+    shutil.rmtree('backup_folder')
 
 
 def restore(args):
@@ -949,9 +858,9 @@ def main():
         default='RVA',
         required=False,
     )
-    run_parser.add_argument(
-        '-p', '--proxy', help='File with proxy configuration'  # Default for NO proxy!
-    )
+    #run_parser.add_argument(
+    #    '-p', '--proxy', help='File with proxy configuration'  # Default for NO proxy!
+    #)
     run_parser.add_argument(
         '-v',
         '--verbose',
@@ -971,9 +880,9 @@ def main():
         default='RVA',
         required=False,
     )
-    dev_parser.add_argument(
-        '-p', '--proxy', default='proxy.txt', help='File with proxy configuration'
-    )
+    #dev_parser.add_argument(
+    #    '-p', '--proxy', default='proxy.txt', help='File with proxy configuration'
+    #)
     dev_parser.add_argument(
         '-v',
         '--verbose',
