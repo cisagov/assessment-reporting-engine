@@ -143,8 +143,6 @@ def build_ptportal(report_type, su=True, restore=False, migrations_file=None):
             '--no-input',
             '--verbosity',
             '0',
-            '--ignore',
-            'admin/*',
         ]
     )
 
