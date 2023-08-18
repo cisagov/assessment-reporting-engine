@@ -68,7 +68,7 @@ DM22-1011
 					<p>Last modified: {{object.updated_at | naturaltime}}</p>
 				</div>
 				<div style="float:right">
-					<sds-button variant="danger" @click="redirectLink('{% url "engagement_delete" %}')"><i class="fa fa-trash"></i> Delete</sds-button>
+					<sds-button variant="danger" @click="redirectLink('{% url "engagement_delete" %}')"><img class="w-8 h-8" src="/static/icons/trash-solid-white.svg" style="float:left; padding:3px 6px 0px 0px"> Delete</sds-button>
 				</div>
 			</div>
 			<br><br><br>

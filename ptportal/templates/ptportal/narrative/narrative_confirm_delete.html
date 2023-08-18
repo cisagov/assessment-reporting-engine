@@ -17,32 +17,31 @@ DM22-1011
 {% block active %}#narrative{% endblock %}
 {% block content %}
 
-
-<h1>Delete Narrative</h1>
-<hr />
-
-<div class="mt-2 mb-4 grid grid-cols-2">
-	<div class="">
-		<h2>Narrative: {{ object.name }} {{ object.order }}</h2>
-		<p>Last modified on {{ object.updated_at | naturaltime }}</p>
+<sds-section>
+	<div class="mt-2 mb-4 grid grid-cols-2">
+		<div class="">
+			<h2><b>Narrative:</b> {{ object.name }} {{ object.order }}</h2>
+			<p><b>Last modified:</b> {{ object.updated_at | naturaltime }}</p>
+		</div>
 	</div>
-</div>
 
-<div class='row'>
-	<div class='col-md-6'>
-		<p>Are you sure you want to delete the narrative for <strong>{{ object.name }} {{ object.order }}</strong>?</p>
+	<div class='row'>
+		<div class='col-md-6'>
+			<p>Are you sure you want to delete the narrative for <strong>{{ object.name }} {{ object.order }}</strong>?</p>
+		</div>
 	</div>
-</div>
-<br><br>
-<form action="" method="POST">
-  {% csrf_token %}
-  <sds-button type="submit" variant="danger">Delete</sds-button>
-</form>
-
+	<br><br>
+	<form action="" method="POST">
+	  {% csrf_token %}
+	  <sds-button type="submit" variant="danger"><img class="w-8 h-8" src="/static/icons/trash-solid-white.svg" style="float:left; padding:3px 6px 0px 0px"> Delete</sds-button>
+	</form>
+</sds-section>
 {% endblock %}
 
 {% block scripts %}
 <script>
-
+	function pageCreated() {
+		this.baseData.layoutArgs.pageTitle = "Delete Narrative"
+	}
 </script>
 {% endblock %}
