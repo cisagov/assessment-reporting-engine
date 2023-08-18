@@ -18,18 +18,16 @@ DM22-1011
 
 {% block content %}
 {% csrf_token %}
-	<h1 class='text-2xl font-bold'>Risk Scoring</h1>
-	<hr />
-
+<sds-section>
 	<sds-table class="table-prose mb-2" v-bind="scoreTableArgs">
 		<template #cell(id)="{item}"></template>
 		<template #cell(finding)="{item}"></template>
 		<template #cell(severity)="{item}"></template>
 		<template #cell(magnitude)="{item}">
-			<sds-input v-model="item.magnitude" placeholder="0-100"></sds-input>
+			<sds-input v-model="item.magnitude" placeholder="0-100" :maxlength="3"></sds-input>
 		</template>
 		<template #cell(probability)="{item}">
-			<sds-input v-model="item.probability" placeholder="0-100"></sds-input>
+			<sds-input v-model="item.probability" placeholder="0-100" :maxlength="3"></sds-input>
 		</template>
 		<template #cell(kev)="{item}"></template>
 		<template #cell(mitigation)="{item}"></template>
@@ -42,7 +40,10 @@ DM22-1011
 			<template #cell(mitigated)="{item}"></template>
 		</sds-table>
 	</div>
-	<sds-button variant="primary" class="float-right" @click="submitRiskScore"><i class="fas fa-save"></i> Save</sds-button>
+	<br>
+	<sds-button variant="primary" class="float-right" @click="submitRiskScore"><img class="w-8 h-8" src="/static/icons/floppy-disk-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Save</sds-button>
+	<br><br>
+</sds-section>
 {% endblock %}
 
 
@@ -120,7 +121,7 @@ DM22-1011
 
 		{% for finding in findings %}
 
-			{% if finding.KEV != null %}
+			{% if finding.KEV.count > 0 %}
 				iskev = "True"
 			{% else %}
 				iskev = "False"
@@ -139,25 +140,53 @@ DM22-1011
 		return data
 	}
 
+	function pageCreated() {
+		this.baseData.layoutArgs.pageTitle = "Risk Scoring"
+	}
+
 	function pageMethods() {
 		pageFunctions = {
 			submitRiskScore: function() {
-				formattedData = JSON.parse(JSON.stringify(this.scoreTableArgs.items))
-				fetch(window.location.href, {
-					method: "POST",
-					body: JSON.stringify(formattedData),
-					credentials: "same-origin",
-					headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
-				}).then(response => {
-					if(response.ok) {
-						this.displayNotification({title: "Risk Score Saved", variant:"success", text: "Risk scoring data saved successfully. Refresh page to see updated Risk Score."})
+
+				this.scoreTableArgs.items.forEach(element => {
+					if (!(parseInt(element.magnitude) >= 0 && (parseInt(element.magnitude) <= 100))) {
+						this.notify_magnitude = true
 					}
-					else {
-						this.displayNotification({text: "Bad response received from server. Check for errors in forms and try again.", title: "Error saving data", variant:"danger"})
+
+					if (!(parseInt(element.probability) >= 0 && (parseInt(element.probability) <= 100))) {
+						this.notify_probability = true
 					}
-				}).catch(error => {
-					this.displayNotification({text: error, title: "Error saving data", variant:"danger"})
 				})
+				
+				if (this.notify_magnitude) {
+					this.displayNotification({title: "Error Saving Data", text: "Magnitude must be a valid integer between 0 and 100. Please correct invalid magnitudes before saving.", variant: "warning", autoHideDelay:10000})
+					this.notify_magnitude = false
+				}
+
+				else if (this.notify_probability) {
+					this.displayNotification({title: "Error Saving Data", text: "Probability must be a valid integer between 0 and 100. Please correct invalid probabilities before saving.", variant: "warning", autoHideDelay:10000})
+					this.notify_probability = false
+				}
+
+				else {
+					formattedData = JSON.parse(JSON.stringify(this.scoreTableArgs.items))
+					fetch(window.location.href, {
+						method: "POST",
+						body: JSON.stringify(formattedData),
+						credentials: "same-origin",
+						headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
+					}).then(response => {
+						if(response.ok) {
+							this.displayNotification({title: "Risk Score Saved", variant:"success", text: "Risk scoring data saved successfully.  Please wait while the page refreshes..."})
+							setTimeout(() => {this.redirectLink("{% url 'risk_score' %}")}, 2000)
+						}
+						else {
+							this.displayNotification({text: "Bad response received from server. Check for errors in forms and try again.", title: "Error Saving Data", variant:"danger"})
+						}
+					}).catch(error => {
+						this.displayNotification({text: error, title: "Error Saving Data", variant:"danger"})
+					})
+				}
 			}
 		}
 

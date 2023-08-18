@@ -113,14 +113,61 @@ DM22-1011
         <div class="col-span-5 mb-12">
           <div class="mb-4">
             <h2 class="after:content-['*required'] after:ml-0.5 after:text-red-500 after:font-normal font-bold">Finding Description</h2>
-            <span class="font-light text-gray-700">Contains the description of this finding from the database. Edit the text below to clarify the description for this specific case.</span>
-            <sds-textarea v-model="formData.findingDescription" :required="true"></sds-textarea>
+            <span class="font-light text-gray-700">Tailor the text below to clarify the description for this specific case.</span>
+            <div style="float:right">
+              <sds-floating-ui
+                  popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                  placement="top"
+                  arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                  placement-top-arrow-class="-bottom-1"
+                  placement-right-arrow-class="-left-1"
+                  placement-bottom-arrow-class="-top-1"
+                  placement-left-arrow-class="-right-1"
+                  :will-open="willOpen"
+                  :will-close="willClose"
+              >
+                <template #trigger="{ open, close }">
+                  <a @click="resetDescription" @mouseover="open" @mouseout="close" style="cursor:pointer; float:right; margin:0px 0px 10px 0px"><img class="w-4 h-4" src="/static/icons/clock-rotate-left-solid.svg"></a>
+                </template>
+                <template #default>
+                    <div class="p-2">
+                      <p>Revert to original description.</p>
+                    </div>
+                </template>
+              </sds-floating-ui>
+            </div>
+            <sds-textarea v-model="formData.findingDescription" :required="true" :maxlength="10000"></sds-textarea>
           </div>
+          <br>
           <div class="mb-4">
             <h2 class="after:content-['*required'] after:ml-0.5 after:text-red-500 after:font-normal font-bold">Finding Remediation</h2>
-            <span class="font-light text-gray-700">Contains the standard remediation of this finding from the database. Edit the text below to clarify the remediation for this specific case.</span>
-            <sds-textarea v-model="formData.findingRemediation" :required="true"></sds-textarea>
+            <span class="font-light text-gray-700">Tailor the text below to clarify the remediation for this specific case.</span>
+            <div style="float:right">
+              <sds-floating-ui
+                  popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                  placement="top"
+                  arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                  placement-top-arrow-class="-bottom-1"
+                  placement-right-arrow-class="-left-1"
+                  placement-bottom-arrow-class="-top-1"
+                  placement-left-arrow-class="-right-1"
+                  :will-open="willOpen"
+                  :will-close="willClose"
+              >
+                <template #trigger="{ open, close }">
+                  <a @click="resetRemediation" @mouseover="open" @mouseout="close" style="cursor:pointer; float:right; margin:0px 0px 10px 0px"><img class="w-4 h-4" src="/static/icons/clock-rotate-left-solid.svg"></a>
+                </template>
+                <template #default>
+                    <div class="p-2">
+                      <p>Revert to original remediation.</p>
+                    </div>
+                </template>
+              </sds-floating-ui>
+            </div>
+            <br>
+            <sds-textarea v-model="formData.findingRemediation" :required="true" :maxlength="10000"></sds-textarea>
           </div>
+          <br>
           <div class="grid grid-cols-4 mb-4">
             <div>
               <h2 class="after:content-['*required'] after:ml-0.5 after:text-red-500 after:font-normal font-bold">Severity</h2>
@@ -140,13 +187,14 @@ DM22-1011
             </div>
             <div>
               <h2 class="after:content-['*required'] after:ml-0.5 after:text-red-500 after:font-normal font-bold">Mitigation</h2>
-              <span class="font-light text-gray-700">Was this finding mitigated within the assessment timeframe?</span>
+              <span class="font-light text-gray-700">Was this finding fully mitigated within the assessment timeframe?</span>
               <div v-for="item in findingDetailSectionArgs.mitigationOptions">
                 <input type="radio" v-model="formData.findingMitigation" :id="item.value" :value="item.value">
                 <label :for="item.value" style="padding:0px 0px 0px 5px">[[item.text]]</label>
               </div>
             </div>
           </div>
+          <br>
           <div>
             <h2 class="font-bold">Affected Systems</h2>
             <span class="font-light text-gray-700">What affected system(s) does this finding relate to?</span>
@@ -173,7 +221,7 @@ DM22-1011
       <div class="mb-4">
         <h2 class="after:font-normal font-bold">Screenshot Description</h2>
         <span class="font-light text-gray-700">Describe the relevance of the screenshots to this finding and to one another (if applicable).</span>
-        <sds-textarea v-model="formData.screenshotDescription" :required="false" :rows="3" placeholder="These screenshots show..."></sds-textarea>
+        <sds-textarea v-model="formData.screenshotDescription" :required="false" :rows="3" placeholder="These screenshots show..." :maxlength="10000"></sds-textarea>
       </div>
       <br>
       <sds-file-uploader class="place-self-center w-full" v-bind="findingImageSectionArgs.fileUploaderArgs" @add=addFile>
@@ -184,7 +232,7 @@ DM22-1011
           <sds-button @click="screenshotModal(screenshot)"><img :src="[[screenshot.imgURL]]"></sds-button>
           <div style="float:left; padding:19px 15px 0px 10px; cursor:pointer"><div style="width:15px; height:2px; background-color:gray; margin:2px 0;"></div><div style="width:15px; height:2px; background-color:gray; margin:2px 0;"></div></div><div class="delete" style="float:right; padding:0px 8px 0px 0px; font-size:20pt"><sds-button @click="deleteFile(screenshot)">&#10799;</sds-button></div>
           <br>
-          <sds-textarea v-model="screenshot.caption" :rows="1" placeholder="Caption"></sds-textarea>
+          <sds-textarea v-model="screenshot.caption" :rows="1" placeholder="Caption" :maxlength="250"></sds-textarea>
         </div>
       </ul>
     </div>
@@ -209,11 +257,10 @@ DM22-1011
           </div>
         </sds-scroll-area>
     </div>
+    <br>
+    <sds-button class="float-right" variant="primary" @click="submitFinding"><img class="w-8 h-8" src="/static/icons/floppy-disk-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Save</sds-button>
+    <br><br>
   </sds-section>
-
-  <div class="flex flex-row-reverse">
-    <sds-button variant="primary" @click="submitFinding">Save</sds-button>
-  </div>
 </div>
 {% endblock %}
 
@@ -223,13 +270,15 @@ function pageData() {
   let pageData = {
     formData: {
       selectedFinding: null,
-      findingDescription: "{{ object.description }}",
-      findingRemediation: "{{ object.remediation }}",
+      findingDescription: "{{ object.description | escapejs }}",
+      findingRemediation: "{{ object.remediation | escapejs }}",
+      originalDescription: "{{ object.finding.description | escapejs }}",
+      originalRemediation: "{{ object.finding.remediation | escapejs }}",
       findingSeverity: "{{ object.severity.severity_name }}",
       assessmentType: "{{ object.assessment_type }}",
       findingMitigation: "{{ object.mitigation }}",
       affectedSystemList: "",
-      screenshotDescription: "{{ object.screenshot_description }}",
+      screenshotDescription: "{{ object.screenshot_description | escapejs }}",
       kevs: [],
       screenshots: [],
     },
@@ -322,6 +371,11 @@ function pageData() {
           value: "Internal",
           text: "Internal"
         },
+        {
+          id: 4,
+          value: "Phishing",
+          text: "Phishing"
+        }
       ],
       mitigationOptions: [
         {
@@ -433,6 +487,8 @@ function pageMethods() {
 
         this.formData.findingDescription = this.formData.selectedFinding.fields.description
         this.formData.findingRemediation = this.formData.selectedFinding.fields.remediation
+        this.formData.originalDescription = this.formData.selectedFinding.fields.description
+        this.formData.originalRemediation = this.formData.selectedFinding.fields.remediation
         this.formData.findingSeverity = this.formData.selectedFinding.fields.severity
       }
       else if (this.formData.selectedFinding == finding) {
@@ -444,6 +500,8 @@ function pageMethods() {
 
         this.formData.findingDescription = null
         this.formData.findingRemediation = null
+        this.formData.originalDescription = null
+        this.formData.originalRemediation = null
         this.formData.findingSeverity = null
       }
       else {
@@ -459,6 +517,8 @@ function pageMethods() {
 
         this.formData.findingDescription = this.formData.selectedFinding.fields.description
         this.formData.findingRemediation = this.formData.selectedFinding.fields.remediation
+        this.formData.originalDescription = this.formData.selectedFinding.fields.description
+        this.formData.originalRemediation = this.formData.selectedFinding.fields.remediation
         this.formData.findingSeverity = this.formData.selectedFinding.fields.severity
       }
     },
@@ -471,7 +531,7 @@ function pageMethods() {
         this.formData.screenshots.push({order: this.formData.screenshots.length + 1, imgOrder: imgOrder, uuid: null, imgURL: URL.createObjectURL(newFiles[file]), caption: ""})
         imgOrder++
       }
-      this.displayNotification({'title': 'Images Added', text: 'Files added to list! Make sure to save the new images.', variant:"info"})
+      this.displayNotification({'title': 'Image(s) Added', text: 'Image(s) uploaded successfully. Be sure to save before leaving this page.', variant:"info", autoHideDelay:10000})
     },
     deleteFile: function (screenshot) {
       index = this.formData.screenshots.indexOf(screenshot.file)
@@ -486,6 +546,14 @@ function pageMethods() {
       this.formData.screenshots.forEach((screenshot, index) => {
         screenshot.order = index + 1
       })
+    },
+    resetDescription: function () {
+      objectDescription = this.formData.originalDescription
+      this.formData.findingDescription = objectDescription
+    },
+    resetRemediation: function () {
+      objectRemediation = this.formData.originalRemediation;
+      this.formData.findingRemediation = objectRemediation
     },
     startDrag(screenshot, i, e) {
       this.startLoc = e.clientY
@@ -551,20 +619,14 @@ function pageMethods() {
           headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
         }).then(response => {
           if (response.ok) {
-            this.displayNotification({'title': 'Finding Saved', text: 'Finding saved successfully.', variant:'success'})
-            if ("{{object}}") {
-              location.reload()
-            }
-            else {
-              base = String(window.location.origin)
-              window.location.href=base.concat("/ptportal/")
-            }
+            this.displayNotification({'title': 'Finding Saved', text: 'Finding saved successfully. Redirecting to dashboard...', variant:'success'})
+            setTimeout(() => {this.redirectLink("{% url 'index' %}")}, 2000)
           }
           else {
             this.displayNotification({title: "Error Saving Data", text: "Bad response received from server. Check for errors in form and try again.", variant: "danger"})
           }
         }).catch(error => {
-          this.displayNotification({'title': 'Save Error', text: 'There was an error saving the finding. Please wait and try again.', variant:'danger'})
+          this.displayNotification({'title': 'Error Saving Data', variant:'danger'})
         })
       }
     },

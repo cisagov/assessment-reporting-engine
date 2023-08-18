@@ -15,9 +15,10 @@
 # DM22-0744
 from django.core.exceptions import ValidationError
 from django.views import generic
+from django.core import serializers
 from django.http import HttpResponse
 import json, re, os
-from ..models import Payload, Report
+from ..models import Payload, Report, SecuritySolution
 
 
 class PayloadResults(generic.base.TemplateView):
@@ -27,6 +28,8 @@ class PayloadResults(generic.base.TemplateView):
         context = {}
         context['payloads'] = Payload.objects.all().order_by('order')
         context['description'] = Report.objects.all().first()
+        context['security_solutions'] = serializers.serialize("json", SecuritySolution.objects.all())
+        context['used_solutions'] = SecuritySolution.objects.filter(used=True)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -34,6 +37,7 @@ class PayloadResults(generic.base.TemplateView):
         report = Report.objects.all().first()
 
         payloads = []
+        security_solutions = []
 
         try:
             report.exception = str(postData['exception'])
@@ -45,6 +49,26 @@ class PayloadResults(generic.base.TemplateView):
             print(e)
 
         report.save()
+
+        for s in postData['security_solutions']:
+            try:
+                obj = SecuritySolution.objects.get(security_solution_name=s)
+                obj.used = True
+                obj.save()
+                security_solutions.append(obj)
+            except Exception as e:
+                print(e)
+                continue
+
+        deletedSolutions = set(SecuritySolution.objects.filter(used=True)) - set(security_solutions)
+
+        for deleted in deletedSolutions:
+            try:
+                deleted.used = False
+                deleted.save()
+            except Exception as e:
+                print(e)
+                continue
 
         for order, data in enumerate(postData['payloads']):
 

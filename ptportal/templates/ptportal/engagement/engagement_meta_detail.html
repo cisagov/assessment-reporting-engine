@@ -17,28 +17,26 @@ DM22-1011
 {% block active %}#engagement{% endblock %}
 {% block content %}
 
-<h1>Engagement Metadata</h1>
-<hr />
-
-<div class="mt-2 mb-4 grid grid-cols-2">
-	<div class="">
-		<h2>{{report.report_type}} ID: {{object.asmt_id}}</h2>
-		<p>Last modified on {{object.updated_at | naturaltime}}</p>
+<sds-section class="mb-4 w-1/2">
+	<div style="float:left">
+    <p><b>{{report.report_type}}-{{object.asmt_id}}</b></p>
+		<p>Last modified: {{object.updated_at | naturaltime}}</p>
 	</div>
-	<div class="justify-self-end">
-    <sds-button class="mr-2" variant="primary" @click="redirectLink('{% url "engagement_update" %}')"><i class="fa fa-edit"></i> Edit</sds-button>
-		<sds-button variant="danger" @click="redirectLink('{% url "engagement_delete" %}')"><i class="fa fa-trash"></i> Delete</sds-button>
+	<div style="float:right">
+    <sds-button class="mr-2" variant="primary" @click="redirectLink('{% url "engagement_update" %}')"><img class="w-8 h-8" src="/static/icons/pen-to-square-white.svg" style="float:left; padding:3px 6px 0px 0px"> Edit</sds-button>
+		<sds-button variant="danger" @click="redirectLink('{% url "engagement_delete" %}')"><img class="w-8 h-8" src="/static/icons/trash-solid-white.svg" style="float:left; padding:3px 6px 0px 0px"> Delete</sds-button>
 	</div>
-</div>
-
+  <br><br><br>
+</sds-section>
+<br>
 <sds-section type="simple" class="mb-4 w-1/2">
   <template #title>
     <h4><b>Stakeholder Information</b></h4>
   </template>
-  <p>Customer Long Name: {{ object.customer_long_name }}</p>
-  <p>Customer Initials: {{ object.customer_initials }}</p>
-  <p>Point of Contact: {{ object.customer_POC_name }}</p>
-  <p>POC Email: {{ object.customer_POC_email }}</p>
+  <p>Stakeholder Name: {{ object.customer_long_name }}</p>
+  <p>Stakeholder Abbreviation: {{ object.customer_initials }}</p>
+  <p>Point of Contact Name: {{ object.customer_POC_name }}</p>
+  <p>Point of Contact Email: {{ object.customer_POC_email }}</p>
   <p>On-Site Testing Location: {{ object.customer_location }}</p>
   <p>State: {{ object.customer_state }}</p>
   <p>Sector: {{ object.customer_sector }}</p>
@@ -129,6 +127,10 @@ DM22-1011
 		{% endif %}
 
     return data
+  }
+
+  function pageCreated() {
+    this.baseData.layoutArgs.pageTitle = "Assessment Details"
   }
 </script>
 {% endblock %}

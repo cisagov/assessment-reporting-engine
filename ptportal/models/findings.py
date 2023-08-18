@@ -281,6 +281,7 @@ class UploadedFinding(abstract_models.TimeStampedModel):
         ('External/Internal', 'External/Internal'),
         ('External', 'External'),
         ('Internal', 'Internal'),
+        ('Phishing', 'Phishing'),
     )
 
     MITIGATION_CHOICES = ((True, 'Yes'), (False, 'No'))

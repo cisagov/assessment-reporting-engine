@@ -48,16 +48,12 @@ DM22-1011
 {% endblock %}
 
 {% block content %}
-<div class="header">
-  <h2> Data Exfiltration</h2>
-</div>
-<br>
 
 <div class="col-span-5">
   {% csrf_token %}
     <sds-section class="col-span-5" type="accented">
         <span class="border-top border-dark"></span>
-            <template #title><b>DATA EXFILTRATION</b></template>
+            <template #title><b>RESULTS</b></template>
               <!-- Data Exfiltration Table -->
               <sds-section>
                 <div class="mb-8">
@@ -67,7 +63,7 @@ DM22-1011
                         <sds-select v-model="item.protocol" :options="protocol_options"/>
                       </template>
                       <template #cell(datatype)="{item}">
-                        <sds-input v-model="item.datatype" placeholder="Data Type"></sds-input>
+                        <sds-input v-model="item.datatype" placeholder="Data Type" :maxlength="100"></sds-input>
                       </template>
                       <template #cell(date_time)="{item}">
                         <sds-datepicker v-model="item.date_time" :min="calendar.min" :max="calendar.max" mode="dateTime" :size="calendar.size"/>
@@ -101,8 +97,9 @@ DM22-1011
                   <sds-button type="button" @click="addRow"><img class="w-8 h-8" src="/static/icons/plus-solid.svg"></sds-button>
                 </div>
               </sds-section>
+              <sds-button variant="primary" class="float-right" @click="submitDataExfil"><img class="w-8 h-8" src="/static/icons/floppy-disk-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Save</sds-button>
+              <br><br>
           </sds-section>
-    <sds-button variant="primary" class="float-right" @click="submitDataExfil"><i class="fas fa-save"></i> Save</sds-button>
 </div>
 {% endblock %}
 
@@ -187,16 +184,16 @@ DM22-1011
           prevent = true
         {% endif %}
 
-        data.exfilTableArgs.items.push({id: "{{de.order}}", protocol: "{{de.protocol}}", datatype: "{{de.datatype}}", date_time: newdate, detection: detect, prevention: prevent})
+        data.exfilTableArgs.items.push({id: "{{de.order}}", protocol: "{{de.protocol|escapejs}}", datatype: "{{de.datatype|escapejs}}", date_time: newdate, detection: detect, prevention: prevent})
 
     {% empty %}
       data.exfilTableArgs.items.push({id: 1, protocol: "HTTP", datatype: "Social Security Numbers (10 MB)", date_time: null, detection: false, prevention: false})
       data.exfilTableArgs.items.push({id: 2, protocol: "HTTPS", datatype: "Social Security Numbers (10 MB)", date_time: null, detection: false, prevention: false})
       data.exfilTableArgs.items.push({id: 3, protocol: "FTP", datatype: "Social Security Numbers (10 MB)", date_time: null, detection: false, prevention: false})
       data.exfilTableArgs.items.push({id: 4, protocol: "SFTP", datatype: "Social Security Numbers (10 MB)", date_time: null, detection: false, prevention: false})
-      data.exfilTableArgs.items.push({id: 5, protocol: "ICMP", datatype: "Social Security Numbers (10 MB)", date_time: null, detection: false, prevention: false})
+      data.exfilTableArgs.items.push({id: 5, protocol: "ICMP", datatype: "Social Security Numbers (1 MB)", date_time: null, detection: false, prevention: false})
       data.exfilTableArgs.items.push({id: 6, protocol: "SMB", datatype: "Social Security Numbers (10 MB)", date_time: null, detection: false, prevention: false})
-      data.exfilTableArgs.items.push({id: 7, protocol: "DNS", datatype: "Social Security Numbers (10 MB)", date_time: null, detection: false, prevention: false})
+      data.exfilTableArgs.items.push({id: 7, protocol: "DNS", datatype: "Social Security Numbers (1 MB)", date_time: null, detection: false, prevention: false})
       data.exfilTableArgs.items.push({id: 8, protocol: "SMTP", datatype: "Social Security Numbers (10 MB)", date_time: null, detection: false, prevention: false})
 
     {% endfor %}
@@ -205,25 +202,44 @@ DM22-1011
 
   }
 
+  function pageCreated() {
+    this.baseData.layoutArgs.pageTitle = "Data Exfiltration"
+  }
+
   function pageMethods() {
     pageFunctions = {
       submitDataExfil: function() {
-        formattedData = JSON.parse(JSON.stringify(this.exfilTableArgs.items))
-        fetch(window.location.href, {
-          method: "POST",
-          body: JSON.stringify(formattedData),
-          credentials: "same-origin",
-          headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
-        }).then(response => {
-          if(response.ok) {
-            this.displayNotification({title: "Data Exfiltration Results Saved", variant:"success", text: "Data Exfiltration results saved successfully."})
+
+        this.exfilTableArgs.items.forEach(element => {
+          if (element.protocol == "" || element.datatype == "") {
+            this.notify = true
           }
-          else {
-            this.displayNotification({text: "Bad response received from server. Check for errors in forms and try again.", title: "Error saving data", variant:"danger"})
-          }
-        }).catch(error => {
-          this.displayNotification({text: error, title: "Error saving data", variant:"danger"})
         })
+
+        if (this.notify) {
+          this.displayNotification({title: "Error Saving Data", text: "One or more items are missing a protocol and/or description. Please enter a protocol and description for each item before saving.", variant: "warning", autoHideDelay:10000})
+          this.notify = false
+        }
+
+        else {
+          formattedData = JSON.parse(JSON.stringify(this.exfilTableArgs.items))
+          fetch(window.location.href, {
+            method: "POST",
+            body: JSON.stringify(formattedData),
+            credentials: "same-origin",
+            headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
+          }).then(response => {
+            if(response.ok) {
+              this.displayNotification({title: "Data Exfiltration Results Saved", variant:"success", text: "Data Exfiltration results saved successfully. Please wait while the page refreshes...", variant: "success"})
+              setTimeout(() => {this.redirectLink("{% url 'data_exfiltration' %}")}, 2000)
+            }
+            else {
+              this.displayNotification({text: "Bad response received from server. Check for errors in forms and try again.", title: "Error Saving Data", variant:"danger"})
+            }
+          }).catch(error => {
+            this.displayNotification({text: error, title: "Error Saving Data", variant:"danger"})
+          })
+        }
       },
 
       addRow: async function () {
@@ -232,6 +248,10 @@ DM22-1011
 
       deleteRow: function(item) {
         this.exfilTableArgs.items.splice(this.exfilTableArgs.items.indexOf(item), 1)
+
+        this.exfilTableArgs.items.forEach((element, index) => {
+          element.id = index + 1
+        })
       },
 
     }

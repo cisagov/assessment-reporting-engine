@@ -51,15 +51,12 @@ DM22-1011
 
 {% block content %}
 {% csrf_token %}
-<div class="header">
-    <h2>{% if object.name %}{{ object.name }}{% else %}New Attack Path{% endif %}</h2>
-</div>
-
+{% load static %}
 <div class="col-span-5">
 
     <sds-section class="mb-4">
         <template #title>
-            <p>Download the <sds-link href="{{ MEDIA_URL }}attack-path-template.pptx" variant="primary">Attack Path Template</sds-link> and follow the instructions in the document to construct/save your attack path diagram. Upload the attack path image file below.</p>
+            <p>Download the <sds-link href="{% static 'templates/attack-path-template.pptx' %}" variant="primary"><b>Attack Path Template</b></sds-link> and follow the instructions in the document to construct/save your attack path diagram. Upload the attack path image file below.</p>
         </template>
         <sds-file-uploader v-bind="attackPathUploadArgs" @add="addFile">
         </sds-file-uploader>
@@ -73,7 +70,7 @@ DM22-1011
             <h4>Caption:</h4>
             <sds-button type="button" class="justify-self-end" @click="deleteFile(file)"><img class="w-8 h-8" src="/static/icons/trash-solid.svg"></sds-button>
         </div>
-        <sds-textarea v-model="file.caption" :rows="1"></sds-textarea>
+        <sds-textarea v-model="file.caption" :rows="1" :maxlength="250"></sds-textarea>
     </sds-section>
 
     <sds-section v-bind="toolSectionArgs" class="mb-4">
@@ -109,7 +106,7 @@ DM22-1011
                         :will-close="willClose"
                     >
                         <template #trigger="{ open, close }">
-                            <sds-input v-model="toolSectionArgs.newTool" id="toolName" placeholder="Tool Name" @mouseover="open" @mouseout="close" style="width:100%"></sds-input>
+                            <sds-input v-model="toolSectionArgs.newTool" id="toolName" placeholder="Tool Name" @mouseover="open" @mouseout="close" style="width:100%" :maxlength="150"></sds-input>
                         </template>
                         <template #default>
                             <div class="p-2">
@@ -131,7 +128,7 @@ DM22-1011
                         :will-close="willClose"
                     >
                         <template #trigger="{ open, close }">
-                            <sds-input v-model="toolSectionArgs.newURL" id="toolURL" placeholder="URL" @mouseover="open" @mouseout="close" style="width: 200%"></sds-input>
+                            <sds-input v-model="toolSectionArgs.newURL" id="toolURL" placeholder="URL" @mouseover="open" @mouseout="close" style="width: 200%" :maxlength="200"></sds-input>
                         </template>
                         <template #default>
                             <div class="p-2">
@@ -186,12 +183,10 @@ DM22-1011
                 </div>
             </sds-scroll-area>
         </div>
-        
-        <div class="flex flex-row-reverse"></div>
+        <br><br>
+        <sds-button class="float-right" variant="primary" @click="saveDetails"><img class="w-8 h-8" src="/static/icons/floppy-disk-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Save</sds-button>
+        <br><br>
     </sds-section>
-    <div class="flex flex-row-reverse">
-        <sds-button variant="primary" @click="saveDetails">Save</sds-button>
-    </div>
 </div>
 {% endblock %}
 
@@ -258,19 +253,19 @@ DM22-1011
 
         {% for i in object.attack.all %}
 
-            pageData.formData.techniques.push("{{i.name}}")
+            pageData.formData.techniques.push("{{i.name|escapejs}}")
 
         {% endfor %}
         
         {% for i in object.tools.all %}
             
-            pageData.formData.tools.push("{{i.name}}")
+            pageData.formData.tools.push("{{i.name|escapejs}}")
 
         {% endfor %}
 
         {% if diagram %}
 
-            pageData.formData.imageUpload.push({imgURL: window.location.origin + '/media/' + "{{object.file}}", caption: "{{object.caption}}"})
+            pageData.formData.imageUpload.push({imgURL: window.location.origin + '/media/' + "{{object.file}}", caption: "{{object.caption|escapejs}}"})
 
         {% endif %}
 
@@ -278,6 +273,14 @@ DM22-1011
         pageData.attackSectionArgs.attackSearchList = pageData.attackData().filter(technique => technique)
 
         return pageData
+    }
+
+    function pageCreated() {
+        {% if object.name %}
+            this.baseData.layoutArgs.pageTitle = "{{object.name}}"
+        {% else %}
+            this.baseData.layoutArgs.pageTitle = "New Attack Path"
+        {% endif %}
     }
 
     function pageMethods() {
@@ -292,7 +295,7 @@ DM22-1011
                     this.formData.imageUpload.push({file: files[file], imgURL: URL.createObjectURL(files[file]), caption: ""})
                 }
 
-                this.displayNotification({'title': 'Image Added', text: 'The attack path diagram successfully uploaded and will replace any diagram that was previously uploaded.', variant:'info'})
+                this.displayNotification({'title': 'Image Added', text: 'The attack path diagram successfully uploaded and will replace any diagram that was previously uploaded.', variant:'info', autoHideDelay:10000})
             },
             deleteFile: function (file) {
                 this.formData.deleteImage = true
@@ -357,26 +360,28 @@ DM22-1011
                     headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
                 }).then(response => {
                 if(response.ok) {
-
-                    this.displayNotification({title: "Narrative Details Saved", text: "Narative details have been saved successfully.", variant: "success"})
                     
                     base = String(window.location.origin)
                     path = String(window.location.pathname)
                     if (path.includes("phishing") && path.includes("create")) {
-                        window.location.href=base.concat("/ptportal/narrative/phishing")
+                        this.displayNotification({title: "Narrative Details Saved", text: "Narative details saved successfully. Redirecting...", variant: "success"})
+                        setTimeout(() => {window.location.href=base.concat("/ptportal/narrative/phishing")}, 2000)
                     }
                     else if (path.includes("external") && path.includes("create")) {
-                        window.location.href=base.concat("/ptportal/narrative/external")
+                        this.displayNotification({title: "Narrative Details Saved", text: "Narative details saved successfully. Redirecting...", variant: "success"})
+                        setTimeout(() => {window.location.href=base.concat("/ptportal/narrative/external")}, 2000)
                     }
                     else if (path.includes("create")) {
-                        window.location.href=base.concat("/ptportal/narrative/internal")
+                        this.displayNotification({title: "Narrative Details Saved", text: "Narative details saved successfully. Redirecting...", variant: "success"})
+                        setTimeout(() => {window.location.href=base.concat("/ptportal/narrative/internal")}, 2000)
                     }
                     else {
-                        location.reload()
+                        this.displayNotification({title: "Narrative Details Saved", text: "Narative details saved successfully. Please wait while the page refreshes...", variant: "success"})
+                        setTimeout(() => {location.reload()}, 2000)
                     }
                 }
                 else {
-                    this.displayNotification({title: "Error Saving Data", text: "Bad response received from server. Check for errors in form and try again.", variant: "danger"})
+                    this.displayNotification({title: "Error Saving Data", text: "Bad response received from server. Check for errors in forms and try again.", variant: "danger"})
                 }
                 }).catch(error => {
                     this.displayNotification({title: "Error Saving Data", text: error, variant: "danger"})

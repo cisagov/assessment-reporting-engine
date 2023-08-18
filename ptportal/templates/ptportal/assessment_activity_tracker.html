@@ -118,7 +118,7 @@ h3 {
     	<div class="mb-8">
 				<sds-table :fields="fields" :items="items" class="table-prose" v-bind="PhishingTableArgs">
 					<template #cell(hostname)="{item}">
-						<sds-textarea v-model="item.hostname" rows="1" placeholder="mail" :maxlength="100"></sds-textarea>
+						<sds-textarea v-model="item.hostname" rows="1" placeholder="gophish0" :maxlength="100"></sds-textarea>
 					</template>
 					<template #cell(ip)="{item}">
 						<sds-textarea v-model="item.ip" rows="1" placeholder="127.0.0.1" :maxlength="15"></sds-textarea>
@@ -249,7 +249,7 @@ h3 {
     <div v-show="tabs.files" id="fil">
     	<br><br>
     	<div class="mb-8">
-    		<div class="help">Log all files that were dropped to disk during testing here, then use the Artifacts tab of this tracker to list its corresponding hashes.</div>
+    		<div class="help">Log all files that were dropped to disk during testing here, then use the Artifacts tab of this tracker to list the corresponding hashes.</div>
     		<br>
 				<sds-table :fields="fields" :items="items" class="table-prose" v-bind="FileTableArgs">
 					<template #cell(hostname)="{item}">
@@ -1078,7 +1078,7 @@ h3 {
 					this.ArtifactTableArgs.items.push({order: this.ArtifactTableArgs.items.length + 1, name: String(newFiles[file]['name']), description: "", md5: "", sha1: "", sha256: "", fileOrder: fileOrder})
 					fileOrder++
 				}
-				this.displayNotification({'title': 'Files Added', text: 'Files have been added to the tracker. Saving this screen will populate the calculated hashes.', variant:"info"})
+				this.displayNotification({'title': 'Files Added', text: 'Files have been added to the tracker. Saving this screen will populate the calculated hashes.', variant:"info", autoHideDelay:10000})
 			},
 
 			submitTracker: function () {

@@ -154,10 +154,42 @@ DM22-1011
     <div class="card">
         <div class="card-inner" align="center">
             <img src="/static/icons/file-powerpoint-regular.svg">
-            <h1>Out-Brief</h1>
-            <p>Download a PPTX slide deck containing report data</p>
+            <h1>Out-Brief (4:3)</h1>
+            <p>Download a standard PPTX slide deck containing report data</p>
             {% if eng_meta %}
             <sds-button variant="primary" size="sm" @click="redirectLink('{% url "generate_outbrief" %}')">Export</sds-button>
+            {% else %}
+            <sds-floating-ui
+                popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                placement="top"
+                arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                placement-top-arrow-class="-bottom-1"
+                placement-right-arrow-class="-left-1"
+                placement-bottom-arrow-class="-top-1"
+                placement-left-arrow-class="-right-1"
+                :will-open="willOpen"
+                :will-close="willClose"
+            >
+                <template #trigger="{ open, close }">
+                    <sds-button variant="primary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                </template>
+                <template #default>
+                    <div class="p-2">
+                        <p>Complete the required Assessment Details fields before exporting data.</p>
+                    </div>
+                </template>
+            </sds-floating-ui>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-inner" align="center">
+            <img src="/static/icons/file-powerpoint-regular.svg">
+            <h1>Out-Brief (16:9)</h1>
+            <p>Download a widescreen PPTX slide deck containing report data</p>
+            {% if eng_meta %}
+            <sds-button variant="primary" size="sm" @click="redirectLink('{% url "generate_outbrief_ws" %}')">Export</sds-button>
             {% else %}
             <sds-floating-ui
                 popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
@@ -286,6 +318,38 @@ DM22-1011
             <p>Download a JSON file containing EI data</p>
             {% if eng_meta %}
             <sds-button variant="primary" size="sm" @click="redirectLink('{% url "generate_EI_json" %}')">Export</sds-button>
+            {% else %}
+            <sds-floating-ui
+                popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                placement="top"
+                arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                placement-top-arrow-class="-bottom-1"
+                placement-right-arrow-class="-left-1"
+                placement-bottom-arrow-class="-top-1"
+                placement-left-arrow-class="-right-1"
+                :will-open="willOpen"
+                :will-close="willClose"
+            >
+                <template #trigger="{ open, close }">
+                    <sds-button variant="primary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                </template>
+                <template #default>
+                    <div class="p-2">
+                        <p>Complete the required Assessment Details fields before exporting data.</p>
+                    </div>
+                </template>
+            </sds-floating-ui>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-inner" align="center">
+            <img src="/static/icons/file-lines-regular.svg">
+            <h1>KEV Report</h1>
+            <p>Download a DOCX file containing KEV data</p>
+            {% if eng_meta %}
+            <sds-button variant="primary" size="sm" @click="redirectLink('{% url "generate_kev_report" %}')">Export</sds-button>
             {% else %}
             <sds-floating-ui
                 popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
@@ -477,6 +541,11 @@ DM22-1011
                     yaxis: {
                         title: {
                             text: ''
+                        },
+                        labels: {
+                            formatter: function(val) {
+                                return val.toFixed(0);
+                            }
                         }
                     },
                     xaxis: {
@@ -544,12 +613,12 @@ DM22-1011
                         title: {
                             text: 'Number of Findings'
                         },
-                        categories: ['AC', 'AT', 'AU', 'CA', 'CM', 'CP', 'IA', 'IR', 'MA', 'MP', 'PE', 'PL', 'PM', 'PS', 'RA', 'SA', 'SC', 'SI', 'SR'],
+                        categories: ['AC', 'AT', 'AU', 'CA', 'CM', 'CP', 'IA', 'IR', 'MA', 'MP', 'PE', 'PL', 'PM', 'PS', 'PT', 'RA', 'SA', 'SC', 'SI', 'SR'],
                     },
                 },
                 data: [
                     {
-                        data: ['{{nist_ac}}', '{{nist_at}}', '{{nist_au}}', '{{nist_ca}}', '{{nist_cm}}', '{{nist_cp}}', '{{nist_ia}}', '{{nist_ir}}', '{{nist_ma}}', '{{nist_mp}}', '{{nist_pe}}', '{{nist_pl}}', '{{nist_pm}}', '{{nist_ps}}', '{{nist_ra}}', '{{nist_sa}}', '{{nist_sc}}', '{{nist_si}}', '{{nist_sr}}']
+                        data: ['{{nist_ac}}', '{{nist_at}}', '{{nist_au}}', '{{nist_ca}}', '{{nist_cm}}', '{{nist_cp}}', '{{nist_ia}}', '{{nist_ir}}', '{{nist_ma}}', '{{nist_mp}}', '{{nist_pe}}', '{{nist_pl}}', '{{nist_pm}}', '{{nist_ps}}', '{{nist_pt}}', '{{nist_ra}}', '{{nist_sa}}', '{{nist_sc}}', '{{nist_si}}', '{{nist_sr}}']
                     }
                 ],
             },
@@ -563,7 +632,7 @@ DM22-1011
                             enabled: false
                         }
                     },
-                    labels: ['ID.AM','ID.GV','ID.RA','ID.SC','PR.AC','PR.AT','PR.DS','PR.IP','PR.MA','PR.PT','DE.AE','DE.CM','RS.MI'],
+                    labels: ['ID.AM','ID.GV','ID.RA','ID.SC','PR.AC','PR.AT','PR.DS','PR.IP','PR.MA','PR.PT','DE.AE','DE.CM','DE.DP','RS.MI'],
                     legend: {
                         show: false
                     },
@@ -589,7 +658,7 @@ DM22-1011
                             }
                         }
                     },
-                    colors: ['#f5a149', '#e86332', '#8f6da9', '#7fcde4', '#07aeb6', '#447b9a', '#acd672', '#558824', '#f9d46c', '#c2a1c0', '#84407e', '#fbbfcb', '#e35b79']
+                    colors: ['#f5a149', '#e86332', '#8f6da9', '#7fcde4', '#07aeb6', '#447b9a', '#acd672', '#558824', '#f9d46c', '#c2a1c0', '#84407e', '#fbbfcb', '#e35b79', "#dc4c4c"]
                 },
             },
         }
@@ -622,10 +691,12 @@ function pageMethods() {
             base = String(window.location.origin)
             window.open(base.concat("/ptportal/generate-report"))
             window.open(base.concat("/ptportal/generate-outbrief"))
+            window.open(base.concat("/ptportal/generate-outbrief-ws"))
             window.open(base.concat("/ptportal/generate-pace"))
             window.open(base.concat("/ptportal/generate-tracker"))
             window.open(base.concat("/ptportal/generate-JSON"))
             window.open(base.concat("/ptportal/generate-EI-JSON"))
+            window.open(base.concat("/ptportal/generate-kev-report"))
             window.open(base.concat("/ptportal/download-backup"))
         }
     }

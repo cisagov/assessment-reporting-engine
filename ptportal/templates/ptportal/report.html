@@ -112,15 +112,15 @@ DM22-1011
             <br>
             <h2>Significant Findings</h2>
             <p>During testing, the team identified the following significant findings:</p>
-			<sds-textarea placeholder="List only significant findings in the form of high-level points (one per line)" v-model="formData.significant_findings" rows="3"></sds-textarea>
+			<sds-textarea placeholder="List only significant findings in the form of high-level points (one per line)" v-model="formData.significant_findings" rows="3" :maxlength="10000"></sds-textarea>
 			<br>
             <h2>Recommendations</h2>
             <p>Based on the significant findings listed above, the team recommends the following high-level actions:</p>
-			<sds-textarea placeholder="List recommendations per each of the significant findings in the form of high-level points (one per line)" v-model="formData.recommendations" rows="3"></sds-textarea>
+			<sds-textarea placeholder="List recommendations per each of the significant findings in the form of high-level points (one per line)" v-model="formData.recommendations" rows="3" :maxlength="10000"></sds-textarea>
 			<br>
             <h2>Observed Strengths</h2>
             <p>In addition to the findings described throughout this report, the team also observed the following strengths pertaining to the {{ eng_meta.customer_long_name }} network and personnel:</p>
-			<sds-textarea placeholder="List observed strengths in the form of high-level points (one per line)" v-model="formData.observed_strengths" rows="3"></sds-textarea>
+			<sds-textarea placeholder="List observed strengths in the form of high-level points (one per line)" v-model="formData.observed_strengths" rows="3" :maxlength="10000"></sds-textarea>
 			<br>
             <h1>Risk Score</h1>
             <p>The team derives a risk score from each finding based on factors related to impact and likelihood. Together, these factors help determine risk from a technical standpoint and make no assumptions about specific threat actors or the business elements of risk.</p>
@@ -148,10 +148,12 @@ DM22-1011
             <p>The assessment team identified {{findings_breakdown.Critical.count | num_to_word}} (<b>{{findings_breakdown.Critical.count}}</b>) critical {% if findings_breakdown.Critical.count == 1 %}finding{% else %}findings{% endif %}, {{findings_breakdown.High.count | num_to_word}} (<b>{{findings_breakdown.High.count}}</b>) high {% if findings_breakdown.High.count == 1 %}finding{% else %}findings{% endif %}, {{findings_breakdown.Medium.count | num_to_word}} (<b>{{findings_breakdown.Medium.count}}</b>) medium {% if findings_breakdown.Medium.count == 1 %}finding{% else %}findings{% endif %}, {{findings_breakdown.Low.count | num_to_word}} (<b>{{findings_breakdown.Low.count}}</b>) low {% if findings_breakdown.Low.count == 1 %}finding{% else %}findings{% endif %}, and {{findings_breakdown.Info.count | num_to_word}} (<b>{{findings_breakdown.Info.count}}</b>) informational {% if findings_breakdown.Info.count == 1 %}finding{% else %}findings{% endif %}. The Total Risk Score for this assessment is <b>[[formData.risk_score]]</b> and the Mitigated Risk Score after deducting mitigated findings is <b>[[formData.mitigated_risk_score]]</b>.</p>
             <br>
             <h1>NIST-Based Summary</h1>
+            <p>The assessment team mapped all findings to applicable National Institute of Standards and Technology (NIST) controls as described in <sds-link href="https://csrc.nist.gov/Projects/risk-management/sp800-53-controls"><b>NIST Special Publication (SP) 800-53</b></sds-link>. The figure below illustrates the relevant control families cited based on findings. Please refer to NIST SP 800-53 for a full list of control families. The Findings section of this report provides specific mappings of controls to findings and the detailed technical description for each finding. Note that some findings may be mapped to multiple applicable NIST controls.</p>
             <apexchart height="600" width="100%" :options="nistSPArgs.options" :series="nistSPArgs.data"></apexchart>
             <div class="figure" align="center">Figure {{ figure_count.increment }}: Findings Mapped to NIST Security and Privacy Controls</div>
             <br>
             <h1>NIST Cybersecurity Framework</h1>
+            <p>Findings are mapped to the NIST Framework for Improving Critical Infrastructure Cybersecurity, Version 1.1, April 16, 2018, called the <sds-link href="https://www.nist.gov/cyberframework"><b>Cybersecurity Framework</b></sds-link>. The figure below illustrates the relevant functions and categories cited based on findings. Please refer to the NIST Cybersecurity Framework for a full list of functions and categories. The Findings section of this report provides specific mappings of categories to findings and the detailed technical description for each finding. Note that some findings may be mapped to multiple applicable NIST categories.</p>
             <apexchart height="500" width="100%" :options="nistFrameworkArgs.chartOptions" :series="nistFrameworkArgs.series"></apexchart>
             <div class="figure" align="center">Figure {{ figure_count.increment }}: Findings Mapped to NIST Cybersecurity Framework Categories</div>
             <br>
@@ -164,29 +166,29 @@ DM22-1011
             <template #title><b>SCOPE</b></template>
             <h1>Phishing</h1>
             <div class="num">
-                <sds-input v-model="formData.users_targeted" placeholder="#"></sds-input>
+                <sds-input v-model="formData.users_targeted" placeholder="#" :maxlength="10"></sds-input>
             </div>
             <div style="float:left; padding: 10px 0px 0px 0px"><p>users were included in the phishing campaign(s) targeting the following mail domain(s):</p></div>
             <br>
             <div style="padding:30px 0px 10px 10px"><p>{{ eng_meta.phishing_domains }}</p></div>
             <h1>External</h1>
             <div class="num">
-                <sds-input v-model="formData.external_discovered" placeholder="#"></sds-input>
+                <sds-input v-model="formData.external_discovered" placeholder="#" :maxlength="20"></sds-input>
             </div>
                 <div style="float:left; padding: 10px 0px 0px 0px;"><p>of</p></div>
             <div class="num">
-                <sds-input v-model="formData.external_scanned" placeholder="#"></sds-input>
+                <sds-input v-model="formData.external_scanned" placeholder="#" :maxlength="20"></sds-input>
             </div>
             <div style="float:left; padding: 10px 0px 0px 0px"><p>scanned hosts were discovered to be live during testing of the following in-scope targets:</p></div>
             <br>
             <div style="padding:30px 0px 10px 10px"><p>{{ eng_meta.ext_scope }}</p></div>
             <h1>Internal</h1>
             <div class="num">
-                <sds-input v-model="formData.internal_discovered" placeholder="#"></sds-input>
+                <sds-input v-model="formData.internal_discovered" placeholder="#" :maxlength="20"></sds-input>
             </div>
             <div style="float:left; padding: 10px 0px 0px 0px;"><p>of</p></div>
             <div class="num">
-                <sds-input v-model="formData.internal_scanned" placeholder="#"></sds-input>
+                <sds-input v-model="formData.internal_scanned" placeholder="#" :maxlength="20"></sds-input>
             </div>
             <div style="float:left; padding: 10px 0px 0px 0px"><p>scanned hosts were discovered to be live during testing of the following in-scope targets:</p></div>
             <br>
@@ -434,19 +436,9 @@ DM22-1011
         <span class="border-top border-dark"></span>
             <template #title><b>ATTACK PATHS</b></template>
             <p>Attack paths are used to demonstrate impact by chaining together vulnerabilities and misconfigurations to achieve a significant level of access. The sections below provide a high-level overview of attack paths that the team executed during the engagement and the corresponding MITRE ATT&CK techniques that were leveraged in each attack. A detailed breakdown of each attack path can be found in the corresponding <sds-link href="#appendix_d"><b>Appendix D: Narrative</b></sds-link> section.</p>
-            <div v-for="path in attackPathArgs.phishing">
-            	<h1>Phishing Attack Path [[path.order]]</h1>
-            	<img :src="[[path.imgURL]]" align="center">
-            	<div class="figure" align="center">[[path.caption]]</div>
-            	<p>The following <sds-link href="https://attack.mitre.org/"><b>MITRE ATT&CK</b></sds-link> Techniques were leveraged in this attack path:</p>
-            	<ul class="list">
-            		<li v-for="t in path.techniques">[[t]]</li>
-            	</ul>
-            	<br>
-            </div>
             <div v-for="path in attackPathArgs.external">
             	<h1>External Attack Path [[path.order]]</h1>
-            	<img :src="[[path.imgURL]]" align="center">
+            	<img :src="[[path.imgURL]]" align="center" onerror="this.style.display='none'">
             	<div class="figure" align="center">[[path.caption]]</div>
             	<p>The following <sds-link href="https://attack.mitre.org/"><b>MITRE ATT&CK</b></sds-link> Techniques were leveraged in this attack path:</p>
             	<ul class="list">
@@ -456,7 +448,17 @@ DM22-1011
             </div>
             <div v-for="path in attackPathArgs.internal">
             	<h1>Internal Attack Path [[path.order]]</h1>
-            	<img :src="[[path.imgURL]]" align="center">
+            	<img :src="[[path.imgURL]]" align="center" onerror="this.style.display='none'">
+            	<div class="figure" align="center">[[path.caption]]</div>
+            	<p>The following <sds-link href="https://attack.mitre.org/"><b>MITRE ATT&CK</b></sds-link> Techniques were leveraged in this attack path:</p>
+            	<ul class="list">
+            		<li v-for="t in path.techniques">[[t]]</li>
+            	</ul>
+            	<br>
+            </div>
+            <div v-for="path in attackPathArgs.phishing">
+            	<h1>Phishing Attack Path [[path.order]]</h1>
+            	<img :src="[[path.imgURL]]" align="center" onerror="this.style.display='none'">
             	<div class="figure" align="center">[[path.caption]]</div>
             	<p>The following <sds-link href="https://attack.mitre.org/"><b>MITRE ATT&CK</b></sds-link> Techniques were leveraged in this attack path:</p>
             	<ul class="list">
@@ -541,31 +543,7 @@ DM22-1011
         <span class="border-top border-dark"></span>
             <template #title><b>APPENDIX C: NARRATIVE</b></template>
             <p>This section highlights key tools and techniques the team utilized during testing and can be used to replicate the team’s actions or better understand how a particular finding was identified. These actions should only be replicated by an experienced individual who thoroughly understands the functionality and risks of the tools and techniques.</p>
-            <h1>Phishing</h1>
-            <div v-for="path in attackPathArgs.phishing">
-            	<h2>Attack Path [[path.order]]</h2>
-            	<p><b>Tools</b></p>
-            	<ul class="list">
-            		<li v-for="tool in path.tools">[[tool.name]] ([[tool.url]])</li>
-            	</ul>
-            	<br>
-            	<div v-for="step in path.steps">
-            		<p><b>Step [[step.order]]:</b> [[step.description]]</p>
-            		<ul v-if="step.url">
-            			<table align="center">
-	            			<tr>
-			            		<td width="15%"></td>
-			            		<td width="70%"><img :src="[[step.url]]" align="center" onerror="this.style.display='none'" /></td>
-				            	<td width="15%"></td>
-				            </tr>
-				            <tr>
-				            	<td colspan="3"><div class="figure" align="center">[[step.caption]]</div></td>
-				            </tr>
-			        	</table>
-			        </ul>
-            		<br>
-            	</div>
-            </div>
+            
             <h1>External</h1>
             <div v-for="path in attackPathArgs.external">
             	<h2>Attack Path [[path.order]]</h2>
@@ -616,6 +594,31 @@ DM22-1011
             		<br>
             	</div>
             </div>
+            <h1>Phishing</h1>
+            <div v-for="path in attackPathArgs.phishing">
+            	<h2>Attack Path [[path.order]]</h2>
+            	<p><b>Tools</b></p>
+            	<ul class="list">
+            		<li v-for="tool in path.tools">[[tool.name]] ([[tool.url]])</li>
+            	</ul>
+            	<br>
+            	<div v-for="step in path.steps">
+            		<p><b>Step [[step.order]]:</b> [[step.description]]</p>
+            		<ul v-if="step.url">
+            			<table align="center">
+	            			<tr>
+			            		<td width="15%"></td>
+			            		<td width="70%"><img :src="[[step.url]]" align="center" onerror="this.style.display='none'" /></td>
+				            	<td width="15%"></td>
+				            </tr>
+				            <tr>
+				            	<td colspan="3"><div class="figure" align="center">[[step.caption]]</div></td>
+				            </tr>
+			        	</table>
+			        </ul>
+            		<br>
+            	</div>
+            </div>
 
 	</sds-section><br>
 
@@ -624,7 +627,7 @@ DM22-1011
         <span class="border-top border-dark"></span>
             <template #title><b>APPENDIX D: PASSWORD ANALYSIS</b></template>
             <p>The assessment team obtained the hashed passwords for all the {{ eng_meta.customer_long_name }} users during the assessment and attempted to obtain the clear text passwords represented by the hashed values. The following output shows statistical analysis of the clear text passwords recovered by the team:</p>
-            <sds-textarea v-model="formData.password_analysis" rows="10" placeholder="Copy/paste output from the password analysis tool (do not include the tool banner)"></sds-textarea>
+            <sds-textarea v-model="formData.password_analysis" rows="10" placeholder="Copy/paste output from the password analysis tool (do not include the tool banner)" :maxlength="10000"></sds-textarea>
 	</sds-section><br>
 
 </div>
@@ -655,7 +658,7 @@ DM22-1011
 	</ul>
 	<br><br>
 	<div align="center">
-		<sds-button variant="primary" class="ml-4" @click="saveReport">Save</sds-button>
+		<sds-button variant="primary" class="ml-4" @click="saveReport"><img class="w-8 h-8" src="/static/icons/floppy-disk-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Save</sds-button>
 		<br><br>
 		{% if previously_saved %}<p>Last Updated: {{ previously_saved | naturaltime }}</p>{% endif %}
 	</div>
@@ -729,7 +732,12 @@ DM22-1011
 					yaxis: {
 						title: {
 							text: ''
-						}
+						},
+						labels: {
+      						formatter: function(val) {
+        						return val.toFixed(0);
+      						}
+    					}
 					},
 					xaxis: {
 						categories: ['Critical', 'High', 'Medium', 'Low', 'Informational'],
@@ -796,12 +804,12 @@ DM22-1011
 						title: {
 							text: 'Number of Findings'
 						},
-						categories: ['AC', 'AT', 'AU', 'CA', 'CM', 'CP', 'IA', 'IR', 'MA', 'MP', 'PE', 'PL', 'PM', 'PS', 'RA', 'SA', 'SC', 'SI', 'SR'],
+						categories: ['AC', 'AT', 'AU', 'CA', 'CM', 'CP', 'IA', 'IR', 'MA', 'MP', 'PE', 'PL', 'PM', 'PS', 'PT', 'RA', 'SA', 'SC', 'SI', 'SR'],
 					},
 				},
 				data: [
 					{
-						data: ['{{nist_ac}}', '{{nist_at}}', '{{nist_au}}', '{{nist_ca}}', '{{nist_cm}}', '{{nist_cp}}', '{{nist_ia}}', '{{nist_ir}}', '{{nist_ma}}', '{{nist_mp}}', '{{nist_pe}}', '{{nist_pl}}', '{{nist_pm}}', '{{nist_ps}}', '{{nist_ra}}', '{{nist_sa}}', '{{nist_sc}}', '{{nist_si}}', '{{nist_sr}}']
+						data: ['{{nist_ac}}', '{{nist_at}}', '{{nist_au}}', '{{nist_ca}}', '{{nist_cm}}', '{{nist_cp}}', '{{nist_ia}}', '{{nist_ir}}', '{{nist_ma}}', '{{nist_mp}}', '{{nist_pe}}', '{{nist_pl}}', '{{nist_pm}}', '{{nist_ps}}', '{{nist_pt}}', '{{nist_ra}}', '{{nist_sa}}', '{{nist_sc}}', '{{nist_si}}', '{{nist_sr}}']
 					}
 				],
 			},
@@ -812,7 +820,7 @@ DM22-1011
 						height: 500,
 						type: 'pie',
 					},
-					labels: ['ID.AM','ID.GV','ID.RA','ID.SC','PR.AC','PR.AT','PR.DS','PR.IP','PR.MA','PR.PT','DE.AE','DE.CM','RS.MI'],
+					labels: ['ID.AM','ID.GV','ID.RA','ID.SC','PR.AC','PR.AT','PR.DS','PR.IP','PR.MA','PR.PT','DE.AE','DE.CM','DE.DP','RS.MI'],
 					legend: {
 						show: false
 					},
@@ -838,7 +846,7 @@ DM22-1011
 							}
 						}
 					},
-					colors: ['#f5a149', '#e86332', '#8f6da9', '#7fcde4', '#07aeb6', '#447b9a', '#acd672', '#558824', '#f9d46c', '#c2a1c0', '#84407e', '#fbbfcb', '#e35b79']
+					colors: ['#f5a149', '#e86332', '#8f6da9', '#7fcde4', '#07aeb6', '#447b9a', '#acd672', '#558824', '#f9d46c', '#c2a1c0', '#84407e', '#fbbfcb', '#e35b79', "#dc4c4c"]
 				},
 			},
 		}
@@ -855,6 +863,7 @@ DM22-1011
 		pageData.nistFrameworkArgs.series.push(parseInt('{{nist_ppt}}'))
 		pageData.nistFrameworkArgs.series.push(parseInt('{{nist_dae}}'))
 		pageData.nistFrameworkArgs.series.push(parseInt('{{nist_dcm}}'))
+		pageData.nistFrameworkArgs.series.push(parseInt('{{nist_ddp}}'))
 		pageData.nistFrameworkArgs.series.push(parseInt('{{nist_rmi}}'))
 		
 
@@ -979,10 +988,10 @@ DM22-1011
 						setTimeout(() => {this.redirectLink("{% url 'report'%}")}, 2000)
 					}
 					else {
-						this.displayNotification({title: "Error Saving Report", variant:"success", text: "Report data could not be saved. Please check the form for errors and try again."})
+						this.displayNotification({title: "Error Saving Data", variant:"danger", text: "Bad response received from server. Check for errors in forms and try again."})
 					}
 				}).catch(error => {
-					this.displayNotification({text: error, title: "Error Saving Report", variant:"danger", text: "Report data could not be saved. Please check the form for errors and try again."})
+					this.displayNotification({text: error, title: "Error Saving Data", variant:"danger"})
 				})
 			},
 		}

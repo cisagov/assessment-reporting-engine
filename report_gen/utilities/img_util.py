@@ -17,21 +17,23 @@ Routines to support sizing and scaling for screenshots
 from PIL import Image
 
 # --- constants for screenshot slide layout
-MAX_IMG_HEIGHT = 290 # 4.03 in
-AP_IMG_HEIGHT = 324 # 4.5 in
+MAX_IMG_HEIGHT = 290  # 4.03 in
+AP_IMG_HEIGHT = 324  # 4.5 in
 MAX_IMG_WIDTH = 619  # 8.6 in
 AP_IMG_WIDTH = 684 # 9.5 in
 IMG_CENTER_X = 396  # 5.5 in
 IMG_CENTER_Y = 270  # 3.75 in
 ORIGIN_X = 50.5  # .7 in
-AP_X = 18 # .25 in
+ORIGIN_X_WS = 168.48  # 2.34 in
+AP_X = 18  # .25 in
+AP_X_WS = 137.52  # 1.91 in
 ORIGIN_Y = 120  # 1.67 in
-AP_Y = 108 # 1.5 in
+AP_Y = 108  # 1.5 in
 SCREEN_RES = 72.0  # used to convert to inches
 IMG_DEBUG = False  # turn on to see dimension details
 
 
-def get_screenshot_dimensions(sfile, stype, in_inches=True):
+def get_screenshot_dimensions(sfile, stype, slide_size, in_inches=True):
     """
     This routine computes the upper left most point of a centered,
     scaled screenshot on a slide
@@ -39,12 +41,18 @@ def get_screenshot_dimensions(sfile, stype, in_inches=True):
     if stype == "path":
         ih = AP_IMG_HEIGHT
         iw = AP_IMG_WIDTH
-        xpos = AP_X
+        if slide_size:
+            xpos = AP_X_WS
+        else:
+            xpos = AP_X
         ypos = AP_Y
     else:
         ih = MAX_IMG_HEIGHT
         iw = MAX_IMG_WIDTH
-        xpos = ORIGIN_X
+        if slide_size:
+            xpos = ORIGIN_X_WS
+        else:
+            xpos = ORIGIN_X
         ypos = ORIGIN_Y
 
     with Image.open(sfile) as img:

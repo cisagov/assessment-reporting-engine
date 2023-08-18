@@ -18,18 +18,14 @@ DM22-1011
 {% block content %}
 {% csrf_token %}
 
-<sds-section type="accented">
-    <template #title>
-        <p class="text-2xl font-bold">{{ narrative_assessment_type }}</p>
-        <br>
-        <sds-button variant="primary" @click="redirectLink('{% url "narrative_create" narrative_assessment_type.name|lower %}')">+ Attack Path</sds-button>
-        <br>
-    </template>
-</sds-section>
-<br>
+
+    <div style="float:right; position:absolute; top:65; right:20; z-index:100">
+        <sds-button variant="primary" @click="redirectLink('{% url "narrative_create" narrative_assessment_type.name|lower %}')"><img class="w-8 h-8" src="/static/icons/circle-plus-solid-white.svg" style="float:left; padding:3px 6px 0px 0px"> Attack Path</sds-button>
+        <br><br>
+    </div>
 <sds-section v-for="path in formData.attackPaths" :key="path.order" type="simple" class="mb-4">
     <template #title>
-        <h1 style="font-size:20pt; float:left">[[path.name]] [[path.order]]</h1><div style="padding:0px 10px 0px 0px; float:right"><sds-button variant="danger" @click="redirectLink([[path.delete_slug]])">Delete</sds-button></div><div style="padding:0px 10px 0px 0px; float:right"><sds-button variant="primary" @click="redirectLink([[path.steps]])">Edit Steps</sds-button></div><div style="padding:0px 10px 0px 0px; float:right"><sds-button variant="primary" @click="redirectLink([[path.slug]])">Edit Details</sds-button></div>
+        <h1 style="font-size:20pt; float:left">[[path.name]] [[path.order]]</h1><div style="padding:0px 10px 0px 0px; float:right"><sds-button variant="danger" @click="redirectLink([[path.delete_slug]])"><img class="w-8 h-8" src="/static/icons/trash-solid-white.svg" style="float:left; padding:3px 6px 0px 0px"> Delete</sds-button></div><div style="padding:0px 10px 0px 0px; float:right"><sds-button variant="primary" @click="redirectLink([[path.steps]])"><img class="w-8 h-8" src="/static/icons/pen-to-square-white.svg" style="float:left; padding:3px 6px 0px 0px"> Steps</sds-button></div><div style="padding:0px 10px 0px 0px; float:right"><sds-button variant="primary" @click="redirectLink([[path.slug]])"><img class="w-8 h-8" src="/static/icons/pen-to-square-white.svg" style="float:left; padding:3px 6px 0px 0px"> Details</sds-button></div>
     </template>
         <div v-if="path.imgURL" style="width:80%">
             <img :src="[[path.imgURL]]" />
@@ -69,11 +65,11 @@ function pageData() {
         techniques = []
 
         {% for tool in path.tools.all %}
-            tools.push("{{tool.name}}")
+            tools.push("{{tool.name|escapejs}}")
         {% endfor %}
 
         {% for technique in path.attack.all %}
-            techniques.push("{{technique.name}}")
+            techniques.push("{{technique.name|escapejs}}")
         {% endfor %}
 
         tool_list = tools.join(', ')
@@ -84,6 +80,10 @@ function pageData() {
     {% endfor %}
 
     return pageData
+}
+
+function pageCreated() {
+    this.baseData.layoutArgs.pageTitle = "{{ narrative_assessment_type }}"
 }
 </script>
 

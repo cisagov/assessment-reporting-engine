@@ -42,13 +42,10 @@ DM22-1011
 {% csrf_token %}
 
 <sds-section class="mb-4" style="border:1px solid #DDDDDD;" type="simple" class="mb-4">
-  <template #title>
-    <h1 style="font-size:16pt;">{{ name }}</h1>
-  </template>
   <sds-file-uploader v-bind="fileUploadArgs" @add="addFile">
   </sds-file-uploader>
   <br>
-  <sds-button variant="primary" @click="addStep()" style="float:left">+ Step Without Screenshot</sds-button><sds-button variant="primary" @click="saveSteps" style="float:right">Save</sds-button>
+  <sds-button variant="primary" @click="addStep()" style="float:left">+ Step Without Screenshot</sds-button><sds-button variant="primary" @click="saveSteps" style="float:right"><img class="w-8 h-8" src="/static/icons/floppy-disk-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Save</sds-button>
   <br><br><br>
 </sds-section>
 
@@ -62,7 +59,7 @@ DM22-1011
       <div class="grid grid-cols-2 mb-2">
         <h4>Description:</h4>
       </div>
-      <sds-textarea v-model="step.description" :rows="3"></sds-textarea>
+      <sds-textarea v-model="step.description" :rows="3" :maxlength="5000"></sds-textarea>
       <br>
       <div v-if="step.imgURL">
         <img :src="[[step.imgURL]]" onerror="this.style.display='none'" />
@@ -70,12 +67,12 @@ DM22-1011
         <div class="grid grid-cols-2 mb-2">
           <h4>Caption:</h4>
         </div>
-        <sds-textarea v-model="step.caption" :rows="1"></sds-textarea>
+        <sds-textarea v-model="step.caption" :rows="1" :maxlength="250"></sds-textarea>
       </div>
     </sds-section>
   </div>
 
-  <div style="float:left; width:17%; right:1%; background-color:#ffffff; padding:10px; position:absolute; border:1px solid #DDDDDD; overflow:auto;">
+  <div v-if="steps.length > 0" style="float:left; width:17%; right:1%; background-color:#ffffff; padding:10px; position:absolute; border:1px solid #DDDDDD; overflow:auto;">
     <div v-for="(step, i) in steps" :key="step" class="step" draggable="true" @dragover="(e) => onDragOver(step, i, e)" @dragend="(e) => finishDrag(step, i, e)" @dragstart="(e) => startDrag(step, i, e)" :class="{over: (step === over.step && step !== dragFrom), [over.dir]: (step === over.step && step !== dragFrom) }">
       <div style="float:left; padding:19px 15px 0px 10px; cursor:pointer"><div style="width:15px; height:2px; background-color:gray; margin:2px 0;"></div><div style="width:15px; height:2px; background-color:gray; margin:2px 0;"></div></div><div style="float:left; padding:12px 0px 10px 0px">Step [[step.order]]</div><div class="delete" style="float:right; padding:0px 8px 0px 0px; font-size:20pt"><sds-button @click="deleteFile(step)">&#10799;</sds-button></div>
       <br><br>
@@ -85,9 +82,9 @@ DM22-1011
 
 <br><br>
 
-<div style="float:left; width:78%; border:1px solid #DDDDDD;">
+<div v-if="steps.length > 0" style="float:left; width:78%; border:1px solid #DDDDDD;">
     <sds-section>
-      <sds-button variant="primary" @click="addStep()" style="float:left">+ Step Without Screenshot</sds-button><sds-button variant="primary" @click="saveSteps" style="float:right">Save</sds-button>
+      <sds-button variant="primary" @click="addStep()" style="float:left">+ Step Without Screenshot</sds-button><sds-button variant="primary" @click="saveSteps" style="float:right"><img class="w-8 h-8" src="/static/icons/floppy-disk-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Save</sds-button>
       <br><br><br>
     </sds-section>
   </div>
@@ -117,17 +114,21 @@ function pageData() {
     
     {% if step.file %}
       imgURL = window.location.origin + "/media/" + "{{step.file}}"
-      caption = "{{step.caption}}"
+      caption = "{{step.caption|escapejs}}"
     {% else %}
       imgURL = ""
       caption = ""
     {% endif %}
 
-      pageData.steps.push({order: "{{step.order}}", uuid: "{{step.uuid}}", imgURL: imgURL, caption: caption, description: "{{step.description}}"})
+      pageData.steps.push({order: "{{step.order}}", uuid: "{{step.uuid}}", imgURL: imgURL, caption: caption, description: "{{step.description|escapejs}}"})
 
   {% endfor %}
 
   return pageData
+}
+
+function pageCreated() {
+  this.baseData.layoutArgs.pageTitle = "{{name}}"
 }
 
 function pageMethods() {
@@ -144,7 +145,7 @@ function pageMethods() {
         this.steps.push({order: this.steps.length + 1, imgOrder: imgOrder, uuid: null, imgURL: URL.createObjectURL(newFiles[file]), caption: "", description: ""})
         imgOrder++
       }
-      this.displayNotification({'title': 'Images added', text: 'File added to list! Make sure to save the new images.', variant:"info"})
+      this.displayNotification({'title': 'Image(s) Added', text: 'A step for each uploaded image has been created. Be sure to save before leaving this page.', variant:"info", autoHideDelay:10000})
     },
     deleteFile: function (step) {
       index = this.steps.indexOf(step.file)
@@ -199,11 +200,11 @@ function pageMethods() {
         if (response.ok) {
 
           this.fileList = []
-          this.displayNotification({title: 'Narrative Steps Saved', text: 'Narrative steps and images have been saved successfully.', variant:"success"})
-          location.reload()
+          this.displayNotification({title: 'Narrative Steps Saved', text: 'Narrative steps and images saved successfully. Please wait while the page refreshes...', variant:"success"})
+          setTimeout(() => {location.reload()}, 2000)
         }
         else {
-          this.displayNotification({title: "Error Saving Data", text: "Bad response received from server. Check for errors in form and try again.", variant: "danger"})
+          this.displayNotification({title: "Error Saving Data", text: "Bad response received from server. Check for errors in forms and try again.", variant: "danger"})
         }
         }).catch(error => {
           this.displayNotification({title: "Error Saving Data", text: error, variant: "danger"})

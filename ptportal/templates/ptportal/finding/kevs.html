@@ -41,20 +41,15 @@ DM22-1011
 {% block content %}
 
 {% csrf_token %}
-<div class="header">
-    <h2>KEV Catalog</h2>
-</div>
-
 <div class="col-span-5">
 
-    <sds-section class="mb-4">
-      <template #title>
-        <p class="text-2xl font-bold">Nessus Results Upload</p>
+    <sds-section class="mb-4" type="accented">
+      <template #title><b>DATA UPLOAD</b></template>
         <sds-file-uploader v-bind="fileUploadArgs" v-model="fileList" :filesize="20"></sds-file-uploader>
-      </template>
+        <br>
       <div class="grid gap-2 grid-cols-2">
         <div class="flex gap-2">
-          <sds-button variant="primary" @click="parseData">Upload</sds-button>
+          <sds-button variant="primary" @click="parseData"><img class="w-8 h-8" src="/static/icons/upload-solid-white.svg" style="float:left; padding:0px 6px 0px 0px"> Upload</sds-button>
         </div>
       </div>
     </sds-section>
@@ -83,12 +78,10 @@ DM22-1011
           </div>
         </sds-scroll-area>
       </div>
-        
-      <div class="flex flex-row-reverse"></div>
+      <br><br>
+      <sds-button class="float-right" variant="primary" @click="saveDetails"><img class="w-8 h-8" src="/static/icons/floppy-disk-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Save</sds-button>
+      <br><br>
     </sds-section>
-    <div class="flex flex-row-reverse">
-      <sds-button variant="primary" @click="saveDetails">Save</sds-button>
-    </div>
 </div>
 {% endblock %}
 
@@ -146,6 +139,10 @@ DM22-1011
     return pageData
   }
 
+  function pageCreated() {
+    this.baseData.layoutArgs.pageTitle = "KEV Catalog"
+  }
+
   function pageMethods() {
     pageFunctions = {
       parseData: async function() {
@@ -160,6 +157,11 @@ DM22-1011
           const file = document.getElementsByName('nessusUpload')[0].files[f]
           const fileName = document.getElementsByName('nessusUpload')[0].files[f]['name']
 
+          if (document.getElementsByName('nessusUpload')[0].files[f].size > 2097152) {
+            this.displayNotification({title: "File Exceeds Size Limit", text: "The following file is too large to upload: " + fileName + ". Consider uploading a CSV with only the 'CVE' column.", variant: "warning", autoHideDelay:10000})
+            continue
+          }
+
           let nessusString = null
           await file.text().then(text => {nessusString = text})
 
@@ -169,19 +171,22 @@ DM22-1011
           var index = headers.indexOf('CVE')
 
           if (index >= 0) {
+            var parse_error = false
             for (var i = 1; i < length; i++) {
               values = lines[i].split(',')
-              if (String(values[index]).includes('CVE')) {
-                if (this.cves.includes(values[index]) && !this.formData.kevs.includes(values[index])) {
-                  this.formData.kevs.push(values[index])
+              item = String(values[index]).replace(/['"]+/g, '')
+
+              if (String(item).includes('CVE')) {
+                if (this.cves.includes(item) && !this.formData.kevs.includes(item)) {
+                  this.formData.kevs.push(item)
                 }
               }
             }
-            this.displayNotification({title: "Data Successfully Parsed", text: "KEVs derived from " + fileName + " have been selected from the catalog. Be sure to save before leaving this page.", variant: "success"})
+            this.displayNotification({title: "Data Parsing Complete", text: "KEVs derived from " + fileName + " have been selected from the catalog. Be sure to save before leaving this page.", variant: "info", autoHideDelay:10000})
           }
 
           else {
-            this.displayNotification({title: "Error Parsing Data", text: "The following Nessus CSV file appears to be missing a valid 'CVE' column: " + fileName, variant: "danger"})
+            this.displayNotification({title: "Error Parsing Data", text: "The following Nessus CSV file appears to be missing a valid 'CVE' column: " + fileName, variant: "warning", autoHideDelay:10000})
           }
 
         }
@@ -223,7 +228,8 @@ DM22-1011
           headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
         }).then(response => {
           if(response.ok) {
-            this.displayNotification({title: "KEVs Saved", text: "KEV data has been saved successfully.", variant: "success"})
+            this.displayNotification({title: "KEVs Saved", text: "KEV data saved successfully. Please wait while the page refreshes...", variant: "success"})
+            setTimeout(() => {this.redirectLink("{% url 'kev_catalog' %}")}, 2000)
           }
           else {
             this.displayNotification({title: "Error Saving Data", text: "Bad response received from server. Check for errors in form and try again.", variant: "danger"})

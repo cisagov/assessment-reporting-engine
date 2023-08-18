@@ -81,19 +81,21 @@ def compose_env(proxy=None):
     """Compose environment file"""
     mode = get_mode()
 
-    docker_env_path = Path(f'docker/{mode}/env.txt')
-    docker_env_backup_path = Path(f'docker/{mode}/env-backup.txt')
-    docker_env_backup_path.touch()
+    if not os.path.exists(f'docker/{mode}/env.txt'):
 
-    shutil.copyfile(docker_env_path, docker_env_backup_path)
+        docker_env_path = Path(f'docker/{mode}/env.txt')
+        docker_env_backup_path = Path(f'docker/{mode}/env-backup.txt')
+        docker_env_backup_path.touch()
 
-    if proxy and proxy != 'False':
-        with open(proxy, 'r') as f:
-            proxy_info = f.read()
+        shutil.copyfile(docker_env_path, docker_env_backup_path)
 
-        with open(docker_env_path, 'w') as f:
-            f.write('\n')
-            f.write(proxy_info)
+        if proxy and proxy != 'False':
+            with open(proxy, 'r') as f:
+                proxy_info = f.read()
+
+            with open(docker_env_path, 'w') as f:
+                f.write('\n')
+                f.write(proxy_info)
 
 
 def restore_env():
@@ -107,7 +109,7 @@ def restore_env():
         shutil.move(docker_env_backup_path, docker_env_path)
 
 
-def build_ptportal(report_type, migrations_file=None, su=True):
+def build_ptportal(report_type, su=True, restore=False, migrations_file=None):
     """Run commands to prep pentestportal app and run django server"""
     web_container = get_web_container()
 
@@ -116,6 +118,7 @@ def build_ptportal(report_type, migrations_file=None, su=True):
             ['docker', 'exec', web_container, 'python', 'manage.py', 'makemigrations']
         )
     subprocess.run(['docker', 'exec', web_container, 'python', 'manage.py', 'migrate'])
+
     subprocess.run(
         [
             'docker',
@@ -140,8 +143,6 @@ def build_ptportal(report_type, migrations_file=None, su=True):
             '--no-input',
             '--verbosity',
             '0',
-            '--ignore',
-            'admin/*',
         ]
     )
 
@@ -157,23 +158,6 @@ def build_ptportal(report_type, migrations_file=None, su=True):
                 'createsuperuser',
             ]
         )
-
-
-def rebuild_ptportal():
-    web_container = get_web_container()
-
-    subprocess.run(['docker', 'exec', web_container, 'python', 'manage.py', 'migrate'])
-    subprocess.run(
-        [
-            'docker',
-            'exec',
-            '-it',
-            web_container,
-            'python',
-            'manage.py',
-            'createsuperuser',
-        ]
-    )
 
 
 def check_if_ptportal_exists(log_handler=None):
@@ -254,7 +238,20 @@ def check_if_project_exited():
     return False, None, None
 
 
+def setup(args):
+    log_handler = logger()
+    log_handler.info('Installing dependencies...')
+
+    install_dependencies()
+
+    log_handler.info('Dependency installation complete.')
+
+
 def dev(args, clear_docker=True):
+    dev_setup(report=args.report_type)
+
+
+def dev_setup(report):
     log_handler = logger()
     log_handler.info('Loading PT Portal with docker-compose for developers')
 
@@ -264,66 +261,95 @@ def dev(args, clear_docker=True):
     set_mode(mode)
 
     clear_migrations()
-    if args.proxy:
-        log_handler.info('composing environment variable file for docker-compose')
-        compose_env(args.proxy)
+    #if args.proxy:
+    #    log_handler.info('composing environment variable file for docker-compose')
+    #    compose_env(args.proxy)
 
-    install_node_packages()
     docker_compose_up(force_recreate=True, rm_orphans=True)
-    build_ptportal(report_type=args.report_type)
+    build_ptportal(report_type=report)
 
     restore_env()
     log_handler.info('App is ready at localhost:8080!')
 
 
 def run(args):
+    prod_setup(report=args.report_type)
+
+
+def prod_setup(report):
     log_handler = logger()
     log_handler.info('Loading PT Portal with docker-compose')
 
     check_if_ptportal_exists(log_handler)
 
-    clear_migrations()
+    has_secret_key = False
+    new_line = False
+
+    with open('docker/prod/env.txt', 'r') as f:
+        lines = f.readlines()
+
+        if "\n" in lines[-1]:
+            new_line = True
+
+        for line in lines:
+            if line.find("SECRET_KEY=") != -1:
+                has_secret_key = True
+                break
+
+    if not has_secret_key:
+        f=open('docker/prod/env.txt', 'a')
+        if not new_line:
+            f.write("\n")
+        f.write("SECRET_KEY=\'")
+        f.close()
+        secret_key_cmd = "python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key(), end=\"\")' >> docker/prod/env.txt"
+        subprocess.run(secret_key_cmd, shell=True)
+        f=open('docker/prod/env.txt', 'a')
+        f.write("\'\n")
+        f.close()
+
+    if os.path.isfile("docker/prod/nginx/ssl/selfsigned.crt") and os.path.isfile("docker/prod/nginx/ssl/selfsigned.key"):
+        print("Using existing SSL files in docker/prod/nginx/ssl")
+    else:
+        if os.path.exists("docker/prod/nginx/ssl/"):
+            print("SSL directory exists. Generating SSL files...")
+        else:
+            print("SSL directory does not exist. Creating SSL directory and generating SSL files...")
+            make_ssl = "mkdir docker/prod/nginx/ssl"
+            subprocess.run(make_ssl, shell=True)
+        ssl_cmd = "openssl req -x509 -nodes -days 365 -subj \"/C=CA/ST=QC/O=Assessment Team/CN=reporting_engine\" -newkey rsa:2048 -keyout docker/prod/nginx/ssl/selfsigned.key -out docker/prod/nginx/ssl/selfsigned.crt"
+        subprocess.run(ssl_cmd, shell=True)
+        print("SSL files saved to: docker/prod/nginx/ssl")
+
     mode = 'prod'
     set_mode(mode)
 
-    if args.proxy:
-        compose_env(args.proxy)
+    clear_migrations()
+    #if args.proxy:
+    #    compose_env(args.proxy)
 
     docker_compose_down(rm_images=True, rm_volumes=True, rm_orphans=True)
-    install_node_packages()
     docker_compose_up(force_recreate=True, rm_orphans=True)
-    build_ptportal(report_type=args.report_type)
+    build_ptportal(report_type=report)
 
     restore_env()
     log_handler.info('App is ready at https://[IP_ADDRESS]:443')
 
 
-def install_node_packages():
-    print("Installing SDS and running postcss for tailwind.")
+def install_dependencies():
+    print("Installing Tailwind CSS...")
     try:
-        subprocess.run(f"npm i", cwd="./node", shell=True)
+        tailwind_cmd = "npm install -D node/dependencies/tailwindcss-3 --legacy-peer-deps"
+        subprocess.run(tailwind_cmd, shell=True)
     except Exception as e:
-        print("Error installing SDS and tailwind: " + e)
-    print("Successfully installed SDS and tailwind.")
+        print("Error installing Tailwind CSS: " + e)
 
-
-def docker_compose_stop():
-    """Stops running containers w/o removing them"""
-    mode = get_mode()
-
-    docker_compose_file = (
-        'docker-compose.prod.yml' if mode == 'prod' else 'docker-compose.yml'
-    )
-    project_name = 'prod' if mode == 'prod' else 'dev'
-
+    print("Installing Vue.js...")
     try:
-        subprocess.run(
-            f'docker compose -f {docker_compose_file} -p {project_name} stop',
-            shell=True,
-        )
+        vue_cmd = "npm install -D node/dependencies/components-vue3 --legacy-peer-deps"
+        subprocess.run(vue_cmd, shell=True)
     except Exception as e:
-        print('exception handler: ', e)
-        subprocess.run(f'docker compose stop', shell=True)
+        print("Error installing Vue.js: " + e)
 
 
 def docker_compose_start():
@@ -415,35 +441,6 @@ def docker_compose_rebuild_service(service):
         subprocess.run(f'docker compose start', shell=True)
 
 
-def pause(args):
-    print('Pausing PT Portal')
-    docker_compose_stop()
-
-
-def resume(args):
-    print('Resuming PT Portal')
-    if args.proxy:
-        compose_env(args.proxy)
-    docker_compose_up(force_recreate=False, rm_orphans=False)
-    mode = get_mode()
-    if mode == 'prod':
-        print('App is ready at https://localhost')
-    else:
-        print('App is ready at http://localhost:8080')
-
-
-def dev_restart(args):
-    mode = get_mode()
-    docker_compose_stop()
-    # rebuild web service
-    docker_compose_rebuild_service('web')
-    docker_compose_up(force_recreate=False, rm_orphans=False)
-    if mode == 'prod':
-        print('App ready at https://localhost')
-    else:
-        print('App ready at http://localhost:8080')
-
-
 def clear_docker_cache(args, verbose=True):
     if verbose:
         print('Stop Containers')
@@ -477,40 +474,6 @@ def remove(args):
         clear_docker_cache(args, verbose=True)
         clear_media_content()
     exit()
-
-
-def save_images(image_folder_path='docker/images/'):
-    mode = get_mode()
-
-    image_folder_path = Path(image_folder_path)
-
-    images = {
-        mode + '-db': f'{image_folder_path}{mode}_db_image.tar',
-        mode + '-web': f'{image_folder_path}{mode}_web_image.tar',
-    }
-
-    if mode == 'prod':
-        images['prod-nginx'] = f'{image_folder_path}prod_nginx_image.tar'
-
-    for image, name in enumerate(images):
-        print(f'saving image {image} to file: {name}')
-        d.save_image(image, name)
-
-
-def load_images(image_folder_path='docker/images/'):
-    mode = get_mode()
-
-    image_folder_path = Path(image_folder_path)
-    images = [
-        f'{image_folder_path}{mode}_db_image.tar',
-        f'{image_folder_path}{mode}_web_image.tar',
-    ]
-    if mode == 'prod':
-        images += Path(f'{image_folder_path}prod_nginx_image.tar')
-
-    for image in images:
-        print(f'loading image {image}')
-        d.load_image(image)
 
 
 def save_containers(container_folder_path='docker/containers/'):
@@ -548,59 +511,11 @@ def load_containers(container_folder_path='docker/containers/'):
         d.load_container(container)
 
 
-def backup_containers(args):
-    # Create & Save Containers as Images
-    mode = get_mode()
-    containers = [mode + '-db-1', mode + '-web-1']
-    if mode == 'prod':
-        containers += [mode + '-nginx-1']
-    for container in containers:
-        print('container to save: ', container)
-        d.save_container_image(container)
-
-
 def backup_app_repo(backup_name='repo-backup'):
     # Copy entire repo into folder
     shutil.rmtree(backup_name, ignore_errors=True)
     shutil.copytree('.', backup_name)
     return backup_name
-
-
-def image_backup(args):
-    mode = get_mode()
-    backup_containers(args)
-    print('Done.  Image backups in the docker/images folder')
-
-
-def image_repo_backup(args):
-    """This method creates a zip backup of the app,
-    containing a tar image of the running containers,
-    a folder of the app &  images.  This backup
-    can be used on ANY new system to restore progress"""
-    mode = get_mode()
-    container = mode + '-web-1'
-    backup_containers(args)
-    backup = backup_app_repo()
-
-    backup_name = (
-        'repo-backup-' + datetime.datetime.now().strftime("%m-%d-%Y-%H-%M") + '.zip'
-    )
-    print('Please enter a password to encrypt the backup')
-    subprocess.run(
-        [
-            'docker',
-            'exec',
-            '-it',
-            container,
-            'zip',
-            '--encrypt',
-            backup_name,
-            '-r',
-            backup,
-        ]
-    )
-    shutil.rmtree(backup)
-    print(f'Done.  Image backups in docker/images.  Full repo backup in: {backup_name}')
 
 
 def backup_json(
@@ -671,14 +586,63 @@ def backup_media(backup_name='media-backup'):
 
 def backup_migrations(backup_name='migrations-backup'):
     # Only backup first migrations file since we only use the first
-    # migrations filel
+    # migrations file
     shutil.copy('ptportal/migrations/0001_initial.py', backup_name)
     return backup_name
 
 
-def backup_mode(backup_name='migrations-backup'):
+def backup_mode(backup_name='mode-backup'):
     shutil.copy('mode.txt', backup_name)
     return backup_name
+
+
+def backup_env(backup_name='env-backup'):
+    mode = get_mode()
+    shutil.copy('docker/' + mode + '/env.txt', backup_name)
+    return backup_name
+
+
+def image_backup(args=None, in_docker=False):
+    mode = get_mode()
+
+    web_image = mode + '-web'
+    db_image = mode + '-db'
+    path = 'docker/' + mode + '/'
+
+    print('Backing up web image to: ' + path + 'web.tar')
+    subprocess.run(
+        [
+            'docker',
+            'save',
+            web_image,
+            '-o',
+            path + 'web.tar'
+        ]
+    )
+
+    print('Backing up db image to: ' + path + 'db.tar')
+    subprocess.run(
+        [
+            'docker',
+            'save',
+            db_image,
+            '-o',
+            path + 'db.tar'
+        ]
+    )
+
+    if mode == 'prod':
+        nginx_image = mode + '-nginx'
+        print('Backing up nginx image to: ' + path + 'nginx.tar')
+        subprocess.run(
+            [
+                'docker',
+                'save',
+                nginx_image,
+                '-o',
+                path + 'nginx.tar'
+            ]
+        )
 
 
 def partial_backup(args=None, in_docker=False, password=None):
@@ -697,11 +661,14 @@ def partial_backup(args=None, in_docker=False, password=None):
     backup_json(container, backup_folder, in_docker=in_docker)
     backup_migrations(backup_folder)
     backup_mode(backup_folder)
+    backup_env(backup_folder)
+
     with open('backup_folder/app_info.txt', 'w+') as f:
         f.write(settings.VERSION_NUMBER)
     backup_file = (
         'backup-' + datetime.datetime.now().strftime("%m-%d-%Y-%H-%M") + '.zip'
     )
+    
     if in_docker:
         # From the application interface.
         # The password is the engagement password
@@ -736,12 +703,8 @@ def partial_backup(args=None, in_docker=False, password=None):
 
 
 def backup(args):
-    # if args.images:
-    #     image_backup(args)
-    if args.repo:
-        image_repo_backup(args)
-    else:
-        partial_backup(args)
+    # image_backup(args)
+    partial_backup(args)
 
 
 def partial_restore(args):
@@ -751,10 +714,12 @@ def partial_restore(args):
     and the media folder with all of the images"""
 
     choice = input(
-        "Restoring will delete all the data currently in the portal. Make sure to backup your data before this. Do you want to restore the portal to a backup? [y/n]: "
+        "Restoring will delete all the data currently in the portal. Make sure to backup existing data before running a restore. Are you sure you want to restore the portal from a backup? [y/n]: "
     )
     if choice != "y":
         exit()
+
+    docker_compose_down(rm_images=True, rm_volumes=True, rm_orphans=True)
 
     if os.path.exists(Path('backup_folder')):
         shutil.rmtree(Path('backup_folder'))
@@ -768,6 +733,8 @@ def partial_restore(args):
         print(e)
         shutil.rmtree(Path('backup_folder'))
 
+    print("Restoring configuration files...")
+
     if os.path.exists(Path('backup_folder/mode.txt').resolve()):
         shutil.copy(Path('backup_folder/mode.txt'), Path('mode.txt'))
         with open(Path('mode.txt')) as mf:
@@ -776,48 +743,17 @@ def partial_restore(args):
         print("Unknown mode. Defaulting to prod.")
         mode = 'prod'
 
+    web_container = mode + '-web-1'
+
+    if os.path.exists(Path('backup_folder/env.txt').resolve()):
+        shutil.copy('backup_folder/env.txt', 'docker/' + mode + '/')
+
     if mode == 'dev':
         compose_file = 'docker-compose.yml'
     else:
         compose_file = 'docker-compose.prod.yml'
-    web_container = mode + '-web-1'
-    d.build(compose_file, project_name=mode)
-    # check if setting.version is the same.  if not, warn user
-    with open('backup_folder/app_info.txt', 'r') as f:
-        if f.read() != settings.VERSION_NUMBER:
-            print(
-                f'WARNING! Backup Built with a Different Version Number.  Backup Version: {f.read()}'
-            )
-    os.remove(Path('ptportal/migrations/0001_initial.py'))
-    shutil.copy('backup_folder/0001_initial.py', 'ptportal/migrations/0001_initial.py')
-
-    rebuild_ptportal()
-    # need to set assessment type
-    report_type = args.report_type
-    subprocess.run(
-        [
-            'docker',
-            'exec',
-            web_container,
-            'python',
-            'manage.py',
-            'set_report_type',
-            '--type',
-            report_type,
-        ]
-    )
-    subprocess.run(
-        [
-            'docker',
-            'exec',
-            web_container,
-            'python',
-            'manage.py',
-            'loaddata',
-            'backup_folder/datadump.json',
-        ]
-    )
-
+    
+    print("Restoring media...")
     if os.path.exists(Path('pentestportal/media/charts')):
         shutil.rmtree(Path('pentestportal/media/charts'))
     if os.path.exists(Path('pentestportal/media/screenshots')):
@@ -832,18 +768,28 @@ def partial_restore(args):
             str(Path('pentestportal/media/screenshots/')),
         )
 
-    shutil.rmtree('backup_folder')
-
     if mode == 'prod':
-        print('App is ready at https://[IP_ADDRESS]:443')
+        prod_setup(report=args.report_type)
     else:
-        print('App is ready at http://[IP_ADDRESS]:8080')
+        dev_setup(report=args.report_type)
+
+    print("Restoring database...")
+    subprocess.run(
+        [
+            'docker',
+            'exec',
+            web_container,
+            'python',
+            'manage.py',
+            'loaddata',
+            'backup_folder/datadump.json',
+        ]
+    )
+
+    shutil.rmtree('backup_folder')
 
 
 def restore(args):
-    # if args.full:
-    #     full_restore(args)
-    # else:
     partial_restore(args)
 
 
@@ -871,21 +817,21 @@ def shell(args):
     """
     mode = get_mode()
     if args.container == 'db':
-        subprocess.run(['docker', 'exec', '-it', mode + '-db-1', 'bash'])
-    elif args.container == 'proxy':
-        subprocess.run(['docker', 'exec', '-it', mode + '-nginx-1', 'bash'])
+        subprocess.run(['docker', 'exec', '-it', mode + '-db-1', 'sh'])
+    elif args.container == 'nginx':
+        subprocess.run(['docker', 'exec', '-it', mode + '-nginx-1', 'sh'])
     else:
-        subprocess.run(['docker', 'exec', '-it', mode + '-web-1', 'bash'])
+        subprocess.run(['docker', 'exec', '-it', mode + '-web-1', 'sh'])
 
 
-def attach(args):
+def show_logs(args):
     mode = get_mode()
     if args.container == 'db':
-        subprocess.run(['docker', 'attach', mode + '-db-1'])
-    elif args.container == 'proxy':
-        subprocess.run(['docker', 'attach', mode + '-nginx-1'])
+        subprocess.run(['docker', 'logs', '-f', mode + '-db-1'])
+    elif args.container == 'nginx':
+        subprocess.run(['docker', 'logs', '-f', mode + '-nginx-1'])
     else:
-        subprocess.run(['docker', 'attach', mode + '-web-1'])
+        subprocess.run(['docker', 'logs', '-f', mode + '-web-1'])
 
 
 def main():
@@ -893,6 +839,10 @@ def main():
     parser = argparse.ArgumentParser(description=description)
 
     subparsers = parser.add_subparsers(title='commands')
+
+    # install dependencies
+    setup_parser = subparsers.add_parser('setup', help='Install Dependencies')
+    setup_parser.set_defaults(func=setup)
 
     # production version
     run_parser = subparsers.add_parser(
@@ -906,12 +856,9 @@ def main():
         default='RVA',
         required=False,
     )
-    run_parser.add_argument(
-        '-p', '--proxy', help='File with proxy configuration'  # Default for NO proxy!
-    )
-    # run_parser.add_argument('-i', '--images',
-    #                         help='File path to directory with images to use (such as docker/images)',
-    #                         required=False)
+    #run_parser.add_argument(
+    #    '-p', '--proxy', help='File with proxy configuration'  # Default for NO proxy!
+    #)
     run_parser.add_argument(
         '-v',
         '--verbose',
@@ -931,12 +878,9 @@ def main():
         default='RVA',
         required=False,
     )
-    dev_parser.add_argument(
-        '-p', '--proxy', default='proxy.txt', help='File with proxy configuration'
-    )
-    # dev_parser.add_argument('-i', '--images',
-    #                         help='File path to directory with images to use (such as docker/images)',
-    #                         required=False)
+    #dev_parser.add_argument(
+    #    '-p', '--proxy', default='proxy.txt', help='File with proxy configuration'
+    #)
     dev_parser.add_argument(
         '-v',
         '--verbose',
@@ -946,56 +890,17 @@ def main():
     )
     dev_parser.set_defaults(func=dev)
 
-    pause_parser = subparsers.add_parser('pause', help='Pause PT Portal')
-    pause_parser.set_defaults(func=pause)
-
-    resume_parser = subparsers.add_parser(
-        'resume', help='Resume PT Portal from a Pause'
-    )
-    resume_parser.add_argument(
-        '-p',
-        '--proxy',  # Default for NO proxy!
-        help='File with proxy configuration.  Default is no proxy',
-    )
-    resume_parser.set_defaults(func=resume)
-
-    # restart a dev version
-    dev_restart_parser = subparsers.add_parser(
-        'dr', help='Restart PT Portal for Developers'
-    )
-    dev_restart_parser.add_argument(
-        '-r',
-        '--report_type',
-        choices=['RVA', 'HVA', 'RPT'],
-        help='report type [RVA, HVA, RPT].   Default to RVA',
-        default='RVA',
-        required=False,
-    )
-    dev_restart_parser.add_argument(
-        '-p', '--proxy', default='proxy.txt', help='File with proxy configuration'
-    )
-    dev_restart_parser.set_defaults(func=dev_restart)
-
     # tear it down
-    remove_parser = subparsers.add_parser('remove', help='Tear Down PT Portal')
+    remove_parser = subparsers.add_parser('remove', help='Tear down an instance of Reporting Engine')
     remove_parser.set_defaults(func=remove)
 
     # backup the database and media directories
-    backup_parser = subparsers.add_parser('backup', help='Backup PT Portal')
-    # backup_parser.add_argument('-i', '--images',
-    #                            help='Optional.  If specified, backup will export containers as images.',
-    #                            action='store_true')
-    backup_parser.add_argument(
-        '-r',
-        '--repo',
-        help='Optional.  If specified, backup will copy, compress, and encrypt the repository, including images.',
-        action='store_true',
-    )
+    backup_parser = subparsers.add_parser('backup', help='Backup an instance of Reporting Engine')
     backup_parser.set_defaults(func=backup)
 
     # restore a backups
     restore_parser = subparsers.add_parser(
-        'restore', help='Restoring your instance of PT Portal'
+        'restore', help='Restore an instance of Reporting Engine'
     )
     restore_parser.add_argument(
         '-b',
@@ -1005,9 +910,6 @@ def main():
         default='backup.zip',
         required=True,
     )
-    # restore_parser.add_argument('-f', '--full',
-    #                            help='Full backup restore.  Default to partial backup restore',
-    #                            action='store_true')
     restore_parser.add_argument(
         '-r',
         '--report_type',
@@ -1019,40 +921,33 @@ def main():
     restore_parser.set_defaults(func=restore)
 
     log_parser = subparsers.add_parser(
-        'logs', help='Attach to a container and get logs'
+        'logs', help='Show logs for the specified container'
     )
     log_parser.add_argument(
         '-c',
         '--container',
-        choices=['web', 'db', 'proxy'],
-        help='container to attach to [web, db, proxy].   Defult to web',
+        choices=['web', 'db', 'nginx'],
+        help='container to show logs for [web, db, nginx] - defaults to web',
         default='web',
         required=False,
     )
-    log_parser.set_defaults(func=attach)
+    log_parser.set_defaults(func=show_logs)
 
     # create admin
-    su_parser = subparsers.add_parser('su', help='Create Super User')
+    su_parser = subparsers.add_parser('su', help='Create a super user')
     su_parser.set_defaults(func=create_super_user)
 
     # exec into the web container
-    shell_parser = subparsers.add_parser('shell', help='Jump into bash shell')
+    shell_parser = subparsers.add_parser('shell', help='Jump into a shell for the specified container')
     shell_parser.add_argument(
         '-c',
         '--container',
-        choices=['web', 'db', 'proxy'],
-        help='shell to get [web, db, proxy].   Defult to web',
+        choices=['web', 'db', 'nginx'],
+        help='shell to open [web, db, nginx] - defaults to web',
         default='web',
         required=False,
     )
     shell_parser.set_defaults(func=shell)
-
-    # prep_test_env_parser = subparsers.add_parser('prep_tests', help='Prep Test Environment')
-    # prep_test_env_parser.add_argument('-t', '--test',
-    #                             choices=['multi','firefox','chrome','m','f','c'],
-    #                             help='What Type of Testing Environment',
-    #                             default='chrome')
-    # prep_test_env_parser.set_defaults(func=prep_test_env)
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)

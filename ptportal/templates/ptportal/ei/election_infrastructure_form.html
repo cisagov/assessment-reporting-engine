@@ -40,11 +40,6 @@ DM22-1011
 {% endblock %}
 
 {% block content %}
-<div class="header">
-   <h2> Election Infrastructure</h2>
-
-</div>
-<br>
 <form @submit="submitEI" class="block">
 
 {% csrf_token %}
@@ -58,13 +53,13 @@ DM22-1011
                 <div class="mb-8">
                     <sds-table :fields="fields" :items="items" class="table-prose" v-bind="EITableArgs">
                             <template #cell(ei_make)="{item}">
-                                <sds-input v-model="item.ei_make" placeholder="Make"></sds-input>
+                                <sds-input v-model="item.ei_make" placeholder="Make" :maxlength="200"></sds-input>
                             </template>
                             <template #cell(ei_model)="{item}">
-                                <sds-input v-model="item.ei_model" placeholder="Model"></sds-input>
+                                <sds-input v-model="item.ei_model" placeholder="Model" :maxlength="200"></sds-input>
                             </template>
                             <template #cell(ei_model_num)="{item}">
-                                <sds-input v-model="item.ei_model_num" placeholder="#"></sds-input>
+                                <sds-input v-model="item.ei_model_num" placeholder="#" :maxlength="200"></sds-input>
                             </template>
 
                             <template #cell(delete)="{item}">
@@ -93,7 +88,7 @@ DM22-1011
                 </div>
                 <div class="col-md-6" style="float:left">
                     {% if asmt_id != '' %}
-                        <sds-button style="margin:5px" variant="success" type="button" @click="redirectLink('{% url "generate_EI_json" %}')"> Download JSON</sds-button>
+                        <sds-button style="margin:5px" variant="success" type="button" @click="redirectLink('{% url "generate_EI_json" %}')"><img class="w-8 h-8" src="/static/icons/file-download-solid-white.svg" style="float:left; padding:3px 6px 0px 0px"> Download JSON</sds-button>
                     {% else %}
                         <sds-floating-ui
                             popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
@@ -107,7 +102,7 @@ DM22-1011
                             :will-close="willClose"
                         >
                         <template #trigger="{ open, close }">
-                        <sds-button style="margin:5px" variant="secondary" type="button" @mouseover="open" @mouseout="close"> Download JSON</sds-button>
+                        <sds-button style="margin:5px" variant="secondary" type="button" @mouseover="open" @mouseout="close"><img class="w-8 h-8" src="/static/icons/file-download-solid-white.svg" style="float:left; padding:3px 6px 0px 0px"> Download JSON</sds-button>
                         </template>
                         <template #default>
                             <div class="p-2">
@@ -117,7 +112,7 @@ DM22-1011
                         </sds-floating-ui>
                     {% endif %}
 
-                    <sds-button style="margin:5px;" variant="danger" type="button" @click="this.deleteWarning = true"> Delete Questionnaire</sds-button>
+                    <sds-button style="margin:5px;" variant="danger" type="button" @click="this.deleteWarning = true"><img class="w-8 h-8" src="/static/icons/trash-solid-white.svg" style="float:left; padding:3px 6px 0px 0px"> Delete Questionnaire</sds-button>
                 
                     <sds-modal size="sm" v-model="deleteWarning">
                     <template #title>
@@ -125,8 +120,8 @@ DM22-1011
                     </template>
                     <p class="mb-2">Are you sure you want to delete this Election Infrastructure Questionnaire? All current data will be lost.</p>
                     <div class="flex gap-2">
-                        <sds-button variant="danger" @click="this.deleteWarning=false;redirectLink('{% url "ei_modal_delete" %}')">Delete</sds-button>
-                        <sds-button variant="secondary" @click="this.deleteWarning = false">Cancel</sds-button>
+                        <sds-button variant="danger" @click="this.deleteWarning=false;redirectLink('{% url "ei_modal_delete" %}')"><img class="w-8 h-8" src="/static/icons/trash-solid-white.svg" style="float:left; padding:3px 6px 0px 0px"> Delete</sds-button>
+                        <sds-button variant="secondary" @click="this.deleteWarning = false"><img class="w-8 h-8" src="/static/icons/circle-xmark-solid-white.svg" style="float:left; padding:3px 6px 0px 0px"> Cancel</sds-button>
                     </div>
                     </sds-modal>
                 </div>
@@ -141,7 +136,7 @@ DM22-1011
                     <div class='form-row mb-3 d-none' id='{{ q.name }}Field'>
                         <div class="col-md-7">
                             <h6 class="control-label">{{ q.label_tag }} {{ q.help_text }}</h6>
-                            <sds-textarea v-model="formData.{{ q.name }}" placeholder="Description" v-bind:rows="3"></sds-textarea>
+                            <sds-textarea v-model="formData.{{ q.name }}" placeholder="Description" v-bind:rows="3" :maxlength="2000"></sds-textarea>
                         </div>
                     </div>
                 {% elif q.name == 'q24' or q.name == 'q25' or q.name == 'q26' or q.name == 'q27' %}
@@ -162,7 +157,7 @@ DM22-1011
                 <br>
             {% endfor %}
 
-        <sds-button type="submit" variant="primary">Save</sds-button>
+        <sds-button type="submit" variant="primary"><img class="w-8 h-8" src="/static/icons/floppy-disk-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Save</sds-button>
         <br>
     </sds-section>
 </div>
@@ -178,13 +173,13 @@ DM22-1011
                 q2: "{{ object.q2 }}",
                 q3: "{{ object.q3 }}",
                 q4: "{{ object.q4 }}",
-                q4A: "{{ object.q4A }}",
+                q4A: "{{ object.q4A | escapejs }}",
                 q5: "{{ object.q5 }}",
                 q6: "{{ object.q6 }}",
                 q7: "{{ object.q7 }}",
                 q8: "{{ object.q8 }}",
                 q9: "{{ object.q9 }}",
-                q9A: "{{ object.q9A }}",
+                q9A: "{{ object.q9A | escapejs }}",
                 q10: "{{ object.q10 }}",
                 q11: "{{ object.q11 }}",
                 q12: "{{ object.q12 }}",
@@ -295,6 +290,10 @@ DM22-1011
         return data
     }
 
+    function pageCreated() {
+        this.baseData.layoutArgs.pageTitle = "Election Infrastructure"
+    }
+
     function pageMethods() {
         pageFunctions = {
             submitEI: function (event) {
@@ -309,14 +308,14 @@ DM22-1011
                     headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
                 }).then(response => {
                     if (response.ok) {
-                        this.displayNotification({title: "EI Data Saved", variant:"success", text: "EI data has successfully saved!"})
-                        this.redirectLink("{% url 'ei_update'%}")
+                        this.displayNotification({title: "Election Data Saved", variant:"success", text: "Election data saved successfully. Please wait while the page refreshes..."})
+                        setTimeout(() => {this.redirectLink("{% url 'ei_update' %}")}, 2000)
                     }
                     else {
                         this.displayNotification({title: "Error Saving Data", text: 'Bad response received from server. Check for errors in forms and try again.', variant: "danger"})
                     }
                 }).catch(error => {
-                    this.displayNotification({text: error, title: "Error Saving EI Data", variant:"danger"})
+                    this.displayNotification({text: error, title: "Error Saving Data", variant:"danger"})
                 })
             },
 

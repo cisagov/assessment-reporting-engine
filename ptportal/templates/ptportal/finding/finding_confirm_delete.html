@@ -17,25 +17,32 @@ DM22-1011
 
 {% block content %}
 
-<h1>Delete Finding</h1>
-
-<div class="mt-2 mb-4 grid grid-cols-2">
-	<div class="">
-		<h2>Finding: {{ object }}</h2>
-		<p>Last modified: {{ object.updated_at | naturaltime }}</p>
+<sds-section>
+	<div class="mt-2 mb-4 grid grid-cols-2">
+		<div class="">
+			<h2><b>Finding:</b> {{ object }}</h2>
+			<p><b>Last modified:</b> {{ object.updated_at | naturaltime }}</p>
+		</div>
 	</div>
-</div>
 
-<div class='row'>
-	<div class='col-md-6'>
-		<p>Are you sure you want to delete the finding: <strong> {{ object }}</strong> and all of its screenshots?</p>
+	<div class='row'>
+		<div class='col-md-6'>
+			<p>Are you sure you want to delete the finding: <strong> {{ object }}</strong> and all of its screenshots?</p>
+		</div>
 	</div>
-</div>
-<br><br>
-<form action="" method="POST">
-  {% csrf_token %}
-  <sds-button type="submit" variant="danger">Delete</sds-button>
-</form>
+	<br><br>
+	<form action="" method="POST">
+	  {% csrf_token %}
+	  <sds-button type="submit" variant="danger"><img class="w-8 h-8" src="/static/icons/trash-solid-white.svg" style="float:left; padding:3px 6px 0px 0px"> Delete</sds-button>
+	</form>
+</sds-section>
 
+{% endblock %}
 
+{% block scripts %}
+<script>
+	function pageCreated() {
+		this.baseData.layoutArgs.pageTitle = "Delete Finding"
+	}
+</script>
 {% endblock %}

@@ -336,7 +336,7 @@ def insert_df_table(doc, db, df_tag, media_path):
         fname = ele['uploaded_finding_name']
 
         severity = ele['severity']
-        location = ele['assessment_type']
+        assessment_type = ele['assessment_type']
 
         if ele['mitigation']:
             mitigation = "Mitigated"
@@ -360,7 +360,7 @@ def insert_df_table(doc, db, df_tag, media_path):
         df_table.cell(0, 0).text = "ID"
         df_table.cell(0, 1).text = "Finding"
         df_table.cell(0, 2).text = "Severity"
-        df_table.cell(0, 3).text = "Location"
+        df_table.cell(0, 3).text = "Type"
         df_table.cell(0, 4).text = "Mitigation Status"
 
         df_table.cell(1, 0).text = fid
@@ -382,7 +382,7 @@ def insert_df_table(doc, db, df_tag, media_path):
         sev_cell.add_run(xu.xsafe(severity))
         df_table.cell(1, 2).paragraphs[0].runs[0].font.bold = True
         df_table.cell(1, 2).paragraphs[0].runs[1].font.bold = True
-        df_table.cell(1, 3).text = xu.xsafe(location)
+        df_table.cell(1, 3).text = xu.xsafe(assessment_type)
 
         mit_cell = df_table.cell(1, 4).paragraphs[0]
 
@@ -1618,12 +1618,18 @@ def insert_pc_table(doc, db):
             row7 = pc_table.add_row()
 
             pc_table.cell(7, 0).text = "Credentials Harvested"
-            pc_table.cell(7, 1).text = str(ele['creds_harvested'])
+            if str(ele['creds_harvested']) == "None":
+                pc_table.cell(7, 1).text = "N/A"
+            else:
+                pc_table.cell(7, 1).text = str(ele['creds_harvested'])
 
             row8 = pc_table.add_row()
 
             pc_table.cell(8, 0).text = "Users Exploited"
-            pc_table.cell(8, 1).text = str(ele['number_exploited'])
+            if str(ele['number_exploited']) == "None":
+                pc_table.cell(8, 1).text = "N/A"
+            else:
+                pc_table.cell(8, 1).text = str(ele['number_exploited'])
 
             row9 = pc_table.add_row()
 
@@ -1806,7 +1812,7 @@ def generate_ptp_report(template, output, draft, json, media):
     # ---- add findings and kevs
     insert_fs_table(doc, rva_info, "{Table: Findings Summary}")
     insert_df_table(doc, rva_info, "{Table: Detailed Findings}", media)
-    insert_kev_table(doc, rva_info, "{Table: KEVs}")
+    #insert_kev_table(doc, rva_info, "{Table: KEVs}")
 
     # ---- add additional service sections
     insert_ransomware(doc, rva_info)

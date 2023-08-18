@@ -162,6 +162,19 @@ class UploadedFindingUpdateView(generic.edit.UpdateView):
         for deleted in deletedScreenshots:
             deleted.delete()
 
+        sev_map = {'Critical': 10, 'High': 8, 'Medium': 5, 'Low': 3, 'Informational': 1}
+        kev_map = {'True': 10, 'False': 1}
+        if finding.KEV.count() > 0:
+            kev = "True"
+        else:
+            kev = "False"
+        mag = finding.magnitude
+        prob = finding.probability
+        score = sev_map[postData['findingSeverity']] + kev_map[kev] + mag + prob
+
+        finding.risk_score = score
+        finding.save()
+
         return HttpResponse(status=200)
 
 
@@ -219,6 +232,16 @@ class UploadedFindingCreateView(generic.edit.CreateView):
         base_finding = BaseFinding.objects.filter(pk=postData['selectedFinding']['pk']).first()
         severity = Severities.objects.filter(severity_name=postData['findingSeverity']).first()
 
+        sev_map = {'Critical': 10, 'High': 8, 'Medium': 5, 'Low': 3, 'Informational': 1}
+        kev_map = {'True': 10, 'False': 1}
+        if len(kevs) > 0:
+            kev = "True"
+        else:
+            kev = "False"
+        mag = 0
+        prob = 0
+        score = sev_map[postData['findingSeverity']] + kev_map[kev] + mag + prob
+
         try:
             finding = UploadedFinding.objects.create(
                 finding = base_finding,
@@ -232,7 +255,8 @@ class UploadedFindingCreateView(generic.edit.CreateView):
                 severity = severity,
                 assessment_type = postData['assessmentType'],
                 mitigation = False if postData['findingMitigation'] == 'False' else True,
-                screenshot_description = postData['screenshotDescription']
+                screenshot_description = postData['screenshotDescription'],
+                risk_score = score
             )
         except Exception as e:
             print(e)

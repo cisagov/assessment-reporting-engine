@@ -1,14 +1,17 @@
 ---
+
 version: '3.7'
 
 services:
   db:
+    container_name: prod-db-1
     build:
       context: .
       dockerfile: docker/prod/Dockerfile.db
     volumes:
       - postgres_data:/var/lib/postgresql/data/
   web:
+    container_name: prod-web-1
     build:
       context: .
       dockerfile: docker/prod/Dockerfile.web
@@ -21,6 +24,7 @@ services:
       # to mount the directory and edit files (and comment out the .:/code)
       - .:/code
   nginx:
+    container_name: prod-nginx-1
     build:
       context: docker/prod/nginx
       dockerfile: Dockerfile.nginx

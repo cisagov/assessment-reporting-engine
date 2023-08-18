@@ -157,10 +157,13 @@ def add_hyperlink(para, link_text, link_address):
     hlink.address = link_address
 
 
-def add_tag(shapes, tag_type, label):
+def add_tag(shapes, tag_type, label, size):
 
     if tag_type == "severity":
-        tag = shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(1.64), Inches(6.69), Inches(1.83), Inches(0.42))
+        if size:
+            tag = shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(2.41), Inches(6.69), Inches(1.83), Inches(0.42))
+        else:
+            tag = shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(1.64), Inches(6.69), Inches(1.83), Inches(0.42))
         tag.fill.solid()
 
         if label == "Critical":
@@ -180,7 +183,10 @@ def add_tag(shapes, tag_type, label):
             tag.line.color.rgb = info
 
     elif tag_type == "mitigation":
-        tag = shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(4.09), Inches(6.69), Inches(1.83), Inches(0.42))
+        if size:
+            tag = shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(5.46), Inches(6.69), Inches(1.83), Inches(0.42))
+        else:
+            tag = shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(4.09), Inches(6.69), Inches(1.83), Inches(0.42))
         tag.fill.solid()
 
         if label == "Mitigated":
@@ -191,7 +197,10 @@ def add_tag(shapes, tag_type, label):
             tag.line.color.rgb = crit
 
     else:
-        tag = shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(6.53), Inches(6.69), Inches(1.83), Inches(0.42))
+        if size:
+            tag = shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(8.51), Inches(6.69), Inches(1.83), Inches(0.42))
+        else:
+            tag = shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(6.53), Inches(6.69), Inches(1.83), Inches(0.42))
         tag.fill.solid()
         tag.fill.fore_color.rgb = crit
         tag.line.color.rgb = crit
@@ -287,7 +296,7 @@ def insert_agenda_slide(prs, report_type):
     slide = prs.slides.add_slide(agenda_slide_layout)
 
 
-def insert_logistics(prs, report_type, rva_info):
+def insert_logistics(prs, report_type, rva_info, slide_size):
     """Inserts the slide with details of the timeframe from the engagement.
 
     Args:
@@ -307,7 +316,10 @@ def insert_logistics(prs, report_type, rva_info):
 
     # date table
     cols = 2
-    left = Inches(0.65)
+    if slide_size:
+        left = Inches(2.31)
+    else:
+        left = Inches(0.65)
     top = Inches(1.58)
     width = Inches(8.71)
     height = Inches(1.2)
@@ -370,7 +382,10 @@ def insert_logistics(prs, report_type, rva_info):
     # poc table
     rows = 2
     cols = 2
-    left = Inches(0.65)
+    if slide_size:
+        left = Inches(2.31)
+    else:
+        left = Inches(0.65)
     top = Inches(3.12)
     width = Inches(8.71)
     height = Inches(0.8)
@@ -409,7 +424,10 @@ def insert_logistics(prs, report_type, rva_info):
     # rva team table
     rows = 5
     cols = 2
-    left = Inches(0.65)
+    if slide_size:
+        left = Inches(2.31)
+    else:
+        left = Inches(0.65)
     top = Inches(4.25)
     width = Inches(8.71)
     height = Inches(2)
@@ -721,7 +739,7 @@ def insert_OSINT_slide(prs, report_type, rva_info):
     run.text = creds_validated + " sets of credentials were validated."
 
 
-def insert_findings_slides(prs, report_type, rva_info, ss_info, media_path):
+def insert_findings_slides(prs, report_type, rva_info, ss_info, media_path, slide_size):
     """Generates the slides for each finding in the assessment.
 
     Args:
@@ -784,7 +802,10 @@ def insert_findings_slides(prs, report_type, rva_info, ss_info, media_path):
         # findings summary table
         rows = len(chunk) + 1
         cols = 3
-        left = Inches(0.65)
+        if slide_size:
+            left = Inches(2.32)
+        else:
+            left = Inches(0.65)
         top = Inches(1.5)
         width = Inches(8.71)
         height = Inches(rows * 0.4)
@@ -857,15 +878,15 @@ def insert_findings_slides(prs, report_type, rva_info, ss_info, media_path):
             shapes = slide.shapes
             shapes.title.text = finding['name']
 
-            add_tag(shapes, "severity", severity)
+            add_tag(shapes, "severity", severity, slide_size)
 
             if mitigation:
-                add_tag(shapes, "mitigation", "Mitigated")
+                add_tag(shapes, "mitigation", "Mitigated", slide_size)
             else:
-                add_tag(shapes, "mitigation", "Not Mitigated")
+                add_tag(shapes, "mitigation", "Not Mitigated", slide_size)
 
             if kev:
-                add_tag(shapes, "kev", "KEV")
+                add_tag(shapes, "kev", "KEV", slide_size)
 
         else:
             for screenshot in screenshots:
@@ -877,21 +898,22 @@ def insert_findings_slides(prs, report_type, rva_info, ss_info, media_path):
                 shapes.title.text = finding['name']
 
                 sfile = media_path + ssf['file']
-                (x, y, w, h) = iu.get_screenshot_dimensions(sfile, "finding")
+                (x, y, w, h) = iu.get_screenshot_dimensions(sfile, "finding", slide_size)
 
                 shapes.add_picture(sfile, Inches(x), Inches(y), width=Inches(w), height=Inches(h))
                 slide.placeholders[12].text = ssf['caption']
 
-                add_tag(shapes, "severity", severity)
+                add_tag(shapes, "severity", severity, slide_size)
 
                 if mitigation:
-                    add_tag(shapes, "mitigation", "Mitigated")
+                    add_tag(shapes, "mitigation", "Mitigated", slide_size)
                 else:
-                    add_tag(shapes, "mitigation", "Not Mitigated")
+                    add_tag(shapes, "mitigation", "Not Mitigated", slide_size)
 
                 if kev:
-                    add_tag(shapes, "kev", "KEV")
+                    add_tag(shapes, "kev", "KEV", slide_size)
 
+    """
     kevs = []
 
     for cnt, kev in enumerate(af.model_gen(rva_info, 'ptportal.kev')):
@@ -946,12 +968,14 @@ def insert_findings_slides(prs, report_type, rva_info, ss_info, media_path):
                 table.cell(count + 1, i).text_frame.paragraphs[0].runs[0].font.size = Pt(11)
                 table.cell(count + 1, i).text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
                 table.cell(count + 1, i).vertical_anchor = MSO_ANCHOR.MIDDLE
+    """
 
 
-def insert_services_slides(prs, rva_info):
+def insert_services_slides(prs, rva_info, slide_size):
 
     # insert ransomware slide
     if af.get_db_info(rva_info, 'ransomwarescenarios', 'NA') is not None or af.get_db_info(rva_info, 'ransomware', 'NA') is not None:
+
         ransomware_slide_layout = prs.slide_layouts[4]
         slide = prs.slides.add_slide(ransomware_slide_layout)
         ransomware_placeholder = slide.placeholders[1].text_frame
@@ -959,18 +983,19 @@ def insert_services_slides(prs, rva_info):
         title = slide.shapes.title
         title.text = "RANSOMWARE SUSCEPTIBILITY"
 
-        vuln = 0
-        total = 0
-        if af.get_db_info(rva_info, 'ransomwarescenarios.fields.vuln', 'NA') != '<not set: NA>':
-            vuln = int(af.get_db_info(rva_info, 'ransomwarescenarios.fields.vuln', 'NA'))
-        if af.get_db_info(rva_info, 'ransomwarescenarios.fields.total', 'NA') != '<not set: NA>':
-            total = int(af.get_db_info(rva_info, 'ransomwarescenarios.fields.total', 'NA'))
+        if af.get_db_info(rva_info, 'ransomwarescenarios', 'NA') is not None:
+            vuln = 0
+            total = 0
+            if af.get_db_info(rva_info, 'ransomwarescenarios.fields.vuln', 'NA') != '<not set: NA>':
+                vuln = int(af.get_db_info(rva_info, 'ransomwarescenarios.fields.vuln', 'NA'))
+            if af.get_db_info(rva_info, 'ransomwarescenarios.fields.total', 'NA') != '<not set: NA>':
+                total = int(af.get_db_info(rva_info, 'ransomwarescenarios.fields.total', 'NA'))
 
-        paragraph = ransomware_placeholder.paragraphs[0]
-        paragraph.level = 1
-        run = paragraph.add_run()
-        run.text = f"During ransomware simulation, the CISA team found that endpoints are vulnerable to {vuln} out of the {total} ransomware scenarios tested."
-        paragraph.font.color.rgb = gray
+            paragraph = ransomware_placeholder.paragraphs[0]
+            paragraph.level = 1
+            run = paragraph.add_run()
+            run.text = f"During ransomware simulation, the CISA team found that endpoints are vulnerable to {vuln} out of the {total} ransomware scenarios tested."
+            paragraph.font.color.rgb = gray
 
         ransomware_results = []
 
@@ -1112,7 +1137,10 @@ def insert_services_slides(prs, rva_info):
         # data exfil table
         rows = len(data_exfil_results) + 1
         cols = 4
-        left = Inches(0.65)
+        if slide_size:
+            left = Inches(2.32)
+        else:
+            left = Inches(0.65)
         top = Inches(1.5)
         width = Inches(8.71)
         height = Inches(rows * 0.4)
@@ -1208,7 +1236,10 @@ def insert_services_slides(prs, rva_info):
             # payload table
             rows = len(chunk) + 1
             cols = 4
-            left = Inches(0.65)
+            if slide_size:
+                left = Inches(2.32)
+            else:
+                left = Inches(0.65)
             top = Inches(1.5)
             width = Inches(8.71)
             height = Inches(rows * 0.4)
@@ -1235,7 +1266,10 @@ def insert_services_slides(prs, rva_info):
 
             for cnt, item in enumerate(chunk):
                 cell_text(table, cnt + 1, 0, item['description'], color=gray)
-                cell_text(table, cnt + 1, 1, item['protocol'], color=gray)
+                if item['protocol'] == "":
+                    cell_text(table, cnt + 1, 1, " ", color=gray)
+                else:
+                    cell_text(table, cnt + 1, 1, item['protocol'], color=gray)
 
                 host_cell = table.cell(cnt + 1, 2).text_frame.paragraphs[0]
                 host_color = host_cell.add_run()
@@ -1301,7 +1335,10 @@ def insert_services_slides(prs, rva_info):
             # phishing campaign table
             rows = 10
             cols = 2
-            left = Inches(0.65)
+            if slide_size:
+                left = Inches(2.32)
+            else:
+                left = Inches(0.65)
             top = Inches(1.5)
             width = Inches(8.71)
             height = Inches(rows * 0.4)
@@ -1352,8 +1389,14 @@ def insert_services_slides(prs, rva_info):
             cell_text(table, 4, 1, str(c['total']), color=gray)
             cell_text(table, 5, 1, str(c['unique']), color=gray)
             cell_text(table, 6, 1, time_to_first_click, color=gray)
-            cell_text(table, 7, 1, str(c['harvest']), color=gray)
-            cell_text(table, 8, 1, str(c['exploit']), color=gray)
+            if str(c['harvest']) == "None":
+                cell_text(table, 7, 1, "N/A", color=gray)
+            else:
+                cell_text(table, 7, 1, str(c['harvest']), color=gray)
+            if str(c['exploit']) == "None":
+                cell_text(table, 8, 1, "N/A", color=gray)
+            else:
+                cell_text(table, 8, 1, str(c['exploit']), color=gray)
             cell_text(table, 9, 1, length, color=gray)
 
             for i in range(1, 10):
@@ -1368,7 +1411,7 @@ def insert_services_slides(prs, rva_info):
         print("No phishing campaign data.")
 
 
-def insert_attack_paths(prs, rva_info, ss_info, media_path):
+def insert_attack_paths(prs, rva_info, ss_info, media_path, slide_size):
     # ---- add Attack Path Section Slide
     title_only = prs.slide_layouts[11]
     slide = prs.slides.add_slide(title_only)
@@ -1386,7 +1429,7 @@ def insert_attack_paths(prs, rva_info, ss_info, media_path):
 
         if ele['file']:
             dfile = media_path + ele['file']
-            (x, y, w, h) = iu.get_screenshot_dimensions(dfile, "path")
+            (x, y, w, h) = iu.get_screenshot_dimensions(dfile, "path", slide_size)
 
             shapes.add_picture(dfile, Inches(x), Inches(y), width=Inches(w), height=Inches(h))
             slide.placeholders[12].text = ele['caption']
@@ -1497,7 +1540,7 @@ def insert_conclusion_slides(prs, rva_info):
     slide = prs.slides.add_slide(final_layout)
 
 
-def generate_ptp_slides(template, output, draft, json, media):
+def generate_ptp_slides(template, output, draft, json, media, size):
     """Generates an outbrief for the current assessment.
 
     Args:
@@ -1525,13 +1568,13 @@ def generate_ptp_slides(template, output, draft, json, media):
     insert_title_slide(prs, report_type, rva_info, draft)
     insert_notice_slide(prs, report_type)
     insert_agenda_slide(prs, report_type)
-    insert_logistics(prs, report_type, rva_info)
+    insert_logistics(prs, report_type, rva_info, size)
     insert_scope_slide(prs, report_type, rva_info, ip_ext_scan, ip_ext_disc, ip_int_scan, ip_int_disc)
     insert_goals_slide(prs, report_type)
 
-    insert_findings_slides(prs, report_type, rva_info, ss_info, media)
-    insert_services_slides(prs, rva_info)
-    insert_attack_paths(prs, rva_info, ss_info, media)
+    insert_findings_slides(prs, report_type, rva_info, ss_info, media, size)
+    insert_services_slides(prs, rva_info, size)
+    insert_attack_paths(prs, rva_info, ss_info, media, size)
 
     insert_conclusion_slides(prs, rva_info)
 
@@ -1564,10 +1607,15 @@ def main():
         default="./",
         help="Location of screenshots, etc.",
     )
+    parser.add_argument(
+        "-s",
+        "--size",
+        action="store_true", help="Slide size indicator"
+    )
     args = parser.parse_args()
 
     generate_ptp_slides(
-        args.TEMPLATE, args.output_file, args.draft, args.json_file, args.media_path
+        args.TEMPLATE, args.output_file, args.draft, args.json_file, args.media_path, args.size
     )
 
 

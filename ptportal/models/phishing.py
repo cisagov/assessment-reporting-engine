@@ -57,19 +57,20 @@ class Campaign(abstract_models.TimeStampedModel):
     )
     
     time_to_first_click = models.DurationField(
-        default=datetime.time.min,
+        default=datetime.timedelta(days=0, hours=0, minutes=0, seconds=0),
+        null=True,
         blank=True,
         verbose_name="Time to First Click"
     )
 
     creds_harvested = models.PositiveIntegerField(
-        default=0,
+        null=True,
         blank=True,
         verbose_name="Credentials Harvested"
     )
 
     number_exploited = models.PositiveIntegerField(
-        default=0,
+        null=True,
         blank=True,
         verbose_name="Users Exploited"
     )
@@ -176,3 +177,34 @@ class Payload(abstract_models.TimeStampedModel):
     class Meta:
         verbose_name_plural = "Payload Testing Results"
         ordering = ["order"]
+
+
+class SecuritySolution(abstract_models.TimeStampedModel):
+    security_solution_name = models.CharField(
+        blank=True,
+        max_length=200,
+        verbose_name="Security Solution Name"
+    )
+
+    used = models.BooleanField(
+        default=False, 
+        blank=True
+    )
+    
+    order = models.PositiveIntegerField(
+        blank=True, 
+        default=1
+    )
+
+    def save(self, *args, **kwargs):
+        super().full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.security_solution_name
+
+    class Meta:
+        verbose_name_plural = "Security Solutions"
+        ordering = ["order"]
+
+

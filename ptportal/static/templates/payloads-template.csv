@@ -1,0 +1,3 @@
+﻿Description,Protocol,Border,Host
+Example Payload 1,HTTPS,B,B
+Example Payload 2,DNS,N,N

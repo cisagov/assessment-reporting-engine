@@ -48,29 +48,27 @@ DM22-1011
 {% endblock %}
 
 {% block content %}
-<div class="header">
-  <h2> Ransomware Susceptibility</h2>
-</div>
-<br>
-
 <div class="col-span-5">
   {% csrf_token %}
     <sds-section class="col-span-5" type="accented">
         <span class="border-top border-dark"></span>
-            <template #title><b>RANSOMWARE SUSCEPTIBILITY</b></template>
+            <template #title><b>RESULTS</b></template>
             <!-- Ransomware Scenarios -->
               <sds-section>
                 <div style="float:left; padding: 10px 0px 0px 0px">Endpoints were found to be vulnerable to </div>
                 <div style="width:70px; float:left; padding: 0px 10px 0px 10px">
-                <sds-input v-model="formData.vuln" placeholder="#"></sds-input>
+                <sds-input v-model="formData.vuln" placeholder="#" :maxlength="2"></sds-input>
                 </div>
                 <div style="float:left; padding: 10px 0px 0px 0px;">/</div>
                 <div style="width:70px; float:left; padding: 0px 10px 0px 10px">
-                <sds-input v-model="formData.total" placeholder="#"></sds-input>
+                <sds-input v-model="formData.total" placeholder="#" :maxlength="2"></sds-input>
                 </div>
                 <div style="float:left; padding: 10px 0px 0px 0px"> of the ransomware scenarios that were tested.</div>
               </sds-section>
-              <br><br><br>
+              <br>
+              <sds-section>
+                <p>For any tests in the table below that were not performed, select the 'Disable' button to indicate no testing was done.</p>
+              </sds-section>
               <!-- Ransomware Table -->
               <sds-section>
                 <div class="mb-8">
@@ -105,8 +103,9 @@ DM22-1011
                   </sds-table>
                 </div>
               </sds-section>
+              <sds-button variant="primary" class="float-right" @click="submitRansomware"><img class="w-8 h-8" src="/static/icons/floppy-disk-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Save</sds-button>
+              <br><br>
           </sds-section>
-    <sds-button variant="primary" class="float-right" @click="submitRansomware"><i class="fas fa-save"></i> Save</sds-button>
 </div>
 {% endblock %}
 
@@ -155,7 +154,7 @@ DM22-1011
         date: null,
         max: null,
         min: null,
-        mode: 'dateTime',
+        mode: 'date',
         size: 'md'
       },
     }
@@ -196,27 +195,106 @@ DM22-1011
 
   }
 
+  function pageCreated() {
+    this.baseData.layoutArgs.pageTitle = "Ransomware Susceptibility"
+  }
+
   function pageMethods() {
     pageFunctions = {
       submitRansomware: function() {
-        formattedData = JSON.parse(JSON.stringify(this.formData))
-        formattedData['results'] = JSON.parse(JSON.stringify(this.ranTableArgs.items))
+        if (Number.isInteger(Number(this.formData.vuln)) && Number.isInteger(Number(this.formData.total))) {
+          scenarios_error = false
+        }
 
-        fetch(window.location.href, {
-          method: "POST",
-          body: JSON.stringify(formattedData),
-          credentials: "same-origin",
-          headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
-        }).then(response => {
-          if(response.ok) {
-            this.displayNotification({title: "Ransomware Susceptibility Results Saved", variant:"success", text: "Ransomware Susceptibility results saved successfully."})
+        else if (this.formData.vuln == "" && this.formData.total == "") {
+          scenarios_error = false
+        }
+
+        else {
+          scenarios_error = true
+        }
+
+        if (Number(this.formData.vuln) <= Number(this.formData.total)) {
+          vuln_error = false
+        }
+
+        else {
+          vuln_error = true
+        }
+
+        dates_error = false
+
+        this.ranTableArgs.items.forEach(element => {
+
+          if (element.trigger == false) {
+            element.time_end = null
+          }
+
+          if (element.disabled == 1) {
+            element.time_start = null
+            element.time_end = null
+          }
+
+          if (element.time_start != null) {
+            start = new Date(element.time_start)
           }
           else {
-            this.displayNotification({text: "Bad response received from server. Check for errors in forms and try again.", title: "Error saving data", variant:"danger"})
+            start = null
           }
-        }).catch(error => {
-          this.displayNotification({text: error, title: "Error saving data", variant:"danger"})
+
+          if (element.time_end != null) {
+            end = new Date(element.time_end)
+          }
+          else {
+            end = null
+          }
+
+          if ((start == null) && (end == null)) {
+            return
+          }
+
+          else if ((start > end) && (end != null)) {
+            dates_error = true
+          }
+
         })
+
+        if (scenarios_error) {
+          this.displayNotification({title: "Error Saving Data", text: "Please enter valid integers for number of vulnerable and tested scenarios or leave both fields blank if scenarios were not tested.", variant: "warning", autoHideDelay:10000})
+          scenarios_error = false
+        }
+
+        else if (vuln_error) {
+          this.displayNotification({title: "Error Saving Data", text: "Please ensure the number of vulnerable scenarios does not exceed the total number of scenarios tested.", variant: "warning", autoHideDelay:10000})
+          vuln_error = false
+        }
+        
+        else if (dates_error) {
+          this.displayNotification({title: "Error Saving Data", text: "Please ensure all test start times are logged as a date/time that precedes or is equal to the detection/prevention time.", variant: "warning", autoHideDelay:10000})
+          dates_error = false
+        }
+
+        else {
+          formattedData = JSON.parse(JSON.stringify(this.formData))
+          formattedData['results'] = JSON.parse(JSON.stringify(this.ranTableArgs.items))
+
+          fetch(window.location.href, {
+            method: "POST",
+            body: JSON.stringify(formattedData),
+            credentials: "same-origin",
+            headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
+          }).then(response => {
+            if(response.ok) {
+              this.displayNotification({title: "Ransomware Data Saved", variant:"success", text: "Ransomware data saved successfully. Please wait while the page refreshes..."})
+              setTimeout(() => {this.redirectLink("{% url 'ransomware' %}")}, 2000)
+            }
+            else {
+              this.displayNotification({text: "Bad response received from server. Check for errors in forms and try again.", title: "Error Saving Data", variant:"danger"})
+            }
+          }).catch(error => {
+            this.displayNotification({text: error, title: "Error Saving Data", variant:"danger"})
+          })
+        }
       }
     }
 

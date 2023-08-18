@@ -27,8 +27,6 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
 
-from ptportal.validators import scope_validator
-
 from . import abstract_models
 from . import findings
 from . import report
@@ -218,25 +216,25 @@ class EngagementMeta(abstract_models.TimeStampedModel):
         verbose_name="Traffic Light Protocol",
         choices=TLP_CHOICES,
         blank=True,
-        help_text="Select which TLP the generated report will be marked with",
+        help_text="Select what TLP marking should be added to the generated report",
         null=True,
     )
 
     # Stakeholder Information
     customer_long_name = models.CharField(
-        max_length=200, blank=True, unique=True, verbose_name="Customer Long Name"
+        max_length=200, blank=True, unique=True, verbose_name="Stakeholder Name"
     )
     customer_initials = models.CharField(
-        max_length=20, blank=True, verbose_name="Customer Initials"
+        max_length=20, blank=True, verbose_name="Stakeholder Abbreviation"
     )
     customer_POC_name = models.CharField(
-        max_length=100, blank=True, verbose_name="Customer POC"
+        max_length=100, blank=True, verbose_name="Point of Contact Name"
     )
     customer_POC_email = models.EmailField(
         max_length=100,
         blank=True,
         validators=[EmailValidator()],
-        verbose_name="Customer POC \n" + "Email Address",
+        verbose_name="Point of Contact Email",
     )
     customer_state = models.CharField(
         max_length=20,
@@ -305,13 +303,13 @@ class EngagementMeta(abstract_models.TimeStampedModel):
     ext_scope = models.TextField(
         blank=True,
         verbose_name="In Scope IP Addresses/Domain Names",
-        help_text="Enter as a list of commas, space, and/or new line separated IPs, Ranges, and CIDRs",
+        help_text="Enter as a list of comma or new line delimited IPs, Ranges, and/or CIDRs",
         null=True,
     )
     ext_excluded_scope = models.TextField(
         blank=True,
         verbose_name="Out of Scope IP Addresses/Domain Names",
-        help_text="Enter as a list of commas, space, and/or new line separated IPs, Ranges, and CIDRs",
+        help_text="Enter as a list of comma or new line delimited IPs, Ranges, and/or CIDRs",
         null=True,
     )
 
@@ -333,20 +331,20 @@ class EngagementMeta(abstract_models.TimeStampedModel):
     int_scope = models.TextField(
         blank=True,
         verbose_name="In Scope IP Addresses/Domain Names",
-        help_text="Enter as a list of commas, space, and/or new line separated IPs, Ranges, and CIDRs",
+        help_text="Enter as a list of comma, space, and/or new line delimited IPs, Ranges, and/or CIDRs",
         null=True,
     )
     int_excluded_scope = models.TextField(
         blank=True,
         verbose_name="Out of Scope IP Addresses/Domain Names",
-        help_text="Enter as a list of commas, space, and/or new line separated IPs, Ranges, and CIDRs",
+        help_text="Enter as a list of comma, space, and/or new line delimited IPs, Ranges, and/or CIDRs",
         null=True,
     )
 
     phishing_domains = models.TextField(
         blank=True,
         verbose_name="In Scope Mail Domains for Phishing",
-        help_text="Enter a list of comma, space, and/or new line separated mail domains associated with in-scope phishing targets",
+        help_text="Enter a list of comma, space, and/or new line delimited mail domains associated with in-scope phishing targets",
         null=True,
     )
 
@@ -543,24 +541,24 @@ def pre_save_engagement(sender, instance, **kwargs):
         instance.fy = date.year + 1
 
 
-@receiver(signals.post_save, sender=EngagementMeta)
-def post_save_engagement(sender, instance, **kwargs):
-    r = report.Report.object()
-    if r.report_type == 'HVA':
-        if HVAData.objects.exists():
-            hva_obj = HVAData.objects.first()
-            hva_obj.asmt_id = instance.asmt_id
-            hva_obj.agency = instance.customer_long_name
-            hva_obj.federal_lead = instance.team_lead_name
-            hva_obj.save()
-        else:
-            hva_obj = HVAData.objects.create(
-                asmt_id=instance.asmt_id,
-                agency=instance.customer_long_name,
-                federal_lead=instance.team_lead_name,
-            )
-    if HVATarget.objects.exists():
-        hva_obj.target.add(*HVATarget.objects.all())
+#@receiver(signals.post_save, sender=EngagementMeta)
+#def post_save_engagement(sender, instance, **kwargs):
+#    r = report.Report.object()
+#    if r.report_type == 'HVA':
+#        if HVAData.objects.exists():
+#            hva_obj = HVAData.objects.first()
+#            hva_obj.asmt_id = instance.asmt_id
+#            hva_obj.agency = instance.customer_long_name
+#            hva_obj.federal_lead = instance.team_lead_name
+#            hva_obj.save()
+#        else:
+#            hva_obj = HVAData.objects.create(
+#                asmt_id=instance.asmt_id,
+#                agency=instance.customer_long_name,
+#                federal_lead=instance.team_lead_name,
+#            )
+#    if HVATarget.objects.exists():
+#        hva_obj.target.add(*HVATarget.objects.all())
 
 
 #@receiver(signals.pre_delete, sender=EngagementMeta)

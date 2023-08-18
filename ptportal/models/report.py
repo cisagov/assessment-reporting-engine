@@ -14,7 +14,6 @@
 
 # DM22-0744
 from django.db import models
-from ptportal.validators import scope_validator
 
 from . import abstract_models
 from . import engagement, findings

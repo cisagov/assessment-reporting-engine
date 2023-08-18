@@ -4,12 +4,14 @@ version: '3.7'
 
 services:
   db:
+    container_name: dev-db-1
     build:
       context: .
       dockerfile: docker/dev/Dockerfile.db
     volumes:
       - postgres_data:/var/lib/postgresql/data/
   web:
+    container_name: dev-web-1
     build:
       context: .
       dockerfile: docker/dev/Dockerfile.web

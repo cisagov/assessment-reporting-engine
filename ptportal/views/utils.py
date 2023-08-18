@@ -26,7 +26,6 @@ from django.core import serializers as JSONserializers
 from rest_framework import serializers
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.text import slugify
-from iptools import IpRange
 from cairosvg import svg2png
 
 from rest_framework.renderers import JSONRenderer
@@ -334,15 +333,25 @@ def generateEntryJson(filename):
     campaign_list = []
 
     for campaign in campaigns:
+        if str(campaign.creds_harvested) == "None":
+            creds_harvested = "N/A"
+        else:
+            creds_harvested = campaign.creds_harvested
+
+        if str(campaign.number_exploited) == "None":
+            number_exploited = "N/A"
+        else:
+            number_exploited = campaign.number_exploited
+
         campaign_list.append({
             'emails_sent': campaign.emails_sent,
             'emails_delivered': campaign.emails_delivered,
             'total_clicks': campaign.total_clicks,
             'unique_clicks': campaign.unique_clicks,
             'time_to_first_click': str(campaign.time_to_first_click),
-            'users_exploited': campaign.number_exploited,
+            'users_exploited': number_exploited,
             'length_of_campaign': campaign.length_of_campaign,
-            'credentials_harvested': campaign.creds_harvested
+            'credentials_harvested': creds_harvested
         })
 
     payloads = Payload.objects.all()

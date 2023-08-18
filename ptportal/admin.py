@@ -59,7 +59,8 @@ allModels = [
     Ransomware,
     RansomwareScenarios,
     ATTACK,
-    Tools
+    Tools,
+    SecuritySolution
 ]
 
 # registering list of models
