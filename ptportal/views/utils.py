@@ -253,11 +253,15 @@ def generateEntryJson(filename):
     start_date = ""
     end_date = ""
 
-    if engagement.ext_start_date < engagement.int_start_date:
-        start_date = engagement.ext_start_date
-        end_date = engagement.int_start_date
+    if report.report_type == "RVA":
+        if engagement.ext_start_date < engagement.int_start_date:
+            start_date = engagement.ext_start_date
+            end_date = engagement.int_start_date
+        else:
+            start_date = engagement.int_start_date
+            end_date = engagement.ext_end_date
     else:
-        start_date = engagement.int_start_date
+        start_date = engagement.ext_start_date
         end_date = engagement.ext_end_date
 
     if end_date.month < 10:
@@ -294,13 +298,24 @@ def generateEntryJson(filename):
         else:
             kev = False
 
-        total_risk_score += finding.risk_score
+        if report.report_type == "RVA":
+            total_risk_score += finding.risk_score
 
-        if not finding.mitigation:
-            mitigated_risk_score += finding.risk_score
-            mitigation_status = "No Action Taken"
+            if not finding.mitigation:
+                mitigated_risk_score += finding.risk_score
+                mitigation_status = "No Action Taken"
+            else:
+                mitigation_status = "Fully Mitigated"
+
+            finding_risk_score = finding.risk_score
+
         else:
-            mitigation_status = "Fully Mitigated"
+            if not finding.mitigation:
+                mitigation_status = "No Action Taken"
+            else:
+                mitigation_status = "Fully Mitigated"
+
+            finding_risk_score = 0
 
         findings_list.append({
             'finding_category': str(finding.finding.category),
@@ -318,7 +333,7 @@ def generateEntryJson(filename):
             'cmmc': "",
             'nist_800_53': finding.NIST_800_53,
             'nist_csf': finding.NIST_CSF,
-            'finding_risk_score': str(finding.risk_score)
+            'finding_risk_score': finding_risk_score
         })
 
     asmt_data['findings'] = {
@@ -446,15 +461,16 @@ def generateEntryJson(filename):
     if RansomwareScenarios.objects.first():
         vuln_ransomware_scenarios = RansomwareScenarios.objects.first().vuln
     else:
-        vuln_ransomware_scenarios = "N/A"
-    security_solution_detection = "N/A"
-    time_to_solution_detection = "N/A"
-    security_solution_prevention = "N/A"
-    time_to_solution_prevention = "N/A"
-    security_personnel_detection = "N/A"
-    time_to_personnel_detection = "N/A"
-    end_user_detection = "N/A"
-    time_to_user_detection = "N/A"
+        vuln_ransomware_scenarios = ""
+
+    security_solution_detection = ""
+    time_to_solution_detection = ""
+    security_solution_prevention = ""
+    time_to_solution_prevention = ""
+    security_personnel_detection = ""
+    time_to_personnel_detection = ""
+    end_user_detection = ""
+    time_to_user_detection = ""
 
     for item in ransomware:
         if "detected by security software" in item.description:
