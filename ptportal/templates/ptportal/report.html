@@ -373,7 +373,7 @@ DM22-1011
             {% endif %}
             {% if payloads %}
             <h1>Payload Testing Results</h1>
-            <p>During payload testing with {{ eng_meta.customer_long_name }}, a manual exception was/was not necessary for the test email to reach the target inbox. Browser name was used to download the payloads and was deemed a primary browser used by {{ eng_meta.customer_long_name }} users.</p>
+            <p>During payload testing with {{ eng_meta.customer_long_name }}, a manual exception {% if report.exception %}{{ report.exception }}{% else %}<b>[MISSING VALUE: WAS/WAS NOT]</b>{% endif %} necessary for the test email to reach the target inbox. {% if report.browser %}{{ report.browser }}{% else %}<b>[MISSING VALUE: BROWSER NAME]</b>{% endif %} was used to download the payloads and was deemed a primary browser used by {{ eng_meta.customer_long_name }} users.</p>
             <p>While it is good to have strong filters and configurations in place to protect users from phishing attacks, it is important to note that a determined adversary could likely circumvent mail and browser filters if an established, trusted domain was used. For this reason, all recommendations outlined in this report are important considerations for defense-in-depth.</p>
             <p>For the purpose of this testing, border protection refers to the ability to make an outbound connection from the internal network to the assessment team-controlled C2 server. If this connection can be made over a particular protocol, it is assumed that all payloads utilizing the same protocol would not be blocked at the border.</p>
             <table class="table-prose" id="payload-table">
@@ -987,17 +987,17 @@ DM22-1011
     		steps = []
 
         	{% for technique in path.attack.all %}
-            	techniques.push("{{technique.name}}")
+            	techniques.push("{{technique.name|escapejs}}")
         	{% endfor %}
 
         	{% for tool in path.tools.all %}
-            	tools.push({name: "{{tool.name}}", url: "{{tool.url}}"})
+            	tools.push({name: "{{tool.name|escapejs}}", url: "{{tool.url|escapejs}}"})
         	{% endfor %}
 
         	{% for step in phishing_steps %}
         		{% if step.narrative == path %}
         			screenshotURL = window.location.origin + "/media/" + "{{step.file}}"
-        			steps.push({order: "{{step.order}}", description: "{{step.description}}", url: screenshotURL, caption: "{{step.caption}}"})
+        			steps.push({order: "{{step.order}}", description: "{{step.description|escapejs}}", url: screenshotURL, caption: "{{step.caption|escapejs}}"})
         		{% endif %}
         	{% endfor %}
 
@@ -1017,13 +1017,13 @@ DM22-1011
         	{% endfor %}
 
         	{% for tool in path.tools.all %}
-            	tools.push({name: "{{tool.name}}", url: "{{tool.url}}"})
+            	tools.push({name: "{{tool.name|escapejs}}", url: "{{tool.url|escapejs}}"})
         	{% endfor %}
 
         	{% for step in external_steps %}
         		{% if step.narrative == path %}
         			screenshotURL = window.location.origin + "/media/" + "{{step.file}}"
-        			steps.push({order: "{{step.order}}", description: "{{step.description}}", url: screenshotURL, caption: "{{step.caption}}"})
+        			steps.push({order: "{{step.order}}", description: "{{step.description|escapejs}}", url: screenshotURL, caption: "{{step.caption|escapejs}}"})
         		{% endif %}
         	{% endfor %}
 
@@ -1039,17 +1039,17 @@ DM22-1011
     		steps = []
 
         	{% for technique in path.attack.all %}
-            	techniques.push("{{technique.name}}")
+            	techniques.push("{{technique.name|escapejs}}")
         	{% endfor %}
 
         	{% for tool in path.tools.all %}
-            	tools.push({name: "{{tool.name}}", url: "{{tool.url}}"})
+            	tools.push({name: "{{tool.name|escapejs}}", url: "{{tool.url|escapejs}}"})
         	{% endfor %}
 
         	{% for step in internal_steps %}
         		{% if step.narrative == path %}
         			screenshotURL = window.location.origin + "/media/" + "{{step.file}}"
-        			steps.push({order: "{{step.order}}", description: "{{step.description}}", url: screenshotURL, caption: "{{step.caption}}"})
+        			steps.push({order: "{{step.order}}", description: "{{step.description|escapejs}}", url: screenshotURL, caption: "{{step.caption|escapejs}}"})
         		{% endif %}
         	{% endfor %}
 
