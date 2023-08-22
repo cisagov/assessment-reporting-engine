@@ -19,7 +19,7 @@ from . import abstract_models
 from . import engagement, findings
 from hashlib import sha256
 
-REPORT_TYPE_CHOICES = (('RVA', 'RVA'), ('RPT', 'RPT'), ('FAST', 'FAST'), ('HVA', 'HVA'))
+REPORT_TYPE_CHOICES = (('RVA', 'RVA'), ('FAST', 'FAST'), ('RPT', 'RPT'), ('HVA', 'HVA'))
 EXCEPTION_CHOICES = (("was", "was"), ("was not", "was not"))
 
 

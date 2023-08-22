@@ -135,8 +135,11 @@ class Export(generic.base.TemplateView):
     def get_context_data(self, **kwargs):
         context = {}
         engagement = EngagementMeta.object()
+        report = Report.object()
         if engagement:
             context['eng_meta'] = engagement
+        if report:
+            context['report'] = report
 
         uploaded_list = UploadedFinding.objects.all().order_by('assessment_type', 'severity', 'uploaded_finding_name')
         cis_csc_objects = CIS_CSC.objects.all().order_by('CIS_ID')

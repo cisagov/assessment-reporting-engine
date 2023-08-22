@@ -17,7 +17,7 @@ from ptportal.models import Report
 
 class Command(BaseCommand):
     help = 'Set Application Report Type'
-    args = '--type [RVA/RPT/HVA]'
+    args = '--type [RVA/FAST/RPT/HVA]'
 
     def add_arguments(self, parser):
         super(Command, self).add_arguments(parser)
@@ -27,7 +27,7 @@ class Command(BaseCommand):
             dest='report_type',
             help='Set report type',
             required=True,
-            choices=['RPT', 'RVA', 'HVA'],
+            choices=['RPT', 'FAST', 'RVA', 'HVA'],
             type=str.upper,
         )
 

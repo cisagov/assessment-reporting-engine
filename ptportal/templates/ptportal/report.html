@@ -103,12 +103,13 @@ DM22-1011
 {% csrf_token %}
 
 <div style="float:left; width:80%">
+	{% if report.report_type == 'RVA' %}
 	<sds-link id="executive_summary"></sds-link>
     <sds-section class="col-span-5" type="accented">
         <span class="border-top border-dark"></span>
             <template #title><b>EXECUTIVE SUMMARY</b></template>
             <h1>Overview</h1>
-            <p>The assessment team conducted a Risk and Vulnerability Assessment (RVA) at the request of {{ eng_meta.customer_long_name }} ({{ eng_meta.customer_initials }}). {{ eng_meta.team_lead_name }} ({{ eng_meta.team_lead_email }}) led the assessment remotely from {{ eng_meta.ext_start_date }} to {{ eng_meta.ext_end_date }} and on site at {{ eng_meta.customer_location }} from {{ eng_meta.int_start_date }} to {{ eng_meta.int_end_date }}. This report only covers the targets described within and makes no claims about the security of any system that was deemed out of scope or was not tested during this engagement.</p>
+            <p>The assessment team conducted {% if report.report_type == 'FAST' %}Federal Attack Surface Testing{% else %}a Risk and Vulnerability Assessment{% endif %} ({{ report.report_type }}) at the request of {{ eng_meta.customer_long_name }} ({{ eng_meta.customer_initials }}). {{ eng_meta.team_lead_name }} ({{ eng_meta.team_lead_email }}) led the assessment remotely from {{ eng_meta.ext_start_date }} to {{ eng_meta.ext_end_date }} and on site at {{ eng_meta.customer_location }} from {{ eng_meta.int_start_date }} to {{ eng_meta.int_end_date }}. This report only covers the targets described within and makes no claims about the security of any system that was deemed out of scope or was not tested during this engagement.</p>
             <br>
             <h2>Significant Findings</h2>
             <p>During testing, the team identified the following significant findings:</p>
@@ -159,11 +160,13 @@ DM22-1011
             <br>
 
 	</sds-section><br>
+	{% endif %}
 
 	<sds-link id="scope"></sds-link>
 	<sds-section class="col-span-5" type="accented">
         <span class="border-top border-dark"></span>
             <template #title><b>SCOPE</b></template>
+            {% if report.report_type == 'RVA' %}
             <h1>Phishing</h1>
             <div class="num">
                 <sds-input v-model="formData.users_targeted" placeholder="#" :maxlength="10"></sds-input>
@@ -171,6 +174,7 @@ DM22-1011
             <div style="float:left; padding: 10px 0px 0px 0px"><p>users were included in the phishing campaign(s) targeting the following mail domain(s):</p></div>
             <br>
             <div style="padding:30px 0px 10px 10px"><p>{{ eng_meta.phishing_domains }}</p></div>
+            {% endif %}
             <h1>External</h1>
             <div class="num">
                 <sds-input v-model="formData.external_discovered" placeholder="#" :maxlength="20"></sds-input>
@@ -182,6 +186,7 @@ DM22-1011
             <div style="float:left; padding: 10px 0px 0px 0px"><p>scanned hosts were discovered to be live during testing of the following in-scope targets:</p></div>
             <br>
             <div style="padding:30px 0px 10px 10px"><p>{{ eng_meta.ext_scope }}</p></div>
+            {% if report.report_type == 'RVA' %}
             <h1>Internal</h1>
             <div class="num">
                 <sds-input v-model="formData.internal_discovered" placeholder="#" :maxlength="20"></sds-input>
@@ -193,14 +198,15 @@ DM22-1011
             <div style="float:left; padding: 10px 0px 0px 0px"><p>scanned hosts were discovered to be live during testing of the following in-scope targets:</p></div>
             <br>
             <div style="padding:30px 0px 10px 10px"><p>{{ eng_meta.int_scope }}</p></div>
-
+            {% endif %}
 	</sds-section><br>
 
+	{% if report.report_type == 'RVA' %}
 	<sds-link id="methodology"></sds-link>
 	<sds-section class="col-span-5" type="accented">
         <span class="border-top border-dark"></span>
             <template #title><b>METHODOLOGY</b></template>
-            <p>The Risk and Vulnerability Assessment consists of several phases detailed in the subsequent sections. At a high level, the RVA methodology involves:</p>
+            <p>The Risk and Vulnerability Assessment consists of several phases detailed in the subsequent sections. At a high level, the {{ report.report_type }} methodology involves:</p>
             <ul class="list">
             	<li>Gathering relevant information about the target organization and its assets;</li>
             	<li>Conducting vulnerability scanning of in-scope assets;</li>
@@ -242,7 +248,7 @@ DM22-1011
 			<div class="figure" align="center">Table {{ table_count.count }}: Recommendations Based on CIS Controls</div>
 			<br>
 	</sds-section><br>
-
+	{% endif %}
 	<sds-link id="findings"></sds-link>
 	<sds-section class="col-span-5" type="accented">
         <span class="border-top border-dark"></span>
@@ -301,7 +307,7 @@ DM22-1011
             		<tr><td colspan="5">{% if f.KEV.count > 0 %}<p>This finding is a <sds-link href="#kevs"><b>Known Exploited Vulnerability</b></sds-link>.</p>{% endif %}<p>NIST 800-53: {% if f.finding.NIST_800_53 %}{{ f.finding.NIST_800_53 }}{% else %}N/A{% endif %}</p><p>NIST Cybersecurity Framework: {% if f.finding.NIST_CSF %}{{ f.finding.NIST_CSF }}{% else %}N/A{% endif %}</p></td></tr>
             	</table>
             {% endfor %}
-            <sds-link id="kevs"></sds-link><h1>Known Exploited Vulnerabilities</h1>
+            <!--<sds-link id="kevs"></sds-link><h1>Known Exploited Vulnerabilities</h1>
             <p>The <sds-link href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog"><b>Known Exploited Vulnerability (KEV) Catalog</b></sds-link> maintained by CISA provides a means to track vulnerabilities that are actively being exploited in the wild. Since KEVs have a high likelihood of being exploited based on the threat landscape, there is significant risk to environments containing these vulnerabilities. The list below provides a mapping of findings to KEVs. In some cases, a KEV may have been detected through vulnerability scanning, but does not necessarily have a corresponding finding if the team was unable to validate it.</p>
             <p>In addition to the CVE links provided below, the Nessus reports that were provided by the team should be referenced for details regarding the vulnerability, affected systems, and recommendations. The vulnerable assets should be investigated further to determine if mitigation is necessary.</p>
             <table class="table-prose" id="kevs-table">
@@ -323,7 +329,8 @@ DM22-1011
 					</tr>
 				{% endfor %}
             </table>
-            <div class="figure" align="center">Table {{ table_count.increment }}: Known Exploited Vulnerability Mappings</div>
+            <div class="figure" align="center">Table {{ table_count.increment }}: Known Exploited Vulnerability Mappings</div>-->
+       	{% if report.report_type == 'RVA' %}
             {% if ransomware %}
             <h1>Ransomware Susceptibility</h1>
             <p>Ransomware is malicious software that encrypts files on infected hosts. In order to decrypt affected files, users or organizations are instructed to pay a ransom. Infection occurs via manual or automated deployment after an attacker has compromised a host. The impact of mass infection can be severe including lost revenue, lost data, diminished reputation, and various costs associated with incident response and recovery.</p>
@@ -388,6 +395,7 @@ DM22-1011
             </table>
             <div class="figure" align="center">Table {{ table_count.increment }}: Payload Testing Results</div>
             {% endif %}
+        {% endif %}
             {% if campaigns %}
             <h1>Phishing Campaign Results</h1>
             {% for c in campaigns %}
@@ -472,7 +480,7 @@ DM22-1011
 	<sds-section class="col-span-5" type="accented">
         <span class="border-top border-dark"></span>
             <template #title><b>APPENDIX A: SEVERITY RATING CRITERIA</b></template>
-            <p>The severity selected for each finding during the RVA are determined using the criteria outlined below.</p>
+            <p>The severity selected for each finding during the {{ report.report_type }} is determined using the criteria outlined below.</p>
             <table class="table-prose" id="campaign-table">
 				<thead>
 					<tr>
@@ -504,6 +512,7 @@ DM22-1011
 			<div class="figure" align="center">Table {{ table_count.increment }}: Severity Rating Descriptions</div>
 	</sds-section><br>
 
+	{% if report.report_type == 'RVA' %}
 	<sds-link id="appendix_b"></sds-link>
 	<sds-section class="col-span-5" type="accented">
         <span class="border-top border-dark"></span>
@@ -537,11 +546,16 @@ DM22-1011
 			</table>
 			<div class="figure" align="center">Table {{ table_count.increment }}: Open Ports and Services on External Systems</div>
 	</sds-section><br>
+	{% endif %}
 
+	{% if report.report_type == 'FAST' %}
+	<sds-link id="appendix_b"></sds-link>
+	{% else %}
 	<sds-link id="appendix_c"></sds-link>
+	{% endif %}
 	<sds-section class="col-span-5" type="accented">
         <span class="border-top border-dark"></span>
-            <template #title><b>APPENDIX C: NARRATIVE</b></template>
+            <template #title><b>APPENDIX {% if report.report_type == 'FAST' %}B{% else %}C{% endif %}: NARRATIVE</b></template>
             <p>This section highlights key tools and techniques the team utilized during testing and can be used to replicate the team’s actions or better understand how a particular finding was identified. These actions should only be replicated by an experienced individual who thoroughly understands the functionality and risks of the tools and techniques.</p>
             
             <h1>External</h1>
@@ -569,6 +583,7 @@ DM22-1011
             		<br>
             	</div>
             </div>
+            {% if report.report_type == 'RVA' %}
             <h1>Internal</h1>
             <div v-for="path in attackPathArgs.internal">
             	<h2>Attack Path [[path.order]]</h2>
@@ -594,6 +609,7 @@ DM22-1011
             		<br>
             	</div>
             </div>
+            {% endif %}
             <h1>Phishing</h1>
             <div v-for="path in attackPathArgs.phishing">
             	<h2>Attack Path [[path.order]]</h2>
@@ -622,6 +638,80 @@ DM22-1011
 
 	</sds-section><br>
 
+	{% if report.report_type == 'FAST' %}
+	<sds-link id="appendix_c"></sds-link>
+	<sds-section class="col-span-5" type="accented">
+        <span class="border-top border-dark"></span>
+            <template #title><b>APPENDIX C: SCOPE</b></template>
+            <br>
+            <table class="table-prose" id="scope-table">
+				<thead>
+					<tr>
+						<th width="30%">Service</th>
+						<th width="45%">IP Address / Hostname</th>
+						<th width="25%">Dates Performed</th>
+					</tr>
+				</thead>
+					<tr>
+					<td>Web Application and Penetration Test</td>
+					<td>{{ eng_meta.ext_scope }}</td>
+					<td>{{ eng_meta.ext_start_date | date:"m/d/Y" }} - {{ eng_meta.ext_end_date | date:"m/d/Y" }}</td>
+					</tr>
+			</table>
+			<div class="figure" align="center">Table {{ table_count.increment }}: Scope of Testing</div>
+			<br>
+			<h1>Exclusions</h1>
+			<table class="table-prose" id="exclusions-table">
+				<thead>
+					<tr>
+						<th width="30%">Service</th>
+						<th width="45%">IP Address / Hostname</th>
+					</tr>
+				</thead>
+					<tr>
+					<td>Web Application and Penetration Test</td>
+					<td>{{ eng_meta.ext_excluded_scope }}</td>
+					</tr>
+			</table>
+			<div class="figure" align="center">Table {{ table_count.increment }}: Scope Exclusions</div>
+	</sds-section><br>
+
+	<sds-link id="appendix_d"></sds-link>
+	<sds-section class="col-span-5" type="accented">
+        <span class="border-top border-dark"></span>
+            <template #title><b>APPENDIX D: EXTERNAL PORT MAPPING</b></template>
+            <p>During external testing, the team identified the following open ports/services on {{ eng_meta.customer_long_name }}’s public-facing systems. It is recommended to review the data below, determine if any unnecessary ports/services are publicly accessible, and minimize the external attack surface where possible.</p>
+            <table class="table-prose" id="campaign-table">
+				<thead>
+					<tr>
+						<th width="25%">IP</th>
+						<th width="35%">Hostname</th>
+						<th width="20%">Ports</th>
+						<th width="20%">Service</th>
+					</tr>
+				</thead>
+				{% for pm in port_mapping %}
+					<tr>
+					<td>{{ pm.ip }}</td>
+					<td>{{ pm.hostname }}</td>
+					<td>{% with pm.ports|split:"," as ports %}
+						{% for port in ports %}
+							{{ port }}<br>
+						{% endfor %}
+					{% endwith %}</td>
+					<td>{% with pm.services|split:"," as services %}
+						{% for service in services %}
+							{{ service }}<br>
+						{% endfor %}
+					{% endwith %}</td>
+					</tr>
+				{% endfor %}
+			</table>
+			<div class="figure" align="center">Table {{ table_count.increment }}: Open Ports and Services on External Systems</div>
+	</sds-section><br>
+	{% endif %}
+
+	{% if report.report_type == 'RVA' %}
 	<sds-link id="appendix_d"></sds-link>
 	<sds-section class="col-span-5" type="accented">
         <span class="border-top border-dark"></span>
@@ -629,6 +719,7 @@ DM22-1011
             <p>The assessment team obtained the hashed passwords for all the {{ eng_meta.customer_long_name }} users during the assessment and attempted to obtain the clear text passwords represented by the hashed values. The following output shows statistical analysis of the clear text passwords recovered by the team:</p>
             <sds-textarea v-model="formData.password_analysis" rows="10" placeholder="Copy/paste output from the password analysis tool (do not include the tool banner)" :maxlength="10000"></sds-textarea>
 	</sds-section><br>
+	{% endif %}
 
 </div>
 
@@ -646,9 +737,13 @@ DM22-1011
 	</div>
 	<br>
 	<ul class="jump">
+		{% if report.report_type == 'RVA' %}
 		<li><a href="#executive_summary"><img class="w-4 h-4" src="/static/icons/clipboard-list-solid.svg" style="float:left;"><div style="float:left; padding: 0px 10px">Summary</div></a></li><br>
+		{% endif %}
 		<li><a href="#scope"><img class="w-4 h-4" src="/static/icons/bullseye-solid.svg" style="float:left"><div style="float:left; padding: 0px 10px">Scope</div></a></li><br>
+		{% if report.report_type == 'RVA' %}
 		<li><a href="#general_recommendations"><img class="w-4 h-4" src="/static/icons/thumbs-up-solid.svg" style="float:left"><div style="float:left; padding: 0px 10px">Recommendations</div></a></li><br>
+		{% endif %}
 		<li><a href="#findings"><img class="w-4 h-4" src="/static/icons/magnifying-glass-plus-solid.svg" style="float:left"><div style="float:left; padding: 0px 10px">Findings</div></a></li><br>
 		<li><a href="#attack_paths"><img class="w-4 h-4" src="/static/icons/diagram-project.svg" style="float:left"><div style="float:left; padding: 0px 10px">Attack Paths</div></a></li><br>
 		<li><a href="#appendix_a"><img class="w-4 h-4" src="/static/icons/a-solid.svg" style="float:left"><div style="float:left; padding: 0px 10px">Appendix A</div></a></li><br>

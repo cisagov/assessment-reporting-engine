@@ -851,8 +851,8 @@ def main():
     run_parser.add_argument(
         '-r',
         '--report_type',
-        choices=['RVA', 'HVA', 'RPT'],
-        help='report type [RVA, HVA, RPT].   Default to RVA',
+        choices=['RVA', 'FAST', 'RPT', 'HVA'],
+        help='report type [RVA, FAST, RPT, HVA].   Default to RVA',
         default='RVA',
         required=False,
     )
@@ -873,8 +873,8 @@ def main():
     dev_parser.add_argument(
         '-r',
         '--report_type',
-        choices=['RVA', 'HVA', 'RPT'],
-        help='report type [RVA, HVA, RPT].   Default to RVA',
+        choices=['RVA', 'FAST', 'RPT', 'HVA'],
+        help='report type [RVA, FAST, RPT, HVA].   Default to RVA',
         default='RVA',
         required=False,
     )
@@ -913,8 +913,8 @@ def main():
     restore_parser.add_argument(
         '-r',
         '--report_type',
-        choices=['RVA', 'HVA', 'RPT'],
-        help='report type [RVA, HVA, RPT].   Default to RVA',
+        choices=['RVA', 'FAST', 'RPT', 'HVA'],
+        help='report type [RVA, FAST, RPT, HVA].   Default to RVA',
         default='RVA',
         required=True,
     )

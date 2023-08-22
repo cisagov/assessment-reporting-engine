@@ -278,7 +278,7 @@ def add_sheet_details(ws, col_names, fnds, start_row=1):
 
 def create_tracker(outfile, json_file):
 
-    tracker_data = af.load_rva_info(json_file)
+    tracker_data = af.load_asmt_info(json_file)
     # create the excel spreadsheet
     wb = px.Workbook()
 

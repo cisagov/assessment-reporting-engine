@@ -72,7 +72,7 @@ def insert_assessinfo(workbook, data):
 
 def generate_remediation(template, json_file, output="RVA_Remediation.xlsm"):
     wb = xl.load_workbook(filename=template, keep_vba=True)
-    data = af.load_rva_info(json_file)
+    data = af.load_asmt_info(json_file)
 
     insert_assessinfo(wb, data)
     insert_findings(wb, data)

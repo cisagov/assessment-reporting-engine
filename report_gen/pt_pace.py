@@ -96,7 +96,7 @@ def generate_pace_document(output, json, assets):
         json (string): Path to the json file with the assessment data.
     """
 
-    rva_info = af.load_rva_info(json)
+    rva_info = af.load_asmt_info(json)
 
     asmt_id = af.get_db_info(
         rva_info, "engagementmeta.fields.asmt_id", "ASMT ID"

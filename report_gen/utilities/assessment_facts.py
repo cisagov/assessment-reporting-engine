@@ -22,7 +22,7 @@ from datetime import date
 
 
 # ---- Get the json information
-def load_rva_info(json_file):
+def load_asmt_info(json_file):
     with open(json_file) as f:
         return json.load(f)
 
@@ -246,7 +246,7 @@ def get_nist_control_data(ndf_data):
 if __name__ == '__main__':
     import sys
 
-    rva_info = load_rva_info(sys.argv[1])  # json file
+    rva_info = load_asmt_info(sys.argv[1])  # json file
 
     get_nist_control_data(rva_info)
 
