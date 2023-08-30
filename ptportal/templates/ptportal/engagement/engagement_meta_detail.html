@@ -37,7 +37,9 @@ DM22-1011
   <p>Stakeholder Abbreviation: {{ object.customer_initials }}</p>
   <p>Point of Contact Name: {{ object.customer_POC_name }}</p>
   <p>Point of Contact Email: {{ object.customer_POC_email }}</p>
+  {% if report.report_type == 'RVA' %}
   <p>On-Site Testing Location: {{ object.customer_location }}</p>
+  {% endif %}
   <p>State: {{ object.customer_state }}</p>
   <p>Sector: {{ object.customer_sector }}</p>
   <p>Critical Infrastructure Type: {{ object.customer_ci_type }}</p>
@@ -60,12 +62,14 @@ DM22-1011
 </sds-section>
 {% endif %}
 
+{% if report.report_type == 'RVA' %}
 <sds-section type="simple" class="mb-4 w-1/2">
   <template #title>
     <h4><b>Phishing Testing</b></h4>
   </template>
   <p>Phishing Domains: {{ object.phishing_domains }}</p>
 </sds-section>
+{% endif %}
 
 <sds-section type="simple" class="mb-4 w-1/2">
   <template #title>
@@ -77,7 +81,7 @@ DM22-1011
   <p>External Excluded Scope: {{ object.ext_excluded_scope }}</p>
 </sds-section>
 
-{% if report_type != 'RPT' %}
+{% if report_type == 'RVA' %}
   <sds-section type="simple" class="mb-4 w-1/2">
     <template #title>
       <h4><b>Internal Testing</b></h4>

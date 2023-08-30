@@ -146,7 +146,7 @@ def generate_kev_report(template, output, json, media):
 
     # ---- Get data
     # gather meta, ndf, mam stats for charts, tables, etc.
-    rva_info = af.load_rva_info(json)
+    rva_info = af.load_asmt_info(json)
 
     # ---- open the report template and insert KEVs
     doc = docx.Document(template)

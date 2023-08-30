@@ -203,7 +203,7 @@ def generate_ptp_summary(template, output, draft, json, media):
 
     # ---- Get data
     # gather meta, ndf, mam stats for charts, tables, etc.
-    rva_info = af.load_rva_info(json)
+    rva_info = af.load_asmt_info(json)
 
     if draft:
         af.set_draft(rva_info)

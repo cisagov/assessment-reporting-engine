@@ -103,12 +103,14 @@ DM22-1011
                     href: "{% url 'kev_catalog' %}",
                     iconUrl: "{% static 'icons/book-solid.svg' %}"
                   },
-                  {
-                    id: 6,
-                    title: "Risk Scoring",
-                    href: "{% url 'risk_score' %}",
-                    iconUrl: "{% static 'icons/calculator-solid.svg' %}"
-                  },
+                  {% if report_type == 'RVA' %}
+                    {
+                      id: 6,
+                      title: "Risk Scoring",
+                      href: "{% url 'risk_score' %}",
+                      iconUrl: "{% static 'icons/calculator-solid.svg' %}"
+                    },
+                  {% endif %}
                   {
                     id: 7,
                     title: "Activity Tracker",
@@ -127,12 +129,14 @@ DM22-1011
                     href: "{% url 'export' %}",
                     iconUrl: "{% static 'icons/download-solid.svg' %}"
                   },
+                  {% if report_type == 'RVA' %}
                   {
                     id: 10,
                     title: "Election Infrastructure",
                     href: "{% url 'ei' %}",
                     iconUrl: "{% static 'icons/poll-h-solid.svg' %}"
-                  },  
+                  },
+                  {% endif %}
                 ]
               },
               phishingLinks: {
@@ -215,27 +219,53 @@ DM22-1011
           //If a function called pageCreated exists on the page that will be ran at the end of the lifecycle.
           created()
           {
+            {% if report_type == 'RVA' %}
+              phishingTabs = {
+                id: 20,
+                title: "Phishing",
+                items: [this.phishingLinks['payloads'], this.phishingLinks['campaigns']],
+                iconUrl: "{% static 'icons/envelope.svg' %}"
+              }
+            {% else %}
+              phishingTabs = {
+                id: 20,
+                title: "Phishing",
+                items: [this.phishingLinks['campaigns']],
+                iconUrl: "{% static 'icons/envelope.svg' %}"
+              }
+            {% endif %}
 
-            phishingTabs = {
-              id: 20,
-              title: "Phishing",
-              items: [this.phishingLinks['payloads'], this.phishingLinks['campaigns']],
-              iconUrl: "{% static 'icons/envelope.svg' %}"
-            }
+            {% if report_type == 'RVA' %}
+              serviceTabs = {
+                id: 30,
+                title: "Services",
+                items: [this.serviceLinks['port'], this.serviceLinks['data_exfil'], this.serviceLinks['ransomware']],
+                iconUrl: "{% static 'icons/gear-solid.svg' %}"
+              }
+            {% else %}
+              serviceTabs = {
+                id: 30,
+                title: "Services",
+                items: [this.serviceLinks['port']],
+                iconUrl: "{% static 'icons/gear-solid.svg' %}"
+              }
+            {% endif %}
 
-            serviceTabs = {
-              id: 30,
-              title: "Services",
-              items: [this.serviceLinks['port'], this.serviceLinks['data_exfil'], this.serviceLinks['ransomware']],
-              iconUrl: "{% static 'icons/gear-solid.svg' %}"
-            }
-
-            narrativeTabs = {
-              id: 40,
-              title: "Narrative",
-              items: [this.narrativeLinks['phishing'], this.narrativeLinks['external'], this.narrativeLinks['internal']],
-              iconUrl: "{% static 'icons/list-solid.svg' %}"
-            }
+            {% if report_type == 'RVA' %}
+              narrativeTabs = {
+                id: 40,
+                title: "Narrative",
+                items: [this.narrativeLinks['phishing'], this.narrativeLinks['external'], this.narrativeLinks['internal']],
+                iconUrl: "{% static 'icons/list-solid.svg' %}"
+              }
+            {% else %}
+              narrativeTabs = {
+                id: 40,
+                title: "Narrative",
+                items: [this.narrativeLinks['phishing'], this.narrativeLinks['external']],
+                iconUrl: "{% static 'icons/list-solid.svg' %}"
+              }
+            {% endif %}
 
             this.layoutArgs.sidebarNavigationItems.splice(3, 0, narrativeTabs)
             this.layoutArgs.sidebarNavigationItems.splice(3, 0, serviceTabs)

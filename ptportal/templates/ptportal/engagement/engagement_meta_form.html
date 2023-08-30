@@ -100,10 +100,12 @@ DM22-1011
 					<h4><b>{{ form.customer_POC_email.label_tag }}</b></h4>
 					<sds-input v-model="formData.customer_POC_email" placeholder="John.Doe@organization.gov" type="email" :maxlength="100"></sds-input>
 				</div>
+				{% if report.report_type == 'RVA' %}
 				<div class="col-span-3">
 					<h4><b>{{ form.customer_location.label_tag }}</b></h4>
 					<sds-input v-model="formData.customer_location" placeholder="123 Main Street, Arlington, VA 12345" :maxlength="200"></sds-input>
 				</div>
+				{% endif %}
 				<div class="col-span-1">
 					<h4><b>{{ form.customer_state.label_tag }}</b></h4>
       				<sds-select v-model="formData.customer_state" :options="state_options"/>
@@ -165,6 +167,7 @@ DM22-1011
 				</div>
 			{% endif %}-->
 		<br>
+		{% if report.report_type == 'RVA' %}
 		<sds-section class="col-span-5" type="accented">
         	<span class="border-top border-dark"></span>
             <template #title><b>PHISHING TESTING</b></template>
@@ -182,6 +185,7 @@ DM22-1011
 			</div>
 		</sds-section>
 		<br>
+		{% endif %}
 		<sds-section class="col-span-5" type="accented">
         	<span class="border-top border-dark"></span>
             <template #title><b>EXTERNAL TESTING</b></template>
@@ -212,7 +216,7 @@ DM22-1011
 			</div>
 		</sds-section>
 		<br>
-			{% if report.report_type != 'RPT' %}
+			{% if report.report_type == 'RVA' %}
 			<sds-section class="col-span-5" type="accented">
 	        	<span class="border-top border-dark"></span>
 	            <template #title><b>INTERNAL TESTING</b></template>

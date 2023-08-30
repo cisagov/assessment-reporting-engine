@@ -1712,6 +1712,100 @@ def insert_pm_table(doc, db):
     xu.delete_paragraph(p_tag)
 
 
+def insert_scope_table(doc, db):
+    """Function that fills out the scope appendix of the report for FAST.
+
+    Args:
+        doc (docx object): The docx template.
+        db (List of dictionaries): The JSON of the engagment data.
+    """
+
+    p_tag = xu.find_paragraph(doc, "{Table: Scope}")
+
+    if p_tag is None:
+        return
+
+    page_break = doc.add_paragraph()
+    page_break.add_run().add_break(WD_BREAK.PAGE)
+    p_tag._p.addnext(page_break._p)
+
+    exc_table = doc.add_table(1, 2)
+    exc_table.style = doc.styles['CISA Table']
+
+    exc_table.cell(0, 0).text = "Service"
+    exc_table.cell(0, 1).text = "IP Address / Hostname"
+
+    exc_row = exc_table.add_row()
+    exc_service = "Web Application and Penetration Test"
+    exc_hosts = af.get_db_info(db, 'engagementmeta.fields.ext_excluded_scope', '{EXTERNAL EXCLUSIONS}')
+
+    exc_table.cell(1, 0).text = exc_service
+    exc_table.cell(1, 1).text = exc_hosts
+
+    exc_table.cell(0, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    exc_table.cell(0, 0).paragraphs[0].runs[0].font.bold = True
+    exc_table.cell(0, 1).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    exc_table.cell(0, 1).paragraphs[0].runs[0].font.bold = True
+
+    xu.set_column_width(exc_table.columns[0], 1.5)
+    xu.set_column_width(exc_table.columns[1], 5)
+
+    xu.move_table_after(exc_table, p_tag)
+
+    para_break = doc.add_paragraph()
+    p_tag._p.addnext(para_break._p)
+
+    header = doc.add_paragraph("Exclusions", style="Heading 2")
+    p_tag._p.addnext(header._p)
+
+    para_break = doc.add_paragraph()
+    p_tag._p.addnext(para_break._p)
+
+    scope_table = doc.add_table(1, 3)
+    scope_table.style = doc.styles['CISA Table']
+
+    scope_table.cell(0, 0).text = "Service"
+    scope_table.cell(0, 1).text = "IP Address / Hostname"
+    scope_table.cell(0, 2).text = "Dates Performed"
+
+    row = scope_table.add_row()
+    service = "Web Application and Penetration Test"
+    hosts = af.get_db_info(db, 'engagementmeta.fields.ext_scope', '{EXTERNAL SCOPE}')
+    try:
+        ext_start_date = af.get_db_info(db, 'engagementmeta.fields.ext_start_date', '{EXT START DATE}')
+        start = datetime.datetime.strptime(ext_start_date, '%Y-%m-%d').strftime('%m/%d/%Y')
+    except:
+        start = "<NO DATE SET>"
+    try:
+        ext_end_date = af.get_db_info(db, 'engagementmeta.fields.ext_end_date', '{EXT END DATE}')
+        end = datetime.datetime.strptime(ext_end_date, '%Y-%m-%d').strftime('%m/%d/%Y')
+    except:
+        end = "<NO DATE SET>"
+    dates = start + " - " + end
+
+    scope_table.cell(1, 0).text = service
+    scope_table.cell(1, 1).text = hosts
+    scope_table.cell(1, 2).text = dates
+
+    scope_table.cell(0, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    scope_table.cell(0, 0).paragraphs[0].runs[0].font.bold = True
+    scope_table.cell(0, 1).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    scope_table.cell(0, 1).paragraphs[0].runs[0].font.bold = True
+    scope_table.cell(0, 2).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    scope_table.cell(0, 2).paragraphs[0].runs[0].font.bold = True
+
+    xu.set_column_width(scope_table.columns[0], 1.5)
+    xu.set_column_width(scope_table.columns[1], 3.8)
+    xu.set_column_width(scope_table.columns[2], 1.2)
+
+    xu.move_table_after(scope_table, p_tag)
+
+    para_break = doc.add_paragraph()
+    p_tag._p.addnext(para_break._p)
+
+    xu.delete_paragraph(p_tag)
+
+
 def generate_ptp_report(template, output, draft, json, media):
     """Generates a PTP report based on the provided json data.
 
@@ -1734,10 +1828,11 @@ def generate_ptp_report(template, output, draft, json, media):
 
     # ---- Get data
     # gather meta, ndf, mam stats for charts, tables, etc.
-    rva_info = af.load_rva_info(json)
+    asmt_info = af.load_asmt_info(json)
+    report_type = af.get_db_info(asmt_info, 'report.fields.report_type', '{REPORT TYPE}')
 
     if draft:
-        af.set_draft(rva_info)
+        af.set_draft(asmt_info)
 
     # ---- open the report template
     doc = docx.Document(template)
@@ -1752,30 +1847,30 @@ def generate_ptp_report(template, output, draft, json, media):
                     if key in inline[i].text:
                         if key == "{External Start Date}":
                             try:
-                                ext_start_date = af.get_db_info(rva_info, 'engagementmeta.fields.ext_start_date', '{EXT START DATE}')
+                                ext_start_date = af.get_db_info(asmt_info, 'engagementmeta.fields.ext_start_date', '{EXT START DATE}')
                                 replace_str = datetime.datetime.strptime(ext_start_date, '%Y-%m-%d').strftime('%B %-d, %Y')
                             except:
                                 replace_str = "<NO DATE SET>"
                         elif key == "{External End Date}":
                             try:
-                                ext_end_date = af.get_db_info(rva_info, 'engagementmeta.fields.ext_end_date', '{EXT END DATE}')
+                                ext_end_date = af.get_db_info(asmt_info, 'engagementmeta.fields.ext_end_date', '{EXT END DATE}')
                                 replace_str = datetime.datetime.strptime(ext_end_date, '%Y-%m-%d').strftime('%B %-d, %Y')
                             except:
                                 replace_str = "<NO DATE SET>"
                         elif key == "{Internal Start Date}":
                             try:
-                                int_start_date = af.get_db_info(rva_info, 'engagementmeta.fields.int_start_date', '{INT START DATE}')
+                                int_start_date = af.get_db_info(asmt_info, 'engagementmeta.fields.int_start_date', '{INT START DATE}')
                                 replace_str = datetime.datetime.strptime(int_start_date, '%Y-%m-%d').strftime('%B %-d, %Y')
                             except:
                                 replace_str = "<NO DATE SET>"
                         elif key == "{Internal End Date}":
                             try:
-                                int_end_date = af.get_db_info(rva_info, 'engagementmeta.fields.int_end_date', '{INT END DATE}')
+                                int_end_date = af.get_db_info(asmt_info, 'engagementmeta.fields.int_end_date', '{INT END DATE}')
                                 replace_str = datetime.datetime.strptime(int_end_date, '%Y-%m-%d').strftime('%B %-d, %Y')
                             except:
                                 replace_str = "<NO DATE SET>"
                         else:    
-                            replace_str = af.get_db_info(rva_info, af.tag_db_map[key], key)
+                            replace_str = af.get_db_info(asmt_info, af.tag_db_map[key], key)
 
                         if isinstance(replace_str, list):
                             replace_str = ', '.join(replace_str)
@@ -1790,7 +1885,7 @@ def generate_ptp_report(template, output, draft, json, media):
                     for para in cell.paragraphs:
                         if key in para.text:
                             replace_str = af.get_db_info(
-                                rva_info, af.tag_db_map[key], key
+                                asmt_info, af.tag_db_map[key], key
                             )
                             if isinstance(replace_str, list):
                                 replace_str = ', '.join(replace_str)
@@ -1798,38 +1893,44 @@ def generate_ptp_report(template, output, draft, json, media):
                             text = para.text.replace(key, str(replace_str))
                             para.text = text
 
-    # RVA 2.0 Template Insertions
-    insert_assessment_info(doc, rva_info)
-    insert_report_summary(doc, rva_info, media)
-    insert_scope(doc, rva_info)
+    insert_assessment_info(doc, asmt_info)
+    
+    if report_type == "RVA":
+        # RVA 2.0 Template Insertions
+        insert_report_summary(doc, asmt_info, media)
+        insert_scope(doc, asmt_info)
 
-    # ---- add risk score table
-    insert_rs_table(doc, rva_info, "{Table: Risk Score}", media)
+        # ---- add risk score table
+        insert_rs_table(doc, asmt_info, "{Table: Risk Score}", media)
 
-    # ---- add cis_csc recommendations
-    insert_cis_csc_table(doc, rva_info, "{Table: CIS_CSC}")
+        # ---- add cis_csc recommendations
+        insert_cis_csc_table(doc, asmt_info, "{Table: CIS_CSC}")
 
     # ---- add findings and kevs
-    insert_fs_table(doc, rva_info, "{Table: Findings Summary}")
-    insert_df_table(doc, rva_info, "{Table: Detailed Findings}", media)
-    #insert_kev_table(doc, rva_info, "{Table: KEVs}")
+    insert_fs_table(doc, asmt_info, "{Table: Findings Summary}")
+    insert_df_table(doc, asmt_info, "{Table: Detailed Findings}", media)
+    #insert_kev_table(doc, asmt_info, "{Table: KEVs}")
 
     # ---- add additional service sections
-    insert_ransomware(doc, rva_info)
-    insert_de_table(doc, rva_info)
-    insert_pt_table(doc, rva_info)
-    insert_pc_table(doc, rva_info)
+    if report_type == "RVA":
+        insert_ransomware(doc, asmt_info)
+        insert_de_table(doc, asmt_info)
+        insert_pt_table(doc, asmt_info)
+    insert_pc_table(doc, asmt_info)
 
     # ---- add attack paths
-    insert_attack_paths(doc, rva_info, media)
+    insert_attack_paths(doc, asmt_info, media)
 
     # ---- add appendices
-    insert_pm_table(doc, rva_info)
-    insert_narrative(doc, rva_info, media)
-    insert_pass_analysis(doc, rva_info)
-    insert_acronyms(doc, rva_info)
+    insert_pm_table(doc, asmt_info)
+    insert_narrative(doc, asmt_info, media)
+    if report_type == "FAST":
+        insert_scope_table(doc, asmt_info)
+    if report_type == "RVA":
+        insert_pass_analysis(doc, asmt_info)
+    insert_acronyms(doc, asmt_info)
 
-    tlp = af.get_db_info(rva_info, 'engagementmeta.fields.traffic_light_protocol', '{TRAFFIC LIGHT PROTOCOL}')
+    tlp = af.get_db_info(asmt_info, 'engagementmeta.fields.traffic_light_protocol', '{TRAFFIC LIGHT PROTOCOL}')
 
     first_header = doc.sections[0].first_page_header
     first_footer = doc.sections[0].first_page_footer
@@ -1911,7 +2012,7 @@ def generate_ptp_report(template, output, draft, json, media):
 
 
 def main():
-    description = "Generate RVA report"
+    description = "Generate report"
     parser = argparse.ArgumentParser(description=description)
 
     parser.add_argument("TEMPLATE", help="Report template.")
