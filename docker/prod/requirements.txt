@@ -5,7 +5,7 @@ django==3.1.14
 django-axes==5.4.3
 django-extra-views
 django-widget-tweaks==1.4.3
-djangorestframework==3.11.1
+djangorestframework==3.11.2
 gunicorn==19.9.0
 inflect==4.1.0
 openpyxl==3.0.7
