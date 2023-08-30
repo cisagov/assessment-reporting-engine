@@ -256,7 +256,7 @@ def generateEntryJson(filename):
     if report.report_type == "RVA":
         if engagement.ext_start_date < engagement.int_start_date:
             start_date = engagement.ext_start_date
-            end_date = engagement.int_start_date
+            end_date = engagement.int_end_date
         else:
             start_date = engagement.int_start_date
             end_date = engagement.ext_end_date
@@ -315,7 +315,7 @@ def generateEntryJson(filename):
             else:
                 mitigation_status = "Fully Mitigated"
 
-            finding_risk_score = 0
+            finding_risk_score = "N/A"
 
         findings_list.append({
             'finding_category': str(finding.finding.category),
@@ -336,13 +336,23 @@ def generateEntryJson(filename):
             'finding_risk_score': finding_risk_score
         })
 
-    asmt_data['findings'] = {
-        'total_findings': len(findings_list),
-        'original_risk_score': total_risk_score,
-        'mitigated_risk_score': mitigated_risk_score,
-        'final_risk_score': "",
-        'individual_findings': findings_list
-    }
+    if report.report_type == "FAST":
+        asmt_data['findings'] = {
+            'total_findings': len(findings_list),
+            'original_risk_score': "N/A",
+            'mitigated_risk_score': "N/A",
+            'final_risk_score': "N/A",
+            'individual_findings': findings_list
+        }
+
+    else:
+        asmt_data['findings'] = {
+            'total_findings': len(findings_list),
+            'original_risk_score': total_risk_score,
+            'mitigated_risk_score': mitigated_risk_score,
+            'final_risk_score': "",
+            'individual_findings': findings_list
+        }
 
     campaigns = Campaign.objects.all()
     campaign_list = []
@@ -414,13 +424,23 @@ def generateEntryJson(filename):
             'filename': payload.attack_name
         })
 
-    asmt_data['phishing_assessment'] = {
-        'date_generated': payload_date,
-        'phishing_assessment_date': str(engagement.ext_start_date),
-        'security_solutions': [],
-        'campaigns': campaign_list,
-        'payloads': payload_list
-    }
+    if report.report_type == "FAST":
+        asmt_data['phishing_assessment'] = {
+            'date_generated': "N/A",
+            'phishing_assessment_date': str(engagement.ext_start_date),
+            'security_solutions': "N/A",
+            'campaigns': campaign_list,
+            'payloads': payload_list
+        }
+        
+    else:
+        asmt_data['phishing_assessment'] = {
+            'date_generated': payload_date,
+            'phishing_assessment_date': str(engagement.ext_start_date),
+            'security_solutions': [],
+            'campaigns': campaign_list,
+            'payloads': payload_list
+        }
 
     narratives = Narrative.objects.all()
     narrative_list = []
@@ -457,178 +477,200 @@ def generateEntryJson(filename):
         'kevs': kev_list
     }
 
-    ransomware = Ransomware.objects.all()
-    if RansomwareScenarios.objects.first():
-        vuln_ransomware_scenarios = RansomwareScenarios.objects.first().vuln
+
+    if report.report_type == "RVA":
+        ransomware = Ransomware.objects.all()
+        if RansomwareScenarios.objects.first():
+            vuln_ransomware_scenarios = RansomwareScenarios.objects.first().vuln
+        else:
+            vuln_ransomware_scenarios = ""
+
+        security_solution_detection = ""
+        time_to_solution_detection = ""
+        security_solution_prevention = ""
+        time_to_solution_prevention = ""
+        security_personnel_detection = ""
+        time_to_personnel_detection = ""
+        end_user_detection = ""
+        time_to_user_detection = ""
+
+        for item in ransomware:
+            if "detected by security software" in item.description:
+                if not item.disabled:
+                    if item.trigger == "Y":
+                        security_solution_detection = "Detected"
+                        if item.time_start and item.time_end:
+                            start = item.time_start.astimezone(timezone.utc)
+                            end = item.time_end.astimezone(timezone.utc)
+                            difference = relativedelta(end, start)
+
+                            if difference.days == 1:
+                                days = "1 day "
+                            else:
+                                days = str(difference.days) + " days "
+                            if difference.hours == 1:
+                                hours = "1 hour "
+                            else:
+                                hours = str(difference.hours) + " hours "
+                            if difference.minutes == 1:
+                                minutes = "and 1 minute"
+                            else:
+                                minutes = "and " + str(difference.minutes) + " minutes"
+                        else:
+                            days = "0 days "
+                            hours = "0 hours "
+                            minutes = "and 0 minutes"
+                        time_to_solution_detection = days + hours + minutes
+                    else:
+                        security_solution_detection = "Not Detected"
+            elif "prevented by security software" in item.description:
+                if not item.disabled:
+                    if item.trigger == "Y":
+                        security_solution_prevention = "Prevented"
+                        if item.time_start and item.time_end:
+                            start = item.time_start.astimezone(timezone.utc)
+                            end = item.time_end.astimezone(timezone.utc)
+                            difference = relativedelta(end, start)
+
+                            if difference.days == 1:
+                                days = "1 day "
+                            else:
+                                days = str(difference.days) + " days "
+                            if difference.hours == 1:
+                                hours = "1 hour "
+                            else:
+                                hours = str(difference.hours) + " hours "
+                            if difference.minutes == 1:
+                                minutes = "and 1 minute"
+                            else:
+                                minutes = "and " + str(difference.minutes) + " minutes"
+                        else:
+                            days = "0 days "
+                            hours = "0 hours "
+                            minutes = "and 0 minutes"
+                        time_to_solution_prevention = days + hours + minutes
+                    else:
+                        security_solution_prevention = "Not Prevented"
+            elif "detected by security and/or IT personnel" in item.description:
+                if not item.disabled:
+                    if item.trigger == "Y":
+                        security_personnel_detection = "Detected"
+                        if item.time_start and item.time_end:
+                            start = item.time_start.astimezone(timezone.utc)
+                            end = item.time_end.astimezone(timezone.utc)
+                            difference = relativedelta(end, start)
+
+                            if difference.days == 1:
+                                days = "1 day "
+                            else:
+                                days = str(difference.days) + " days "
+                            if difference.hours == 1:
+                                hours = "1 hour "
+                            else:
+                                hours = str(difference.hours) + " hours "
+                            if difference.minutes == 1:
+                                minutes = "and 1 minute"
+                            else:
+                                minutes = "and " + str(difference.minutes) + " minutes"
+                        else:
+                            days = "0 days "
+                            hours = "0 hours "
+                            minutes = "and 0 minutes"
+                        time_to_personnel_detection = days + hours + minutes
+                    else:
+                        security_personnel_detection = "Not Detected"
+            elif "reported by end users" in item.description:
+                if not item.disabled:
+                    if item.trigger == "Y":
+                        end_user_detection = "Detected"
+                        if item.time_start and item.time_end:
+                            start = item.time_start.astimezone(timezone.utc)
+                            end = item.time_end.astimezone(timezone.utc)
+                            difference = relativedelta(end, start)
+
+                            if difference.days == 1:
+                                days = "1 day "
+                            else:
+                                days = str(difference.days) + " days "
+                            if difference.hours == 1:
+                                hours = "1 hour "
+                            else:
+                                hours = str(difference.hours) + " hours "
+                            if difference.minutes == 1:
+                                minutes = "and 1 minute"
+                            else:
+                                minutes = "and " + str(difference.minutes) + " minutes"
+                        else:
+                            days = "0 days "
+                            hours = "0 hours "
+                            minutes = "and 0 minutes"
+                        time_to_user_detection = days + hours + minutes
+                    else:
+                        end_user_detection = "Not Detected"
+            else:
+                continue
+
+        asmt_data['ransomware_susceptibility'] = {
+            'total_vulnerable_scenarios': vuln_ransomware_scenarios,
+            'security_solution_detection': security_solution_detection,
+            'time_to_solution_detection': time_to_solution_detection,
+            'security_solution_prevention': security_solution_prevention,
+            'time_to_solution_prevention': time_to_solution_prevention,
+            'security_personnel_detection': security_personnel_detection,
+            'time_to_personnel_detection': time_to_personnel_detection,
+            'end_user_detection': end_user_detection,
+            'time_to_user_detection': time_to_user_detection
+        }
+
     else:
-        vuln_ransomware_scenarios = ""
+        asmt_data['ransomware_susceptibility'] = {
+            'total_vulnerable_scenarios': "N/A",
+            'security_solution_detection': "N/A",
+            'time_to_solution_detection': "N/A",
+            'security_solution_prevention': "N/A",
+            'time_to_solution_prevention': "N/A",
+            'security_personnel_detection': "N/A",
+            'time_to_personnel_detection': "N/A",
+            'end_user_detection': "N/A",
+            'time_to_user_detection': "N/A"
+        }
 
-    security_solution_detection = ""
-    time_to_solution_detection = ""
-    security_solution_prevention = ""
-    time_to_solution_prevention = ""
-    security_personnel_detection = ""
-    time_to_personnel_detection = ""
-    end_user_detection = ""
-    time_to_user_detection = ""
+    if report.report_type == "RVA":
+        data_exfil = DataExfil.objects.all()
+        data_exfil_list = []
+        data_exfil_count = 0
 
-    for item in ransomware:
-        if "detected by security software" in item.description:
-            if not item.disabled:
-                if item.trigger == "Y":
-                    security_solution_detection = "Detected"
-                    if item.time_start and item.time_end:
-                        start = item.time_start.astimezone(timezone.utc)
-                        end = item.time_end.astimezone(timezone.utc)
-                        difference = relativedelta(end, start)
+        for item in data_exfil:
+            if item.detection == "N" and item.prevention == "N":
+                data_exfil_count+=1
 
-                        if difference.days == 1:
-                            days = "1 day "
-                        else:
-                            days = str(difference.days) + " days "
-                        if difference.hours == 1:
-                            hours = "1 hour "
-                        else:
-                            hours = str(difference.hours) + " hours "
-                        if difference.minutes == 1:
-                            minutes = "and 1 minute"
-                        else:
-                            minutes = "and " + str(difference.minutes) + " minutes"
-                    else:
-                        days = "0 days "
-                        hours = "0 hours "
-                        minutes = "and 0 minutes"
-                    time_to_solution_detection = days + hours + minutes
-                else:
-                    security_solution_detection = "Not Detected"
-        elif "prevented by security software" in item.description:
-            if not item.disabled:
-                if item.trigger == "Y":
-                    security_solution_prevention = "Prevented"
-                    if item.time_start and item.time_end:
-                        start = item.time_start.astimezone(timezone.utc)
-                        end = item.time_end.astimezone(timezone.utc)
-                        difference = relativedelta(end, start)
+            if item.detection == "D":
+                detection = "Detected"
+            else:
+                detection = "Not Detected"
 
-                        if difference.days == 1:
-                            days = "1 day "
-                        else:
-                            days = str(difference.days) + " days "
-                        if difference.hours == 1:
-                            hours = "1 hour "
-                        else:
-                            hours = str(difference.hours) + " hours "
-                        if difference.minutes == 1:
-                            minutes = "and 1 minute"
-                        else:
-                            minutes = "and " + str(difference.minutes) + " minutes"
-                    else:
-                        days = "0 days "
-                        hours = "0 hours "
-                        minutes = "and 0 minutes"
-                    time_to_solution_prevention = days + hours + minutes
-                else:
-                    security_solution_prevention = "Not Prevented"
-        elif "detected by security and/or IT personnel" in item.description:
-            if not item.disabled:
-                if item.trigger == "Y":
-                    security_personnel_detection = "Detected"
-                    if item.time_start and item.time_end:
-                        start = item.time_start.astimezone(timezone.utc)
-                        end = item.time_end.astimezone(timezone.utc)
-                        difference = relativedelta(end, start)
+            if item.prevention == "B":
+                prevention = "Blocked"
+            else:
+                prevention = "Not Blocked"
 
-                        if difference.days == 1:
-                            days = "1 day "
-                        else:
-                            days = str(difference.days) + " days "
-                        if difference.hours == 1:
-                            hours = "1 hour "
-                        else:
-                            hours = str(difference.hours) + " hours "
-                        if difference.minutes == 1:
-                            minutes = "and 1 minute"
-                        else:
-                            minutes = "and " + str(difference.minutes) + " minutes"
-                    else:
-                        days = "0 days "
-                        hours = "0 hours "
-                        minutes = "and 0 minutes"
-                    time_to_personnel_detection = days + hours + minutes
-                else:
-                    security_personnel_detection = "Not Detected"
-        elif "reported by end users" in item.description:
-            if not item.disabled:
-                if item.trigger == "Y":
-                    end_user_detection = "Detected"
-                    if item.time_start and item.time_end:
-                        start = item.time_start.astimezone(timezone.utc)
-                        end = item.time_end.astimezone(timezone.utc)
-                        difference = relativedelta(end, start)
+            data_exfil_list.append({
+                'protocol': item.protocol,
+                'data_type': item.datatype,
+                'detection': detection,
+                'prevention': prevention
+            })
 
-                        if difference.days == 1:
-                            days = "1 day "
-                        else:
-                            days = str(difference.days) + " days "
-                        if difference.hours == 1:
-                            hours = "1 hour "
-                        else:
-                            hours = str(difference.hours) + " hours "
-                        if difference.minutes == 1:
-                            minutes = "and 1 minute"
-                        else:
-                            minutes = "and " + str(difference.minutes) + " minutes"
-                    else:
-                        days = "0 days "
-                        hours = "0 hours "
-                        minutes = "and 0 minutes"
-                    time_to_user_detection = days + hours + minutes
-                else:
-                    end_user_detection = "Not Detected"
-        else:
-            continue
+        asmt_data['data_exfiltration'] = {
+            'total_vulnerable_protocols': data_exfil_count,
+            'results': data_exfil_list
+        }
 
-    asmt_data['ransomware_susceptibility'] = {
-        'total_vulnerable_scenarios': vuln_ransomware_scenarios,
-        'security_solution_detection': security_solution_detection,
-        'time_to_solution_detection': time_to_solution_detection,
-        'security_solution_prevention': security_solution_prevention,
-        'time_to_solution_prevention': time_to_solution_prevention,
-        'security_personnel_detection': security_personnel_detection,
-        'time_to_personnel_detection': time_to_personnel_detection,
-        'end_user_detection': end_user_detection,
-        'time_to_user_detection': time_to_user_detection
-    }
-
-    data_exfil = DataExfil.objects.all()
-    data_exfil_list = []
-    data_exfil_count = 0
-
-    for item in data_exfil:
-        if item.detection == "N" and item.prevention == "N":
-            data_exfil_count+=1
-
-        if item.detection == "D":
-            detection = "Detected"
-        else:
-            detection = "Not Detected"
-
-        if item.prevention == "B":
-            prevention = "Blocked"
-        else:
-            prevention = "Not Blocked"
-
-        data_exfil_list.append({
-            'protocol': item.protocol,
-            'data_type': item.datatype,
-            'detection': detection,
-            'prevention': prevention
-        })
-
-    asmt_data['data_exfiltration'] = {
-        'total_vulnerable_protocols': data_exfil_count,
-        'results': data_exfil_list
-    }
+    else:
+        asmt_data['data_exfiltration'] = {
+            'total_vulnerable_protocols': "N/A",
+            'results': "N/A"
+        }
 
     port_mapping = PortMappingHost.objects.all()
     port_mapping_list = []
