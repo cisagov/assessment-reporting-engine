@@ -16,4 +16,4 @@ python-docx==0.8.10
 python-pptx==0.6.18
 pyzipper
 numpy==1.23.5
-reportlab==3.6.12
+reportlab==3.6.13
