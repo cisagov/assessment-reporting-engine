@@ -324,11 +324,11 @@ DM22-1011
 				technical_lead_email: "{{ object.technical_lead_email | escapejs }}",
 				ext_date: {start: "{{object.ext_start_date}}" ? new Date("{{object.ext_start_date}}") : "", end: "{{object.ext_end_date}}" ? new Date("{{object.ext_end_date}}") : ""},
 				int_date: {start: "{{object.int_start_date}}" ? new Date("{{object.int_start_date}}") : "", end: "{{object.int_end_date}}" ? new Date("{{object.int_end_date}}") : ""},
-				phishing_domains: "{{ object.phishing_domains }}",
-				ext_scope: "{{ object.ext_scope }}",
-				ext_excluded_scope: "{{ object.ext_excluded_scope }}",
-				int_scope: "{{ object.int_scope }}",
-				int_excluded_scope: "{{ object.int_excluded_scope }}",
+				phishing_domains: "{{ object.phishing_domains | escapejs }}",
+				ext_scope: "{{ object.ext_scope | escapejs }}",
+				ext_excluded_scope: "{{ object.ext_excluded_scope | escapejs }}",
+				int_scope: "{{ object.int_scope | escapejs }}",
+				int_excluded_scope: "{{ object.int_excluded_scope | escapejs }}",
 				asmt_id: "{{ object.asmt_id }}",
 				report_password: "{{ object.report_password }}",
 				confirm_report_password: "{{ object.confirm_report_password }}",
@@ -452,16 +452,21 @@ DM22-1011
 				options: [
 					{
 						id: 1,
+						value: "Clear",
+						text: "Clear"
+					},
+					{
+						id: 2,
 						value: "Amber",
 						text: "Amber"
 					},
 					{
-						id: 2,
+						id: 3,
 						value: "Amber+Strict",
 						text: "Amber+Strict"
 					},
 					{
-						id: 3,
+						id: 4,
 						value: "Red",
 						text: "Red"
 					}

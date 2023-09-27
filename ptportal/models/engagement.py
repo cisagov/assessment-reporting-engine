@@ -83,6 +83,7 @@ class HVATarget(abstract_models.TimeStampedModel):
 
 class EngagementMeta(abstract_models.TimeStampedModel):
     TLP_CHOICES = (
+        ('Clear', 'Clear'),
         ('Amber', 'Amber'), 
         ('Amber+Strict', 'Amber+Strict'),
         ('Red', 'Red'),
@@ -303,13 +304,13 @@ class EngagementMeta(abstract_models.TimeStampedModel):
     ext_scope = models.TextField(
         blank=True,
         verbose_name="In Scope IP Addresses/Domain Names",
-        help_text="Enter as a list of comma or new line delimited IPs, Ranges, and/or CIDRs",
+        help_text="Enter as a list of IPs, Ranges, and/or CIDRs",
         null=True,
     )
     ext_excluded_scope = models.TextField(
         blank=True,
         verbose_name="Out of Scope IP Addresses/Domain Names",
-        help_text="Enter as a list of comma or new line delimited IPs, Ranges, and/or CIDRs",
+        help_text="Enter as a list of IPs, Ranges, and/or CIDRs",
         null=True,
     )
 
@@ -331,20 +332,20 @@ class EngagementMeta(abstract_models.TimeStampedModel):
     int_scope = models.TextField(
         blank=True,
         verbose_name="In Scope IP Addresses/Domain Names",
-        help_text="Enter as a list of comma, space, and/or new line delimited IPs, Ranges, and/or CIDRs",
+        help_text="Enter as a list of IPs, Ranges, and/or CIDRs",
         null=True,
     )
     int_excluded_scope = models.TextField(
         blank=True,
         verbose_name="Out of Scope IP Addresses/Domain Names",
-        help_text="Enter as a list of comma, space, and/or new line delimited IPs, Ranges, and/or CIDRs",
+        help_text="Enter as a list of IPs, Ranges, and/or CIDRs",
         null=True,
     )
 
     phishing_domains = models.TextField(
         blank=True,
         verbose_name="In Scope Mail Domains for Phishing",
-        help_text="Enter a list of comma, space, and/or new line delimited mail domains associated with in-scope phishing targets",
+        help_text="Enter a list of mail domains associated with in-scope phishing targets",
         null=True,
     )
 

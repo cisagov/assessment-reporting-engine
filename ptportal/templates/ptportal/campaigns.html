@@ -55,6 +55,8 @@ DM22-1011
     <sds-section class="col-span-10" type="accented">
         <span class="border-top border-dark"></span>
             <template #title><b>RESULTS</b></template>
+            <p style="float:left;padding:10px">The first phishing campaign was launched on: </p><div style="width:250px;float:left;padding:0px 10px"><sds-datepicker v-model="pcdate"></sds-datepicker></div>
+            <br><br><br>
 			<!-- Campaign Table -->
 			<sds-section>
 				<div class="mb-8">
@@ -159,6 +161,7 @@ function pageData() {
 		overwriteWarning: false,
 		//to display pop up notification
 		notify: null,
+		pcdate: null,
 		// campaign table columns
 		CampaignTableArgs: {
 				fields: [
@@ -222,6 +225,13 @@ function pageData() {
 		}
 	}
 
+	{% if report.phishing_campaign_date != null %}
+		pcdate = "{{report.phishing_campaign_date | date:"m/d/Y"}}"
+		data.pcdate = new Date (pcdate.replace(/\./g, ''))
+	{% else %}
+		data.pcdate = null
+	{% endif %}
+
 	{% for campaign in campaigns %}
 		console.log("{{campaign.creds_harvested}}")
 		{% if campaign.creds_harvested == None %}
@@ -278,6 +288,7 @@ function pageMethods() {
 
 			else {
 				formattedData = {}
+				formattedData['pcdate'] = JSON.parse(JSON.stringify(this.pcdate))
 				formattedData['results'] = JSON.parse(JSON.stringify(this.CampaignTableArgs.items))
 	        	formattedData['descriptions'] = JSON.parse(JSON.stringify(this.CampaignDescArgs.items))
 	        	

@@ -46,6 +46,9 @@ class Report(abstract_models.TimeStampedModel):
         max_length=100,
     )
 
+    payload_testing_date = models.DateField(verbose_name="Payload Testing Date", null=True, blank=True)
+    phishing_campaign_date = models.DateField(verbose_name="Phishing Campaign Date", null=True, blank=True)
+
     class Meta:
         verbose_name_plural = 'Report'
 

@@ -15,7 +15,7 @@ from gettext import find
 from re import sub
 import numpy as np
 import pandas as pd
-import json
+import json, requests
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management import BaseCommand
 
@@ -415,7 +415,22 @@ class Command(BaseCommand):
         # --- Known Exploited Vulnerabilities ---
 
         # load KEVs
-        with open('assets/known_exploited_vulnerabilities.json', 'r') as kev_json_file:
+        kev_file = 'assets/known_exploited_vulnerabilities.json'
+
+        try:
+            print("Retrieving the latest version of the KEV catalog...")
+            kev_url = 'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json'
+            kev_r = requests.get(kev_url, allow_redirects=False)
+            if kev_r.status_code == 200:
+                open('assets/known_exploited_vulnerabilities_new.json', 'wb').write(kev_r.content)
+                kev_file = 'assets/known_exploited_vulnerabilities_new.json'
+            else:
+                print("Unable to retrieve the latest KEV Catalog - using backup version. [Status Code: " + str(kev_r.status_code) + "]")
+
+        except:
+            print("Unable to retrieve the latest KEV catalog - using backup version.")
+
+        with open(kev_file, 'r') as kev_json_file:
             KEVs_json = json.loads(kev_json_file.read())
 
         try:

@@ -34,5 +34,5 @@ class ReportForm(BaseModelForm):
     class Meta:
         model = Report
         fields = '__all__'
-        exclude = ('report_type','exception','browser')
+        exclude = ('report_type','exception','browser', 'payload_testing_date', 'phishing_campaign_date')
         widgets = {}

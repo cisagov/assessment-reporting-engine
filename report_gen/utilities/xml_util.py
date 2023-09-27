@@ -83,15 +83,15 @@ def find_paragraph(doc, s):
 
 
 def xsafe(s):
-    """Escapes HTML encoded text to prevent formatting issues.
+    """Unescapes numeric character references to prevent formatting issues.
 
     Args:
-        s (string): HTML string that is to be escaped.
+        s (string): HTML string that is to be converted.
 
     Returns:
-        string: The escaped html string.
+        string: The converted html string.
     """
-    return html.escape(s)
+    return html.unescape(s)
 
 
 def dpi_safe(sfile, img):

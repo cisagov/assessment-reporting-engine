@@ -17,7 +17,7 @@ from django.core.exceptions import ValidationError
 from django.views import generic
 from django.http import HttpResponse
 import json
-from ..models import Campaign
+from ..models import Campaign, Report
 import datetime
 
 
@@ -27,11 +27,16 @@ class Campaigns(generic.base.TemplateView):
     def get_context_data(self, **kwargs):
         context = {}
         context['campaigns'] = Campaign.objects.all().order_by('order')
+        context['report'] = Report.objects.all().first()
         return context
 
     def post(self, request, *args, **kwargs):
         postData = json.loads(request.body)
+        report = Report.objects.all().first()
         campaigns = []
+
+        report.phishing_campaign_date = None if postData['pcdate'] == None else postData['pcdate'][0:10]
+        report.save()
 
         for order, data in enumerate(postData['results']):
             if (

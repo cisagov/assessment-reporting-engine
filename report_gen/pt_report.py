@@ -298,8 +298,8 @@ def insert_cis_csc_table(doc, db, cis_csc_tag):
     cis_csc_table.cell(0, 2).paragraphs[0].runs[0].font.bold = True
 
     xu.set_column_width(cis_csc_table.columns[0], 0.37)
-    xu.set_column_width(cis_csc_table.columns[1], 5.06)
-    xu.set_column_width(cis_csc_table.columns[2], 1.06)
+    xu.set_column_width(cis_csc_table.columns[1], 3.5)
+    xu.set_column_width(cis_csc_table.columns[2], 2.62)
 
     xu.move_table_after(cis_csc_table, p_tag)
     xu.delete_paragraph(p_tag)
@@ -345,11 +345,11 @@ def insert_df_table(doc, db, df_tag, media_path):
 
         finding_sshot = af.find_screenshots(ss_info, fpk)
 
-        have_ss = ""
+        ptp_df_screen_text = "Relevant Screenshots"
         if len(finding_sshot) == 0:
-            have_ss = "No "
-        ptp_df_screen_text = have_ss + "Relevant Screenshots"
-        ptp_df_screenshot_note = ele['screenshot_description']
+            ptp_df_screenshot_note = "No relevant screenshots exist for this finding."
+        else:
+            ptp_df_screenshot_note = ele['screenshot_description']
 
         # ---- build the affected systems string
         affected_systems = af.find_affected_systems(as_info, ele['affected_systems'])
@@ -627,12 +627,26 @@ def insert_acronyms(doc, db):
     acronym_table = doc.add_table(1, 2)
     acronym_table.style = doc.styles['Acronyms']
 
+    acronyms = []
+
     for cnt, acr in enumerate(af.model_gen(db, "ptportal.acronym")):
         ele = acr['fields']
+        acronym = {}
+        acronym["abbr"] = ele['acronym']
+        acronym["def"] = ele['definition']
+        acronyms.append(acronym)
+
+    org_acronym = {}
+    org_acronym["abbr"] = af.get_db_info(db, 'engagementmeta.fields.customer_initials', '{STAKEHOLDER ACRONYM}')
+    org_acronym["def"] = af.get_db_info(db, 'engagementmeta.fields.customer_long_name', '{STAKEHOLDER NAME}')
+    acronyms.append(org_acronym)
+    sorted_acronyms = sorted(acronyms, key=lambda x: x['abbr'])
+
+    for cnt, acr in enumerate(sorted_acronyms):
         row = acronym_table.add_row()
 
-        acronym_table.cell(cnt, 0).text = ele['acronym']
-        acronym_table.cell(cnt, 1).text = ele['definition']
+        acronym_table.cell(cnt, 0).text = acr["abbr"]
+        acronym_table.cell(cnt, 1).text = acr["def"]
         
     xu.set_column_width(acronym_table.columns[0], 1.38)
     xu.set_column_width(acronym_table.columns[1], 5.23)
@@ -657,7 +671,7 @@ def insert_attack_paths(doc, db, media_path):
 
     for technique in af.model_gen(db, "ptportal.attack"):
         ele = technique['fields']
-        t_data = {"id": technique['pk'], "t_id": ele['t_id'], "name": ele['name']}
+        t_data = {"id": technique['pk'], "t_id": ele['t_id'], "name": ele['name'], "url": ele['url']}
         techniques.append(t_data)
 
     for cnt, path in reversed(list(enumerate(af.model_gen(db, "ptportal.narrative")))):
@@ -678,8 +692,8 @@ def insert_attack_paths(doc, db, media_path):
 
         for t in reversed(used_techniques):
             b = doc.add_paragraph()
-            if t['t_id']:
-                url = "https://attack.mitre.org/techniques/" + t['t_id']
+            if t['url']:
+                url = t['url']
             else:
                 url = "https://attack.mitre.org/techniques/"
             xu.add_link(b, 0, url, t['name'])
@@ -1944,6 +1958,9 @@ def generate_ptp_report(template, output, draft, json, media):
     elif tlp == "Amber+Strict":
         label = " TLP:AMBER+STRICT"
         color = RGBColor(255, 192, 0)
+    elif tlp == "Clear":
+        label = " TLP:CLEAR"
+        color = RGBColor(255, 255, 255)
     else:
         label = None
 
