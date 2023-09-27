@@ -380,10 +380,6 @@ def generateEntryJson(filename):
         })
 
     payloads = Payload.objects.all()
-    if Payload.objects.first():
-        payload_date = str(Payload.objects.first().created_at.strftime('%Y-%m-%d'))
-    else:
-        payload_date = ""
     attack = ATTACK.objects.all()
     payload_list = []
     tactics_map = {'Reconnaissance': 'TA0043', 'Resource Development': 'TA0042', 'Initial Access': 'TA0001', 'Execution': 'TA0002', 'Persistence': 'TA0003', 'Privilege Escalation': 'TA0004', 'Defense Evasion': 'TA0005', 'Credential Access': 'TA0006', 'Discovery': 'TA0007', 'Lateral Movement': 'TA0008', 'Collection': 'TA0009', 'Command and Control': 'TA0011', 'Exfiltration': 'TA0010', 'Impact': 'TA0040'}
@@ -424,10 +420,20 @@ def generateEntryJson(filename):
             'filename': payload.attack_name
         })
 
+    if report.phishing_campaign_date == None:
+        phishing_campaign_date = ""
+    else:
+        phishing_campaign_date = report.phishing_campaign_date
+
+    if report.payload_testing_date == None:
+        payload_testing_date = ""
+    else:
+        payload_testing_date = report.payload_testing_date
+
     if report.report_type == "FAST":
         asmt_data['phishing_assessment'] = {
             'date_generated': "N/A",
-            'phishing_assessment_date': str(engagement.ext_start_date),
+            'phishing_assessment_date': str(phishing_campaign_date),
             'security_solutions': "N/A",
             'campaigns': campaign_list,
             'payloads': payload_list
@@ -435,8 +441,8 @@ def generateEntryJson(filename):
         
     else:
         asmt_data['phishing_assessment'] = {
-            'date_generated': payload_date,
-            'phishing_assessment_date': str(engagement.ext_start_date),
+            'date_generated': str(payload_testing_date),
+            'phishing_assessment_date': str(phishing_campaign_date),
             'security_solutions': [],
             'campaigns': campaign_list,
             'payloads': payload_list

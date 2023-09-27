@@ -99,6 +99,8 @@ DM22-1011
     <sds-section class="col-span-5" type="accented">
         <span class="border-top border-dark"></span>
             <template #title><b>RESULTS</b></template>
+            <p style="float:left;padding:10px">The first round of payload testing was conducted on: </p><div style="width:250px;float:left;padding:0px 10px"><sds-datepicker v-model="formData.ptdate"></sds-datepicker></div>
+            <br><br><br><br>
             <p style="float:left;padding:10px">During payload testing, a manual exception</p><sds-select v-model="formData.exception" :options="exceptionOptions" style="text-align:center;width:120px;float:left;"></sds-select><p style="float:left;padding:10px">necessary for the test email to reach the target inbox.</p>
             <br><br><br><br>
             <sds-input v-model="formData.browser" style="width:180px;float:left;padding:0px 10px" placeholder="Google Chrome" :maxlength="100"></sds-input><p style="float:left;padding:10px 0px">was used to download the payloads and was deemed a primary browser used by users.</p>
@@ -160,7 +162,8 @@ function pageData() {
 		formData: {
 			exception: "{{ description.exception }}",
 			browser: "{{ description.browser|escapejs }}",
-			security_solutions: []
+			security_solutions: [],
+			ptdate:  null,
 		},
 		exceptionOptions: [
 			{ id: 1, value: 'was', text: 'was' },
@@ -226,6 +229,13 @@ function pageData() {
 	}
 
 	pageData.securityArgs.solutionSearchList = pageData.securityData().filter(solution => solution)
+
+	{% if description.payload_testing_date != null %}
+		ptdate = "{{description.payload_testing_date | date:"m/d/Y"}}"
+		pageData.formData.ptdate = new Date (ptdate.replace(/\./g, ''))
+	{% else %}
+		pageData.formData.ptdate = null
+	{% endif %}
 
 	{% for s in used_solutions %}
 

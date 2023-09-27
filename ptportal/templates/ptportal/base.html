@@ -171,21 +171,21 @@ DM22-1011
                 },
 
                 narrativeLinks: {
-                  phishing: {
-                    id: 10,
-                    title: "Phishing",
-                    href: "{% url 'narratives' 'phishing' %}",
-                  },
                   external: {
-                    id: 11,
+                    id: 10,
                     title: "External",
                     href: "{% url 'narratives' 'external' %}",
                   },
                   internal: {
-                    id: 12,
+                    id: 11,
                     title: "Internal",
                     href: "{% url 'narratives' 'internal' %}",
-                  }
+                  },
+                  phishing: {
+                    id: 12,
+                    title: "Phishing",
+                    href: "{% url 'narratives' 'phishing' %}",
+                  },
                 },
             }
             //If the current page content contains a function called pageData, it will merge the dictionary returned
@@ -255,14 +255,14 @@ DM22-1011
               narrativeTabs = {
                 id: 40,
                 title: "Narrative",
-                items: [this.narrativeLinks['phishing'], this.narrativeLinks['external'], this.narrativeLinks['internal']],
+                items: [this.narrativeLinks['external'], this.narrativeLinks['internal'], this.narrativeLinks['phishing']],
                 iconUrl: "{% static 'icons/list-solid.svg' %}"
               }
             {% else %}
               narrativeTabs = {
                 id: 40,
                 title: "Narrative",
-                items: [this.narrativeLinks['phishing'], this.narrativeLinks['external']],
+                items: [this.narrativeLinks['external'], this.narrativeLinks['phishing']],
                 iconUrl: "{% static 'icons/list-solid.svg' %}"
               }
             {% endif %}
