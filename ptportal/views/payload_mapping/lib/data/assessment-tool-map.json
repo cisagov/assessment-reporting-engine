@@ -697,7 +697,7 @@
       "Comodo": {},
       "Cortex Extended Detection and Response (XDR)": {},
       "CrowdStrike": {},
-      "Cyberreason": {},
+      "Cybereason": {},
       "Cylance Endpoint Security": {},
       "Cynet Next-Gen Antivirus (NGAV)": {},
       "CYREN AntiVirus": {},
@@ -708,7 +708,7 @@
       "HP Wolf Security": {},
       "Kaspersky": {},
       "Malwarebytes": {},
-      "Manage Engine Endpoint Cental": {},
+      "ManageEngine Endpoint Central": {},
       "Microsoft Windows Defender": {},
       "Microsoft Windows Defender ATP": {},
       "Morphisec": {},
@@ -721,8 +721,8 @@
       "Sophos Managed Threat Response (MTR)": {},
       "Symantec Endpoint Security": {},
       "Trellix": {},
-      "TrendMicro": {},
-      "WebRoot": {},
+      "Trend Micro": {},
+      "Webroot": {},
       "Vipre": {}
     }
   }
