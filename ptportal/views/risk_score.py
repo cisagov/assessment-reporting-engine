@@ -38,7 +38,7 @@ class RiskScoring(generic.base.TemplateView):
                 == finding['uploaded_finding_name']
                 == finding['severity']
                 == finding['magnitude']
-                == finding['probability']
+                == finding['likelihood']
                 == finding['kev']
                 == finding['mitigation']
                 == finding['risk_score']
@@ -46,26 +46,39 @@ class RiskScoring(generic.base.TemplateView):
             ):
                 continue
 
-            if (int(finding['magnitude']) < 0 or int(finding['magnitude']) > 100):
-                return HttpResponse(status=400, reason="Magnitude must be integer between 0 and 100.")
+            if finding['kev'] == 'True':
+                likelihood = 100
+            elif finding['likelihood'] == '':
+                likelihood = None
+            elif (int(finding['likelihood']) < 0 or int(finding['likelihood']) > 100):
+                return HttpResponse(status=400, reason="Likelihood must be integer between 1 and 100.")
+            else:
+                likelihood = int(finding['likelihood'])
 
-            if (int(finding['probability']) < 0 or int(finding['probability']) > 100):
-                return HttpResponse(status=400, reason="Probability must be integer between 0 and 100.")
-
-            # placeholder - to be replaced with risk score weights and formula
-            sev_map = {'Critical': 10, 'High': 8, 'Medium': 5, 'Low': 3, 'Informational': 1}
-            kev_map = {'True': 10, 'False': 1}
+            '''
+            ******************************************************************************
+             The mappings and risk score formula below should be adjusted based on the
+             methodology of the assessing entity. All values are placeholders and do not 
+             reflect an actual risk scoring methodology.
+            ******************************************************************************
+            '''
+            sev_map = {'Critical': 10, 'High': 9, 'Medium': 8, 'Low': 7, 'Informational': 6}
+            mag_map = {'': 0, '1-10': 10, '11-20': 20, '21-30': 30, '31+': 40}
             sev = finding['severity']
-            kev = finding['kev']
-            mag = int(finding['magnitude'])
-            prob = int(finding['probability'])
-            score = sev_map[sev] + kev_map[kev] + mag + prob
+            mag = finding['magnitude']
+
+            if likelihood == None:
+                lkd = 0
+            else:
+                lkd = likelihood
+
+            score = sev_map[sev] + mag_map[mag] + lkd
 
             try:
                 UploadedFinding.objects.filter(
                     uploaded_finding_name=finding['uploaded_finding_name']).update(
                         magnitude=finding['magnitude'], 
-                        probability=finding['probability'],
+                        likelihood=likelihood,
                         risk_score=score
                     )
             except (KeyError, ValidationError) as e:
