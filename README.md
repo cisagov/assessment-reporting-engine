@@ -81,7 +81,7 @@ Once `docker compose` is successfully installed, run the following command to ve
 
 ### Python
 
-Python (v3.8.0+) must be installed to run RE. In some cases, running the most up-to-date version of Python could present issues if the maintainers of this repository have not completed testing with the latest version. RE has been primarily tested using v3.8.0-3.9.2.
+Python (v3.8.0+) must be installed to run RE. In some cases, running the most up-to-date version of Python could present issues if the maintainers of this repository have not completed testing with the latest version. RE has been primarily tested using v3.8.0-3.11.2.
 
 **Verify Python Version**
 
