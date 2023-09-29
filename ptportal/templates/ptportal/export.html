@@ -113,6 +113,16 @@ DM22-1011
     <br>
     {% endif %}
 
+    {% if incomplete_risk_score %}
+    <div class="errorcard">
+        <img class="w-8 h-8" src="/static/icons/circle-xmark-solid.svg">
+        <p><b>Missing Risk Score Information:</b> All fields on the Risk Scoring page must be completed before generating certain artifacts.</p>
+        <br>
+    </div>
+
+    <br>
+    {% endif %}
+
     <!--<div class="warningcard">
         <img class="w-8 h-8" src="/static/icons/triangle-exclamation-solid.svg">
         <p><b>Warning:</b> Description of warning.</p>
@@ -124,9 +134,7 @@ DM22-1011
             <img src="/static/icons/file-word-regular.svg">
             <h1>Report</h1>
             <p>Download a DOCX file containing report data</p>
-            {% if eng_meta %}
-            <sds-button variant="primary" size="sm" @click="redirectLink('{% url "generate_report" %}')">Export</sds-button>
-            {% else %}
+            {% if not eng_meta %}
             <sds-floating-ui
                 popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
                 placement="top"
@@ -139,7 +147,7 @@ DM22-1011
                 :will-close="willClose"
             >
                 <template #trigger="{ open, close }">
-                    <sds-button variant="primary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                    <sds-button variant="secondary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
                 </template>
                 <template #default>
                     <div class="p-2">
@@ -147,6 +155,29 @@ DM22-1011
                     </div>
                 </template>
             </sds-floating-ui>
+            {% elif incomplete_risk_score %}
+            <sds-floating-ui
+                popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                placement="top"
+                arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                placement-top-arrow-class="-bottom-1"
+                placement-right-arrow-class="-left-1"
+                placement-bottom-arrow-class="-top-1"
+                placement-left-arrow-class="-right-1"
+                :will-open="willOpen"
+                :will-close="willClose"
+            >
+                <template #trigger="{ open, close }">
+                    <sds-button variant="secondary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                </template>
+                <template #default>
+                    <div class="p-2">
+                        <p>Please complete all fields on the Risk Scoring page before exporting data.</p>
+                    </div>
+                </template>
+            </sds-floating-ui>
+            {% else %}            
+            <sds-button variant="primary" size="sm" @click="redirectLink('{% url "generate_report" %}')">Export</sds-button>
             {% endif %}
         </div>
     </div>
@@ -156,9 +187,7 @@ DM22-1011
             <img src="/static/icons/file-powerpoint-regular.svg">
             <h1>Out-Brief (4:3)</h1>
             <p>Download a standard PPTX slide deck containing report data</p>
-            {% if eng_meta %}
-            <sds-button variant="primary" size="sm" @click="redirectLink('{% url "generate_outbrief" %}')">Export</sds-button>
-            {% else %}
+            {% if not eng_meta %}
             <sds-floating-ui
                 popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
                 placement="top"
@@ -171,7 +200,7 @@ DM22-1011
                 :will-close="willClose"
             >
                 <template #trigger="{ open, close }">
-                    <sds-button variant="primary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                    <sds-button variant="secondary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
                 </template>
                 <template #default>
                     <div class="p-2">
@@ -179,6 +208,29 @@ DM22-1011
                     </div>
                 </template>
             </sds-floating-ui>
+            {% elif incomplete_risk_score %}
+            <sds-floating-ui
+                popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                placement="top"
+                arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                placement-top-arrow-class="-bottom-1"
+                placement-right-arrow-class="-left-1"
+                placement-bottom-arrow-class="-top-1"
+                placement-left-arrow-class="-right-1"
+                :will-open="willOpen"
+                :will-close="willClose"
+            >
+                <template #trigger="{ open, close }">
+                    <sds-button variant="secondary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                </template>
+                <template #default>
+                    <div class="p-2">
+                        <p>Please complete all fields on the Risk Scoring page before exporting data.</p>
+                    </div>
+                </template>
+            </sds-floating-ui>
+            {% else %}            
+            <sds-button variant="primary" size="sm" @click="redirectLink('{% url "generate_outbrief" %}')">Export</sds-button>
             {% endif %}
         </div>
     </div>
@@ -188,9 +240,7 @@ DM22-1011
             <img src="/static/icons/file-powerpoint-regular.svg">
             <h1>Out-Brief (16:9)</h1>
             <p>Download a widescreen PPTX slide deck containing report data</p>
-            {% if eng_meta %}
-            <sds-button variant="primary" size="sm" @click="redirectLink('{% url "generate_outbrief_ws" %}')">Export</sds-button>
-            {% else %}
+            {% if not eng_meta %}
             <sds-floating-ui
                 popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
                 placement="top"
@@ -203,7 +253,7 @@ DM22-1011
                 :will-close="willClose"
             >
                 <template #trigger="{ open, close }">
-                    <sds-button variant="primary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                    <sds-button variant="secondary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
                 </template>
                 <template #default>
                     <div class="p-2">
@@ -211,6 +261,29 @@ DM22-1011
                     </div>
                 </template>
             </sds-floating-ui>
+            {% elif incomplete_risk_score %}
+            <sds-floating-ui
+                popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                placement="top"
+                arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                placement-top-arrow-class="-bottom-1"
+                placement-right-arrow-class="-left-1"
+                placement-bottom-arrow-class="-top-1"
+                placement-left-arrow-class="-right-1"
+                :will-open="willOpen"
+                :will-close="willClose"
+            >
+                <template #trigger="{ open, close }">
+                    <sds-button variant="secondary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                </template>
+                <template #default>
+                    <div class="p-2">
+                        <p>Please complete all fields on the Risk Scoring page before exporting data.</p>
+                    </div>
+                </template>
+            </sds-floating-ui>
+            {% else %}            
+            <sds-button variant="primary" size="sm" @click="redirectLink('{% url "generate_outbrief_ws" %}')">Export</sds-button>
             {% endif %}
         </div>
     </div>
@@ -221,9 +294,7 @@ DM22-1011
             <img src="/static/icons/file-pdf-regular.svg">
             <h1>PACE</h1>
             <p>Download a Post-Assessment Closure Evaluation PDF</p>
-            {% if eng_meta %}
-            <sds-button variant="primary" size="sm" @click="redirectLink('{% url "generate_pace" %}')">Export</sds-button>
-            {% else %}
+            {% if not eng_meta %}
             <sds-floating-ui
                 popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
                 placement="top"
@@ -236,7 +307,7 @@ DM22-1011
                 :will-close="willClose"
             >
                 <template #trigger="{ open, close }">
-                    <sds-button variant="primary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                    <sds-button variant="secondary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
                 </template>
                 <template #default>
                     <div class="p-2">
@@ -244,6 +315,29 @@ DM22-1011
                     </div>
                 </template>
             </sds-floating-ui>
+            {% elif incomplete_risk_score %}
+            <sds-floating-ui
+                popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                placement="top"
+                arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                placement-top-arrow-class="-bottom-1"
+                placement-right-arrow-class="-left-1"
+                placement-bottom-arrow-class="-top-1"
+                placement-left-arrow-class="-right-1"
+                :will-open="willOpen"
+                :will-close="willClose"
+            >
+                <template #trigger="{ open, close }">
+                    <sds-button variant="secondary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                </template>
+                <template #default>
+                    <div class="p-2">
+                        <p>Please complete all fields on the Risk Scoring page before exporting data.</p>
+                    </div>
+                </template>
+            </sds-floating-ui>
+            {% else %}            
+            <sds-button variant="primary" size="sm" @click="redirectLink('{% url "generate_pace" %}')">Export</sds-button>
             {% endif %}
         </div>
     </div>
@@ -269,7 +363,7 @@ DM22-1011
                 :will-close="willClose"
             >
                 <template #trigger="{ open, close }">
-                    <sds-button variant="primary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                    <sds-button variant="secondary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
                 </template>
                 <template #default>
                     <div class="p-2">
@@ -286,9 +380,7 @@ DM22-1011
             <img src="/static/icons/file-code-regular.svg">
             <h1>JSON</h1>
             <p>Download a JSON file containing report data</p>
-            {% if eng_meta %}
-            <sds-button variant="primary" size="sm" @click="redirectLink('{% url "generate_json" %}')">Export</sds-button>
-            {% else %}
+            {% if not eng_meta %}
             <sds-floating-ui
                 popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
                 placement="top"
@@ -301,7 +393,7 @@ DM22-1011
                 :will-close="willClose"
             >
                 <template #trigger="{ open, close }">
-                    <sds-button variant="primary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                    <sds-button variant="secondary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
                 </template>
                 <template #default>
                     <div class="p-2">
@@ -309,6 +401,29 @@ DM22-1011
                     </div>
                 </template>
             </sds-floating-ui>
+            {% elif incomplete_risk_score %}
+            <sds-floating-ui
+                popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                placement="top"
+                arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                placement-top-arrow-class="-bottom-1"
+                placement-right-arrow-class="-left-1"
+                placement-bottom-arrow-class="-top-1"
+                placement-left-arrow-class="-right-1"
+                :will-open="willOpen"
+                :will-close="willClose"
+            >
+                <template #trigger="{ open, close }">
+                    <sds-button variant="secondary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                </template>
+                <template #default>
+                    <div class="p-2">
+                        <p>Please complete all fields on the Risk Scoring page before exporting data.</p>
+                    </div>
+                </template>
+            </sds-floating-ui>
+            {% else %}            
+            <sds-button variant="primary" size="sm" @click="redirectLink('{% url "generate_json" %}')">Export</sds-button>
             {% endif %}
         </div>
     </div>
@@ -334,7 +449,7 @@ DM22-1011
                 :will-close="willClose"
             >
                 <template #trigger="{ open, close }">
-                    <sds-button variant="primary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                    <sds-button variant="secondary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
                 </template>
                 <template #default>
                     <div class="p-2">
@@ -367,7 +482,7 @@ DM22-1011
                 :will-close="willClose"
             >
                 <template #trigger="{ open, close }">
-                    <sds-button variant="primary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                    <sds-button variant="secondary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
                 </template>
                 <template #default>
                     <div class="p-2">
@@ -399,7 +514,7 @@ DM22-1011
                 :will-close="willClose"
             >
                 <template #trigger="{ open, close }">
-                    <sds-button variant="primary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                    <sds-button variant="secondary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
                 </template>
                 <template #default>
                     <div class="p-2">
@@ -416,7 +531,49 @@ DM22-1011
             <img src="/static/icons/file-export-solid.svg">
             <h1>Export All</h1>
             <p>Download all files listed on this page</p>
-            {% if eng_meta %}
+            {% if not eng_meta %}
+            <sds-floating-ui
+                popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                placement="top"
+                arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                placement-top-arrow-class="-bottom-1"
+                placement-right-arrow-class="-left-1"
+                placement-bottom-arrow-class="-top-1"
+                placement-left-arrow-class="-right-1"
+                :will-open="willOpen"
+                :will-close="willClose"
+            >
+                <template #trigger="{ open, close }">
+                    <sds-button variant="secondary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                </template>
+                <template #default>
+                    <div class="p-2">
+                        <p>Complete the required Assessment Details fields before exporting data.</p>
+                    </div>
+                </template>
+            </sds-floating-ui>
+            {% elif incomplete_risk_score %}
+            <sds-floating-ui
+                popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
+                placement="top"
+                arrow-class="absolute bg-black w-2 h-2 rotate-45"
+                placement-top-arrow-class="-bottom-1"
+                placement-right-arrow-class="-left-1"
+                placement-bottom-arrow-class="-top-1"
+                placement-left-arrow-class="-right-1"
+                :will-open="willOpen"
+                :will-close="willClose"
+            >
+                <template #trigger="{ open, close }">
+                    <sds-button variant="secondary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
+                </template>
+                <template #default>
+                    <div class="p-2">
+                        <p>Please complete all fields on the Risk Scoring page before exporting data.</p>
+                    </div>
+                </template>
+            </sds-floating-ui>
+            {% else %}            
             <sds-floating-ui
                 popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
                 placement="top"
@@ -434,27 +591,6 @@ DM22-1011
                 <template #default>
                     <div class="p-2">
                         <p>This function requires pop-ups and redirects to be enabled for this web application.</p>
-                    </div>
-                </template>
-            </sds-floating-ui>
-            {% else %}
-            <sds-floating-ui
-                popper-class="absolute bg-black text-white text-xs shadow rounded-lg text-center w-56"
-                placement="top"
-                arrow-class="absolute bg-black w-2 h-2 rotate-45"
-                placement-top-arrow-class="-bottom-1"
-                placement-right-arrow-class="-left-1"
-                placement-bottom-arrow-class="-top-1"
-                placement-left-arrow-class="-right-1"
-                :will-open="willOpen"
-                :will-close="willClose"
-            >
-                <template #trigger="{ open, close }">
-                    <sds-button variant="primary" type="button" size="sm" @click="" @mouseover="open" @mouseout="close">Export</sds-button>
-                </template>
-                <template #default>
-                    <div class="p-2">
-                        <p>Complete the required Assessment Details fields before exporting data.</p>
                     </div>
                 </template>
             </sds-floating-ui>

@@ -123,14 +123,21 @@ class UploadedFindingUpdateView(generic.edit.UpdateView):
                 print(e)
                 continue
 
-        kev_backup = finding.KEV
+        kev_backup = finding.KEV.all()
+
+        if (len(kev_backup) > 0 and len(kevs) == 0):
+            reset = True
+        else:
+            reset = False
 
         try:
             finding.KEV.clear()
             finding.KEV.add(*kevs)
         except Exception as e:
             print(e)
-            finding.KEV = kev_backup
+            finding.KEV.add(*kev_backup)
+
+        finding.save()
 
         for index, data in enumerate(postData['screenshots']):
             if data['uuid'] is not None:
@@ -162,15 +169,33 @@ class UploadedFindingUpdateView(generic.edit.UpdateView):
         for deleted in deletedScreenshots:
             deleted.delete()
 
-        sev_map = {'Critical': 10, 'High': 8, 'Medium': 5, 'Low': 3, 'Informational': 1}
-        kev_map = {'True': 10, 'False': 1}
-        if finding.KEV.count() > 0:
-            kev = "True"
+        '''
+        ******************************************************************************
+         The mappings and risk score formula below should be adjusted based on the
+         methodology of the assessing entity. All values are placeholders and do not 
+         reflect an actual risk scoring methodology.
+        ******************************************************************************
+        '''
+        if reset:
+            likelihood = None
+        elif len(kevs) > 0:
+            likelihood = 100
         else:
-            kev = "False"
+            likelihood = finding.likelihood
+
+        finding.likelihood=likelihood
+
+        sev_map = {'Critical': 10, 'High': 9, 'Medium': 8, 'Low': 7, 'Informational': 6}
+        mag_map = {'': 0, '1-10': 10, '11-20': 20, '21-30': 30, '31+': 40}
+        sev = postData['findingSeverity']
         mag = finding.magnitude
-        prob = finding.probability
-        score = sev_map[postData['findingSeverity']] + kev_map[kev] + mag + prob
+
+        if likelihood == None:
+            lkd = 0
+        else:
+            lkd = likelihood
+                
+        score = sev_map[sev] + mag_map[mag] + lkd
 
         finding.risk_score = score
         finding.save()
@@ -232,15 +257,38 @@ class UploadedFindingCreateView(generic.edit.CreateView):
         base_finding = BaseFinding.objects.filter(pk=postData['selectedFinding']['pk']).first()
         severity = Severities.objects.filter(severity_name=postData['findingSeverity']).first()
 
-        sev_map = {'Critical': 10, 'High': 8, 'Medium': 5, 'Low': 3, 'Informational': 1}
-        kev_map = {'True': 10, 'False': 1}
         if len(kevs) > 0:
             kev = "True"
+            likelihood = 100
         else:
             kev = "False"
+            likelihood = None
+
+        '''
+        ******************************************************************************
+         The mappings and risk score formula below should be adjusted based on the
+         methodology of the assessing entity. All values are placeholders and do not 
+         reflect an actual risk scoring methodology.
+        ******************************************************************************
+        '''
+        
+        if len(kevs) > 0:
+            kev = "True"
+            likelihood = 100
+        else:
+            kev = "False"
+            likelihood = None
+
+        sev_map = {'Critical': 10, 'High': 9, 'Medium': 8, 'Low': 7, 'Informational': 6}
+        sev = postData['findingSeverity']
         mag = 0
-        prob = 0
-        score = sev_map[postData['findingSeverity']] + kev_map[kev] + mag + prob
+
+        if likelihood == None:
+            lkd = 0
+        else:
+            lkd = likelihood
+                
+        score = sev_map[sev] + mag + lkd
 
         try:
             finding = UploadedFinding.objects.create(
@@ -256,6 +304,7 @@ class UploadedFindingCreateView(generic.edit.CreateView):
                 assessment_type = postData['assessmentType'],
                 mitigation = False if postData['findingMitigation'] == 'False' else True,
                 screenshot_description = postData['screenshotDescription'],
+                likelihood = likelihood,
                 risk_score = score
             )
         except Exception as e:

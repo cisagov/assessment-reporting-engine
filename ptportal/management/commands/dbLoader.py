@@ -257,6 +257,7 @@ class Command(BaseCommand):
                     resources=row.Resources.strip(),
                     references=row.References.strip(),
                     severity=row.Severity.strip(),
+                    default_likelihood=int(row.Likelihood),
                     NIST_800_53=row.NIST_Controls,
                     NIST_CSF=row.NIST_CSF,
                     CIS_CSC=row.CIS_Recommendations,
@@ -366,6 +367,7 @@ class Command(BaseCommand):
                     ),
                     gen_finding=row.General_Finding_Name.strip(),
                     severity=row.Severity,
+                    default_likelihood=int(row.Likelihood),
                     finding_type='specific',
                 )
             except Exception as e:

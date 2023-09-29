@@ -54,7 +54,7 @@ class UploadedFindingForm(BaseModelForm):
             'timetable',
             'KEV',
             'magnitude',
-            'probability',
+            'likelihood',
             'risk_score',
             'slug',
             'created_at',
@@ -99,6 +99,10 @@ class EditUploadedFindingForm(BaseModelForm):
 
     class Meta:
         model = UploadedFinding
+        exclude = (
+            'magnitude',
+            'likelihood',
+        )
         fields = '__all__'
         widgets = {
             'severity': forms.RadioSelect(

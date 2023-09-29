@@ -17,73 +17,32 @@ DM22-1011
 {% block active %}#engagement{% endblock %}
 {% block content %}
 
-
-<h1>Delete Engagement</h1>
-<hr />
-
-<div class="mt-2 mb-4 grid grid-cols-2">
-	<div class="">
-		<h2>{{report.report_type}} ID: {{object.asmt_id}}</h2>
-		<p>Last modified on {{object.updated_at | naturaltime}}</p>
+<sds-section>
+	<div class="mt-2 mb-4 grid grid-cols-2">
+		<div class="">
+			<h2><b>Assessment:</b> {{report.report_type}}-{{object.asmt_id}}</h2>
+			<p><b>Last modified:</b> {{ object.updated_at | naturaltime }}</p>
+		</div>
 	</div>
-	<div class="justify-self-end">
-    	<sds-button class="mr-2" variant="primary" @click="redirectLink('{% url "engagement_update" %}')"><i class="fa fa-edit"></i> Edit</sds-button>
-	</div>
-</div>
 
-<div class='row'>
-	<div class='col-md-6'>
-		<p>Are you sure you want to delete the engagement: <strong>{{ object.customer_long_name }}</strong>?</p>
+	<div class='row'>
+		<div class='col-md-6'>
+			<p>Are you sure you want to delete the assessment details for <strong>{{report.report_type}}-{{object.asmt_id}}</strong>?</p>
+		</div>
 	</div>
-</div>
-{% if report_type == 'HVA' %}
-<div class='row'>
-	<div class='col-md-6'>
-	<p>And these HVAs?</p>
-	</div>
-</div>
-<div class="w-1/2 mb-4">
-	<sds-table v-bind="HVATableArgs" class="table-prose"></sds-table>
-</div>
-{% endif %}
-
-<form action="" method="POST">
-  {% csrf_token %}
-  <sds-button type="submit" variant="primary">Yes, delete</sds-button>
-</form>
+	<br><br>
+	<form action="" method="POST">
+	  {% csrf_token %}
+	  <sds-button type="submit" variant="danger"><img class="w-8 h-8" src="/static/icons/trash-solid-white.svg" style="float:left; padding:3px 6px 0px 0px"> Delete</sds-button>
+	</form>
+</sds-section>
 
 {% endblock %}
 
 {% block scripts %}
 <script>
-  function pageData() {
-    data = {
-      HVATableArgs: {
-				fields: [
-					{
-						key: "name",
-						label: "HVA Name"
-					},
-					{
-						key: "address",
-						label: "Address"
-					},
-					{
-						key: "status",
-						label: "Status"
-					},
-				],
-				items: [],
-				sortBy: "num"
-			}
-    }
-    {% if report.report_type == 'HVA' %}
-			{% for hva in hvas %}
-				data["HVATableArgs"]["items"].push({name: "{{hva.name}}", address: "{{hva.address}}", status: "{{hva.status}}"})
-			{% endfor %}
-		{% endif %}
-
-    return data
-  }
+	function pageCreated() {
+		this.baseData.layoutArgs.pageTitle = "Delete Assessment Details"
+	}
 </script>
 {% endblock %}

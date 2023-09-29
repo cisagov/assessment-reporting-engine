@@ -201,6 +201,9 @@ class BaseFinding(abstract_models.TimeStampedModel):
         max_length=20, default='TBD'
     )
     timetable = models.TextField(verbose_name="Recommendation Timetable", blank=True)
+    default_likelihood = models.IntegerField(
+        blank=True, null=True, verbose_name='Default Likelihood', help_text='What is the default likelihood of this finding?'
+    )
 
     NIST_800_53 = models.TextField(blank=True)
     NIST_CSF = models.TextField(blank=True)
@@ -286,6 +289,14 @@ class UploadedFinding(abstract_models.TimeStampedModel):
 
     MITIGATION_CHOICES = ((True, 'Yes'), (False, 'No'))
 
+    MAGNITUDE_CHOICES = (
+        ('', ''),
+        ('1-10', '1-10'),
+        ('11-20', '11-20'),
+        ('21-30', '21-30'),
+        ('31+', '31+'),
+    )
+
     finding = models.ForeignKey(
         BaseFinding,
         to_field='finding_id',
@@ -366,18 +377,21 @@ class UploadedFinding(abstract_models.TimeStampedModel):
         blank=True
     )
 
-    magnitude = models.IntegerField(
-        default=0,
+    magnitude = models.CharField(
+        choices=MAGNITUDE_CHOICES,
+        max_length=5,
+        default='',
         blank=True,
         null=True,
-        verbose_name='Magnitude'
+        verbose_name='Magnitude',
+        help_text='How many occurrences of this finding were discovered?'
     )
 
-    probability = models.IntegerField(
-        default=0,
+    likelihood = models.IntegerField(
         blank=True,
         null=True,
-        verbose_name='Probability'
+        verbose_name='Likelihood',
+        help_text='What is the likelihood that this finding is discovered and abused?'
     )
 
     risk_score = models.IntegerField(

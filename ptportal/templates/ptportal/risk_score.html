@@ -15,22 +15,118 @@ DM22-1011
 {% extends 'ptportal/base.html' %}
 {% block active %}#riskScore{% endblock %}
 
+{% block style %}
+<style>
+	input[type='checkbox'] {
+		display: none;
+	}
+
+.lbl-toggle {
+	display: block;
+	font-weight: bold;
+	font-size: 1rem;
+	text-transform: uppercase;
+	text-align: center;
+	padding: 1rem;
+	color: #FFF;
+	background: #555;
+	cursor: pointer;
+	transition: all 0.25s ease-out;
+}
+
+.lbl-toggle:hover {
+	color: #DDD;
+}
+
+.lbl-toggle::before {
+	content: ' ';
+	display: inline-block;
+	border-top: 5px solid transparent;
+	border-bottom: 5px solid transparent;
+	border-left: 5px solid currentColor;
+	vertical-align: middle;
+	margin-right: .7rem;
+	transform: translateY(-2px);
+	transition: transform .2s ease-out;
+}
+
+.collapse-content .content {
+	background: #FFF;
+	color: #333;
+	border-bottom: 1px solid #555;
+	padding: .5rem 1rem;
+}
+
+.collapse-content {
+	max-height: 0px;
+	overflow: hidden;
+	transition: max-height .25s ease-in-out;
+}
+
+.toggle:checked + .lbl-toggle + .collapse-content {
+	max-height: 100vh;
+}
+
+.toggle:checked + .lbl-toggle::before {
+	transform: rotate(90deg) translateX(-3px);
+}
+
+.toggle:checked + .lbl-toggle {
+	border-bottom-right-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+</style>
+{% endblock %}
 
 {% block content %}
 {% csrf_token %}
 <sds-section>
+	<div class="collapse-section">
+		<input id="collapse" class="toggle" type="checkbox">
+		<label for="collapse" class="lbl-toggle">Risk Scoring Terms & Guidance</label>
+		<div class="collapse-content">
+			<div class="content">
+				<br>
+				<p><b>Severity: </b>The severity of a finding correlates to how easily a finding can be leveraged and how high the impact would be, if the finding were abused. This element can be set while creating/editing a finding and this page will be updated to reflect the severity.</p>
+				<br>
+				<p><b>Magnitude: </b>The magnitude of a finding is the number of occurrences of the finding within the target environment. Often, this refers to the number of affected systems. In cases where a group of domain objects is affected (e.g., 'Domain Users'), the magnitude should reflect the total number of affected objects (e.g., number of users in the 'Domain Users' group).</p>
+				<br>
+				<p><b>Likelihood: </b>The likelihood (1-100%) of a finding is based on how likely it is to be discovered and abused. A baseline value is provided as a placeholder for reference, but it is up to the assessment team to adjust the value, taking into consideration environmental factors. If a finding has one or more associated Known Exploited Vulnerabilities (KEVs), it will automatically be set to 100%. There should be no instances where the likelihood is 0%, as that implies it is not a finding.</p>
+				<br>
+				<p><b>KEV: </b>If a finding has one ore more KEVs mapped to it, it will be tagged as a KEV and the likelihood will automatically be set to 100%. This element can be set while creating/editing a finding by selecting relevant KEVs and this page will be updated to reflect the KEV status.</p>
+				<br>
+				<p><b>Mitigation Status: </b>If a finding was mitigated within the assessment timeframe, it will be deducted from the total risk score to calculate the mitigated risk score. This element can be set while creating/editing a finding and this page will be updated to reflect the mitigation status.</p>
+				<br>
+				<p><b>Risk Score: </b>The risk score of each finding is calculated based on the values associated with Severity, Magnitude, and Likelihood. This score can be used to track an organization's risk over time and compare risk across organizations and sectors.</p>
+				<br>
+			</div>
+		</div>
+	</div>
+		
+	</p>
+	<br><br>
 	<sds-table class="table-prose mb-2" v-bind="scoreTableArgs">
 		<template #cell(id)="{item}"></template>
 		<template #cell(finding)="{item}"></template>
 		<template #cell(severity)="{item}"></template>
 		<template #cell(magnitude)="{item}">
-			<sds-input v-model="item.magnitude" placeholder="0-100" :maxlength="3"></sds-input>
+			<sds-select v-model="item.magnitude" :options="magnitude_options"/>
 		</template>
-		<template #cell(probability)="{item}">
-			<sds-input v-model="item.probability" placeholder="0-100" :maxlength="3"></sds-input>
+		<template #cell(likelihood)="{item}">
+			<div v-if="item.kev">
+				<sds-input v-model="item.likelihood" v-bind:placeholder="item.default_likelihood" :maxlength="3" v-on:keydown.prevent></sds-input>
+			</div>
+			<div v-else>
+				<sds-input v-model="item.likelihood" v-bind:placeholder="item.default_likelihood" :maxlength="3"></sds-input>
+			</div>
 		</template>
-		<template #cell(kev)="{item}"></template>
-		<template #cell(mitigation)="{item}"></template>
+		<template #cell(kev)="{item}">
+			<sds-toggle-switch v-model="item.kev" :disabled="Boolean(1)"/>
+		</template>
+		<template #cell(mitigation)="{item}">
+			<sds-toggle-switch v-model="item.mitigation" :disabled="Boolean(1)"/>
+		</template>
 		<template #cell(score)="{item}"></template>
 	</sds-table>
 
@@ -71,12 +167,12 @@ DM22-1011
 					},
 					{
 						key: "magnitude",
-						label: "Magnitude (%)",
+						label: "Magnitude",
 						sortable: true
 					},
 					{
-						key: "probability",
-						label: "Probability (%)",
+						key: "likelihood",
+						label: "Likelihood (%)",
 						sortable: true
 					},
 					{
@@ -97,7 +193,6 @@ DM22-1011
 				],
 				items: []
 			},
-
 			totalTableArgs: {
 				fields: [
 					{
@@ -113,7 +208,13 @@ DM22-1011
 					}
 				],
 				items: []
-			}
+			},
+			magnitude_options: [
+				{ id: 1, value: '1-10', text: '1-10'},
+				{ id: 2, value: '11-20', text: '11-20'},
+				{ id: 3, value: '21-30', text: '21-30'},
+				{ id: 4, value: '31+', text: '31+'},
+			],
 		}
 
 		total_risk = 0
@@ -122,9 +223,15 @@ DM22-1011
 		{% for finding in findings %}
 
 			{% if finding.KEV.count > 0 %}
-				iskev = "True"
+				iskev = true
 			{% else %}
-				iskev = "False"
+				iskev = false
+			{% endif %}
+
+			{% if finding.mitigation == True %}
+				mitigated = true
+			{% else %}
+				mitigated = false
 			{% endif %}
 
 			total_risk += parseInt("{{finding.risk_score}}")
@@ -132,7 +239,13 @@ DM22-1011
 				mitigated_risk += parseInt("{{finding.risk_score}}")
 			{% endif %}
 
-			data.scoreTableArgs.items.push({uploaded_finding_id: "{{finding.uploaded_finding_id}}", uploaded_finding_name: "{{finding.uploaded_finding_name}}", severity: "{{finding.severity}}", magnitude: "{{finding.magnitude}}", probability: "{{finding.probability}}", kev: iskev, mitigation: "{{finding.mitigation}}", risk_score: "{{finding.risk_score}}"})
+			{% if finding.likelihood == None %}
+				likelihood = ""
+			{% else %}
+				likelihood = parseInt("{{finding.likelihood}}")
+			{% endif %}
+
+			data.scoreTableArgs.items.push({uploaded_finding_id: "{{finding.uploaded_finding_id}}", uploaded_finding_name: "{{finding.uploaded_finding_name}}", severity: "{{finding.severity}}", magnitude: "{{finding.magnitude|escapejs}}", likelihood: likelihood, default_likelihood: "{{finding.finding.default_likelihood}}", kev: iskev, mitigation: mitigated, risk_score: "{{finding.risk_score}}"})
 		{% endfor %}
 
 		data.totalTableArgs.items.push({total: total_risk, mitigated: mitigated_risk})
@@ -149,23 +262,16 @@ DM22-1011
 			submitRiskScore: function() {
 
 				this.scoreTableArgs.items.forEach(element => {
-					if (!(parseInt(element.magnitude) >= 0 && (parseInt(element.magnitude) <= 100))) {
-						this.notify_magnitude = true
-					}
-
-					if (!(parseInt(element.probability) >= 0 && (parseInt(element.probability) <= 100))) {
-						this.notify_probability = true
+					if (!(element.likelihood) == "") {
+						if (!(parseInt(element.likelihood) >= 1 && (parseInt(element.likelihood) <= 100))) {
+							this.notify_likelihood = true
+						}
 					}
 				})
 				
-				if (this.notify_magnitude) {
-					this.displayNotification({title: "Error Saving Data", text: "Magnitude must be a valid integer between 0 and 100. Please correct invalid magnitudes before saving.", variant: "warning", autoHideDelay:10000})
-					this.notify_magnitude = false
-				}
-
-				else if (this.notify_probability) {
-					this.displayNotification({title: "Error Saving Data", text: "Probability must be a valid integer between 0 and 100. Please correct invalid probabilities before saving.", variant: "warning", autoHideDelay:10000})
-					this.notify_probability = false
+				if (this.notify_likelihood) {
+					this.displayNotification({title: "Error Saving Data", text: "Likelihood must be a valid integer between 1 and 100. Please correct invalid likelihood values before saving.", variant: "warning", autoHideDelay:10000})
+					this.notify_likelihood = false
 				}
 
 				else {
