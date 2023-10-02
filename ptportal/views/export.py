@@ -144,8 +144,11 @@ class Export(generic.base.TemplateView):
         uploaded_list = UploadedFinding.objects.all().order_by('assessment_type', 'severity', 'uploaded_finding_name')
         cis_csc_objects = CIS_CSC.objects.all().order_by('CIS_ID')
 
-        if UploadedFinding.objects.filter(magnitude='').count() > 0 or UploadedFinding.objects.filter(likelihood__isnull=True).count() > 0:
-            context['incomplete_risk_score'] = True
+        if report.report_type == "RVA":
+            if UploadedFinding.objects.filter(magnitude='').count() > 0 or UploadedFinding.objects.filter(likelihood__isnull=True).count() > 0:
+                context['incomplete_risk_score'] = True
+            else:
+                context['incomplete_risk_score'] = False
         else:
             context['incomplete_risk_score'] = False
 
