@@ -96,8 +96,8 @@ Once `python` is successfully installed, run the following command to verify tha
 ## Getting Started
 
 ```bash
-> git clone https://github.com/cisagov/rva-reporting-engine.git
-> cd rva-reporting-engine
+> git clone https://github.com/cisagov/assessment-reporting-engine.git
+> cd assessment-reporting-engine
 ```
 
 <a name='install-dependencies'></a>
@@ -200,7 +200,7 @@ A back up ZIP file can be downloaded through the GUI by logging in and navigatin
 
 ### Restore Online
 
-It is assumed that a copy of the rva-reporting-engine directory (whether its backed up from the previous instance or a new copy) is on the system where RE is being restored. ***The version of RE must match the version the backup was generated from and the same assessment type from the previous instance must be specified with the `-r` flag.*** The following command will restore the RE instance from a backup ZIP file:
+It is assumed that a copy of the assessment-reporting-engine directory (whether its backed up from the previous instance or a new copy) is on the system where RE is being restored. ***The version of RE must match the version the backup was generated from and the same assessment type from the previous instance must be specified with the `-r` flag.*** The following command will restore the RE instance from a backup ZIP file:
 
 ```bash
 > python3 ptp.py restore -r [FAST/RPT/RVA] -b [/path/to/backup.zip]
@@ -221,7 +221,7 @@ This method involves a lot of overhead in terms of large files transferred betwe
 > docker save prod-db > db.tar
 ```
 
-The ***entire rva-reporting-engine directory***, including the web/nginx/db TAR files and the backup ZIP file must be transferred to the new system due to various dependencies and files that were generated with internet connectivity, and which cannot be re-generated in the offline environment. This will fulfill the **TailwindCSS** and **Vue.js** requirements, however, ***the system where RE is being restored must already meet all other prerequisites and dependency requirements***.
+The ***entire assessment-reporting-engine directory***, including the web/nginx/db TAR files and the backup ZIP file must be transferred to the new system due to various dependencies and files that were generated with internet connectivity, and which cannot be re-generated in the offline environment. This will fulfill the **TailwindCSS** and **Vue.js** requirements, however, ***the system where RE is being restored must already meet all other prerequisites and dependency requirements***.
 
 <a name='restore-offline'></a>
 
