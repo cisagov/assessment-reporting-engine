@@ -440,10 +440,17 @@ def generateEntryJson(filename):
         }
         
     else:
+        sec_solutions = SecuritySolution.objects.all()
+        sec_solutions_list = []
+
+        for solution in sec_solutions:
+            if solution.used:
+                sec_solutions_list.append(solution.security_solution_name)
+
         asmt_data['phishing_assessment'] = {
             'date_generated': str(payload_testing_date),
             'phishing_assessment_date': str(phishing_campaign_date),
-            'security_solutions': [],
+            'security_solutions': sec_solutions_list,
             'campaigns': campaign_list,
             'payloads': payload_list
         }

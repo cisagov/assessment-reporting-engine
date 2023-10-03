@@ -1,24 +1,17 @@
 
 **/.settings
 
-testUploads
 pentestportal/media/*
-dhs_format*
-RPT[0-9]*
-RVA[0-9]*
-HVA[0-9]*
-RPT_Outbrief*
-RVA_Outbrief*
-HVA_Outbrief*
-RVA_Tracker*
-HVA_Tracker*
-RPT_Tracker*
-hva.json
-election-infrastructure.json
-ptp_export_*
-RVA_Report_*
+RPT-[0-9]*
+RVA-[0-9]*
+HVA-[0-9]*
+FAST-[0-9]*
+RV[0-9]*
+backup-*
 mode.txt
-
+docker/dev/env.txt
+docker/prod/env.txt
+docker/prod/nginx/ssl/
 
 *.sqlite3
 
@@ -28,26 +21,15 @@ ptportal.log
 __pycache__
 *.pyc
 
-
 docs/_build/*
 
-
-**/.settings
-
-pentestportal/testUploads
-external_scope.txt
-internal_scope.txt
-ptp_backup*
 ~$*
 
-ptp_export_*
-*.sqlite3
 *.pyc
 *.DS_Store
 
 .coverage
 .editorconfig
-mode.txt
 
 docs/_build/*
 
@@ -63,7 +45,6 @@ ptportal/static/rest_framework/*
 ptportal/static/webfonts/*
 ptportal/static/admin/js/*
 ptportal.log
-mode.txt
 
 .vscode
 
