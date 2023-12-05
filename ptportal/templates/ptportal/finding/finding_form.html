@@ -448,7 +448,7 @@ function pageData() {
 
     {% for screenshot in screenshots %}
       imgURL = window.location.origin + "/media/" + "{{screenshot.file}}"
-      caption = "{{screenshot.caption}}"
+      caption = "{{screenshot.caption | escapejs}}"
       pageData.formData.screenshots.push({order: "{{screenshot.order}}", uuid: "{{screenshot.uuid}}", imgURL: imgURL, caption: caption})
     {% endfor %}
 
