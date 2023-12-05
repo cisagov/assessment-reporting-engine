@@ -169,7 +169,7 @@ DM22-1011
             {% if report.report_type == 'RVA' %}
             <h1>Phishing</h1>
             <div class="num">
-                <sds-input v-model="formData.users_targeted" placeholder="#" :maxlength="10"></sds-input>
+                <sds-input v-model="formData.users_targeted" placeholder="#" :maxlength="10" type="number"></sds-input>
             </div>
             <div style="float:left; padding: 10px 0px 0px 0px"><p>users were included in the phishing campaign(s) targeting the following mail domain(s):</p></div>
             <br>
@@ -186,11 +186,11 @@ DM22-1011
             <h1>Network Penetration Test</h1>
             {% endif %}
             <div class="num">
-                <sds-input v-model="formData.external_discovered" placeholder="#" :maxlength="20"></sds-input>
+                <sds-input v-model="formData.external_discovered" placeholder="#" :maxlength="20" type="number"></sds-input>
             </div>
                 <div style="float:left; padding: 10px 0px 0px 0px;"><p>of</p></div>
             <div class="num">
-                <sds-input v-model="formData.external_scanned" placeholder="#" :maxlength="20"></sds-input>
+                <sds-input v-model="formData.external_scanned" placeholder="#" :maxlength="20" type="number"></sds-input>
             </div>
             <div style="float:left; padding: 10px 0px 0px 0px"><p>scanned hosts were discovered to be live during testing of the following in-scope targets:</p></div>
             <br>
@@ -203,11 +203,11 @@ DM22-1011
             {% if report.report_type == 'RVA' %}
             <h1>Internal</h1>
             <div class="num">
-                <sds-input v-model="formData.internal_discovered" placeholder="#" :maxlength="20"></sds-input>
+                <sds-input v-model="formData.internal_discovered" placeholder="#" :maxlength="20" type="number"></sds-input>
             </div>
             <div style="float:left; padding: 10px 0px 0px 0px;"><p>of</p></div>
             <div class="num">
-                <sds-input v-model="formData.internal_scanned" placeholder="#" :maxlength="20"></sds-input>
+                <sds-input v-model="formData.internal_scanned" placeholder="#" :maxlength="20" type="number"></sds-input>
             </div>
             <div style="float:left; padding: 10px 0px 0px 0px"><p>scanned hosts were discovered to be live during testing of the following in-scope targets:</p></div>
             <br>

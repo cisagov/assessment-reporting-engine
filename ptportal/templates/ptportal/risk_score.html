@@ -118,7 +118,7 @@ DM22-1011
 				<sds-input v-model="item.likelihood" v-bind:placeholder="item.default_likelihood" :maxlength="3" v-on:keydown.prevent></sds-input>
 			</div>
 			<div v-else>
-				<sds-input v-model="item.likelihood" v-bind:placeholder="item.default_likelihood" :maxlength="3"></sds-input>
+				<sds-input v-model="item.likelihood" v-bind:placeholder="item.default_likelihood" :maxlength="3" type="number"></sds-input>
 			</div>
 		</template>
 		<template #cell(kev)="{item}">

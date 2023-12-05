@@ -62,16 +62,16 @@ DM22-1011
 				<div class="mb-8">
 					<sds-table :fields="fields" :items="items" class="table-prose" v-bind="CampaignTableArgs">
 						<template #cell(emails_sent)="{item}">
-                        	<sds-input v-model="item.emails_sent" placeholder="#" :maxlength="10"></sds-input>
+                        	<sds-input v-model="item.emails_sent" placeholder="#" :maxlength="10" type="number"></sds-input>
                     	</template>
                     	<template #cell(emails_delivered)="{item}">
-                        	<sds-input v-model="item.emails_delivered" placeholder="#" :maxlength="10"></sds-input>
+                        	<sds-input v-model="item.emails_delivered" placeholder="#" :maxlength="10" type="number"></sds-input>
                     	</template>
                     	<template #cell(total_clicks)="{item}">
-                        	<sds-input v-model="item.total_clicks" placeholder="#" :maxlength="10"></sds-input>
+                        	<sds-input v-model="item.total_clicks" placeholder="#" :maxlength="10" type="number"></sds-input>
                     	</template>
                     	<template #cell(unique_clicks)="{item}">
-                        	<sds-input v-model="item.unique_clicks" placeholder="#" :maxlength="10"></sds-input>
+                        	<sds-input v-model="item.unique_clicks" placeholder="#" :maxlength="10" type="number"></sds-input>
                     	</template>
                     	<template #cell(time_to_first_click)="{item}">
                     		<sds-floating-ui
@@ -108,7 +108,7 @@ DM22-1011
 								:will-close="willClose"
 							>
 							<template #trigger="{ open, close }">
-                        	<sds-input v-model="item.creds_harvested" placeholder="#" @mouseover="open" @mouseout="close" :maxlength="20"></sds-input>
+                        	<sds-input v-model="item.creds_harvested" placeholder="#" @mouseover="open" @mouseout="close" :maxlength="20" type="number"></sds-input>
                     		</template>
                     		<template #default>
 					        	<div class="p-2">
@@ -118,10 +118,10 @@ DM22-1011
 					      	</sds-floating-ui>
 	              		</template>
                     	<template #cell(number_exploited)="{item}">
-                        	<sds-input v-model="item.number_exploited" placeholder="#" :maxlength="20"></sds-input>
+                        	<sds-input v-model="item.number_exploited" placeholder="#" :maxlength="20" type="number"></sds-input>
                     	</template>
                     	<template #cell(length_of_campaign)="{item}">
-                        	<sds-input v-model="item.length_of_campaign" placeholder="#" :maxlength="20"></sds-input>
+                        	<sds-input v-model="item.length_of_campaign" placeholder="#" :maxlength="20" type="number"></sds-input>
                     	</template>
 						<template #cell(delete)="{item}">
 							<div style="width:20px; padding:10px 0px 0px 0px">
