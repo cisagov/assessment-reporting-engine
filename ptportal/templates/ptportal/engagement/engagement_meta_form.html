@@ -193,7 +193,9 @@ DM22-1011
 			<div class="grid grid-cols-6 form-spacing mb-8">
 				<div class="col-span-4">
 					<h4 class="mb-2"><b>External Start and End Date</b></h4>
-					<sds-datepicker v-model="formData.ext_date"></sds-datepicker>
+					<input class="form-control" v-model="formData.ext_start_date" type="date" value="formData.ext_start_date" style="float:left; width:35%; padding:10px">
+					<div style="float:left; padding:10px">&#8594;</div>
+					<input class="form-control" v-model="formData.ext_end_date" type="date" value="formData.ext_end_date" style="float:left; width:35%; padding:10px">
 				</div>
 				<div class="col-span-3">
 					<h4><b>
@@ -224,7 +226,9 @@ DM22-1011
 				<div class="grid grid-cols-6 form-spacing mb-8">
 					<div class="col-span-4">
 						<h4 class="mb-2"><b>Internal Start and End Date</b></h4>
-						<sds-datepicker v-model="formData.int_date"></sds-datepicker>
+						<input class="form-control" v-model="formData.int_start_date" type="date" value="formData.int_start_date" style="float:left; width:35%; padding:10px">
+					<div style="float:left; padding:10px">&#8594;</div>
+						<input class="form-control" v-model="formData.int_end_date" type="date" value="formData.int_end_date" style="float:left; width:35%; padding:10px">
 					</div>
 					<div class="col-span-3">
 						<h4><b>
@@ -322,8 +326,10 @@ DM22-1011
 				team_lead_email: "{{ object.team_lead_email | escapejs }}",
 				technical_lead_name: "{{ object.technical_lead_name | escapejs }}",
 				technical_lead_email: "{{ object.technical_lead_email | escapejs }}",
-				ext_date: {start: "{{object.ext_start_date}}" ? new Date("{{object.ext_start_date}}") : "", end: "{{object.ext_end_date}}" ? new Date("{{object.ext_end_date}}") : ""},
-				int_date: {start: "{{object.int_start_date}}" ? new Date("{{object.int_start_date}}") : "", end: "{{object.int_end_date}}" ? new Date("{{object.int_end_date}}") : ""},
+				ext_start_date: "{{ object.ext_start_date | date:"Y-m-d" }}",
+				ext_end_date: "{{ object.ext_end_date | date:"Y-m-d" }}",
+				int_start_date: "{{ object.int_start_date | date:"Y-m-d" }}",
+				int_end_date: "{{ object.int_end_date | date:"Y-m-d" }}",
 				phishing_domains: "{{ object.phishing_domains | escapejs }}",
 				ext_scope: "{{ object.ext_scope | escapejs }}",
 				ext_excluded_scope: "{{ object.ext_excluded_scope | escapejs }}",
