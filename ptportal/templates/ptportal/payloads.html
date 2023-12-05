@@ -204,7 +204,7 @@ function pageData() {
 				items: []
 		},
 		fileUploadArgs: {
-			helperText: "Upload a CSV under 10 MB with the following headers: Description,Protocol,Host,Border and row format: <string>,<string>,<string>,<B/N>,<B/N>",
+			helperText: "Upload a CSV under 10 MB with the following headers: Description,Protocol,Host,Border and row format: <string>,<string>,<B/N>,<B/N>",
 			accept: ".csv",
 			allowedFiletypes: ["text/csv"],
 			name: "payloadUpload",
@@ -327,35 +327,66 @@ function pageMethods() {
 			let payloadString = null
 			await fileName.text().then(text => {payloadString = text})
 
-			if (overwrite) {
-				this.PayloadTableArgs.items = []
-			}
-
-			var lines = payloadString.split('\n')
+			var lines = payloadString.split(/[\n\r]+/)
 			var length = lines.length
+			var headers = lines[0].split(',')
+			var dindex = headers.indexOf('Description')
+			var pindex = headers.indexOf('Protocol')
+			var hindex = headers.indexOf('Host')
+			var bindex = headers.indexOf('Border')
 
-			for (var i = 1; i < length; i++) {
-				values = lines[i].split(',')
-
-				if (values[2][0] == "N") {
-					h = false
-				}
-				else {
-					h = true
-				}
-			    
-				if (values[3][0] == "N") {
-					b = false
-				}
-				else {
-					b = true
-				}
-
-				this.PayloadTableArgs.items.push({id: this.PayloadTableArgs.items.length + 1, payload_description: values[0], attack_name: "", c2_protocol: values[1], host_protection: h, border_protection: b})
+			var error = false
+			
+			if (dindex < 0) {
+				this.displayNotification({title: "Error Parsing Data", text: "The uploaded CSV file appears to be missing a valid 'Description' column.", variant: "warning", autoHideDelay:10000})
+				error = true
 			}
 
-			this.displayNotification({'title': 'Payloads Added', text: 'Payloads have been added to the table below. Saving this screen will populate the MITRE ATT&CK formats accordingly.', variant:"info", autoHideDelay:10000})
-			this.fileList = []
+			if (pindex < 0) {
+				this.displayNotification({title: "Error Parsing Data", text: "The uploaded CSV file appears to be missing a valid 'Protocol' column.", variant: "warning", autoHideDelay:10000})
+				error = true
+			}
+
+			if (hindex < 0) {
+				this.displayNotification({title: "Error Parsing Data", text: "The uploaded CSV file appears to be missing a valid 'Host' column.", variant: "warning", autoHideDelay:10000})
+				error = true
+			}
+
+			if (bindex < 0) {
+				this.displayNotification({title: "Error Parsing Data", text: "The uploaded CSV file appears to be missing a valid 'Border' column.", variant: "warning", autoHideDelay:10000})
+				error = true
+			}
+
+			if (!error) {
+				if (overwrite) {
+					this.PayloadTableArgs.items = []
+				}
+
+				for (var i = 1; i < length; i++) {
+					values = lines[i].split(',')
+					description = String(values[dindex])
+					protocol = String(values[pindex])
+
+					if (values[hindex][0] == "N") {
+						h = false
+					}
+					else {
+						h = true
+					}
+				    
+					if (values[bindex][0] == "N") {
+						b = false
+					}
+					else {
+						b = true
+					}
+
+					this.PayloadTableArgs.items.push({id: this.PayloadTableArgs.items.length + 1, payload_description: description, attack_name: "", c2_protocol: protocol, host_protection: h, border_protection: b})
+				}
+
+				this.displayNotification({'title': 'Payloads Added', text: 'Payloads have been added to the table below. Saving this screen will populate the MITRE ATT&CK formats accordingly.', variant:"info", autoHideDelay:10000})
+				this.fileList = []
+			}
 		},
 
 		checkSolution: function(sol) {
