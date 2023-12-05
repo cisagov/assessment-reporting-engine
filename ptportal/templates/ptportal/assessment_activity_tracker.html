@@ -383,7 +383,7 @@ h3 {
     	<div class="mb-8">
     		<div class="help">Use this form to upload any files that were dropped to disk during testing (e.g., payload testing, phishing campaign, spawning a beacon, etc.) and select 'Save' once the files are uploaded to automatically generate their hashes. Files can also be logged manually by adding new rows and inputting the corresponding hashes (e.g., for files that are too large to upload).</div>
     		<br>
-			<sds-file-uploader v-bind="fileUploadArgs" @add="addFile" :restrictions="{maxFileSize:200000000}"></sds-file-uploader>
+			<sds-file-uploader v-bind="fileUploadArgs" @add="addFile"></sds-file-uploader>
 			<br><br>
     		<sds-table :fields="fields" :items="items" class="table-prose" v-bind="ArtifactTableArgs">
 				<template #cell(name)="{item}">
