@@ -110,7 +110,7 @@ Once `python` is successfully installed, run the following command to verify tha
 
 A python3 script ptp.py is included to automate various functions, including the set up, backup, restore, and tear down processes. In order to use the ptp.py script and set up RE, the following dependencies must be met (in addition to the prerequisites outlined in the previous section). Note that RE has only been tested with the following dependency versions and may not function correctly with other versions.
 
-#### Node v18.13.x and NPM v9.2.x
+#### Node v18.x.x and NPM v9.x.x
 
 Any alternate versions of Node and NPM that may be running on the system where RE is being installed could conflict with RE set up. For that reason, it is recommended to purge any existing versions of Node and NPM if they are not needed. The following command will install Node and NPM:
 

@@ -1,5 +1,5 @@
 {
-  "last_updated": "2023-10-30",
+  "last_updated": "2023-11-16",
   "revision": 2,
   "tools": {
     "AtomPePacker": {
@@ -701,8 +701,8 @@
       "Cylance Endpoint Security": {"old_names": []},
       "Cynet Next-Gen Antivirus (NGAV)": {"old_names": []},
       "CYREN AntiVirus": {"old_names": []},
+      "Elastic Security": {"old_names": []},
       "ESET-NOD32": {"old_names": []},
-      "F-Secure": {"old_names": []},
       "FireEye Endpoint Security": {"old_names": []},
       "Fortinet": {"old_names": []},
       "HP Wolf Security": {"old_names": []},
@@ -723,6 +723,7 @@
       "Trellix": {"old_names": []},
       "Trend Micro": {"old_names": ["TrendMicro"]},
       "Webroot": {"old_names": []},
+      "WithSecure": {"old_names": ["F-Secure"]},
       "Vipre": {"old_names": []}
     }
   }
