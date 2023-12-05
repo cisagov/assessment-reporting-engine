@@ -119,6 +119,7 @@ DM22-1011
         allowedFiletypes: ["text/csv"],
         name: "nessusUpload",
         multiple: true,
+        filesize: 20,
       },
     }
 
@@ -157,7 +158,7 @@ DM22-1011
           const file = document.getElementsByName('nessusUpload')[0].files[f]
           const fileName = document.getElementsByName('nessusUpload')[0].files[f]['name']
 
-          if (document.getElementsByName('nessusUpload')[0].files[f].size > 2097152) {
+          if (document.getElementsByName('nessusUpload')[0].files[f].size > 20000000) {
             this.displayNotification({title: "File Exceeds Size Limit", text: "The following file is too large to upload: " + fileName + ". Consider uploading a CSV with only the 'CVE' column.", variant: "warning", autoHideDelay:10000})
             continue
           }

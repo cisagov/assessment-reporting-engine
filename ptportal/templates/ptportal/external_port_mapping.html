@@ -112,11 +112,12 @@ DM22-1011
 				items: []
 			},
 			fileUploadArgs: {
-				helperText: "Upload an XML file (obtained via Nmap using either -oX for XML format or -oA for all formats).\nSelect the Append button to add to the existing data in the table below or Overwrite to overwrite all previous port mapping data.",
+				helperText: "Upload one XML file under 20 MB at a time (obtained via Nmap using either -oX for XML format or -oA for all formats).\nSelect the Append button to add to the existing data in the table below or Overwrite to overwrite all previous port mapping data.",
 				accept: ".xml",
 				allowedFiletypes: ["text/xml"],
 				name: "nmapUpload",
-				multiple: false
+				multiple: false,
+				filesize: 20,
 			}
 		}
 

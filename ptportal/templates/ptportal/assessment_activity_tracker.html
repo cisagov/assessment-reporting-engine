@@ -383,7 +383,7 @@ h3 {
     	<div class="mb-8">
     		<div class="help">Use this form to upload any files that were dropped to disk during testing (e.g., payload testing, phishing campaign, spawning a beacon, etc.) and select 'Save' once the files are uploaded to automatically generate their hashes. Files can also be logged manually by adding new rows and inputting the corresponding hashes (e.g., for files that are too large to upload).</div>
     		<br>
-			<sds-file-uploader v-bind="fileUploadArgs" @add="addFile"></sds-file-uploader>
+			<sds-file-uploader v-bind="fileUploadArgs" @add="addFile" :restrictions="{maxFileSize:200000000}"></sds-file-uploader>
 			<br><br>
     		<sds-table :fields="fields" :items="items" class="table-prose" v-bind="ArtifactTableArgs">
 				<template #cell(name)="{item}">
@@ -426,6 +426,7 @@ h3 {
 				accept: "",
 				name: "artifactUpload",
 				multiple: true,
+				filesize: 200,
 			},
 			tabs: {
 				infrastructure: true,
@@ -1045,15 +1046,21 @@ h3 {
 			},
 
 			addFile: function (event) {
+				filesUploaded = false
 				const files = Array.from(event.files)
 				newFiles = files.filter(file => !this.fileList.includes(file))
 				fileOrder = this.fileList.length
 				Array.prototype.push.apply(this.fileList, newFiles)
+
 				for (let file in newFiles) {
+					filesUploaded = true
 					this.ArtifactTableArgs.items.push({order: this.ArtifactTableArgs.items.length + 1, name: String(newFiles[file]['name']), description: "", md5: "", sha1: "", sha256: "", fileOrder: fileOrder})
 					fileOrder++
 				}
-				this.displayNotification({'title': 'Files Added', text: 'Files have been added to the tracker. Saving this screen will populate the calculated hashes.', variant:"info", autoHideDelay:10000})
+
+				if (filesUploaded) {
+					this.displayNotification({'title': 'Files Added', text: 'Files have been added to the tracker. Saving this screen will populate the calculated hashes.', variant:"info", autoHideDelay:10000})
+				}
 			},
 
 			submitTracker: function () {
