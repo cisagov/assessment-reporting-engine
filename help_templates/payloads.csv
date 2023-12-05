@@ -1,0 +1,7 @@
+Description,Protocol,Host,Border
+Linked x64 EXE (Cobalt Strike),HTTPS,N,B
+Linked EXE Embedded HTA (Cobalt Strike),HTTPS,B,N
+Linked VBA Embedded HTA (Cobalt Strike),HTTPS,N,B
+Linked PowerShell HTA (Cobalt Strike),HTTPS,B,N
+Linked PowerShell HTA (Obfuscated via MorphHTA),HTTPS,N,N
+Linked C# HTA Embedded in HTML (SharpShooter),HTTPS,B,B
