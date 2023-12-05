@@ -1423,12 +1423,11 @@ def insert_services_slides(prs, asmt_info, slide_size):
         print("No phishing campaign data.")
 
 
-def insert_attack_paths(prs, asmt_info, ss_info, media_path, slide_size):
+def insert_attack_paths(prs, report_type, asmt_info, steps_info, media_path, slide_size):
     # ---- add Attack Path Section Slide
     title_only = prs.slide_layouts[11]
     slide = prs.slides.add_slide(title_only)
     slide.placeholders[13].text = "ATTACK PATHS"
-
 
     for cnt, path in enumerate(af.model_gen(asmt_info, "ptportal.narrative")):
         ele = path['fields']
@@ -1437,7 +1436,7 @@ def insert_attack_paths(prs, asmt_info, ss_info, media_path, slide_size):
         attack_path_layout = prs.slide_layouts[15]
         slide = prs.slides.add_slide(attack_path_layout)
         shapes = slide.shapes
-        shapes.title.text = name.upper()
+        shapes.title.text = name
 
         if ele['file']:
             dfile = media_path + ele['file']
@@ -1445,6 +1444,37 @@ def insert_attack_paths(prs, asmt_info, ss_info, media_path, slide_size):
 
             shapes.add_picture(dfile, Inches(x), Inches(y), width=Inches(w), height=Inches(h))
             slide.placeholders[12].text = ele['caption']
+
+        if report_type == "RVA" or report_type == "FAST":
+            steps = af.find_steps(steps_info, path['pk'])
+
+            for step in steps:
+                sf = step['fields']
+
+                if sf['file'] != "":
+                    narrative_layout = prs.slide_layouts[14]
+                    slide = prs.slides.add_slide(narrative_layout)
+                    shapes = slide.shapes
+                    shapes.title.text = name
+
+                    sfile = media_path + sf['file']
+                    (x, y, w, h) = iu.get_screenshot_dimensions(sfile, "finding", slide_size)
+
+                    shapes.add_picture(sfile, Inches(x), Inches(y), width=Inches(w), height=Inches(h))
+                    slide.placeholders[12].text = sf['caption']
+
+                else:
+                    narrative_layout = prs.slide_layouts[6]
+                    slide = prs.slides.add_slide(narrative_layout)
+                    title = slide.shapes.title
+                    title.text = name
+                    nar_placeholder = slide.placeholders[1].text_frame
+
+                    paragraph = nar_placeholder.paragraphs[0]
+                    paragraph.level = 0
+                    run = paragraph.add_run()
+                    run.text = sf['description']
+                    paragraph.font.color.rgb = gray
 
 
 def insert_conclusion_slides(prs, report_type, asmt_info):
@@ -1567,6 +1597,7 @@ def generate_ptp_slides(template, output, draft, json, media, size):
     # ---- find all screenshot information
     asmt_info = af.load_asmt_info(json)
     ss_info = af.build_screenshot_info(asmt_info)
+    steps_info = af.build_narrative_info(asmt_info)
 
     rep_fields = af.get_db_info(asmt_info, "report.fields", "keyNA")
     report_type = rep_fields["report_type"]
@@ -1589,7 +1620,7 @@ def generate_ptp_slides(template, output, draft, json, media, size):
     insert_findings_slides(prs, report_type, asmt_info, ss_info, media, size)
     insert_services_slides(prs, asmt_info, size)
     if report_type == "RVA" or report_type == "FAST":
-        insert_attack_paths(prs, asmt_info, ss_info, media, size)
+        insert_attack_paths(prs, report_type, asmt_info, steps_info, media, size)
 
     insert_conclusion_slides(prs, report_type, asmt_info)
     prs.save(output)

@@ -183,6 +183,14 @@ def build_screenshot_info(db):
     return sshots
 
 
+def build_narrative_info(db):
+    """Generate a list of all screenshot entries in the rva data dump"""
+    steps = []
+    for ele in model_gen(db, "ptportal.narrativestep"):
+        steps.append(ele)
+    return steps
+
+
 def find_screenshots(ss_list, fkey):
     """Walk through list of screenshot elements and return a list of
     screenshot elements associated with the finding's key `fkey'
@@ -193,6 +201,18 @@ def find_screenshots(ss_list, fkey):
         if ssf["finding"] == fkey:
             ss_fkey.append(ss)
     return ss_fkey
+
+
+def find_steps(s_list, nkey):
+    """Walk through list of steps and return a list of
+    elements associated with the narrative's key `nkey'
+    """
+    s_nkey = []
+    for s in s_list:
+        sf = s['fields']
+        if sf["narrative"] == nkey:
+            s_nkey.append(s)
+    return s_nkey
 
 
 def build_affected_systems_info(db):

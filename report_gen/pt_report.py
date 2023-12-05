@@ -797,7 +797,7 @@ def insert_narrative(doc, db, media_path):
 
                         file = media_path + ele['file']
                         if not os.path.exists(file):
-                            print("Can't find diagram file", file)
+                            print("Can't find step screenshot", file)
                             continue
                         p_ss = doc.add_paragraph()
                         p_ss.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -867,7 +867,7 @@ def insert_narrative(doc, db, media_path):
 
                         file = media_path + ele['file']
                         if not os.path.exists(file):
-                            print("Can't find diagram file", file)
+                            print("Can't find step screenshot", file)
                             continue
                         i_ss = doc.add_paragraph()
                         i_ss.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -934,7 +934,7 @@ def insert_narrative(doc, db, media_path):
 
                         file = media_path + ele['file']
                         if not os.path.exists(file):
-                            print("Can't find diagram file", file)
+                            print("Can't find step screenshot", file)
                             continue
                         e_ss = doc.add_paragraph()
                         e_ss.alignment = WD_ALIGN_PARAGRAPH.CENTER
