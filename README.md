@@ -40,6 +40,8 @@ This is a development version, so includes source code with docker images. In fu
     -   [Reset Login Attempts](#reset-attempts)
     -   [View Logs](#view-logs)
     -   [Connect to Shell](#connect-shell)
+    -   [Pause](#pause)
+    -   [Resume](#resume)
     -   [Tear Down](#tear-down)
 -   [Development Guide](#development-guide)
     -   [Setup (Development)](#development-setup)
@@ -296,6 +298,26 @@ To connect to a shell for a particular container, use the following command (be 
 
 ```bash
 > python3 ptp.py shell -c [db/nginx/web]
+```
+
+<a name='pause'></a>
+
+### Pause
+
+To pause an instance of Reporting Engine, run the following command (be sure to back up the instance first):
+
+```bash
+> python3 ptp.py pause
+```
+
+<a name='resume'></a>
+
+### Resume
+
+To resume a paused instance of Reporting Engine, run the following command:
+
+```bash
+> python3 ptp.py resume
 ```
 
 <a name='tear-down'></a>

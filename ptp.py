@@ -871,8 +871,33 @@ def show_logs(args):
         subprocess.run(['docker', 'logs', '-f', mode + '-web-1'])
 
 
+def pause(args):
+    print("Pausing Reporting Engine...")
+    mode = get_mode()
+
+    docker_compose_file = 'docker-compose.prod.yml' if mode == 'prod' else 'docker-compose.yml'
+    project_name = 'prod' if mode == 'prod' else 'dev'
+
+    try:
+        subprocess.run(f'docker compose -f {docker_compose_file} -p {project_name} stop', shell=True)
+    except Exception as e:
+        print('exception handler: ', e)
+        subprocess.run(f'docker compose stop', shell=True)
+
+
+def resume(args):
+    print('Resuming Reporting Engine...')
+
+    docker_compose_up(force_recreate=False, rm_orphans=False)
+    mode = get_mode()
+    if mode == 'prod':
+        print('App is ready at https://localhost')
+    else:
+        print('App is ready at http://localhost:8080')
+
+
 def main():
-    description = "PT Portal"
+    description = "Reporting Engine"
     parser = argparse.ArgumentParser(description=description)
 
     subparsers = parser.add_subparsers(title='commands')
@@ -999,6 +1024,12 @@ def main():
         required=False,
     )
     shell_parser.set_defaults(func=shell)
+
+    pause_parser = subparsers.add_parser('pause', help='Pause Reporting Engine instance')
+    pause_parser.set_defaults(func=pause)
+
+    resume_parser = subparsers.add_parser('resume', help='Resume a paused instance of Reporting Engine')
+    resume_parser.set_defaults(func=resume)
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
