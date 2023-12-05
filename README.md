@@ -243,7 +243,7 @@ Once the above requirements are met, the following commands can be run from the 
 > docker load < web.tar
 > docker load < nginx.tar
 > docker load < db.tar
-> python3 ptp.py restore -r [FAST/RPT/RVA] -b [/path/to/backup.zip]
+> python3 ptp.py restore -r [FAST/RPT/RVA] -b [/path/to/backup.zip] -c offline
 ```
 
 <a name='other-functions'></a>

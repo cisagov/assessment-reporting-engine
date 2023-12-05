@@ -160,6 +160,16 @@ def build_ptportal(report_type, su=True, restore=False, migrations_file=None):
         )
 
 
+def build_offline(report_type, restore=False, migrations_file=None):
+    web_container = get_web_container()
+
+    if not migrations_file:
+        subprocess.run(
+            ['docker', 'exec', web_container, 'python', 'manage.py', 'makemigrations']
+        )
+    subprocess.run(['docker', 'exec', web_container, 'python', 'manage.py', 'migrate'])
+
+
 def check_if_ptportal_exists(log_handler=None):
     old_project_exists, _, _ = check_if_project_exited()
     if old_project_exists:
@@ -273,10 +283,10 @@ def dev_setup(report):
 
 
 def run(args):
-    prod_setup(report=args.report_type)
+    prod_setup(report=args.report_type, connectivity='online')
 
 
-def prod_setup(report):
+def prod_setup(report, connectivity):
     log_handler = logger()
     log_handler.info('Loading PT Portal with docker-compose')
 
@@ -328,9 +338,14 @@ def prod_setup(report):
     #if args.proxy:
     #    compose_env(args.proxy)
 
-    docker_compose_down(rm_images=True, rm_volumes=True, rm_orphans=True)
-    docker_compose_up(force_recreate=True, rm_orphans=True)
-    build_ptportal(report_type=report)
+    if connectivity == 'offline':
+        docker_compose_down(rm_images=False, rm_volumes=True, rm_orphans=True)
+        docker_compose_up(force_recreate=False, rm_orphans=True)
+        build_offline(report_type=report)
+    else:
+        docker_compose_down(rm_images=True, rm_volumes=True, rm_orphans=True)
+        docker_compose_up(force_recreate=True, rm_orphans=True)
+        build_ptportal(report_type=report)
 
     restore_env()
     log_handler.info('App is ready at https://[IP_ADDRESS]:443')
@@ -732,7 +747,12 @@ def partial_restore(args):
     if choice != "y":
         exit()
 
-    docker_compose_down(rm_images=True, rm_volumes=True, rm_orphans=True)
+    if args.connectivity == 'offline':
+        print("Restoring offline...")
+        docker_compose_down(rm_images=False, rm_volumes=True, rm_orphans=True)
+    else:
+        print("Restoring online...")
+        docker_compose_down(rm_images=True, rm_volumes=True, rm_orphans=True)
 
     if os.path.exists(Path('backup_folder')):
         shutil.rmtree(Path('backup_folder'))
@@ -782,7 +802,7 @@ def partial_restore(args):
         )
 
     if mode == 'prod':
-        prod_setup(report=args.report_type)
+        prod_setup(report=args.report_type, connectivity=args.connectivity)
     else:
         dev_setup(report=args.report_type)
 
@@ -992,6 +1012,14 @@ def main():
         help='report type [RVA, FAST, RPT, HVA].   Default to RVA',
         default='RVA',
         required=True,
+    )
+    restore_parser.add_argument(
+        '-c',
+        '--connectivity',
+        choices=['online', 'offline'],
+        help='restore online (recommended) or offline (refer to offline backup/restore sections in README)',
+        default='online',
+        required=False,
     )
     restore_parser.set_defaults(func=restore)
 
