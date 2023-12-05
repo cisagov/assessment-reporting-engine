@@ -55,7 +55,7 @@ DM22-1011
     <sds-section class="col-span-10" type="accented">
         <span class="border-top border-dark"></span>
             <template #title><b>RESULTS</b></template>
-            <p style="float:left;padding:10px">The first phishing campaign was launched on: </p><div style="width:250px;float:left;padding:0px 10px"><sds-datepicker v-model="pcdate"></sds-datepicker></div>
+            <p style="float:left;padding:10px">The first phishing campaign was launched on: </p><div style="width:250px;float:left;padding:0px 10px"><input class="form-control" v-model="pcdate" type="date" value="pcdate"></div>
             <br><br><br>
 			<!-- Campaign Table -->
 			<sds-section>
@@ -226,8 +226,7 @@ function pageData() {
 	}
 
 	{% if report.phishing_campaign_date != null %}
-		pcdate = "{{report.phishing_campaign_date | date:"m/d/Y"}}"
-		data.pcdate = new Date (pcdate.replace(/\./g, ''))
+		data.pcdate = "{{report.phishing_campaign_date | date:"Y-m-d"}}"
 	{% else %}
 		data.pcdate = null
 	{% endif %}

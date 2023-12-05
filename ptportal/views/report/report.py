@@ -331,22 +331,6 @@ class ReportUpdate(generic.edit.UpdateView):
         engagement = EngagementMeta.object()
         if engagement:
             context['eng_meta'] = engagement
-            if engagement.int_start_date is None or engagement.int_end_date is None:
-                start_date = engagement.ext_start_date
-                end_date = engagement.ext_end_date
-            else:
-                start_date = (
-                    engagement.int_start_date
-                    if engagement.int_start_date < engagement.ext_start_date
-                    else engagement.ext_start_date
-                )
-                end_date = (
-                    engagement.ext_end_date
-                    if engagement.ext_end_date > engagement.int_end_date
-                    else engagement.int_end_date
-                )
-            engagement_dates = f"{start_date.strftime('%B %d, %Y')} to {end_date.strftime('%B %d, %Y')}"
-            context['eng_dates'] = engagement_dates
 
         uploaded_list = UploadedFinding.objects.all().order_by('assessment_type', 'severity', 'uploaded_finding_name')
         context['findings'] = uploaded_list

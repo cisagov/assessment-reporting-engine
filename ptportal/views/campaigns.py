@@ -35,7 +35,7 @@ class Campaigns(generic.base.TemplateView):
         report = Report.objects.all().first()
         campaigns = []
 
-        report.phishing_campaign_date = None if postData['pcdate'] == None else postData['pcdate'][0:10]
+        report.phishing_campaign_date = None if postData['pcdate'] == None else postData['pcdate']
         report.save()
 
         for order, data in enumerate(postData['results']):

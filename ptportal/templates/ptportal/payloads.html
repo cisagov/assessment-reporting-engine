@@ -99,7 +99,7 @@ DM22-1011
     <sds-section class="col-span-5" type="accented">
         <span class="border-top border-dark"></span>
             <template #title><b>RESULTS</b></template>
-            <p style="float:left;padding:10px">The first round of payload testing was conducted on: </p><div style="width:250px;float:left;padding:0px 10px"><sds-datepicker v-model="formData.ptdate"></sds-datepicker></div>
+            <p style="float:left;padding:10px">The first round of payload testing was conducted on: </p><div style="width:250px;float:left;padding:0px 10px"><input class="form-control" v-model="formData.ptdate" type="date" value="formData.ptdate"></div>
             <br><br><br><br>
             <p style="float:left;padding:10px">During payload testing, a manual exception</p><sds-select v-model="formData.exception" :options="exceptionOptions" style="text-align:center;width:120px;float:left;"></sds-select><p style="float:left;padding:10px">necessary for the test email to reach the target inbox.</p>
             <br><br><br><br>
@@ -231,8 +231,7 @@ function pageData() {
 	pageData.securityArgs.solutionSearchList = pageData.securityData().filter(solution => solution)
 
 	{% if description.payload_testing_date != null %}
-		ptdate = "{{description.payload_testing_date | date:"m/d/Y"}}"
-		pageData.formData.ptdate = new Date (ptdate.replace(/\./g, ''))
+		pageData.formData.ptdate = "{{description.payload_testing_date | date:"Y-m-d"}}"
 	{% else %}
 		pageData.formData.ptdate = null
 	{% endif %}
