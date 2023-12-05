@@ -54,7 +54,7 @@ class NarrativeCreate(generic.edit.CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['all_tools'] = serializers.serialize("json", Tools.objects.all())
-        context['techniques'] = serializers.serialize("json", ATTACK.objects.filter(is_subtechnique=False))
+        context['techniques'] = serializers.serialize("json", ATTACK.objects.all())
 
         return context
 
