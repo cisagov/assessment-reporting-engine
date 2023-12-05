@@ -1,0 +1,327 @@
+<!-- Risk & Vulnerability Assessment Reporting Engine
+
+Copyright 2022 The Risk & Vulnerability Reporting Engine Contributors, All Rights Reserved.
+(see Contributors.txt for a full list of Contributors)
+
+SPDX-License-Identifier: BSD-3-Clause
+
+Please see additional acknowledgments (including references to third party source code, object code, documentation and other files) in the license.txt file or contact permission@sei.cmu.edu for full terms.
+
+Created, in part, with funding and support from the United States Government. (see Acknowledgments file).
+
+DM22-1011
+ -->
+
+{% extends 'ptportal/base.html' %}
+{% load humanize %}
+{% block style %}
+<style>
+    .header{
+        padding: 10px;
+        background: white;
+        color: black;
+        font-size: 20px;
+        position: relative;
+        top: -15px;
+        margin-left: -18px;
+        margin-right: -20px;
+    }
+	.col-span-5{
+        border-top:1px solid black!important;
+        border-color:#1b1c1d!important;
+		margin-bottom: 50px !important;
+    }
+	.float-left{
+		display: inline-block;
+		position: relative;
+		top: -40px;
+	}
+	.right-block{
+		display:inline-block;
+		vertical-align:top;
+		font-size: 11pt;
+	}
+	.space{
+		padding: 4px;
+	}
+  </style>
+{% endblock %}
+
+{% block content %}
+{% load static %}
+<div class="col-span-5">
+	{% csrf_token %}
+
+		<sds-modal size="sm" v-model="overwriteWarning">
+			<template #title>
+				<p>Warning</p>
+			</template>
+			<p class="mb-2">Are you sure you want to overwrite? All current data will be lost.</p>
+			<div class="flex gap-2">
+				<sds-button variant="primary" @click="this.overwriteWarning=false;parseData(true)">Confirm</sds-button>
+				<sds-button variant="danger" @click="this.overwriteWarning = false">Cancel</sds-button>
+			</div>
+		</sds-modal>
+		<sds-section class="mb-4" type="accented">
+			<span class="border-top border-dark"></span>
+            <template #title><b>DATA UPLOAD</b></template>
+            <p>Download the <sds-link href="{% static 'templates/email-template.csv' %}" variant="primary"><b>Breached Email Template</b></sds-link> and follow the format to construct an email list. Upload the list below.</p>
+            <br>
+			<sds-file-uploader v-model="fileList" v-bind="fileUploadArgs"></sds-file-uploader>
+			<br>
+			<div class="grid gap-2 grid-cols-2">
+				<div class="flex gap-2">
+					<sds-button variant="primary" @click="parseData(false)"><img class="w-8 h-8" src="/static/icons/circle-plus-solid-white.svg" style="float:left; padding:0px 6px 0px 0px"> Append</sds-button>
+					<sds-button variant="primary" @click="this.overwriteWarning = true"><img class="w-8 h-8" src="/static/icons/file-circle-xmark-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Overwrite</sds-button>
+				</div>
+			</div>
+		</sds-section>
+	<br>
+    <sds-section class="col-span-5" type="accented">
+        <span class="border-top border-dark"></span>
+            <template #title><b>BREACH METRICS</b></template>
+			<!-- Breached Email Metrics Table -->
+			<table width="100%">
+				<th colspan="2" style="padding:10px">Breached Email Metrics</th>
+				<tr>
+					<td style="padding:10px; width:50%; text-align:right">Emails Identified</td>
+					<td style="padding:10px;"><sds-input v-model="formData.emails_identified" placeholder="#" :maxlength="10" type="number" style="width:20%"></sds-input></td>
+				</tr>
+				<tr>
+					<td style="padding:10px; width:50%; text-align:right">Emails Identified in Third-Party Data Breaches</td>
+					<td style="padding:10px"><sds-input v-model="formData.emails_identified_tp" placeholder="#" :maxlength="10" type="number" style="width:20%"></sds-input></td>
+				</tr>
+				<tr>
+					<td style="padding:10px; width:50%; text-align:right">Percentage of Emails Identified in Third-Party Data Breaches</td>
+					<td style="padding:20px"><div>{% widthratio metrics.percentage_emails 1 100 %}%</div></td>
+				</tr>
+			</table>
+			<br><br>
+			<!-- Breached Credentials Metrics Table -->
+			<table width="100%">
+				<th colspan="2" style="padding:10px">Breached Credential Metrics</th>
+				<tr>
+					<td style="padding:10px; width:50%; text-align:right">Credentials Identified</td>
+					<td style="padding:10px"><sds-input v-model="formData.creds_identified" placeholder="#" :maxlength="10" type="number" style="width:20%"></sds-input></td>
+				</tr>
+				<tr>
+					<td style="padding:10px; width:50%; text-align:right">Unique Users with Identified Credentials</td>
+					<td style="padding:10px"><sds-input v-model="formData.creds_identified_unique" placeholder="#" :maxlength="10" type="number" style="width:20%"></sds-input></td>
+				</tr>
+				<tr>
+					<td style="padding:10px; width:50%; text-align:right">Credentials Successfully Validated</td>
+					<td style="padding:10px"><sds-input v-model="formData.creds_validated" placeholder="#" :maxlength="10" type="number" style="width:20%"></sds-input></td>
+				</tr>
+			</table>
+			<br><br>
+	</sds-section>
+	<sds-section class="col-span-5" type="accented">
+        <span class="border-top border-dark"></span>
+            <template #title><b>BREACHED EMAIL ADDRESSES</b></template>
+			<!-- Breached Email Addresses Table -->
+			<sds-section>
+				<div class="mb-8">
+					<sds-table :fields="fields" :items="items" class="table-prose" v-bind="EmailTableArgs">
+							<template #cell(email)="{item}">
+								<sds-textarea v-model="item.email" placeholder="Email Address" :maxlength="500" rows="1"></sds-textarea>
+							</template>
+							<template #cell(information)="{item}">
+								<sds-textarea v-model="item.information" placeholder="Breach Information" :maxlength="1000" rows="2"></sds-textarea>
+							</template>
+							<template #cell(delete)="{item}">
+								<sds-button type="button" @click="deleteEmail(item)" ><img class="w-8 h-8" src="/static/icons/trash-solid.svg"></sds-button>
+							</template>
+					</sds-table>
+					<sds-button type="button" @click="addEmail"><img class="w-8 h-8" src="/static/icons/plus-solid.svg"></sds-button>
+				</div>
+			</sds-section>
+			<sds-button variant="primary" class="float-right" @click="submitOSINF"><img class="w-8 h-8" src="/static/icons/floppy-disk-solid.svg" style="float:left; padding:0px 6px 0px 0px"> Save</sds-button>
+			<br><br>
+		</sds-section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function pageData() {
+	pageData = {
+		fileList: [],
+		formData: {
+			emails_identified: "{{ metrics.emails_identified }}",
+			emails_identified_tp: "{{ metrics.emails_identified_tp }}",
+			percentage_emails: parseInt("{{ metrics.percentage_emails }}")*100,
+			creds_identified: "{{ metrics.creds_identified }}",
+			creds_identified_unique: "{{ metrics.creds_identified_unique }}",
+			creds_validated: "{{ metrics.creds_validated }}"
+		},
+		overwriteWarning: false,
+		notify: null,
+		EmailTableArgs: {
+				fields: [
+					{
+					 	key: "id",
+					 	label:"#",
+					},
+					{
+						key: "email",
+						label: "Email Address"
+					},
+					{
+						key: "information",
+						label: "Breach Information"
+					},
+					{
+						key: "delete",
+					}
+				],
+				items: []
+		},
+		fileUploadArgs: {
+			helperText: "Upload a CSV under 10 MB with the following headers: Email Address,Breach Information",
+			accept: ".csv",
+			allowedFiletypes: ["text/csv"],
+			name: "emailUpload",
+			multiple: false
+		},
+	}
+
+	{% for email in emails %}
+
+		pageData.EmailTableArgs.items.push({id: "{{email.order}}", email: "{{email.email_address|escapejs}}", information: "{{email.breach_info|escapejs}}"})
+
+	{% endfor %}
+
+	return pageData
+}
+
+function pageCreated() {
+	this.baseData.layoutArgs.pageTitle = "Open-Source Information Gathering"
+}
+
+function pageMethods() {
+	pageFunctions = {
+		submitOSINF: function() {
+
+			this.EmailTableArgs.items.forEach(element => {
+				if (element.email == "") {
+					this.notify = true
+				}
+			})
+
+			if (parseInt(this.formData.emails_identified_tp) > parseInt(this.formData.emails_identified)) {
+				this.notify_emails = true
+			}
+
+			if (parseInt(this.formData.creds_identified_unique) > parseInt(this.formData.creds_identified)) {
+				this.notify_creds_identified = true
+			}
+
+			if (parseInt(this.formData.creds_validated) > parseInt(this.formData.creds_identified)) {
+				this.notify_creds_validated = true
+			}
+			
+			if (this.notify_emails) {
+				this.displayNotification({title: "Error Saving Data", text: "In order to calculate a valid percentage, the number of emails identified must be greater than or equal to number of emails identified in third-party data breaches. Please correct these values before saving.", variant: "warning", autoHideDelay:10000})
+				this.notify_emails = false
+			}
+
+			else if (this.notify_creds_identified) {
+				this.displayNotification({title: "Error Saving Data", text: "The number of unique users with identified credentials should not exceed the number of credentials identified. Please correct these values before saving.", variant: "warning", autoHideDelay:10000})
+				this.notify_creds_identified = false
+			}
+
+			else if (this.notify_creds_validated) {
+				this.displayNotification({title: "Error Saving Data", text: "The number of credentials successfully validated should not exceed the number of credentials identified. Please correct these values before saving.", variant: "warning", autoHideDelay:10000})
+				this.notify_creds_validated = false
+			}
+
+			else if (this.notify) {
+				this.displayNotification({title: "Error Saving Data", text: "One or more rows are missing an email address. Please enter an email address or remove the row before saving.", variant: "warning", autoHideDelay:10000})
+				this.notify = false
+			}
+
+			else {
+				formattedData = JSON.parse(JSON.stringify(this.formData))
+				formattedData['emails'] = JSON.parse(JSON.stringify(this.EmailTableArgs.items))
+
+				fetch(window.location.href, {
+					method: "POST",
+					body: JSON.stringify(formattedData),
+					credentials: "same-origin",
+					headers: {"X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value}
+				}).then(response => {
+				if(response.ok) {
+					this.displayNotification({title: "OSINF Data Saved", text: "OSINF data saved successfully. Please wait while the page refreshes...", variant: "success"})
+					setTimeout(() => {this.redirectLink("{% url 'osinf' %}")}, 2000)
+				}
+				else {
+					this.displayNotification({title: "Error Saving Data", text: 'Bad response received from server. Check for errors in forms and try again.', variant: "danger"})
+				}
+				}).catch(error => {
+					this.displayNotification({title: "Error Saving Data", text: error, variant: "danger"})
+				})
+			}
+		},
+
+		addEmail: async function () {
+			this.EmailTableArgs.items.push({id: this.EmailTableArgs.items.length + 1, email: "", information: ""})
+		},
+
+		deleteEmail: function(item) {
+			this.EmailTableArgs.items.splice(this.EmailTableArgs.items.indexOf(item), 1)
+
+			this.EmailTableArgs.items.forEach((element, index) => {
+				element.id = index + 1
+			})
+		},
+
+		parseData: async function(overwrite) {
+			if (document.getElementsByName('emailUpload')[0].files.length == 0) {
+				return
+			}
+
+			const fileName = document.getElementsByName('emailUpload')[0].files[0]
+			let emailString = null
+			await fileName.text().then(text => {emailString = text})
+
+			var lines = emailString.split(/[\n\r]+/)
+			var length = lines.length
+			var headers = lines[0].split(',')
+			var eindex = headers.indexOf('Email Address')
+			var bindex = headers.indexOf('Breach Information')
+
+			var error = false
+			
+			if (eindex < 0) {
+				this.displayNotification({title: "Error Parsing Data", text: "The uploaded CSV file appears to be missing a valid 'Email Address' column.", variant: "warning", autoHideDelay:10000})
+				error = true
+			}
+
+			if (bindex < 0) {
+				this.displayNotification({title: "Error Parsing Data", text: "The uploaded CSV file appears to be missing a valid 'Breach Information' column.", variant: "warning", autoHideDelay:10000})
+				error = true
+			}
+
+			if (!error) {
+				if (overwrite) {
+					this.EmailTableArgs.items = []
+				}
+
+				for (var i = 1; i < length; i++) {
+					values = lines[i].split(',')
+					email_address = String(values[eindex])
+					breach_information = String(values[bindex])
+
+					this.EmailTableArgs.items.push({id: this.EmailTableArgs.items.length + 1, email: email_address, information: breach_information})
+				}
+
+				this.displayNotification({'title': 'Email Addresses Added', text: 'Email addresses have been added to the table below. Save this screen before navigating away.', variant:"info", autoHideDelay:10000})
+				this.fileList = []
+			}
+		},
+    }
+
+    return pageFunctions
+}
+</script>
+{% endblock %}

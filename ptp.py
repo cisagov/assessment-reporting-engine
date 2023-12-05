@@ -160,6 +160,16 @@ def build_ptportal(report_type, su=True, restore=False, migrations_file=None):
         )
 
 
+def build_offline(report_type, restore=False, migrations_file=None):
+    web_container = get_web_container()
+
+    if not migrations_file:
+        subprocess.run(
+            ['docker', 'exec', web_container, 'python', 'manage.py', 'makemigrations']
+        )
+    subprocess.run(['docker', 'exec', web_container, 'python', 'manage.py', 'migrate'])
+
+
 def check_if_ptportal_exists(log_handler=None):
     old_project_exists, _, _ = check_if_project_exited()
     if old_project_exists:
@@ -273,10 +283,10 @@ def dev_setup(report):
 
 
 def run(args):
-    prod_setup(report=args.report_type)
+    prod_setup(report=args.report_type, connectivity='online')
 
 
-def prod_setup(report):
+def prod_setup(report, connectivity):
     log_handler = logger()
     log_handler.info('Loading PT Portal with docker-compose')
 
@@ -328,9 +338,14 @@ def prod_setup(report):
     #if args.proxy:
     #    compose_env(args.proxy)
 
-    docker_compose_down(rm_images=True, rm_volumes=True, rm_orphans=True)
-    docker_compose_up(force_recreate=True, rm_orphans=True)
-    build_ptportal(report_type=report)
+    if connectivity == 'offline':
+        docker_compose_down(rm_images=False, rm_volumes=True, rm_orphans=True)
+        docker_compose_up(force_recreate=False, rm_orphans=True)
+        build_offline(report_type=report)
+    else:
+        docker_compose_down(rm_images=True, rm_volumes=True, rm_orphans=True)
+        docker_compose_up(force_recreate=True, rm_orphans=True)
+        build_ptportal(report_type=report)
 
     restore_env()
     log_handler.info('App is ready at https://[IP_ADDRESS]:443')
@@ -580,25 +595,38 @@ def backup_json(
 def backup_media(backup_name='media-backup'):
     # using distutils copy_tree function because it
     # copies a directory into an existing directory w/o problems
-    shutil.copytree(Path('pentestportal/media'), backup_name)
+    if os.path.exists(Path('pentestportal/media')):
+        shutil.copytree(Path('pentestportal/media'), backup_name)
+    else:
+        print('pentestportal/media directory does not exist or cannot be accessed due to permissions. Media may not restore properly without this directory. Continuing with remaining back up steps...')
+
     return backup_name
 
 
 def backup_migrations(backup_name='migrations-backup'):
     # Only backup first migrations file since we only use the first
     # migrations file
-    shutil.copy('ptportal/migrations/0001_initial.py', backup_name)
+    if os.path.exists(Path('ptportal/migrations/0001_initial.py')):
+        shutil.copy('ptportal/migrations/0001_initial.py', backup_name)
+    else:
+        print('ptportal/migrations/0001_initial.py file does not exist or cannot be accessed due to permissions. Migrations may not restore properly without this file. Continuing with remaining back up steps...')
     return backup_name
 
 
 def backup_mode(backup_name='mode-backup'):
-    shutil.copy('mode.txt', backup_name)
+    if os.path.exists(Path('mode.txt')):
+        shutil.copy('mode.txt', backup_name)
+    else:
+        print('mode.txt file does not exist or cannot be accessed due to permissions. RE may not restore properly without this file. Continuing with remaining back up steps...')
     return backup_name
 
 
 def backup_env(backup_name='env-backup'):
     mode = get_mode()
-    shutil.copy('docker/' + mode + '/env.txt', backup_name)
+    if os.path.exists(Path('docker/' + mode + '/env.txt')):
+        shutil.copy('docker/' + mode + '/env.txt', backup_name)
+    else:
+        print('docker/' + mode + '/env.txt file does not exist or cannot be accessed due to permissions. RE may not restore properly without this file. Continuing with remaining back up steps...')
     return backup_name
 
 
@@ -719,7 +747,12 @@ def partial_restore(args):
     if choice != "y":
         exit()
 
-    docker_compose_down(rm_images=True, rm_volumes=True, rm_orphans=True)
+    if args.connectivity == 'offline':
+        print("Restoring offline...")
+        docker_compose_down(rm_images=False, rm_volumes=True, rm_orphans=True)
+    else:
+        print("Restoring online...")
+        docker_compose_down(rm_images=True, rm_volumes=True, rm_orphans=True)
 
     if os.path.exists(Path('backup_folder')):
         shutil.rmtree(Path('backup_folder'))
@@ -769,7 +802,7 @@ def partial_restore(args):
         )
 
     if mode == 'prod':
-        prod_setup(report=args.report_type)
+        prod_setup(report=args.report_type, connectivity=args.connectivity)
     else:
         dev_setup(report=args.report_type)
 
@@ -811,6 +844,43 @@ def create_super_user(args):
     )
 
 
+def change_password(args):
+    """
+    Change password for existing user
+    """
+    mode = get_mode()
+    subprocess.run(
+        [
+            'docker',
+            'exec',
+            '-it',
+            mode + '-web-1',
+            'python',
+            'manage.py',
+            'changepassword',
+            args.username
+        ]
+    )
+
+
+def reset_attempts(args):
+    """
+    Reset attempts for login
+    """
+    mode = get_mode()
+    subprocess.run(
+        [
+            'docker',
+            'exec',
+            '-it',
+            mode + '-web-1',
+            'python',
+            'manage.py',
+            'axes_reset'
+        ]
+    )
+
+
 def shell(args):
     """
     Jump into container shell.   Default to web
@@ -834,8 +904,33 @@ def show_logs(args):
         subprocess.run(['docker', 'logs', '-f', mode + '-web-1'])
 
 
+def pause(args):
+    print("Pausing Reporting Engine...")
+    mode = get_mode()
+
+    docker_compose_file = 'docker-compose.prod.yml' if mode == 'prod' else 'docker-compose.yml'
+    project_name = 'prod' if mode == 'prod' else 'dev'
+
+    try:
+        subprocess.run(f'docker compose -f {docker_compose_file} -p {project_name} stop', shell=True)
+    except Exception as e:
+        print('exception handler: ', e)
+        subprocess.run(f'docker compose stop', shell=True)
+
+
+def resume(args):
+    print('Resuming Reporting Engine...')
+
+    docker_compose_up(force_recreate=False, rm_orphans=False)
+    mode = get_mode()
+    if mode == 'prod':
+        print('App is ready at https://localhost')
+    else:
+        print('App is ready at http://localhost:8080')
+
+
 def main():
-    description = "PT Portal"
+    description = "Reporting Engine"
     parser = argparse.ArgumentParser(description=description)
 
     subparsers = parser.add_subparsers(title='commands')
@@ -918,6 +1013,14 @@ def main():
         default='RVA',
         required=True,
     )
+    restore_parser.add_argument(
+        '-c',
+        '--connectivity',
+        choices=['online', 'offline'],
+        help='restore online (recommended) or offline (refer to offline backup/restore sections in README)',
+        default='online',
+        required=False,
+    )
     restore_parser.set_defaults(func=restore)
 
     log_parser = subparsers.add_parser(
@@ -937,6 +1040,20 @@ def main():
     su_parser = subparsers.add_parser('su', help='Create a super user')
     su_parser.set_defaults(func=create_super_user)
 
+    # change password
+    pw_parser = subparsers.add_parser('password', help='Change password for existing user')
+    pw_parser.add_argument(
+        '-u',
+        '--username',
+        help='username to change password for',
+        required=True,
+    )
+    pw_parser.set_defaults(func=change_password)
+
+    # reset login attempts
+    reset_parser = subparsers.add_parser('reset', help='Reset login attempts for all users')
+    reset_parser.set_defaults(func=reset_attempts)
+
     # exec into the web container
     shell_parser = subparsers.add_parser('shell', help='Jump into a shell for the specified container')
     shell_parser.add_argument(
@@ -948,6 +1065,12 @@ def main():
         required=False,
     )
     shell_parser.set_defaults(func=shell)
+
+    pause_parser = subparsers.add_parser('pause', help='Pause Reporting Engine instance')
+    pause_parser.set_defaults(func=pause)
+
+    resume_parser = subparsers.add_parser('resume', help='Resume a paused instance of Reporting Engine')
+    resume_parser.set_defaults(func=resume)
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)

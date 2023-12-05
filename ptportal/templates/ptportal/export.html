@@ -288,7 +288,7 @@ DM22-1011
         </div>
     </div>
 
-    {% if report.report_type == 'RVA' %}
+    {% if report.report_type == 'RVA' or report.report_type == 'RPT' %}
     <div class="card">
         <div class="card-inner" align="center">
             <img src="/static/icons/file-pdf-regular.svg">
@@ -586,7 +586,13 @@ DM22-1011
                 :will-close="willClose"
             >
                 <template #trigger="{ open, close }">
-                    <sds-button variant="primary" size="sm" @click="exportAll" @mouseover="open" @mouseout="close">Export</sds-button>
+                    {% if report.report_type == 'FAST' %}
+                        <sds-button variant="primary" size="sm" @click="exportAllFAST" @mouseover="open" @mouseout="close">Export</sds-button>
+                    {% elif report.report_type == 'RPT' %}
+                        <sds-button variant="primary" size="sm" @click="exportAllRPT" @mouseover="open" @mouseout="close">Export</sds-button>
+                    {% else %}
+                        <sds-button variant="primary" size="sm" @click="exportAll" @mouseover="open" @mouseout="close">Export</sds-button>
+                    {% endif %}
                 </template>
                 <template #default>
                     <div class="p-2">
@@ -836,6 +842,27 @@ function pageMethods() {
             window.open(base.concat("/ptportal/generate-tracker"))
             window.open(base.concat("/ptportal/generate-JSON"))
             window.open(base.concat("/ptportal/generate-EI-JSON"))
+            window.open(base.concat("/ptportal/generate-kev-report"))
+            window.open(base.concat("/ptportal/download-backup"))
+        },
+        exportAllRPT: function() {
+            base = String(window.location.origin)
+            window.open(base.concat("/ptportal/generate-report"))
+            window.open(base.concat("/ptportal/generate-outbrief"))
+            window.open(base.concat("/ptportal/generate-outbrief-ws"))
+            window.open(base.concat("/ptportal/generate-pace"))
+            window.open(base.concat("/ptportal/generate-tracker"))
+            window.open(base.concat("/ptportal/generate-JSON"))
+            window.open(base.concat("/ptportal/generate-kev-report"))
+            window.open(base.concat("/ptportal/download-backup"))
+        },
+        exportAllFAST: function() {
+            base = String(window.location.origin)
+            window.open(base.concat("/ptportal/generate-report"))
+            window.open(base.concat("/ptportal/generate-outbrief"))
+            window.open(base.concat("/ptportal/generate-outbrief-ws"))
+            window.open(base.concat("/ptportal/generate-tracker"))
+            window.open(base.concat("/ptportal/generate-JSON"))
             window.open(base.concat("/ptportal/generate-kev-report"))
             window.open(base.concat("/ptportal/download-backup"))
         }

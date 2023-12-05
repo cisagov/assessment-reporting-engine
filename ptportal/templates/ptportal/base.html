@@ -103,7 +103,7 @@ DM22-1011
                     href: "{% url 'kev_catalog' %}",
                     iconUrl: "{% static 'icons/book-solid.svg' %}"
                   },
-                  {% if report_type == 'RVA' %}
+                  {% if report_type == 'RVA' or report_type == 'RPT' %}
                     {
                       id: 6,
                       title: "Risk Scoring",
@@ -141,12 +141,12 @@ DM22-1011
               },
               phishingLinks: {
                 payloads: {
-                  id: 5,
+                  id: 11,
                   title: "Payloads",
                   href: "{% url 'payloads' %}"
                 },
                 campaigns: {
-                  id: 6,
+                  id: 12,
                   title: "Campaigns",
                   href: "{% url 'campaigns' %}"
                 },
@@ -154,35 +154,40 @@ DM22-1011
 
               serviceLinks :{
                 port: {
-                  id: 7,
+                  id: 13,
                   title: "Port Mapping",
                   href: "{% url 'port_mapping' %}"
                 },
                 data_exfil: {
-                  id: 8,
+                  id: 14,
                   title: "Data Exfiltration",
                   href: "{% url 'data_exfiltration' %}"
                 },
                 ransomware: {
-                  id: 9,
-                    title: "Ransomware",
-                    href: "{% url 'ransomware' %}"
-                  },
+                  id: 15,
+                  title: "Ransomware",
+                  href: "{% url 'ransomware' %}"
                 },
+                osinf: {
+                  id: 16,
+                  title: "OSINF",
+                  href: "{% url 'osinf' %}"
+                },
+              },
 
                 narrativeLinks: {
                   external: {
-                    id: 10,
+                    id: 17,
                     title: "External",
                     href: "{% url 'narratives' 'external' %}",
                   },
                   internal: {
-                    id: 11,
+                    id: 18,
                     title: "Internal",
                     href: "{% url 'narratives' 'internal' %}",
                   },
                   phishing: {
-                    id: 12,
+                    id: 19,
                     title: "Phishing",
                     href: "{% url 'narratives' 'phishing' %}",
                   },
@@ -226,6 +231,13 @@ DM22-1011
                 items: [this.phishingLinks['payloads'], this.phishingLinks['campaigns']],
                 iconUrl: "{% static 'icons/envelope.svg' %}"
               }
+            {% elif report_type == 'RPT' %}
+              phishingTabs = {
+                id: 20,
+                title: "Phishing",
+                items: [this.phishingLinks['payloads']],
+                iconUrl: "{% static 'icons/envelope.svg' %}"
+              }
             {% else %}
               phishingTabs = {
                 id: 20,
@@ -240,6 +252,13 @@ DM22-1011
                 id: 30,
                 title: "Services",
                 items: [this.serviceLinks['port'], this.serviceLinks['data_exfil'], this.serviceLinks['ransomware']],
+                iconUrl: "{% static 'icons/gear-solid.svg' %}"
+              }
+            {% elif report_type == 'RPT' %}
+              serviceTabs = {
+                id: 30,
+                title: "Services",
+                items: [this.serviceLinks['port'], this.serviceLinks['osinf']],
                 iconUrl: "{% static 'icons/gear-solid.svg' %}"
               }
             {% else %}
@@ -313,9 +332,9 @@ DM22-1011
     <!-- Load scripts from content pages -->{% endblock %}
 
     {% if asmt_id %}
-    <title>PT Portal {{report_type}}-{{asmt_id}}</title>
+    <title>RE {{report_type}}-{{asmt_id}}</title>
     {% else %}
-    <title>PT Portal {{report_type}}</title>
+    <title>RE {{report_type}}</title>
     {% endif %}
 
   </head>
@@ -326,7 +345,7 @@ DM22-1011
         <template #suite-header>
           <sds-dropdown v-bind="dropdownArgs">
             <template #title>{{ user }}</template>
-            <sds-dropdown-item v-if="{{ user.is_admin }} = true" tag="a" href="/admin">Admin</sds-dropdown-item>
+            <sds-dropdown-item v-if="'{{user.is_admin}}' == 'True'" tag="a" href="/admin">Admin</sds-dropdown-item>
             <sds-dropdown-item v-else tag="a" href="{% url 'password_change' %}">Change Password</sds-dropdown-item>
             <sds-dropdown-item tag="a" href="{% url 'logout_view' %}">Logout</sds-dropdown-item>
           </sds-dropdown>

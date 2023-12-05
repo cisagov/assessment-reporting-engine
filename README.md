@@ -36,8 +36,12 @@ This is a development version, so includes source code with docker images. In fu
         -   [Restore Offline](#restore-offline)
 -   [Other Functions](#other-functions)
     -   [Create a Superuser](#create-superuser)
+    -   [Change Password](#change-password)
+    -   [Reset Login Attempts](#reset-attempts)
     -   [View Logs](#view-logs)
     -   [Connect to Shell](#connect-shell)
+    -   [Pause](#pause)
+    -   [Resume](#resume)
     -   [Tear Down](#tear-down)
 -   [Development Guide](#development-guide)
     -   [Setup (Development)](#development-setup)
@@ -96,7 +100,7 @@ Once `python` is successfully installed, run the following command to verify tha
 ## Getting Started
 
 ```bash
-> git clone https://github.com/cisagov/assessment-reporting-engine.git
+> git clone https://github.com/asmtlab/assessment-reporting-engine.git
 > cd assessment-reporting-engine
 ```
 
@@ -106,7 +110,7 @@ Once `python` is successfully installed, run the following command to verify tha
 
 A python3 script ptp.py is included to automate various functions, including the set up, backup, restore, and tear down processes. In order to use the ptp.py script and set up RE, the following dependencies must be met (in addition to the prerequisites outlined in the previous section). Note that RE has only been tested with the following dependency versions and may not function correctly with other versions.
 
-#### Node v18.13.x and NPM v9.2.x
+#### Node v18.x.x and NPM v9.x.x
 
 Any alternate versions of Node and NPM that may be running on the system where RE is being installed could conflict with RE set up. For that reason, it is recommended to purge any existing versions of Node and NPM if they are not needed. The following command will install Node and NPM:
 
@@ -239,7 +243,7 @@ Once the above requirements are met, the following commands can be run from the 
 > docker load < web.tar
 > docker load < nginx.tar
 > docker load < db.tar
-> python3 ptp.py restore -r [FAST/RPT/RVA] -b [/path/to/backup.zip]
+> python3 ptp.py restore -r [FAST/RPT/RVA] -b [/path/to/backup.zip] -c offline
 ```
 
 <a name='other-functions'></a>
@@ -254,6 +258,26 @@ During set up, you will automatically be prompted to create a superuser. Once th
 
 ```bash
 > python3 ptp.py su
+```
+
+<a name='change-password'></a>
+
+### Change Password
+
+The password for an existing account can be changed by running the following command (user will be prompted to set a new password for the user):
+
+```bash
+> python3 ptp.py password -u [username]
+```
+
+<a name='reset-attempts'></a>
+
+### Reset Login Attempts
+
+An account will be locked out after three failed attempts to prevent brute-force password attacks. The attempt count for all accounts can be reset by running the following command:
+
+```bash
+> python3 ptp.py reset
 ```
 
 <a name='view-logs'></a>
@@ -274,6 +298,26 @@ To connect to a shell for a particular container, use the following command (be 
 
 ```bash
 > python3 ptp.py shell -c [db/nginx/web]
+```
+
+<a name='pause'></a>
+
+### Pause
+
+To pause an instance of Reporting Engine, run the following command (be sure to back up the instance first):
+
+```bash
+> python3 ptp.py pause
+```
+
+<a name='resume'></a>
+
+### Resume
+
+To resume a paused instance of Reporting Engine, run the following command:
+
+```bash
+> python3 ptp.py resume
 ```
 
 <a name='tear-down'></a>

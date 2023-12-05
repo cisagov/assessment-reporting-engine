@@ -291,26 +291,38 @@ class EngagementMeta(abstract_models.TimeStampedModel):
         default=datetime.date.today,
         max_length=10,
         blank=True,
-        verbose_name="Start Date",
+        verbose_name="External Start Date",
         null=True,
     )
     ext_end_date = models.DateField(
         default=datetime.date.today() + datetime.timedelta(days=4),
         max_length=10,
         blank=True,
-        verbose_name="End Date",
+        verbose_name="External End Date",
         null=True,
     )
     ext_scope = models.TextField(
         blank=True,
-        verbose_name="In Scope IP Addresses/Domain Names",
+        verbose_name="External In Scope IP Addresses/Domain Names",
         help_text="Enter as a list of IPs, Ranges, and/or CIDRs",
         null=True,
     )
     ext_excluded_scope = models.TextField(
         blank=True,
-        verbose_name="Out of Scope IP Addresses/Domain Names",
+        verbose_name="External Out of Scope IP Addresses/Domain Names",
         help_text="Enter as a list of IPs, Ranges, and/or CIDRs",
+        null=True,
+    )
+    web_app_scope = models.TextField(
+        blank=True,
+        verbose_name="In Scope Web Applications",
+        help_text="Enter as a list of domains and/or IPs",
+        null=True,
+    )
+    osinf_scope = models.TextField(
+        blank=True,
+        verbose_name="In Scope Domains for OSINF",
+        help_text="Enter as a list of domains",
         null=True,
     )
 
@@ -319,25 +331,25 @@ class EngagementMeta(abstract_models.TimeStampedModel):
         default=datetime.date.today() + datetime.timedelta(days=7),
         max_length=10,
         blank=True,
-        verbose_name="Start Date",
+        verbose_name="Internal Start Date",
         null=True,
     )
     int_end_date = models.DateField(
         default=datetime.date.today() + datetime.timedelta(days=11),
         max_length=10,
         blank=True,
-        verbose_name="End Date",
+        verbose_name="Internal End Date",
         null=True,
     )
     int_scope = models.TextField(
         blank=True,
-        verbose_name="In Scope IP Addresses/Domain Names",
+        verbose_name="Internal In Scope IP Addresses/Domain Names",
         help_text="Enter as a list of IPs, Ranges, and/or CIDRs",
         null=True,
     )
     int_excluded_scope = models.TextField(
         blank=True,
-        verbose_name="Out of Scope IP Addresses/Domain Names",
+        verbose_name="Internal Out of Scope IP Addresses/Domain Names",
         help_text="Enter as a list of IPs, Ranges, and/or CIDRs",
         null=True,
     )
@@ -532,14 +544,14 @@ def get_engagement_dates(instance):
     return engagement_dates
 
 
-@receiver(signals.pre_save, sender=EngagementMeta)
-def pre_save_engagement(sender, instance, **kwargs):
-    date = instance.int_end_date
-    month = date.month
-    if month < 10:
-        instance.fy = date.year
-    else:
-        instance.fy = date.year + 1
+#@receiver(signals.pre_save, sender=EngagementMeta)
+#def pre_save_engagement(sender, instance, **kwargs):
+#    date = instance.int_end_date
+#    month = date.month
+#    if month < 10:
+#        instance.fy = date.year
+#    else:
+#        instance.fy = date.year + 1
 
 
 #@receiver(signals.post_save, sender=EngagementMeta)

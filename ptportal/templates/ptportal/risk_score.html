@@ -94,7 +94,7 @@ DM22-1011
 				<br>
 				<p><b>Likelihood: </b>The likelihood (1-100%) of a finding is based on how likely it is to be discovered and abused. A baseline value is provided as a placeholder for reference, but it is up to the assessment team to adjust the value, taking into consideration environmental factors. If a finding has one or more associated Known Exploited Vulnerabilities (KEVs), it will automatically be set to 100%. There should be no instances where the likelihood is 0%, as that implies it is not a finding.</p>
 				<br>
-				<p><b>KEV: </b>If a finding has one ore more KEVs mapped to it, it will be tagged as a KEV and the likelihood will automatically be set to 100%. This element can be set while creating/editing a finding by selecting relevant KEVs and this page will be updated to reflect the KEV status.</p>
+				<p><b>KEV: </b>If a finding has one or more KEVs mapped to it, it will be tagged as a KEV and the likelihood will automatically be set to 100%. This element can be set while creating/editing a finding by selecting relevant KEVs and this page will be updated to reflect the KEV status.</p>
 				<br>
 				<p><b>Mitigation Status: </b>If a finding was mitigated within the assessment timeframe, it will be deducted from the total risk score to calculate the mitigated risk score. This element can be set while creating/editing a finding and this page will be updated to reflect the mitigation status.</p>
 				<br>
@@ -118,7 +118,7 @@ DM22-1011
 				<sds-input v-model="item.likelihood" v-bind:placeholder="item.default_likelihood" :maxlength="3" v-on:keydown.prevent></sds-input>
 			</div>
 			<div v-else>
-				<sds-input v-model="item.likelihood" v-bind:placeholder="item.default_likelihood" :maxlength="3"></sds-input>
+				<sds-input v-model="item.likelihood" v-bind:placeholder="item.default_likelihood" :maxlength="3" type="number"></sds-input>
 			</div>
 		</template>
 		<template #cell(kev)="{item}">

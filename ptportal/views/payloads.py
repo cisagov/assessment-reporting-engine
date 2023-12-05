@@ -48,7 +48,7 @@ class PayloadResults(generic.base.TemplateView):
         except Exception as e:
             print(e)
 
-        report.payload_testing_date = None if postData['ptdate'] == None else postData['ptdate'][0:10]
+        report.payload_testing_date = None if postData['ptdate'] == None else postData['ptdate']
 
         report.save()
 

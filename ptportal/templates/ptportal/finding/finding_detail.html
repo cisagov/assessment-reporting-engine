@@ -127,7 +127,7 @@ DM22-1011
 
     {% for screenshot in screenshots %}
       imgURL = window.location.origin + "/media/" + "{{screenshot.file}}"
-      pageData.screenshots.push({url: imgURL, caption: "{{screenshot.caption}}", order: "{{screenshot.order}}"})
+      pageData.screenshots.push({url: imgURL, caption: "{{screenshot.caption | escapejs}}", order: "{{screenshot.order}}"})
     {% endfor %}
 
     {% for k in object.KEV.all %}

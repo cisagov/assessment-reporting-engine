@@ -68,25 +68,6 @@ class EngagementCreate(generic.edit.CreateView):
         postData = json.loads(request.body)
         report = Report.object()
 
-        if postData['ext_date']['start']:
-            postData['ext_start_date'] = datetime.date.fromisoformat(
-                postData['ext_date']['start'].split("T")[0]
-            )
-        if postData['ext_date']['end']:
-            ext_end_date = datetime.date.fromisoformat(
-                postData['ext_date']['end'].split("T")[0]
-            )
-            postData['ext_end_date'] = ext_end_date - datetime.timedelta(days=1)
-        if postData['int_date']['start']:
-            postData['int_start_date'] = datetime.date.fromisoformat(
-                postData['int_date']['start'].split("T")[0]
-            )
-        if postData['int_date']['end']:
-            int_end_date = datetime.date.fromisoformat(
-                postData['int_date']['end'].split("T")[0]
-            )
-            postData['int_end_date'] = int_end_date - datetime.timedelta(days=1)
-
         engageForm = EngagementForm(postData)
 
         if engageForm.is_valid():
@@ -139,25 +120,6 @@ class EngagementUpdate(generic.edit.UpdateView):
     def post(self, request, *args, **kwargs):
         postData = json.loads(request.body)
         report = Report.object()
-
-        if postData['ext_date']['start']:
-            postData['ext_start_date'] = datetime.date.fromisoformat(
-                postData['ext_date']['start'].split("T")[0]
-            )
-        if postData['ext_date']['end']:
-            ext_end_date = datetime.date.fromisoformat(
-                postData['ext_date']['end'].split("T")[0]
-            )
-            postData['ext_end_date'] = ext_end_date - datetime.timedelta(days=1)
-        if postData['int_date']['start']:
-            postData['int_start_date'] = datetime.date.fromisoformat(
-                postData['int_date']['start'].split("T")[0]
-            )
-        if postData['int_date']['end']:
-            int_end_date = datetime.date.fromisoformat(
-                postData['int_date']['end'].split("T")[0]
-            )
-            postData['int_end_date'] = int_end_date - datetime.timedelta(days=1)
         
         if postData['traffic_light_protocol'] == 'None':
             postData['traffic_light_protocol'] = None

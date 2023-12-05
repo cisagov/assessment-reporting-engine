@@ -66,31 +66,6 @@ class Report(abstract_models.TimeStampedModel):
         super().save(*args, **kwargs)
 
 
-class RPTIdentifiedNetworks(models.Model):
-    ip_address = models.CharField(max_length=30, blank=True)
-    domain = models.CharField(max_length=253, blank=True)
-    registrant = models.CharField(max_length=253, blank=True)
-    belongs_to_report = models.ForeignKey(Report, null=True, on_delete=models.CASCADE)
-
-    class Meta:
-        verbose_name_plural = 'RPT Identified Networks'
-
-    def __str__(self):
-        return str(self.domain)
-
-
-class RPTBreachedEmails(models.Model):
-    breached_email = models.CharField(max_length=254, blank=True)
-    breach_info = models.TextField(blank=True)
-    belongs_to_report = models.ForeignKey(Report, null=True, on_delete=models.CASCADE)
-
-    class Meta:
-        verbose_name_plural = 'RPT Breached Email Addresses'
-
-    def __str__(self):
-        return str(self.breached_email)
-
-
 class Acronym(models.Model):
     found_choices = [('M', 'Manual'), ('A', 'Auto')]
 

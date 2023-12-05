@@ -65,6 +65,11 @@ urlpatterns += [
     path('port_mapping/', views.PortMapping.as_view(), name='port_mapping'),
 ]
 
+# OSINF
+urlpatterns += [
+    path('osinf/', views.OSINF.as_view(), name='osinf'),
+]
+
 # Engagement Metadata
 urlpatterns += [
     path(

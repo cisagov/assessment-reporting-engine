@@ -341,12 +341,18 @@ def insert_logistics(prs, report_type, asmt_info, slide_size):
     ext_start_date = af.get_db_info(
         asmt_info, "engagementmeta.fields.ext_start_date", "External Start Date"
     )
-    ext_start_formatted = datetime.datetime.strptime(ext_start_date, '%Y-%m-%d').strftime('%b %-d, %Y')
+    if ext_start_date is not None:
+        ext_start_formatted = datetime.datetime.strptime(ext_start_date, '%Y-%m-%d').strftime('%b %-d, %Y')
+    else:
+        ext_start_formatted = "<External Start Date>"
 
     ext_end_date = af.get_db_info(
         asmt_info, "engagementmeta.fields.ext_end_date", "External End Date"
     )
-    ext_end_formatted = datetime.datetime.strptime(ext_end_date, '%Y-%m-%d').strftime('%b %-d, %Y')
+    if ext_end_date is not None:
+        ext_end_formatted = datetime.datetime.strptime(ext_end_date, '%Y-%m-%d').strftime('%b %-d, %Y')
+    else:
+        ext_end_formatted = "<External End Date>"
 
     cell_text(table, 0, 0, "Activity", "c", white)
     cell_text(table, 0, 1, "Dates", "c", white)
@@ -358,11 +364,18 @@ def insert_logistics(prs, report_type, asmt_info, slide_size):
         int_start_date = af.get_db_info(
             asmt_info, "engagementmeta.fields.int_start_date", "Internal Start Date"
         )
-        int_start_formatted = datetime.datetime.strptime(int_start_date, '%Y-%m-%d').strftime('%b %-d, %Y')
+        if int_start_date is not None:
+            int_start_formatted = datetime.datetime.strptime(int_start_date, '%Y-%m-%d').strftime('%b %-d, %Y')
+        else:
+            int_start_formatted = "<Internal Start Date>"
+        
         int_end_date = af.get_db_info(
             asmt_info, "engagementmeta.fields.int_end_date", "Internal End Date"
         )
-        int_end_formatted = datetime.datetime.strptime(int_end_date, '%Y-%m-%d').strftime('%b %-d, %Y')
+        if int_end_date is not None:
+            int_end_formatted = datetime.datetime.strptime(int_end_date, '%Y-%m-%d').strftime('%b %-d, %Y')
+        else:
+            int_end_formatted = "<Internal End Date>"
 
         cell_text(table, 2, 0, "Internal Testing", color=gray)
         cell_text(table, 2, 1, str(int_start_formatted) + " to " + str(int_end_formatted), color=gray)
@@ -429,7 +442,7 @@ def insert_logistics(prs, report_type, asmt_info, slide_size):
     table.cell(1, 0).text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
     table.cell(1, 1).text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
 
-    # rva team table
+    # team table
     rows = 5
     cols = 2
     if slide_size:
@@ -536,7 +549,7 @@ def insert_scope_slide(prs, report_type, asmt_info, ip_ext_scan, ip_ext_disc, ip
     paragraph.level = 1
     run = paragraph.add_run()
     run.text = "Short timeframe - overcome by working with {} staff".format(
-        af.get_db_info(asmt_info, "engagementmeta.fields.customer_initials", "CI")
+        af.get_db_info(asmt_info, "engagementmeta.fields.customer_initials", "CustomerAbbreviation")
     )
     paragraph.font.color.rgb = gray
 
@@ -688,63 +701,53 @@ def insert_goals_slide(prs, report_type):
     """
 
 
-def insert_OSINT_slide(prs, report_type, asmt_info):
-    """Generate the OSINT slides if the report is a RPT.
+def insert_OSINF_slide(prs, asmt_info):
+    """Generate the OSINF slides if the report is a RPT.
 
     Args:
         prs (pptx presentation): The Powerpoint presentation.
         report_type (str): The type of report being generated. I.e. RVA, RPT, or HVA.
         asmt_info (List[Dict]): The Json data from the engagement.
     """
-    osint_slide_layout = prs.slide_layouts[3]
-    slide = prs.slides.add_slide(osint_slide_layout)
-
-    rpt_info = af.get_db_info(asmt_info, "report.fields", "keyNA")
-
-    email_id = str(rpt_info["emails_identified"])
-    email_brch = str(rpt_info["emails_breached"])
-    creds_identified = str(rpt_info["credentials_identified"])
-    creds_validated = str(rpt_info["credentials_validated"])
-
-    if email_id == "0":
-        email_id = "<NOT SET>"
-    if email_brch == "0":
-        email_brch = "<NOT SET>"
-    if creds_identified == "0":
-        creds_identified = "<NOT SET>"
-    if creds_validated == "0":
-        creds_validated = "<NOT SET>"
+    # ---- add osinf slide
+    osinf_slide_layout = prs.slide_layouts[4]
+    slide = prs.slides.add_slide(osinf_slide_layout)
+    osinf_placeholder = slide.placeholders[1].text_frame
 
     title = slide.shapes.title
-    agenda_placeholder = slide.placeholders[1].text_frame
-    title.text = "Open Source Information Gathering"
-    paragraph = agenda_placeholder.paragraphs[0]
-    # Title is two lines at font size 40, add_paragraph() adds space from title to stop font overlap
-    paragraph = agenda_placeholder.add_paragraph()
-    paragraph.level = 1
-    run = paragraph.add_run()
-    run.text = email_id + " emails were scraped from various Internet sources."
+    title.text = "OSINF"
 
-    paragraph = agenda_placeholder.add_paragraph()
-    paragraph.level = 1
+    paragraph = osinf_placeholder.paragraphs[0]
+    paragraph.level = 0
     run = paragraph.add_run()
-    run.text = (
-        email_brch
-        + " scraped emails were identified as existing in previous data breaches (according to HaveIBeenPwned database)"
+    run.text = "{} emails were scraped from various Internet sources".format(
+        af.get_db_info(asmt_info, "breachmetrics.fields.emails_identified", "EmailsIdentified")
     )
+    paragraph.font.color.rgb = gray
 
-    paragraph = agenda_placeholder.add_paragraph()
-    paragraph.level = 1
+    paragraph = osinf_placeholder.add_paragraph()
+    paragraph.level = 0
     run = paragraph.add_run()
-    run.text = (
-        creds_identified
-        + " sets of credentials (emails and passwords) identified in the wild."
+    run.text = "{} scraped emails were identified as existing in previous data breaches (according to HaveIBeenPwned database)".format(
+        af.get_db_info(asmt_info, "breachmetrics.fields.emails_identified_tp", "EmailsIdentifiedTP")
     )
+    paragraph.font.color.rgb = gray
 
-    paragraph = agenda_placeholder.add_paragraph()
-    paragraph.level = 1
+    paragraph = osinf_placeholder.add_paragraph()
+    paragraph.level = 0
     run = paragraph.add_run()
-    run.text = creds_validated + " sets of credentials were validated."
+    run.text = "{} sets of credentials (emails and passwords) identified in the wild".format(
+        af.get_db_info(asmt_info, "breachmetrics.fields.creds_identified", "CredsIdentified")
+    )
+    paragraph.font.color.rgb = gray
+
+    paragraph = osinf_placeholder.add_paragraph()
+    paragraph.level = 0
+    run = paragraph.add_run()
+    run.text = "{} sets of credentials were successfully validated".format(
+        af.get_db_info(asmt_info, "breachmetrics.fields.creds_validated", "CredsValidated")
+    )
+    paragraph.font.color.rgb = gray
 
 
 def insert_findings_slides(prs, report_type, asmt_info, ss_info, media_path, slide_size):
@@ -1420,12 +1423,11 @@ def insert_services_slides(prs, asmt_info, slide_size):
         print("No phishing campaign data.")
 
 
-def insert_attack_paths(prs, asmt_info, ss_info, media_path, slide_size):
+def insert_attack_paths(prs, report_type, asmt_info, steps_info, media_path, slide_size):
     # ---- add Attack Path Section Slide
     title_only = prs.slide_layouts[11]
     slide = prs.slides.add_slide(title_only)
     slide.placeholders[13].text = "ATTACK PATHS"
-
 
     for cnt, path in enumerate(af.model_gen(asmt_info, "ptportal.narrative")):
         ele = path['fields']
@@ -1434,7 +1436,7 @@ def insert_attack_paths(prs, asmt_info, ss_info, media_path, slide_size):
         attack_path_layout = prs.slide_layouts[15]
         slide = prs.slides.add_slide(attack_path_layout)
         shapes = slide.shapes
-        shapes.title.text = name.upper()
+        shapes.title.text = name
 
         if ele['file']:
             dfile = media_path + ele['file']
@@ -1442,6 +1444,37 @@ def insert_attack_paths(prs, asmt_info, ss_info, media_path, slide_size):
 
             shapes.add_picture(dfile, Inches(x), Inches(y), width=Inches(w), height=Inches(h))
             slide.placeholders[12].text = ele['caption']
+
+        if report_type == "RVA" or report_type == "FAST":
+            steps = af.find_steps(steps_info, path['pk'])
+
+            for step in steps:
+                sf = step['fields']
+
+                if sf['file'] != "":
+                    narrative_layout = prs.slide_layouts[14]
+                    slide = prs.slides.add_slide(narrative_layout)
+                    shapes = slide.shapes
+                    shapes.title.text = name
+
+                    sfile = media_path + sf['file']
+                    (x, y, w, h) = iu.get_screenshot_dimensions(sfile, "finding", slide_size)
+
+                    shapes.add_picture(sfile, Inches(x), Inches(y), width=Inches(w), height=Inches(h))
+                    slide.placeholders[12].text = sf['caption']
+
+                else:
+                    narrative_layout = prs.slide_layouts[6]
+                    slide = prs.slides.add_slide(narrative_layout)
+                    title = slide.shapes.title
+                    title.text = name
+                    nar_placeholder = slide.placeholders[1].text_frame
+
+                    paragraph = nar_placeholder.paragraphs[0]
+                    paragraph.level = 0
+                    run = paragraph.add_run()
+                    run.text = sf['description']
+                    paragraph.font.color.rgb = gray
 
 
 def insert_conclusion_slides(prs, report_type, asmt_info):
@@ -1451,7 +1484,7 @@ def insert_conclusion_slides(prs, report_type, asmt_info):
     slide.placeholders[13].text = "CONCLUSION"
 
     # insert Observations slide
-    if report_type == "RVA":
+    if report_type == "RVA" or report_type == "RPT":
         observation_layout = prs.slide_layouts[4]
         slide = prs.slides.add_slide(observation_layout)
         title = slide.shapes.title
@@ -1460,7 +1493,7 @@ def insert_conclusion_slides(prs, report_type, asmt_info):
 
         observations = af.get_db_info(asmt_info, 'report.fields.observed_strengths', "").replace("\r", "\n")
 
-        for cnt, bullet in enumerate(observations.split("\n")[::-1]):
+        for cnt, bullet in enumerate(observations.split("\n")):
             if cnt == 0:
                 paragraph = obs_placeholder.paragraphs[0]
             else:
@@ -1564,6 +1597,7 @@ def generate_ptp_slides(template, output, draft, json, media, size):
     # ---- find all screenshot information
     asmt_info = af.load_asmt_info(json)
     ss_info = af.build_screenshot_info(asmt_info)
+    steps_info = af.build_narrative_info(asmt_info)
 
     rep_fields = af.get_db_info(asmt_info, "report.fields", "keyNA")
     report_type = rep_fields["report_type"]
@@ -1581,16 +1615,14 @@ def generate_ptp_slides(template, output, draft, json, media, size):
     insert_logistics(prs, report_type, asmt_info, size)
     insert_scope_slide(prs, report_type, asmt_info, ip_ext_scan, ip_ext_disc, ip_int_scan, ip_int_disc)
     insert_goals_slide(prs, report_type)
-
+    if report_type == "RPT":
+        insert_OSINF_slide(prs, asmt_info)
     insert_findings_slides(prs, report_type, asmt_info, ss_info, media, size)
     insert_services_slides(prs, asmt_info, size)
-    insert_attack_paths(prs, asmt_info, ss_info, media, size)
+    if report_type == "RVA" or report_type == "FAST":
+        insert_attack_paths(prs, report_type, asmt_info, steps_info, media, size)
 
     insert_conclusion_slides(prs, report_type, asmt_info)
-
-    #if report_type == "RPT":
-    #    insert_OSINT_slide(prs, report_type, asmt_info)
-
     prs.save(output)
 
 

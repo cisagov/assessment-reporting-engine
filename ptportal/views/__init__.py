@@ -29,3 +29,4 @@ from .campaigns import *
 from .data_exfil import *
 from .ransomware import *
 from .risk_score import *
+from .osinf import *
