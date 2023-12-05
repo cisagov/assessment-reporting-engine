@@ -261,6 +261,12 @@ def generateEntryJson(filename):
             else:
                 start_date = engagement.int_start_date
                 end_date = engagement.ext_end_date
+        elif engagement.ext_start_date is not None and engagement.ext_end_date is not None:
+            start_date = engagement.ext_start_date
+            end_date = engagement.ext_end_date
+        elif engagement.int_start_date is not None and engagement.int_end_date is not None:
+            start_date = engagement.int_start_date
+            end_date = engagement.int_end_date
     else:
         if engagement.ext_start_date is not None:
             start_date = engagement.ext_start_date
@@ -741,10 +747,16 @@ def generateElectionJson(filename):
     if engagement.ext_start_date is not None and engagement.int_start_date is not None and engagement.ext_end_date is not None and engagement.int_end_date is not None:
         if engagement.ext_start_date < engagement.int_start_date:
             start_date = engagement.ext_start_date
-            end_date = engagement.int_start_date
+            end_date = engagement.int_end_date
         else:
             start_date = engagement.int_start_date
             end_date = engagement.ext_end_date
+    elif engagement.ext_start_date is not None and engagement.ext_end_date is not None:
+        start_date = engagement.ext_start_date
+        end_date = engagement.ext_end_date
+    elif engagement.int_start_date is not None and engagement.int_end_date is not None:
+        start_date = engagement.int_start_date
+        end_date = engagement.int_end_date
 
     if end_date != "":
         if end_date.month < 10:
@@ -786,6 +798,12 @@ def generateElectionJson(filename):
     else:
         elec_data['questionnaire'] = {}
 
+    security = {"": "", "1": "Least Secure", "2": "Moderately Secure", "3": "Secure", "4": "Very Secure", "5": "Most Secure", "TBD": "TBD"}
+    questions = {"q24": elec_data['questionnaire']['q24'], "q25": elec_data['questionnaire']['q25'], "q26": elec_data['questionnaire']['q26'], "q27": elec_data['questionnaire']['q27']}
+    
+    for q in questions:
+        elec_data['questionnaire'][q] = security[questions[q]]
+    
     with open(filename, "wb+") as f:
         f.write(json.dumps(elec_data).encode())
 
