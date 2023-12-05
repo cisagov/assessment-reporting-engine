@@ -254,20 +254,26 @@ def generateEntryJson(filename):
     end_date = ""
 
     if report.report_type == "RVA":
-        if engagement.ext_start_date < engagement.int_start_date:
+        if engagement.ext_start_date is not None and engagement.int_start_date is not None and engagement.ext_end_date is not None and engagement.int_end_date is not None:
+            if engagement.ext_start_date < engagement.int_start_date:
+                start_date = engagement.ext_start_date
+                end_date = engagement.int_end_date
+            else:
+                start_date = engagement.int_start_date
+                end_date = engagement.ext_end_date
+    else:
+        if engagement.ext_start_date is not None:
             start_date = engagement.ext_start_date
-            end_date = engagement.int_end_date
-        else:
-            start_date = engagement.int_start_date
+        if engagement.ext_end_date is not None:
             end_date = engagement.ext_end_date
-    else:
-        start_date = engagement.ext_start_date
-        end_date = engagement.ext_end_date
 
-    if end_date.month < 10:
-        fiscal_year = end_date.year
+    if end_date != "":
+        if end_date.month < 10:
+            fiscal_year = end_date.year
+        else:
+            fiscal_year = end_date.year + 1
     else:
-        fiscal_year = end_date.year + 1
+        fiscal_year = ""
 
     asmt_data = {
         'type': report_type,
@@ -732,17 +738,21 @@ def generateElectionJson(filename):
     start_date = ""
     end_date = ""
 
-    if engagement.ext_start_date < engagement.int_start_date:
-        start_date = engagement.ext_start_date
-        end_date = engagement.int_start_date
-    else:
-        start_date = engagement.int_start_date
-        end_date = engagement.ext_end_date
+    if engagement.ext_start_date is not None and engagement.int_start_date is not None and engagement.ext_end_date is not None and engagement.int_end_date is not None:
+        if engagement.ext_start_date < engagement.int_start_date:
+            start_date = engagement.ext_start_date
+            end_date = engagement.int_start_date
+        else:
+            start_date = engagement.int_start_date
+            end_date = engagement.ext_end_date
 
-    if end_date.month < 10:
-        fiscal_year = end_date.year
+    if end_date != "":
+        if end_date.month < 10:
+            fiscal_year = end_date.year
+        else:
+            fiscal_year = end_date.year + 1
     else:
-        fiscal_year = end_date.year + 1
+        fiscal_year = ""
 
     elec_data = {
         'type': report_type,
@@ -832,7 +842,9 @@ def serializeJSON(filename=None):
         + list(InteractiveLogons.objects.all().order_by('order')) \
         + list(HighImpactScans.objects.all().order_by('order')) \
         + list(SignificantEvents.objects.all().order_by('order')) \
-        + list(Artifact.objects.all().order_by('order'))
+        + list(Artifact.objects.all().order_by('order')) \
+        + list(BreachMetrics.objects.all()) \
+        + list(BreachedEmail.objects.all())
 
     data = JSONserializers.serialize("json", all_data)
     if not filename:

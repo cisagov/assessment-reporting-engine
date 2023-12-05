@@ -133,11 +133,21 @@ DM22-1011
 	<ul>
 		<li><input type="checkbox" :checked="added_assessment_details" :disabled="true">&emsp; Add Assessment Details</li>
 		<li><input type="checkbox" :checked="added_findings" :disabled="true">&emsp; Add Finding Data</li>
+		{% if report.report_type == 'RVA' or report.report_type == 'RPT' %}
 		<li><input type="checkbox" :checked="added_payloads" :disabled="true">&emsp; Add Payload Data</li>
+		{% endif %}
+		{% if report.report_type == 'RVA' or report.report_type == 'FAST' %}
 		<li><input type="checkbox" :checked="added_campaigns" :disabled="true">&emsp; Add Campaign Data</li>
+		{% endif %}
 		<li><input type="checkbox" :checked="added_port_mapping" :disabled="true">&emsp; Add Port Mapping Data</li>
+		{% if report.report_type == 'RPT' %}
+		<li><input type="checkbox" :checked="added_osinf_breach" :disabled="true">&emsp; Add OSINF Breach Metrics</li>
+		<li><input type="checkbox" :checked="added_osinf_emails" :disabled="true">&emsp; Add OSINF Email Addresses</li>
+		{% endif %}
+		{% if report.report_type == 'RVA' %}
 		<li><input type="checkbox" :checked="added_data_exfil" :disabled="true">&emsp; Add Data Exfiltration Data</li>
 		<li><input type="checkbox" :checked="added_ransomware" :disabled="true">&emsp; Add Ransomware Data</li>
+		{% endif %}
 		<li><input type="checkbox" :checked="added_narratives" :disabled="true">&emsp; Add Narrative Data</li>
 		<li><input type="checkbox" :checked="added_kevs" :disabled="true">&emsp; Add Known Exploited Vulnerabilities</li>
 	</ul>
@@ -313,7 +323,9 @@ DM22-1011
 			added_data_exfil: false,
 			added_ransomware: false,
 			added_narratives: false,
-			added_kevs: false
+			added_kevs: false,
+			added_osinf_breach: false,
+			added_osinf_emails: false
 		}
 
 		{% if engagement_present == True %}
@@ -350,6 +362,14 @@ DM22-1011
 
 		{% if total_kevs > 0 %}
 			pageData.added_kevs = true
+		{% endif %}
+
+		{% if total_osinf_metrics > 0 %}
+			pageData.added_osinf_breach = true
+		{% endif %}
+
+		{% if total_osinf_emails > 0 %}
+			pageData.added_osinf_emails = true
 		{% endif %}
 
 		{% for i in object_list %}

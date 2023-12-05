@@ -160,18 +160,35 @@ def generate_pace_document(output, json, assets):
     else:
         report_type = ""
 
-    if ext_start_date and ext_end_date and int_start_date and int_end_date:
-        ext_start = datetime.datetime.strptime(ext_start_date, '%Y-%m-%d').date()
-        ext_end = datetime.datetime.strptime(ext_end_date, '%Y-%m-%d').date()
-        int_start = datetime.datetime.strptime(int_start_date, '%Y-%m-%d').date()
-        int_end = datetime.datetime.strptime(int_end_date, '%Y-%m-%d').date()
+    if report_type_acronym == "RVA":
+        if ext_start_date and ext_end_date and int_start_date and int_end_date:
+            ext_start = datetime.datetime.strptime(ext_start_date, '%Y-%m-%d').date()
+            ext_end = datetime.datetime.strptime(ext_end_date, '%Y-%m-%d').date()
+            int_start = datetime.datetime.strptime(int_start_date, '%Y-%m-%d').date()
+            int_end = datetime.datetime.strptime(int_end_date, '%Y-%m-%d').date()
 
-        if ext_start < int_start:
-            start_date = str(ext_start)
-            end_date = str(int_end)
+            if ext_start < int_start:
+                start_date = str(ext_start)
+                end_date = str(int_end)
+            else:
+                start_date = str(int_start)
+                end_date = str(ext_end)
         else:
-            start_date = str(int_start)
+            start_date = ""
+            end_date = ""
+
+    elif report_type_acronym == "RPT":
+        if ext_start_date:
+            ext_start = datetime.datetime.strptime(ext_start_date, '%Y-%m-%d').date()
+            start_date = str(ext_start)
+        else:
+            start_date = ""
+        if ext_end_date:
+            ext_end = datetime.datetime.strptime(ext_end_date, '%Y-%m-%d').date()
             end_date = str(ext_end)
+        else:
+            end_date = ""
+                
     else:
         start_date = ""
         end_date = ""

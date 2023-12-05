@@ -88,7 +88,10 @@ class IndexView(generic.ListView):
         context['total_data_exfil'] = DataExfil.objects.all().count()
         context['total_ransomware'] = Ransomware.objects.all().count()
         context['total_narratives'] = Narrative.objects.all().count()
+        context['total_osinf_emails'] = BreachedEmail.objects.all().count()
+        context['total_osinf_metrics'] = BreachMetrics.objects.all().count()
         context['total_kevs'] = KEV.objects.filter(found=True).count()
+        context['report'] = Report.objects.all().first()
 
         unique_clicks = 0
         emails_delivered = 0

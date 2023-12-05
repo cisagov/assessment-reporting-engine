@@ -103,7 +103,7 @@ DM22-1011
                     href: "{% url 'kev_catalog' %}",
                     iconUrl: "{% static 'icons/book-solid.svg' %}"
                   },
-                  {% if report_type == 'RVA' %}
+                  {% if report_type == 'RVA' or report_type == 'RPT' %}
                     {
                       id: 6,
                       title: "Risk Scoring",

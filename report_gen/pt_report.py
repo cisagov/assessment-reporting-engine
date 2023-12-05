@@ -1125,6 +1125,14 @@ def insert_scope(doc, db):
     if p_tag is not None:
         p_tag.text =af.get_db_info(db, 'engagementmeta.fields.int_scope', '{INTERNAL SCOPE}')
 
+    p_tag = xu.find_paragraph(doc, "{OSINF DOMAINS}")
+    if p_tag is not None:
+        p_tag.text =af.get_db_info(db, 'engagementmeta.fields.osinf_scope', '{OSINF DOMAINS}')
+
+    p_tag = xu.find_paragraph(doc, "{WEB APP SCOPE}")
+    if p_tag is not None:
+        p_tag.text =af.get_db_info(db, 'engagementmeta.fields.web_app_scope', '{WEB APP SCOPE}')
+
 
 def insert_ransomware(doc, db):
     """Function that fills out the ransomware susceptibility section of the report, if ransomware results exist.
@@ -1671,6 +1679,228 @@ def insert_pc_table(doc, db):
     xu.delete_paragraph(p_tag)
 
 
+def insert_osinf_tables(doc, db):
+    """Function that fills out the OSINF section of the report if OSINF data exists.
+
+    Args:
+        doc (docx object): The docx template.
+        db (List of dictionaries): The JSON of the engagment data.
+    """
+    p_tag = xu.find_paragraph(doc, "{OSINF RESULTS}")
+
+    if p_tag is None:
+        return
+
+    if af.get_db_info(db, 'breachedemail', 'NA') is not None:
+
+        page_break = doc.add_paragraph()
+        page_break.add_run().add_break(WD_BREAK.PAGE)
+        p_tag._p.addnext(page_break._p)
+
+        caption_emails = xu.insert_caption(doc, False, "OSINF Breached Email Addresses")
+        p_tag._p.addnext(caption_emails._p)
+
+        be_table = doc.add_table(1, 2)
+        be_table.style = doc.styles['CISA Table']
+
+        be_table.cell(0, 0).text = "Email Address"
+        be_table.cell(0, 1).text = "Breach Information"
+
+        for cnt, email in enumerate(af.model_gen(db, "ptportal.breachedemail")):
+            ele = email['fields']
+            row = be_table.add_row()
+
+            be_table.cell(cnt + 1, 0).text = xu.xsafe(ele['email_address'])
+            be_table.cell(cnt + 1, 1).text = xu.xsafe(ele['breach_info'])
+
+            be_table.cell(cnt + 1, 0).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+            be_table.cell(cnt + 1, 1).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+
+        be_table.cell(0, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+        be_table.cell(0, 0).paragraphs[0].runs[0].font.bold = True
+        be_table.cell(0, 1).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+        be_table.cell(0, 1).paragraphs[0].runs[0].font.bold = True
+
+        xu.set_column_width(be_table.columns[0], 2.5)
+        xu.set_column_width(be_table.columns[1], 4)
+
+        xu.move_table_after(be_table, p_tag)
+
+    if af.get_db_info(db, 'breachmetrics', 'NA') is not None and af.get_db_info(db, 'breachedemail', 'NA') is None:
+        page_break = doc.add_paragraph()
+        page_break.add_run().add_break(WD_BREAK.PAGE)
+        p_tag._p.addnext(page_break._p)
+
+    if af.get_db_info(db, 'breachmetrics', 'NA') is not None:
+        if af.get_db_info(db, 'breachmetrics.fields.emails_identified', 'NA') != '<not set: NA>':
+            emails_identified = int(af.get_db_info(db, 'breachmetrics.fields.emails_identified', 'NA'))
+        else:
+            emails_identified = 0
+
+        if af.get_db_info(db, 'breachmetrics.fields.emails_identified_tp', 'NA') != '<not set: NA>':
+            emails_identified_tp = int(af.get_db_info(db, 'breachmetrics.fields.emails_identified_tp', 'NA'))
+        else:
+            emails_identified_tp = 0
+
+        if af.get_db_info(db, 'breachmetrics.fields.percentage_emails', 'NA') != '<not set: NA>':
+            percentage_emails = round(float(af.get_db_info(db, 'breachmetrics.fields.percentage_emails', 'NA')) * 100, 2)
+        else:
+            percentage_emails = 0.0
+
+        percentage = str(percentage_emails) + "%"
+
+        if af.get_db_info(db, 'breachmetrics.fields.creds_identified', 'NA') != '<not set: NA>':
+            creds_identified = int(af.get_db_info(db, 'breachmetrics.fields.creds_identified', 'NA'))
+        else:
+            creds_identified = 0
+
+        if af.get_db_info(db, 'breachmetrics.fields.creds_identified_unique', 'NA') != '<not set: NA>':
+            creds_identified_unique = int(af.get_db_info(db, 'breachmetrics.fields.creds_identified_unique', 'NA'))
+        else:
+            creds_identified_unique = 0
+
+        if af.get_db_info(db, 'breachmetrics.fields.creds_validated', 'NA') != '<not set: NA>':
+            creds_validated = int(af.get_db_info(db, 'breachmetrics.fields.creds_validated', 'NA'))
+        else:
+            creds_validated = 0
+
+        end_space = doc.add_paragraph("", style="Normal")
+        p_tag._p.addnext(end_space._p)
+
+        caption_cred_metrics = xu.insert_caption(doc, False, "OSINF Breached Credential Metrics")
+        p_tag._p.addnext(caption_cred_metrics._p)
+
+        bm_creds_table = doc.add_table(1, 2)
+        bm_creds_table.style = doc.styles['CISA Table']
+
+        bm_creds_table.cell(0, 0).merge(bm_creds_table.cell(0, 1))
+        bm_creds_table.cell(0, 0).text = "Breached Credential Metrics"
+
+        row1 = bm_creds_table.add_row()
+
+        bm_creds_table.cell(1, 0).text = "Credentials Identified"
+        bm_creds_table.cell(1, 1).text = str(creds_identified)
+
+        row2 = bm_creds_table.add_row()
+
+        bm_creds_table.cell(2, 0).text = "Unique Users With Identified Credentials"
+        bm_creds_table.cell(2, 1).text = str(creds_identified_unique)
+
+        row3 = bm_creds_table.add_row()
+
+        bm_creds_table.cell(3, 0).text = "Credentials Successfully Validated"
+        bm_creds_table.cell(3, 1).text = str(creds_validated)
+
+        bm_creds_table.cell(0, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+        bm_creds_table.cell(0, 0).paragraphs[0].runs[0].font.bold = True
+
+        xu.set_column_width(bm_creds_table.columns[0], 4.75)
+        xu.set_column_width(bm_creds_table.columns[1], 1.75)
+
+        xu.move_table_after(bm_creds_table, p_tag)
+
+        end_space = doc.add_paragraph("", style="Normal")
+        p_tag._p.addnext(end_space._p)
+
+        caption_email_metrics = xu.insert_caption(doc, False, "OSINF Breached Email Metrics")
+        p_tag._p.addnext(caption_email_metrics._p)
+
+        bm_email_table = doc.add_table(1, 2)
+        bm_email_table.style = doc.styles['CISA Table']
+
+        bm_email_table.cell(0, 0).merge(bm_email_table.cell(0, 1))
+        bm_email_table.cell(0, 0).text = "Breached Email Metrics"
+
+        row4 = bm_email_table.add_row()
+
+        bm_email_table.cell(1, 0).text = "Emails Identified"
+        bm_email_table.cell(1, 1).text = str(emails_identified)
+
+        row5 = bm_email_table.add_row()
+
+        bm_email_table.cell(2, 0).text = "Emails Identified in Third-Party Data Breaches"
+        bm_email_table.cell(2, 1).text = str(emails_identified_tp)
+
+        row6 = bm_email_table.add_row()
+
+        bm_email_table.cell(3, 0).text = "Percentage of Emails Identified in Third-Party Data Breaches"
+        bm_email_table.cell(3, 1).text = percentage
+
+        bm_email_table.cell(0, 0).paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+        bm_email_table.cell(0, 0).paragraphs[0].runs[0].font.bold = True
+
+        xu.set_column_width(bm_email_table.columns[0], 4.75)
+        xu.set_column_width(bm_email_table.columns[1], 1.75)
+
+        xu.move_table_after(bm_email_table, p_tag)
+
+        space = doc.add_paragraph("", style="Normal")
+        p_tag._p.addnext(space._p)
+
+        counts = {"emails_identified": emails_identified, "emails_identified_tp": emails_identified_tp, "creds_identified": creds_identified, "creds_identified_unique": creds_identified_unique, "creds_validated": creds_validated}
+        words = {"emails_identified": "", "emails": "", "emails_identified_tp": "", "creds_identified": "", "creds_identified_unique": "", "creds_validated": ""}
+        plural = {"emails_identified": "addresses", "emails": "These", "creds_identified_unique": "users", "creds_validated": "sets", "creds": "were"}
+
+        if counts['emails_identified'] < 100:
+            words['emails_identified'] = num.number_to_words(counts['emails_identified']) + " (" + str(counts['emails_identified']) + ")"
+        else:
+            words['emails_identified'] = str(counts['emails_identified'])
+
+        if counts['emails_identified_tp'] < 100:
+            words['emails_identified_tp'] = num.number_to_words(counts['emails_identified_tp']) + " (" + str(counts['emails_identified_tp']) + ")"
+        else:
+            words['emails_identified_tp'] = str(counts['emails_identified_tp'])
+
+        if counts['creds_identified'] < 100:
+            words['creds_identified'] = num.number_to_words(counts['creds_identified']) + " (" + str(counts['creds_identified']) + ")"
+        else:
+            words['creds_identified'] = str(counts['creds_identified'])
+
+        if counts['creds_identified_unique'] < 100:
+            words['creds_identified_unique'] = num.number_to_words(counts['creds_identified_unique']) + " (" + str(counts['creds_identified_unique']) + ")"
+        else:
+            words['creds_identified_unique'] = str(counts['creds_identified_unique'])
+
+        if counts['creds_validated'] < 100:
+            words['creds_validated'] = num.number_to_words(counts['creds_validated']) + " (" + str(counts['creds_validated']) + ")"
+        else:
+            words['creds_validated'] = str(counts['creds_validated'])
+
+        if counts['emails_identified'] == 1:
+            plural['emails_identified'] = "address"
+            plural['emails'] = "This"
+
+        if counts['creds_identified_unique'] == 1:
+            plural['creds_identified_unique'] = "user"
+
+        if counts['creds_validated'] == 1:
+            plural['creds_validated'] = "set"
+            plural['creds'] = "was"
+
+        customer_name = af.get_db_info(db, 'engagementmeta.fields.customer_long_name', '{STAKEHOLDER NAME}')
+        #emails_identified = af.get_db_info(db, 'breachmetrics.fields.emails_identified', '{EMAILS IDENTIFIED}')
+        #emails_identified_tp = af.get_db_info(db, 'breachmetrics.fields.emails_identified_tp', '{EMAILS IDENTIFIED THIRD PARTY}')
+        #percentage_emails = af.get_db_info(db, 'breachmetrics.fields.percentage_emails', '{PERCENTAGE EMAILS}')
+        #creds_identified = af.get_db_info(db, 'breachmetrics.fields.creds_identified', '{CREDENTIALS IDENTIFIED}')
+        #creds_identified_unique = af.get_db_info(db, 'breachmetrics.fields.creds_identified_unique', '{UNIQUE CREDENTIALS IDENTIFIED}')
+        #creds_validated = af.get_db_info(db, 'breachmetrics.fields.creds_validated', '{CREDENTIALS VALIDATED}')
+
+        third = doc.add_paragraph(f"Whenever credentials are discovered as a part of data breaches, CISA attempts to validate whether the credentials are still active and could be used as part of successful network exploitation. CISA was able to identify {words['creds_identified_unique']} unique {plural['creds_identified_unique']} with credentials found in publicly accessible breaches. Through testing, {words['creds_validated']} {plural['creds_validated']} of credentials {plural['creds']} successfully validated. Valid credentials can be used by threat actors to access {customer_name} resources.", style="Normal")
+        p_tag._p.addnext(third._p)
+
+        second = doc.add_paragraph(f"Once user email addresses have been identified, additional research is performed to determine if any have been exposed in publicly accessible breach information. CISA was able to identify that {words['emails_identified_tp']} of the discovered email addresses had been involved in breaches with publicly accessible data available. This indicates that {percentage} of identified users ({counts['emails_identified_tp']} of {counts['emails_identified']}) have been involved in previous data breaches.", style="Normal")
+        p_tag._p.addnext(second._p)
+        
+        first = doc.add_paragraph(f"During the engagement, the CISA team performed reconnaissance of open-source information pertaining to the {customer_name} domain(s). With about one hour’s worth of effort, a threat actor would be able to identify {words['emails_identified']} unique user email {plural['emails_identified']} related to the {customer_name} domain. {plural['emails']} email {plural['emails_identified']} could be used in targeted social engineering attacks, such as phishing, or could be used to attempt brute force or password guessing attacks against authentication portals.", style="Normal")
+        p_tag._p.addnext(first._p)
+
+        header = doc.add_paragraph("Open-Source Information Gathering", style="Heading 2")
+        p_tag._p.addnext(header._p)
+
+    xu.delete_paragraph(p_tag)
+
+
 def insert_pm_table(doc, db):
     """Function that fills out the port mapping appendix of the report.
 
@@ -1909,7 +2139,7 @@ def generate_ptp_report(template, output, draft, json, media):
 
     insert_assessment_info(doc, asmt_info)
     
-    if report_type == "RVA":
+    if report_type == "RVA" or report_type == "RPT":
         # RVA 2.0 Template Insertions
         insert_report_summary(doc, asmt_info, media)
         insert_scope(doc, asmt_info)
@@ -1930,7 +2160,12 @@ def generate_ptp_report(template, output, draft, json, media):
         insert_ransomware(doc, asmt_info)
         insert_de_table(doc, asmt_info)
         insert_pt_table(doc, asmt_info)
-    insert_pc_table(doc, asmt_info)
+        insert_pc_table(doc, asmt_info)
+    if report_type == "RPT":
+        insert_pt_table(doc, asmt_info)
+        insert_osinf_tables(doc, asmt_info)
+    if report_type == "FAST":
+        insert_pc_table(doc, asmt_info)
 
     # ---- add attack paths
     insert_attack_paths(doc, asmt_info, media)
