@@ -66,7 +66,7 @@ DM22-1011
                         <sds-input v-model="item.datatype" placeholder="Data Type" :maxlength="100"></sds-input>
                       </template>
                       <template #cell(date_time)="{item}">
-                        <sds-datepicker v-model="item.date_time" :min="calendar.min" :max="calendar.max" mode="dateTime" :size="calendar.size"/>
+                        <input class="form-control" v-model="item.date_time" type="datetime-local" value="item.start">
                       </template>
                       <template #cell(detection)="{item}">
                         <div class="right-block">
@@ -153,23 +153,15 @@ DM22-1011
             { id: 7, value: 'DNS', text: 'DNS' },
             { id: 8, value: 'SMTP', text: 'SMTP' },
       ],
-      calendar: {
-        date: null,
-        max: null,
-        min: null,
-        mode: 'dateTime',
-        size: 'md'
-      },
     }
 
 
     {% for de in data_exfil %}
 
-        newdate = null
+        date = null
 
         {% if de.date_time != null %}
-          date = "{{de.date_time | date:"m/d/Y h:i a"}}"
-          newdate = new Date (date.replace(/\./g, ''))
+          date = "{{de.date_time | date:"Y-m-d"}}T{{de.date_time | time:"H:i:s"}}"
         {% endif %}
 
         {% if de.detection == "N" %}
@@ -184,7 +176,7 @@ DM22-1011
           prevent = true
         {% endif %}
 
-        data.exfilTableArgs.items.push({id: "{{de.order}}", protocol: "{{de.protocol|escapejs}}", datatype: "{{de.datatype|escapejs}}", date_time: newdate, detection: detect, prevention: prevent})
+        data.exfilTableArgs.items.push({id: "{{de.order}}", protocol: "{{de.protocol|escapejs}}", datatype: "{{de.datatype|escapejs}}", date_time: date, detection: detect, prevention: prevent})
 
     {% empty %}
       data.exfilTableArgs.items.push({id: 1, protocol: "HTTP", datatype: "Social Security Numbers (10 MB)", date_time: null, detection: false, prevention: false})

@@ -87,10 +87,10 @@ DM22-1011
                         </div>
                       </template>
                       <template #cell(time_start)="{item}">
-                        <sds-datepicker v-model="item.time_start" :min="calendar.min" :max="calendar.max" mode="dateTime" :size="calendar.size" :disabled="Boolean(item.disabled)"/>
+                        <input class="form-control" v-model="item.time_start" type="datetime-local" value="item.time_start" :disabled="Boolean(item.disabled)">
                       </template>
                       <template #cell(time_end)="{item}">
-                        <sds-datepicker v-model="item.time_end" :min="calendar.min" :max="calendar.max" mode="dateTime" :size="calendar.size" :disabled="Boolean(!item.trigger)"/>
+                        <input class="form-control" v-model="item.time_end" type="datetime-local" value="item.time_end" :disabled="Boolean(!item.trigger)">
                       </template>
                       <template #cell(delete)="{item}">
                         <div v-if="item.disabled">
@@ -150,13 +150,6 @@ DM22-1011
           ],
           items: []
       },
-      calendar: {
-        date: null,
-        max: null,
-        min: null,
-        mode: 'date',
-        size: 'md'
-      },
     }
 
 
@@ -172,13 +165,11 @@ DM22-1011
         end = null
 
         {% if rs.time_start != null %}
-          date = "{{rs.time_start | date:"m/d/Y h:i a"}}"
-          start = new Date (date.replace(/\./g, ''))
+          start = "{{rs.time_start | date:"Y-m-d"}}T{{rs.time_start | time:"H:i:s"}}"
         {% endif %}
 
         {% if rs.time_end != null %}
-          date = "{{rs.time_end | date:"m/d/Y h:i a"}}"
-          end = new Date (date.replace(/\./g, ''))
+          end = "{{rs.time_end | date:"Y-m-d"}}T{{rs.time_end | time:"H:i:s"}}"
         {% endif %}
 
         data.ranTableArgs.items.push({id: "{{rs.order}}", description: "{{rs.description}}", trigger: trigger, time_start: start, time_end: end, disabled: parseInt("{{rs.disabled}}")})

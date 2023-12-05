@@ -106,7 +106,7 @@ h3 {
 						<sds-textarea v-model="item.domain" rows="1" placeholder="dhs-test.com" :maxlength="100"></sds-textarea>
 					</template>
 					<template #cell(killdate)="{item}">
-						<sds-datepicker v-model="item.killdate" :min="calendar.min" :max="calendar.max" mode="date" :size="calendar.size"/>
+						<input class="form-control" v-model="item.killdate" type="date" value="item.killdate">
 					</template>
 					<template #cell(delete)="{item}">
 						<sds-button type="button" @click="deleteRow(ExtTeamserverTableArgs, item)"><img class="w-8 h-8" src="/static/icons/trash-solid.svg"></sds-input>
@@ -179,7 +179,7 @@ h3 {
 						<sds-textarea v-model="item.domain" rows="1" placeholder="dhs-test.com" :maxlength="100"></sds-textarea>
 					</template>
 					<template #cell(killdate)="{item}">
-						<sds-datepicker v-model="item.killdate" :min="calendar.min" :max="calendar.max" mode="date" :size="calendar.size"/>
+						<input class="form-control" v-model="item.killdate" type="date" value="item.killdate">
 					</template>
 					<template #cell(delete)="{item}">
 						<sds-button type="button" @click="deleteRow(IntTeamserverTableArgs, item)"><img class="w-8 h-8" src="/static/icons/trash-solid.svg"></sds-input>
@@ -215,7 +215,7 @@ h3 {
     	<div class="mb-8">
 				<sds-table :fields="fields" :items="items" class="table-prose" v-bind="LatTableArgs">
 					<template #cell(beacon)="{item}">
-						<sds-datepicker v-model="item.beacon" :min="dateTime.min" :max="dateTime.max" mode="dateTime" :size="dateTime.size"/>
+						<input class="form-control" v-model="item.beacon" type="datetime-local" value="item.beacon">
 					</template>
 					<template #cell(hostname)="{item}">
 						<sds-textarea v-model="item.hostname" rows="1" placeholder="workstation0" :maxlength="100"></sds-textarea>
@@ -268,10 +268,10 @@ h3 {
 						<sds-select v-model="item.status" :options="deleteOptions"/>
 					</template>
 					<template #cell(created)="{item}">
-						<sds-datepicker v-model="item.created" :min="dateTime.min" :max="dateTime.max" mode="dateTime" :size="dateTime.size"/>
+						<input class="form-control" v-model="item.created" type="datetime-local" value="item.created">
 					</template>
 					<template #cell(deleted)="{item}">
-						<sds-datepicker v-model="item.deleted" :min="dateTime.min" :max="dateTime.max" mode="dateTime" :size="dateTime.size"/>
+						<input class="form-control" v-model="item.deleted" type="datetime-local" value="item.deleted">
 					</template>
 					<template #cell(delete)="{item}">
 						<sds-button type="button" @click="deleteRow(FileTableArgs, item)"><img class="w-10 h-10" src="/static/icons/trash-solid.svg"></sds-input>
@@ -298,10 +298,10 @@ h3 {
 						<sds-textarea v-model="item.method" rows="1" placeholder="WMIEXEC" :maxlength="200"></sds-textarea>
 					</template>
 					<template #cell(logon)="{item}">
-						<sds-datepicker v-model="item.logon" :min="dateTime.min" :max="dateTime.max" mode="dateTime" :size="dateTime.size"/>
+						<input class="form-control" v-model="item.logon" type="datetime-local" value="item.logon">
 					</template>
 					<template #cell(logoff)="{item}">
-						<sds-datepicker v-model="item.logoff" :min="dateTime.min" :max="dateTime.max" mode="dateTime" :size="dateTime.size"/>
+						<input class="form-control" v-model="item.logoff" type="datetime-local" value="item.logoff">
 					</template>
 					<template #cell(operator)="{item}">
 						<sds-textarea v-model="item.operator" rows="1" :maxlength="50"></sds-textarea>
@@ -336,10 +336,10 @@ h3 {
 						<sds-textarea v-model="item.domain" rows="1" placeholder="domain.local" :maxlength="500"></sds-textarea>
 					</template>
 					<template #cell(start)="{item}">
-						<sds-datepicker v-model="item.start" :min="dateTime.min" :max="dateTime.max" mode="dateTime" :size="dateTime.size"/>
+						<input class="form-control" v-model="item.start" type="datetime-local" value="item.start">
 					</template>
 					<template #cell(end)="{item}">
-						<sds-datepicker v-model="item.end" :min="dateTime.min" :max="dateTime.max" mode="dateTime" :size="dateTime.size"/>
+						<input class="form-control" v-model="item.end" type="datetime-local" value="item.end">
 					</template>
 					<template #cell(notes)="{item}">
 						<sds-textarea v-model="item.notes" rows="1" :maxlength="500"></sds-textarea>
@@ -365,10 +365,10 @@ h3 {
 						<sds-textarea v-model="item.notes" rows="1" :maxlength="1000"></sds-textarea>
 					</template>
 					<template #cell(start)="{item}">
-						<sds-datepicker v-model="item.start" :min="dateTime.min" :max="dateTime.max" mode="dateTime" :size="dateTime.size"/>
+						<input class="form-control" v-model="item.start" type="datetime-local" value="item.start">
 					</template>
 					<template #cell(end)="{item}">
-						<sds-datepicker v-model="item.end" :min="dateTime.min" :max="dateTime.max" mode="dateTime" :size="dateTime.size"/>
+						<input class="form-control" v-model="item.end" type="datetime-local" value="item.end">
 					</template>
 					<template #cell(delete)="{item}">
 						<sds-button type="button" @click="deleteRow(SigTableArgs, item)"><img class="w-8 h-8" src="/static/icons/trash-solid.svg"></sds-input>
@@ -435,20 +435,6 @@ h3 {
 				scans: false,
 				significant_events: false,
 				artifacts: false
-			},
-			calendar: {
-				date: null,
-				max: null,
-				min: null,
-				mode: 'date',
-				size: 'md'
-			},
-			dateTime: {
-				date: null,
-				max: null,
-				min: null,
-				mode: 'dateTime',
-				size: 'md'
 			},
 			osOptions: [
 				{ id: 1, value: 'Kali', text: 'Kali'},
@@ -869,8 +855,7 @@ h3 {
 
 		{% for i in infra_ext_ts %}
 			{% if i.beacon_kill_date != null %}
-				date = "{{i.beacon_kill_date | date:"m/d/Y"}}"
-				killdate = new Date (date.replace(/\./g, ''))
+				killdate = "{{i.beacon_kill_date | date:"Y-m-d"}}"
 			{% else %}
 				killdate = null
 			{% endif %}
@@ -880,8 +865,7 @@ h3 {
 
 		{% for i in infra_int_ts %}
 			{% if i.beacon_kill_date != null %}
-				date = "{{i.beacon_kill_date | date:"m/d/Y"}}"
-				killdate = new Date (date.replace(/\./g, ''))
+				killdate = "{{i.beacon_kill_date | date:"Y-m-d"}}"
 			{% else %}
 				killdate = null
 			{% endif %}
@@ -907,8 +891,7 @@ h3 {
 
 		{% for i in lat_mov %}
 			{% if i.initial_beacon != null %}
-				date = "{{i.initial_beacon | date:"m/d/Y h:i a"}}"
-				beacon = new Date (date.replace(/\./g, ''))
+				beacon = "{{i.initial_beacon | date:"Y-m-d"}}T{{i.initial_beacon | time:"H:i:s"}}"
 			{% else %}
 				beacon = null
 			{% endif %}
@@ -918,15 +901,13 @@ h3 {
 
 		{% for i in files %}
 			{% if i.datetime_created != null %}
-				date = "{{i.datetime_created | date:"m/d/Y h:i a"}}"
-				created = new Date (date.replace(/\./g, ''))
+				created = "{{i.datetime_created | date:"Y-m-d"}}T{{i.datetime_created | time:"H:i:s"}}"
 			{% else %}
 				created = null
 			{% endif %}
 
 			{% if i.datetime_deleted != null %}
-				date = "{{i.datetime_deleted | date:"m/d/Y h:i a"}}"
-				deleted = new Date (date.replace(/\./g, ''))
+				deleted = "{{i.datetime_deleted | date:"Y-m-d"}}T{{i.datetime_deleted | time:"H:i:s"}}"
 			{% else %}
 				deleted = null
 			{% endif %}
@@ -936,15 +917,13 @@ h3 {
 
 		{% for i in int_log %}
 			{% if i.logon_datetime != null %}
-				date = "{{i.logon_datetime | date:"m/d/Y h:i a"}}"
-				logon = new Date (date.replace(/\./g, ''))
+				logon = "{{i.logon_datetime | date:"Y-m-d"}}T{{i.logon_datetime | time:"H:i:s"}}"
 			{% else %}
 				logon = null
 			{% endif %}
 
 			{% if i.logoff_datetime != null %}
-				date = "{{i.logoff_datetime | date:"m/d/Y h:i a"}}"
-				logoff = new Date (date.replace(/\./g, ''))
+				logoff = "{{i.logoff_datetime | date:"Y-m-d"}}T{{i.logoff_datetime | time:"H:i:s"}}"
 			{% else %}
 				logoff = null
 			{% endif %}
@@ -954,15 +933,13 @@ h3 {
 
 		{% for i in scans %}
 			{% if i.scan_start != null %}
-				date = "{{i.scan_start | date:"m/d/Y h:i a"}}"
-				start = new Date (date.replace(/\./g, ''))
+				start = "{{i.scan_start | date:"Y-m-d"}}T{{i.scan_start | time:"H:i:s"}}"
 			{% else %}
 				start = null
 			{% endif %}
 
 			{% if i.scan_end != null %}
-				date = "{{i.scan_end | date:"m/d/Y h:i a"}}"
-				end = new Date (date.replace(/\./g, ''))
+				end = "{{i.scan_end | date:"Y-m-d"}}T{{i.scan_end | time:"H:i:s"}}"
 			{% else %}
 				end = null
 			{% endif %}
@@ -972,15 +949,13 @@ h3 {
 
 		{% for i in sig_eve %}
 			{% if i.start_datetime != null %}
-				date = "{{i.start_datetime | date:"m/d/Y h:i a"}}"
-				start = new Date (date.replace(/\./g, ''))
+				start = "{{i.start_datetime | date:"Y-m-d"}}T{{i.start_datetime | time:"H:i:s"}}"
 			{% else %}
 				start = null
 			{% endif %}
 
 			{% if i.end_datetime != null %}
-				date = "{{i.end_datetime | date:"m/d/Y h:i a"}}"
-				end = new Date (date.replace(/\./g, ''))
+				end = "{{i.end_datetime | date:"Y-m-d"}}T{{i.end_datetime | time:"H:i:s"}}"
 			{% else %}
 				end = null
 			{% endif %}
