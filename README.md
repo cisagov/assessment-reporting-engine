@@ -36,6 +36,8 @@ This is a development version, so includes source code with docker images. In fu
         -   [Restore Offline](#restore-offline)
 -   [Other Functions](#other-functions)
     -   [Create a Superuser](#create-superuser)
+    -   [Change Password](#change-password)
+    -   [Reset Login Attempts](#reset-attempts)
     -   [View Logs](#view-logs)
     -   [Connect to Shell](#connect-shell)
     -   [Tear Down](#tear-down)
@@ -96,7 +98,7 @@ Once `python` is successfully installed, run the following command to verify tha
 ## Getting Started
 
 ```bash
-> git clone https://github.com/cisagov/assessment-reporting-engine.git
+> git clone https://github.com/asmtlab/assessment-reporting-engine.git
 > cd assessment-reporting-engine
 ```
 
@@ -254,6 +256,26 @@ During set up, you will automatically be prompted to create a superuser. Once th
 
 ```bash
 > python3 ptp.py su
+```
+
+<a name='change-password'></a>
+
+### Change Password
+
+The password for an existing account can be changed by running the following command (user will be prompted to set a new password for the user):
+
+```bash
+> python3 ptp.py password -u [username]
+```
+
+<a name='reset-attempts'></a>
+
+### Reset Login Attempts
+
+An account will be locked out after three failed attempts to prevent brute-force password attacks. The attempt count for all accounts can be reset by running the following command:
+
+```bash
+> python3 ptp.py reset
 ```
 
 <a name='view-logs'></a>

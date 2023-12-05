@@ -14,7 +14,7 @@
 
 # DM22-0744
 from django.contrib.auth.models import BaseUserManager
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractBaseUser
 from django.db import models
 
 
@@ -40,12 +40,11 @@ class MyUserManager(BaseUserManager):
             is_admin=True,
             is_active=True,
         )
-        user.user_permissions.add()
         user.save(using=self.db)
         return user
 
 
-class User(AbstractUser):
+class User(AbstractBaseUser):
     username = models.CharField(unique=True, null=True, max_length=255)
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)

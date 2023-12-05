@@ -326,7 +326,7 @@ DM22-1011
         <template #suite-header>
           <sds-dropdown v-bind="dropdownArgs">
             <template #title>{{ user }}</template>
-            <sds-dropdown-item v-if="{{ user.is_admin }} = true" tag="a" href="/admin">Admin</sds-dropdown-item>
+            <sds-dropdown-item v-if="'{{user.is_admin}}' == 'True'" tag="a" href="/admin">Admin</sds-dropdown-item>
             <sds-dropdown-item v-else tag="a" href="{% url 'password_change' %}">Change Password</sds-dropdown-item>
             <sds-dropdown-item tag="a" href="{% url 'logout_view' %}">Logout</sds-dropdown-item>
           </sds-dropdown>

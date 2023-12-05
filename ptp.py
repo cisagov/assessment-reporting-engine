@@ -811,6 +811,43 @@ def create_super_user(args):
     )
 
 
+def change_password(args):
+    """
+    Change password for existing user
+    """
+    mode = get_mode()
+    subprocess.run(
+        [
+            'docker',
+            'exec',
+            '-it',
+            mode + '-web-1',
+            'python',
+            'manage.py',
+            'changepassword',
+            args.username
+        ]
+    )
+
+
+def reset_attempts(args):
+    """
+    Reset attempts for login
+    """
+    mode = get_mode()
+    subprocess.run(
+        [
+            'docker',
+            'exec',
+            '-it',
+            mode + '-web-1',
+            'python',
+            'manage.py',
+            'axes_reset'
+        ]
+    )
+
+
 def shell(args):
     """
     Jump into container shell.   Default to web
@@ -936,6 +973,20 @@ def main():
     # create admin
     su_parser = subparsers.add_parser('su', help='Create a super user')
     su_parser.set_defaults(func=create_super_user)
+
+    # change password
+    pw_parser = subparsers.add_parser('password', help='Change password for existing user')
+    pw_parser.add_argument(
+        '-u',
+        '--username',
+        help='username to change password for',
+        required=True,
+    )
+    pw_parser.set_defaults(func=change_password)
+
+    # reset login attempts
+    reset_parser = subparsers.add_parser('reset', help='Reset login attempts for all users')
+    reset_parser.set_defaults(func=reset_attempts)
 
     # exec into the web container
     shell_parser = subparsers.add_parser('shell', help='Jump into a shell for the specified container')
