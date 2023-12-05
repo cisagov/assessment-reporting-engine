@@ -167,7 +167,7 @@ DM22-1011
 				</div>
 			{% endif %}-->
 		<br>
-		{% if report.report_type == 'RVA' %}
+		{% if report.report_type == 'RVA' or report.report_type == 'RPT' %}
 		<sds-section class="col-span-5" type="accented">
         	<span class="border-top border-dark"></span>
             <template #title><b>PHISHING TESTING</b></template>
@@ -199,23 +199,54 @@ DM22-1011
 				</div>
 				<div class="col-span-3">
 					<h4><b>
+						{% if report.report_type == 'RPT' %}
+						In Scope IP Addresses for Network Penetration Test
+						{% else %}
 						{{form.ext_scope.label_tag}}
+						{% endif %}
 					</b></h4>
 					<span class="text-sm text-gray-600">
 						{{form.ext_scope.help_text}}
 					</span>
-					<sds-textarea v-model="formData.ext_scope" placeholder="123.45.67.8, 123.45.67.10-20, 123.45.67.10-123.45.67.20, 123.45.67.0/24" :maxlength="10000"></sds-textarea>
+					<sds-textarea v-model="formData.ext_scope" placeholder="123.45.67.8, 123.45.67.10-20, 123.45.67.10-123.45.67.20, 123.45.67.0/24" :maxlength="100000"></sds-textarea>
 				</div>
 				<div class="col-span-3">
 					<h4><b>
+						{% if report.report_type == 'RPT' %}
+						Out of Scope IP Addresses for Network Penetration Test
+						{% else %}
 						{{form.ext_excluded_scope.label_tag}}
+						{% endif %}
 					</b></h4>
 					<span class="text-sm text-gray-600">
 						{{form.ext_excluded_scope.help_text}}
 					</span>
-					<sds-textarea v-model="formData.ext_excluded_scope" placeholder="123.45.67.8, 123.45.67.10-20, 123.45.67.10-123.45.67.20, 123.45.67.0/24" :maxlength="10000"></sds-textarea>
+					<sds-textarea v-model="formData.ext_excluded_scope" placeholder="123.45.67.8, 123.45.67.10-20, 123.45.67.10-123.45.67.20, 123.45.67.0/24" :maxlength="100000"></sds-textarea>
+					<br><br>
 				</div>
 			</div>
+			{% if report.report_type == 'RPT' %}
+			<div class="grid grid-cols-6 form-spacing mb-8">
+				<div class="col-span-3">
+					<h4><b>
+						{{form.web_app_scope.label_tag}}
+					</b></h4>
+					<span class="text-sm text-gray-600">
+						{{form.web_app_scope.help_text}}
+					</span>
+					<sds-textarea v-model="formData.web_app_scope" placeholder="test.dhs.gov (123.45.67.8), test2.cisa.gov (123.45.67.9)" :maxlength="100000"></sds-textarea>
+				</div>
+				<div class="col-span-3">
+					<h4><b>
+						{{form.osinf_scope.label_tag}}
+					</b></h4>
+					<span class="text-sm text-gray-600">
+						{{form.osinf_scope.help_text}}
+					</span>
+					<sds-textarea v-model="formData.osinf_scope" placeholder="dhs.gov, cisa.gov" :maxlength="10000"></sds-textarea>
+				</div>
+			</div>
+			{% endif %}
 		</sds-section>
 		<br>
 			{% if report.report_type == 'RVA' %}
@@ -335,6 +366,8 @@ DM22-1011
 				ext_excluded_scope: "{{ object.ext_excluded_scope | escapejs }}",
 				int_scope: "{{ object.int_scope | escapejs }}",
 				int_excluded_scope: "{{ object.int_excluded_scope | escapejs }}",
+				web_app_scope: "{{ object.web_app_scope | escapejs }}",
+				osinf_scope: "{{ object.osinf_scope | escapejs }}",
 				asmt_id: "{{ object.asmt_id }}",
 				report_password: "{{ object.report_password }}",
 				confirm_report_password: "{{ object.confirm_report_password }}",

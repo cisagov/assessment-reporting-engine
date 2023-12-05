@@ -44,8 +44,6 @@ allModels = [
     HighImpactScans,
     SignificantEvents,
     Artifact,
-    RPTIdentifiedNetworks,
-    RPTBreachedEmails,
     PortMappingHost,
     ElectionInfrastructureQuestionnaire,
     ElectionSystems,
@@ -63,7 +61,9 @@ allModels = [
     ATTACK,
     Tools,
     SecuritySolution,
-    Report
+    Report,
+    BreachMetrics,
+    BreachedEmail
 ]
 
 # registering list of models

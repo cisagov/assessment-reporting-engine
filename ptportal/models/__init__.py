@@ -24,3 +24,4 @@ from .port_mapping import *
 from .narrative import *
 from .data_exfil import *
 from .ransomware import *
+from .osinf import *

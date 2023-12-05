@@ -18,14 +18,14 @@ DM22-1011
 {% block content %}
 
 <sds-section class="mb-4 w-1/2">
-	<div style="float:left">
+  <div style="float:left">
     <p><b>{{report.report_type}}-{{object.asmt_id}}</b></p>
-		<p>Last modified: {{object.updated_at | naturaltime}}</p>
-	</div>
-	<div style="float:right">
+    <p>Last modified: {{object.updated_at | naturaltime}}</p>
+  </div>
+  <div style="float:right">
     <sds-button class="mr-2" variant="primary" @click="redirectLink('{% url "engagement_update" %}')"><img class="w-8 h-8" src="/static/icons/pen-to-square-white.svg" style="float:left; padding:3px 6px 0px 0px"> Edit</sds-button>
-		<sds-button variant="danger" @click="redirectLink('{% url "engagement_delete" %}')"><img class="w-8 h-8" src="/static/icons/trash-solid-white.svg" style="float:left; padding:3px 6px 0px 0px"> Delete</sds-button>
-	</div>
+    <sds-button variant="danger" @click="redirectLink('{% url "engagement_delete" %}')"><img class="w-8 h-8" src="/static/icons/trash-solid-white.svg" style="float:left; padding:3px 6px 0px 0px"> Delete</sds-button>
+  </div>
   <br><br><br>
 </sds-section>
 <br>
@@ -62,7 +62,7 @@ DM22-1011
 </sds-section>
 {% endif %}
 
-{% if report.report_type == 'RVA' %}
+{% if report.report_type == 'RVA' or report.report_type == 'RPT' %}
 <sds-section type="simple" class="mb-4 w-1/2">
   <template #title>
     <h4><b>Phishing Testing</b></h4>
@@ -79,6 +79,10 @@ DM22-1011
   <p>External End Date: {{ object.ext_end_date }}</p>
   <p>External Included Scope: {{ object.ext_scope }}</p>
   <p>External Excluded Scope: {{ object.ext_excluded_scope }}</p>
+  {% if report.report_type == 'RPT' %}
+  <p>Web Application Scope: {{ object.web_app_scope }}</p>
+  <p>OSINF Scope: {{ object.osinf_scope }}</p>
+  {% endif %}
 </sds-section>
 
 {% if report_type == 'RVA' %}
@@ -106,29 +110,29 @@ DM22-1011
   function pageData() {
     data = {
       HVATableArgs: {
-				fields: [
-					{
-						key: "name",
-						label: "HVA Name"
-					},
-					{
-						key: "address",
-						label: "Address"
-					},
-					{
-						key: "status",
-						label: "Status"
-					},
-				],
-				items: [],
-				sortBy: "num"
-			}
+        fields: [
+          {
+            key: "name",
+            label: "HVA Name"
+          },
+          {
+            key: "address",
+            label: "Address"
+          },
+          {
+            key: "status",
+            label: "Status"
+          },
+        ],
+        items: [],
+        sortBy: "num"
+      }
     }
     {% if report.report_type == 'HVA' %}
-			{% for hva in hvas %}
-				data["HVATableArgs"]["items"].push({name: "{{hva.name}}", address: "{{hva.address}}", status: "{{hva.status}}"})
-			{% endfor %}
-		{% endif %}
+      {% for hva in hvas %}
+        data["HVATableArgs"]["items"].push({name: "{{hva.name}}", address: "{{hva.address}}", status: "{{hva.status}}"})
+      {% endfor %}
+    {% endif %}
 
     return data
   }

@@ -23,12 +23,12 @@ class EngagementForm(BaseModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields['ext_start_date'].widget.attrs.update(
-            {'data-provide': 'datepicker', 'type': 'date'}
-        )
-        self.fields['ext_end_date'].widget.attrs.update(
-            {'data-provide': 'datepicker', 'type': 'date'}
-        )
+        #self.fields['ext_start_date'].widget.attrs.update(
+        #    {'data-provide': 'datepicker', 'type': 'date'}
+        #)
+        #self.fields['ext_end_date'].widget.attrs.update(
+        #    {'data-provide': 'datepicker', 'type': 'date'}
+        #)
 
         self.fields['phishing_domains'].widget.attrs.update({'rows': '3'})
 

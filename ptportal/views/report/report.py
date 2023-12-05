@@ -38,6 +38,8 @@ from ...models import (
     Payload,
     Campaign,
     NarrativeStep,
+    BreachMetrics,
+    BreachedEmail
 )
 
 from django.http import HttpResponse, JsonResponse
@@ -329,16 +331,20 @@ class ReportUpdate(generic.edit.UpdateView):
         engagement = EngagementMeta.object()
         if engagement:
             context['eng_meta'] = engagement
-            start_date = (
-                engagement.int_start_date
-                if engagement.int_start_date < engagement.ext_start_date
-                else engagement.ext_start_date
-            )
-            end_date = (
-                engagement.ext_end_date
-                if engagement.ext_end_date > engagement.int_end_date
-                else engagement.int_end_date
-            )
+            if engagement.int_start_date is None or engagement.int_end_date is None:
+                start_date = engagement.ext_start_date
+                end_date = engagement.ext_end_date
+            else:
+                start_date = (
+                    engagement.int_start_date
+                    if engagement.int_start_date < engagement.ext_start_date
+                    else engagement.ext_start_date
+                )
+                end_date = (
+                    engagement.ext_end_date
+                    if engagement.ext_end_date > engagement.int_end_date
+                    else engagement.int_end_date
+                )
             engagement_dates = f"{start_date.strftime('%B %d, %Y')} to {end_date.strftime('%B %d, %Y')}"
             context['eng_dates'] = engagement_dates
 
@@ -352,6 +358,8 @@ class ReportUpdate(generic.edit.UpdateView):
         context['data_exfil'] = DataExfil.objects.all()
         context['payloads'] = Payload.objects.all()
         context['campaigns'] = Campaign.objects.all()
+        context['breach_metrics'] = BreachMetrics.objects.all().first()
+        context['osinf'] = BreachedEmail.objects.all()
         context['narratives_external'] = Narrative.objects.all().filter(assessment_type__name__contains="External").order_by('order')
         context['narratives_internal'] = Narrative.objects.all().filter(assessment_type__name__contains="Internal").order_by('order')
         context['narratives_phishing'] = Narrative.objects.all().filter(assessment_type__name__contains="Phishing").order_by('order')

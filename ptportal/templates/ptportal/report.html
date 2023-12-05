@@ -103,13 +103,13 @@ DM22-1011
 {% csrf_token %}
 
 <div style="float:left; width:80%">
-	{% if report.report_type == 'RVA' %}
+	{% if report.report_type == 'RVA' or report.report_type == 'RPT' %}
 	<sds-link id="executive_summary"></sds-link>
     <sds-section class="col-span-5" type="accented">
         <span class="border-top border-dark"></span>
             <template #title><b>EXECUTIVE SUMMARY</b></template>
             <h1>Overview</h1>
-            <p>The assessment team conducted {% if report.report_type == 'FAST' %}Federal Attack Surface Testing{% else %}a Risk and Vulnerability Assessment{% endif %} ({{ report.report_type }}) at the request of {{ eng_meta.customer_long_name }} ({{ eng_meta.customer_initials }}). {{ eng_meta.team_lead_name }} ({{ eng_meta.team_lead_email }}) led the assessment remotely from {{ eng_meta.ext_start_date }} to {{ eng_meta.ext_end_date }} and on site at {{ eng_meta.customer_location }} from {{ eng_meta.int_start_date }} to {{ eng_meta.int_end_date }}. This report only covers the targets described within and makes no claims about the security of any system that was deemed out of scope or was not tested during this engagement.</p>
+            <p>The assessment team conducted a {% if report.report_type == 'RPT' %}Remote Penetration Test{% else %}Risk and Vulnerability Assessment{% endif %} ({{ report.report_type }}) at the request of {{ eng_meta.customer_long_name }} ({{ eng_meta.customer_initials }}). {{ eng_meta.team_lead_name }} ({{ eng_meta.team_lead_email }}) led the assessment remotely from {{ eng_meta.ext_start_date }} to {{ eng_meta.ext_end_date }}{% if report.report_type == 'RVA' %} and on site at {{ eng_meta.customer_location }} from {{ eng_meta.int_start_date }} to {{ eng_meta.int_end_date }}{% endif %}. This report only covers the targets described within and makes no claims about the security of any system that was deemed out of scope or was not tested during this engagement.</p>
             <br>
             <h2>Significant Findings</h2>
             <p>During testing, the team identified the following significant findings:</p>
@@ -175,7 +175,16 @@ DM22-1011
             <br>
             <div style="padding:30px 0px 10px 10px"><p>{{ eng_meta.phishing_domains }}</p></div>
             {% endif %}
+            {% if report.report_type == 'RPT' %}
+            <h1>Open-Source Information Gathering</h1>
+            <p>Open-Source Information Gathering was conducted targeting the following domain(s):</p>
+            <p>{{ eng_meta.osinf_scope }}</p>
+            {% endif %}
+            {% if report.report_type == 'RVA' %}
             <h1>External</h1>
+            {% else %}
+            <h1>Network Penetration Test</h1>
+            {% endif %}
             <div class="num">
                 <sds-input v-model="formData.external_discovered" placeholder="#" :maxlength="20"></sds-input>
             </div>
@@ -186,6 +195,11 @@ DM22-1011
             <div style="float:left; padding: 10px 0px 0px 0px"><p>scanned hosts were discovered to be live during testing of the following in-scope targets:</p></div>
             <br>
             <div style="padding:30px 0px 10px 10px"><p>{{ eng_meta.ext_scope }}</p></div>
+            {% if report.report_type == 'RPT' %}
+            <h1>Web Application Assessment</h1>
+            <p>Web application testing was conducted targeting the following web applications:</p>
+            <p>{{ eng_meta.web_app_scope }}</p>
+            {% endif %}
             {% if report.report_type == 'RVA' %}
             <h1>Internal</h1>
             <div class="num">
@@ -198,6 +212,11 @@ DM22-1011
             <div style="float:left; padding: 10px 0px 0px 0px"><p>scanned hosts were discovered to be live during testing of the following in-scope targets:</p></div>
             <br>
             <div style="padding:30px 0px 10px 10px"><p>{{ eng_meta.int_scope }}</p></div>
+            {% endif %}
+            {% if report.report_type == 'RPT' %}
+            <h1>Phishing</h1>
+            <p>A technical phishing assessment was conducted targeting the following mail domain(s):</p>
+            <p>{{ eng_meta.phishing_domains }}</p>
             {% endif %}
 	</sds-section><br>
 
@@ -224,29 +243,28 @@ DM22-1011
             	<li>Access to the domain via a privileged account</li>
             </ul>
 	</sds-section><br>
-
-	<sds-link id="general_recommendations"></sds-link>
-	<sds-section type="accented">
+	{% endif %}
+	{% if report.report_type == 'RPT' %}
+	<sds-link id="methodology"></sds-link>
+	<sds-section class="col-span-5" type="accented">
         <span class="border-top border-dark"></span>
-            <template #title><b>GENERAL RECOMMENDATIONS</b></template>
-            <p>To support the team’s goal of helping stakeholders improve their security posture, the assessment team identified general recommendations based on the Center for Internet Security’s Critical Infrastructure Security (CIS) controls for mitigating the risks discovered. The table below represents a high-level summary of prioritized recommended remediations and the associated findings. As always, {{ eng_meta.customer_long_name }} has a much deeper understanding of its business and technical environment standards that should determine the balance of implementation.</p>
-            <table class="table-prose" id="cis-csc-table">
-				<thead class="text-center">
-					<tr><th width="10%">ID</th>
-					<th width="65%">Controls</th>
-					<th width="25%">Finding ID</th>
-					</tr>
-				</thead>
-				{% for c in cis_csc %}
-					<tr class="text-center">
-					<td>{{ c.CIS_ID }}</td>
-					<td>{{ c.name }}</td>
-					<td>{{ c.finding_ids }}</td>
-					</tr>
-				{% endfor %}
-			</table>
-			<div class="figure" align="center">Table {{ table_count.count }}: Recommendations Based on CIS Controls</div>
-			<br>
+            <template #title><b>METHODOLOGY</b></template>
+            <p>The Remote Penetration Test consists of several phases detailed in the subsequent sections. At a high level, the {{ report.report_type }} methodology involves:</p>
+            <ul class="list">
+            	<li>Gathering relevant information about the target organization and its assets;</li>
+            	<li>Conducting vulnerability scanning of in-scope assets;</li>
+            	<li>Conducting a technical phishing assessment to evaluate the environment's susceptibility to malicious code;</li>
+            	<li>Manually analyzing in-scope assets and collected data;</li>
+            	<li>Validating findings, including chaining together multiple vulnerabilities and misconfigurations where possible, in order to elevate privileges and access, or otherwise demonstrate significant impact;</li>
+            	<li>Providing actionable deliverables to the stakeholder, including an out brief, final report, and raw assessment data</li>
+            </ul>
+            <p>The team utilizes this methodology from different contexts, dependent on the stakeholder’s interests and accommodations, as well as the team’s ability to obtain various levels of access. The scenarios by which the team conducts testing may include:</p>
+            <ul class="list">
+            	<li>External to the stakeholder’s network, with no assumed access to assets or accounts other than what is accessible to the public;</li>
+            	<li>Leveraging user credentials identified from the internet as a result of third-party data breaches;</li>
+            	<li>Leveraging stakeholder-provided credentials to access specific internet-facing web applications;</li>
+            	<li>Coordinating with the stakeholder to execute a technical phishing assessment, including by simulating a phished user accessing and executing malicious code;</li>
+            </ul>
 	</sds-section><br>
 	{% endif %}
 	<sds-link id="findings"></sds-link>
@@ -307,6 +325,27 @@ DM22-1011
             		<tr><td colspan="5">{% if f.KEV.count > 0 %}<p>This finding is a <sds-link href="#kevs"><b>Known Exploited Vulnerability</b></sds-link>.</p>{% endif %}<p>NIST 800-53: {% if f.finding.NIST_800_53 %}{{ f.finding.NIST_800_53 }}{% else %}N/A{% endif %}</p><p>NIST Cybersecurity Framework: {% if f.finding.NIST_CSF %}{{ f.finding.NIST_CSF }}{% else %}N/A{% endif %}</p></td></tr>
             	</table>
             {% endfor %}
+            {% if report.report_type == 'RVA' or report.report_type == 'RPT' %}
+			<h1>General Recommendations</h1>
+				<p>To support the team’s goal of helping stakeholders improve their security posture, the assessment team identified general recommendations based on the Center for Internet Security’s Critical Infrastructure Security (CIS) controls for mitigating the risks discovered. The table below represents a high-level summary of prioritized recommended remediations and the associated findings. As always, {{ eng_meta.customer_long_name }} has a much deeper understanding of its business and technical environment standards that should determine the balance of implementation.</p>
+				<table class="table-prose" id="cis-csc-table">
+					<thead class="text-center">
+						<tr><th width="10%">ID</th>
+						<th width="65%">Controls</th>
+						<th width="25%">Finding ID</th>
+						</tr>
+					</thead>
+					{% for c in cis_csc %}
+						<tr class="text-center">
+							<td>{{ c.CIS_ID }}</td>
+							<td>{{ c.name }}</td>
+							<td>{{ c.finding_ids }}</td>
+						</tr>
+					{% endfor %}
+				</table>
+				<div class="figure" align="center">Table {{ table_count.count }}: Recommendations Based on CIS Controls</div>
+				<br>
+			{% endif %}
             <!--<sds-link id="kevs"></sds-link><h1>Known Exploited Vulnerabilities</h1>
             <p>The <sds-link href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog"><b>Known Exploited Vulnerability (KEV) Catalog</b></sds-link> maintained by CISA provides a means to track vulnerabilities that are actively being exploited in the wild. Since KEVs have a high likelihood of being exploited based on the threat landscape, there is significant risk to environments containing these vulnerabilities. The list below provides a mapping of findings to KEVs. In some cases, a KEV may have been detected through vulnerability scanning, but does not necessarily have a corresponding finding if the team was unable to validate it.</p>
             <p>In addition to the CVE links provided below, the Nessus reports that were provided by the team should be referenced for details regarding the vulnerability, affected systems, and recommendations. The vulnerable assets should be investigated further to determine if mitigation is necessary.</p>
@@ -371,18 +410,19 @@ DM22-1011
             <div class="figure" align="center">Table {{ table_count.increment }}: Data Exfiltration Results</div>
             <p>In addition to the recommended mitigations provided throughout the <sds-link href="#findings"><b>Findings</b></sds-link> section pertaining to protecting sensitive data, the team recommends designing and implementing network perimeter controls to detect and prevent data exfiltration. Where possible, outbound traffic should be forced through authenticated proxy servers on the enterprise perimeter. These proxy servers can be configured to decrypt and inspect network traffic, flagging suspicious or anomalous characteristics. Additionally, perimeter controls should be configured with rules that allow or block traffic based on its destination.</p>
             {% endif %}
-            {% if payloads %}
-            <h1>Payload Testing Results</h1>
-            <p>During payload testing with {{ eng_meta.customer_long_name }}, a manual exception {% if report.exception %}{{ report.exception }}{% else %}<b>[MISSING VALUE: WAS/WAS NOT]</b>{% endif %} necessary for the test email to reach the target inbox. {% if report.browser %}{{ report.browser }}{% else %}<b>[MISSING VALUE: BROWSER NAME]</b>{% endif %} was used to download the payloads and was deemed a primary browser used by {{ eng_meta.customer_long_name }} users.</p>
-            <p>While it is good to have strong filters and configurations in place to protect users from phishing attacks, it is important to note that a determined adversary could likely circumvent mail and browser filters if an established, trusted domain was used. For this reason, all recommendations outlined in this report are important considerations for defense-in-depth.</p>
-            <p>For the purpose of this testing, border protection refers to the ability to make an outbound connection from the internal network to the assessment team-controlled C2 server. If this connection can be made over a particular protocol, it is assumed that all payloads utilizing the same protocol would not be blocked at the border.</p>
-            <table class="table-prose" id="payload-table">
+        {% endif %}
+		{% if payloads %}
+			<h1>Payload Testing Results</h1>
+			<p>During payload testing with {{ eng_meta.customer_long_name }}, a manual exception {% if report.exception %}{{ report.exception }}{% else %}<b>[MISSING VALUE: WAS/WAS NOT]</b>{% endif %} necessary for the test email to reach the target inbox. {% if report.browser %}{{ report.browser }}{% else %}<b>[MISSING VALUE: BROWSER NAME]</b>{% endif %} was used to download the payloads and was deemed a primary browser used by {{ eng_meta.customer_long_name }} users.</p>
+			<p>While it is good to have strong filters and configurations in place to protect users from phishing attacks, it is important to note that a determined adversary could likely circumvent mail and browser filters if an established, trusted domain was used. For this reason, all recommendations outlined in this report are important considerations for defense-in-depth.</p>
+			<p>For the purpose of this testing, border protection refers to the ability to make an outbound connection from the internal network to the assessment team-controlled C2 server. If this connection can be made over a particular protocol, it is assumed that all payloads utilizing the same protocol would not be blocked at the border.</p>
+			<table class="table-prose" id="payload-table">
 				<thead class="text-center">
-					<tr><th width="45%">Payload</th>
-					<th width="13%">C2 Protocol</th>
-					<th width="21%">Host Protection</th>
-					<th width="21%">Border Protection</th>
-					</tr>
+				<tr><th width="45%">Payload</th>
+				<th width="13%">C2 Protocol</th>
+				<th width="21%">Host Protection</th>
+				<th width="21%">Border Protection</th>
+				</tr>
 				</thead>
 				{% for p in payloads %}
 					<tr class="text-center">
@@ -394,13 +434,13 @@ DM22-1011
 				{% endfor %}
             </table>
             <div class="figure" align="center">Table {{ table_count.increment }}: Payload Testing Results</div>
-            {% endif %}
+            <br>
         {% endif %}
-            {% if campaigns %}
-            <h1>Phishing Campaign Results</h1>
-            {% for c in campaigns %}
-            	<p>{{ c.campaign_description }}</p>
-            	<table class="table-prose" id="campaign-table">
+		{% if campaigns %}
+			<h1>Phishing Campaign Results</h1>
+			{% for c in campaigns %}
+				<p>{{ c.campaign_description }}</p>
+				<table class="table-prose" id="campaign-table">
 					<thead class="text-center">
 						<tr><th colspan="2">Campaign #{{ forloop.counter }}</th></tr>
 					</thead>
@@ -435,7 +475,56 @@ DM22-1011
 				<div class="figure" align="center">Table {{ table_count.increment }}: Phishing Campaign Results ({{ forloop.counter }})</div>
 				<br>
             {% endfor %}
-            {% endif %}
+		{% endif %}
+		{% if osinf %}
+			<h1>Open-Source Information Gathering Results</h1>
+			<table class="table-prose" id="breach-table">
+				<thead class="text-center">
+					<tr><th colspan="2">Breached Email Metrics</th></tr>
+				</thead>
+				<tr>
+					<td width="80%">Emails Identified</td><td align="center" width="20%">{{ breach_metrics.emails_identified }}</td>
+				</tr>
+				<tr>
+					<td width="80%">Emails Identified in Third-Party Data Breaches</td><td align="center" width="20%">{{ breach_metrics.emails_identified_tp }}</td>
+				</tr>
+				<tr>
+					<td width="80%">Percentage of Emails Identified in Third-Party Data Breaches</td><td align="center" width="20%">{{ breach_metrics.percentage_emails | percentage }}</td>
+				</tr>
+			</table>
+			<div class="figure" align="center">Table {{ table_count.increment }}: OSINF Breached Email Metrics</div>
+			<br>
+			<table class="table-prose" id="breach-table">
+				<thead class="text-center">
+					<tr><th colspan="2">Breached Credential Metrics</th></tr>
+				</thead>
+				<tr>
+					<td width="80%">Credentials Identified</td><td align="center" width="20%">{{ breach_metrics.creds_identified }}</td>
+				</tr>
+				<tr>
+					<td width="80%">Unique Users With Identified Credentials</td><td align="center" width="20%">{{ breach_metrics.creds_identified_unique }}</td>
+				</tr>
+				<tr>
+					<td width="80%">Credentials Successfully Validated</td><td align="center" width="20%">{{ breach_metrics.creds_validated }}</td>
+				</tr>
+			</table>
+			<div class="figure" align="center">Table {{ table_count.increment }}: OSINF Breached Credential Metrics</div>
+			<br>
+			<table class="table-prose" id="payload-table">
+				<thead class="text-center">
+				<tr><th width="30%">Email Address</th>
+				<th width="70%">Breach Information</th>
+				</tr>
+				</thead>
+				{% for o in osinf %}
+					<tr class="text-center">
+					<td>{{ o.email_address }}</td>
+					<td>{{ o.breach_info }}</td>
+					</tr>
+				{% endfor %}
+			</table>
+			<div class="figure" align="center">Table {{ table_count.increment }}: OSINF Breached Email Addresses</div>
+		{% endif %}
 
 	</sds-section><br>
 
@@ -512,7 +601,7 @@ DM22-1011
 			<div class="figure" align="center">Table {{ table_count.increment }}: Severity Rating Descriptions</div>
 	</sds-section><br>
 
-	{% if report.report_type == 'RVA' %}
+	{% if report.report_type == 'RVA' or report.report_type == 'RPT' %}
 	<sds-link id="appendix_b"></sds-link>
 	<sds-section class="col-span-5" type="accented">
         <span class="border-top border-dark"></span>
@@ -737,19 +826,18 @@ DM22-1011
 	</div>
 	<br>
 	<ul class="jump">
-		{% if report.report_type == 'RVA' %}
+		{% if report.report_type == 'RVA' or report.report_type == 'RPT' %}
 		<li><a href="#executive_summary"><img class="w-4 h-4" src="/static/icons/clipboard-list-solid.svg" style="float:left;"><div style="float:left; padding: 0px 10px">Summary</div></a></li><br>
 		{% endif %}
 		<li><a href="#scope"><img class="w-4 h-4" src="/static/icons/bullseye-solid.svg" style="float:left"><div style="float:left; padding: 0px 10px">Scope</div></a></li><br>
-		{% if report.report_type == 'RVA' %}
-		<li><a href="#general_recommendations"><img class="w-4 h-4" src="/static/icons/thumbs-up-solid.svg" style="float:left"><div style="float:left; padding: 0px 10px">Recommendations</div></a></li><br>
-		{% endif %}
 		<li><a href="#findings"><img class="w-4 h-4" src="/static/icons/magnifying-glass-plus-solid.svg" style="float:left"><div style="float:left; padding: 0px 10px">Findings</div></a></li><br>
 		<li><a href="#attack_paths"><img class="w-4 h-4" src="/static/icons/diagram-project.svg" style="float:left"><div style="float:left; padding: 0px 10px">Attack Paths</div></a></li><br>
 		<li><a href="#appendix_a"><img class="w-4 h-4" src="/static/icons/a-solid.svg" style="float:left"><div style="float:left; padding: 0px 10px">Appendix A</div></a></li><br>
 		<li><a href="#appendix_b"><img class="w-4 h-4" src="/static/icons/b-solid.svg" style="float:left"><div style="float:left; padding: 0px 10px">Appendix B</div></a></li><br>
 		<li><a href="#appendix_c"><img class="w-4 h-4" src="/static/icons/c-solid.svg" style="float:left"><div style="float:left; padding: 0px 10px">Appendix C</div></a></li><br>
+		{% if report.report_type == 'RVA' or report.report_type == 'FAST' %}
 		<li><a href="#appendix_d"><img class="w-4 h-4" src="/static/icons/d-solid.svg" style="float:left;"><div style="float:left; padding: 0px 10px">Appendix D</div></a></li>
+		{% endif %}
 	</ul>
 	<br><br>
 	<div align="center">
