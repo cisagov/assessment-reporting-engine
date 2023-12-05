@@ -825,7 +825,7 @@ def gen_ptp_filename(
 
 def serializeJSON(filename=None):
     # Get uploaded findings in order of External -> Internal -> Phishing(Critical-Low)
-    uploaded_findings = UploadedFinding.objects.all().order_by('assessment_type', 'severity', 'uploaded_finding_name')
+    uploaded_findings = UploadedFinding.objects.all().order_by('severity', 'assessment_type', 'uploaded_finding_name')
     eng_meta_serializer = EngagementSerializer(EngagementMeta.objects.all(), many=True)
     eng_meta_model = str(EngagementMeta._meta)
     all_data = list(CIS_CSC.objects.all().order_by('CIS_ID')) \
