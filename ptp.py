@@ -580,25 +580,38 @@ def backup_json(
 def backup_media(backup_name='media-backup'):
     # using distutils copy_tree function because it
     # copies a directory into an existing directory w/o problems
-    shutil.copytree(Path('pentestportal/media'), backup_name)
+    if os.path.exists(Path('pentestportal/media')):
+        shutil.copytree(Path('pentestportal/media'), backup_name)
+    else:
+        print('pentestportal/media directory does not exist or cannot be accessed due to permissions. Media may not restore properly without this directory. Continuing with remaining back up steps...')
+
     return backup_name
 
 
 def backup_migrations(backup_name='migrations-backup'):
     # Only backup first migrations file since we only use the first
     # migrations file
-    shutil.copy('ptportal/migrations/0001_initial.py', backup_name)
+    if os.path.exists(Path('ptportal/migrations/0001_initial.py')):
+        shutil.copy('ptportal/migrations/0001_initial.py', backup_name)
+    else:
+        print('ptportal/migrations/0001_initial.py file does not exist or cannot be accessed due to permissions. Migrations may not restore properly without this file. Continuing with remaining back up steps...')
     return backup_name
 
 
 def backup_mode(backup_name='mode-backup'):
-    shutil.copy('mode.txt', backup_name)
+    if os.path.exists(Path('mode.txt')):
+        shutil.copy('mode.txt', backup_name)
+    else:
+        print('mode.txt file does not exist or cannot be accessed due to permissions. RE may not restore properly without this file. Continuing with remaining back up steps...')
     return backup_name
 
 
 def backup_env(backup_name='env-backup'):
     mode = get_mode()
-    shutil.copy('docker/' + mode + '/env.txt', backup_name)
+    if os.path.exists(Path('docker/' + mode + '/env.txt')):
+        shutil.copy('docker/' + mode + '/env.txt', backup_name)
+    else:
+        print('docker/' + mode + '/env.txt file does not exist or cannot be accessed due to permissions. RE may not restore properly without this file. Continuing with remaining back up steps...')
     return backup_name
 
 
