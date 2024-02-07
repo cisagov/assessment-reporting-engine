@@ -1,7 +1,7 @@
 attackcti
 beautifulsoup4==4.10.0
 cairosvg==2.7.0
-django==3.1.14
+django==3.2.24
 django-axes==5.4.3
 django-extra-views
 django-widget-tweaks==1.4.3
